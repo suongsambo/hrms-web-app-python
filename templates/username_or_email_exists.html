@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registration Error</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  </head>
+  <body>
+    <div class="container mt-5">
+      <div class="alert alert-danger">
+        <h4 class="alert-heading">Registration Failed!</h4>
+        <p>Username or Email already exists. Try again.</p>
+        <hr />
+        <a href="{{ url_for('register') }}" class="btn btn-primary">Go Back to Register</a>
+      </div>
+    </div>
+  </body>
+</html>
