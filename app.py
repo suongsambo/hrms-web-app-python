@@ -1,10 +1,3 @@
-# from flask import Flask, render_template, request, redirect, url_for, session
-# import sqlite3
-# import hashlib
-# import os
-# app = Flask(__name__)
-# app.secret_key = "your_secret_key"
-
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import hashlib
@@ -29,11 +22,15 @@ def get_db_connection():
 
 # User class to integrate with Flask-Login
 class User(UserMixin):
-    def __init__(self, id, username, password, email):
+    def __init__(self, id, username, password, email, branch=None, is_admin=False):
         self.id = id
         self.username = username
         self.password = password
         self.email = email
+        self.branch = branch
+        self.is_admin = is_admin
+
+
 
 
 # User loader function for Flask-Login
@@ -42,7 +39,7 @@ def load_user(user_id):
     with get_db_connection() as conn:
         user_data = conn.execute('SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
         if user_data:
-            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'])
+            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'], branch=user_data['Branch'], is_admin=user_data['IsAdmin'])
         return None
 
 
@@ -119,6 +116,16 @@ def init_db():
                 MemberID TEXT                                                         
             )
         ''')
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS user_branches (
+                user_id INTEGER,
+                branch_id INTEGER,
+                FOREIGN KEY (user_id) REFERENCES users (ID) ON DELETE CASCADE,
+                FOREIGN KEY (branch_id) REFERENCES branches (ID) ON DELETE CASCADE,
+                PRIMARY KEY (user_id, branch_id)
+            )
+        ''')
         conn.commit()
 
 
@@ -138,7 +145,6 @@ def register():
         password = request.form['password']
         email = request.form['email']
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
         with get_db_connection() as conn:
             try:
                 conn.execute('''
@@ -152,23 +158,6 @@ def register():
                 #  "Username or Email already exists. Try again."
 
     return render_template('register.html')
-
-# @app.route('/login', methods=['POST'])
-# def login():
-#     username = request.form['username']
-#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
-
-#     with get_db_connection() as conn:
-#         user = conn.execute('''
-#             SELECT * FROM users WHERE UserName = ? AND Password = ?
-#         ''', (username, password)).fetchone()
-
-#     if user:
-#         session['user'] = username
-#         return redirect(url_for('dashboard'))
-#     else:
-#         return render_template('404.html'), 404
-
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -199,29 +188,110 @@ def users():
         users = conn.execute("SELECT * FROM users").fetchall()
     return render_template('/users/users.html', users=users)
 
+# @app.route('/users/add', methods=['GET', 'POST'])
+# @login_required
+# def add_user():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = hashlib.sha256(request.form['password'].encode()).hexdigest()
+#         email = request.form['email']
+#         first_name_kh = request.form['first_name_kh']
+#         last_name_kh = request.form['last_name_kh']
+#         first_name_en = request.form['first_name_en']
+#         last_name_en = request.form['last_name_en']
+#         branch = request.form['branch']
+#         is_admin = request.form.get('is_admin', 0)
+#         mobile1 = request.form['mobile1']
+#         with get_db_connection() as conn:
+#             conn.execute("""
+#                 INSERT INTO users (UserName, Password, Email, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, Mobile1)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+#                 (username, password, email, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, mobile1))
+#             conn.commit()
+#         return redirect(url_for('list_users'))
+#     return render_template('/users/add_user.html')
+
+
+
+# Route to add a new user
+# @app.route('/users/add', methods=['GET', 'POST'])
+# def add_user():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         branches = request.form.getlist('branches')  # Multi-select branches
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         # Insert user into 'users' table
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO users (UserName, Password, Email)
+#                 VALUES (?, ?, ?)
+#             ''', (username, hashed_password, email))
+#             user_id = cursor.lastrowid
+
+#             # Insert relationships into 'user_branches'
+#             for branch_id in branches:
+#                 cursor.execute('''
+#                     INSERT INTO user_branches (user_id, branch_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, branch_id))
+#             conn.commit()
+
+#         return redirect(url_for('list_users'))
+    
+#     # Fetch all branches for selection
+#     with get_db_connection() as conn:
+#         branches = conn.execute('SELECT * FROM branches').fetchall()
+#     return render_template('/users/add_user.html')
+#     # return render_template('add_user.html', branches=branches)
+
 @app.route('/users/add', methods=['GET', 'POST'])
-@login_required
 def add_user():
     if request.method == 'POST':
         username = request.form['username']
-        password = hashlib.sha256(request.form['password'].encode()).hexdigest()
+        password = request.form['password']
         email = request.form['email']
+        mobile1 = request.form['mobile1']
         first_name_kh = request.form['first_name_kh']
         last_name_kh = request.form['last_name_kh']
         first_name_en = request.form['first_name_en']
         last_name_en = request.form['last_name_en']
         branch = request.form['branch']
-        is_admin = request.form.get('is_admin', 0)
-        mobile1 = request.form['mobile1']
-        
+        branch_id = request.form['branch']  # Get the branch ID from the form
+        is_admin = request.form.get('is_admin', 0)  # Checkbox will return '1' if checked, else default to 0
+
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        # Insert user into 'users' table
         with get_db_connection() as conn:
-            conn.execute("""
-                INSERT INTO users (UserName, Password, Email, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, Mobile1)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (username, password, email, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, mobile1))
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin))
+            user_id = cursor.lastrowid
+
+            # Insert relationship into 'user_branches' table
+            cursor.execute('''
+                INSERT INTO user_branches (user_id, branch_id)
+                VALUES (?, ?)
+            ''', (user_id, branch_id))
             conn.commit()
+
         return redirect(url_for('list_users'))
-    return render_template('/users/add_user.html')
+    
+    # Fetch all branches for selection
+    with get_db_connection() as conn:
+        branches = conn.execute('SELECT * FROM branches').fetchall()
+
+    return render_template('/users/add_user.html', branches=branches)
+
+
+
+
 
 @app.route('/users/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -259,11 +329,6 @@ def delete_user(id):
     return redirect(url_for('list_users'))
 
 
-# @app.route('/dashboard')
-# def dashboard():
-#     if 'user' not in session:
-#         return redirect(url_for('index'))
-#     return render_template('dashboard.html')
 
 @app.route('/dashboard')
 @login_required
@@ -273,9 +338,6 @@ def dashboard():
 @app.route('/users' , methods=['GET'])
 @login_required
 def list_users():
-    # if 'user' not in session:
-    #     return render_template('unauthorized.html'), 401
-
     with get_db_connection() as conn:
         users = conn.execute("SELECT * FROM users").fetchall()
 
@@ -296,8 +358,6 @@ def view_user(id):
 @app.route('/users/search', methods=['GET'])
 @login_required
 def search_users():
-    # if 'user' not in session:
-    #     return redirect(url_for('index'))
 
     query = request.args.get('query', '')
 
@@ -318,8 +378,6 @@ def list_employees():
 @app.route('/employees/search', methods=['GET'])
 @login_required
 def search_employees():
-    # if 'user' not in session:
-    #     return redirect(url_for('index'))
 
     query = request.args.get('query', '')
 
@@ -332,8 +390,6 @@ def search_employees():
 @app.route('/employees/add', methods=['GET', 'POST'])
 @login_required
 def add_employee():
-    # if 'user' not in session:
-    #     return redirect(url_for('index'))
 
     if request.method == 'POST':
         name = request.form['name']
@@ -353,8 +409,6 @@ def add_employee():
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_employee(id):
-    # if 'user' not in session:
-    #     return redirect(url_for('index'))
 
     with get_db_connection() as conn:
         employee = conn.execute("SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
@@ -377,8 +431,6 @@ def edit_employee(id):
 @app.route('/employees/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_employee(id):
-    # if 'user' not in session:
-    #     return redirect(url_for('index'))
 
     with get_db_connection() as conn:
         conn.execute("DELETE FROM employees WHERE id = ?", (id,))
@@ -485,8 +537,6 @@ def view_branch(id):
 @app.route('/branches/search', methods=['GET'])
 @login_required
 def search_branches():
-    # if 'user' not in session:
-    #     return redirect(url_for('index'))
 
     query = request.args.get('query', '')
 

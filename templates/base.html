@@ -69,29 +69,29 @@
 
 
 
-
+            <!-- 
             <button @click="lang = lang === 'en' ? 'km' : 'en'; localStorage.setItem('lang', lang)"
                 class="mb-4 bg-gray-800 text-white px-4 py-2 rounded flex items-center justify-center space-x-1 transition duration-200 ease-in-out hover:bg-gray-700 focus:outline-none focus:shadow-outline">
                 <span x-text="lang === 'en' ? 'Switch to Khmer' : 'Switch to English'"></span>
                 <span class="material-symbols-outlined" x-show="lang === 'en'">language</span>
                 <span class="material-symbols-outlined" x-show="lang === 'km'">translate</span>
-            </button>
+            </button> -->
 
 
-            <!-- <button @click="lang = lang === 'en' ? 'km' : 'en'"
+            <button @click="lang = lang === 'en' ? 'km' : 'en'"
                 class="mb-4 bg-gray-800 text-white px-4 py-2 rounded flex items-center justify-center space-x-2 transition duration-200 ease-in-out hover:bg-gray-700 focus:outline-none focus:shadow-outline">
 
-         
+
                 <span x-text="lang === 'en' ? 'ភាសាខ្មែរ' : 'English'"></span>
 
-            
+
                 <span x-show="lang === 'en'" class="text-xl">🇬🇧</span>
 
-        
+
                 <span x-show="lang === 'km'" class="text-xl">🇰🇭</span>
 
-            
-            </button> -->
+
+            </button>
 
             <ul>
                 <li class="mb-2">
@@ -191,9 +191,9 @@
         </div>
         <!-- Main Content -->
         <div class="flex-1 p-6">
-            <button @click="sidebarOpen = !sidebarOpen" class="mb-4 bg-gray-800 text-white px-4 py-2 rounded">
+            <!-- <button @click="sidebarOpen = !sidebarOpen" class="mb-4 bg-gray-800 text-white px-4 py-2 rounded">
                 Toggle Sidebar
-            </button>
+            </button> -->
             <main>
                 {% block content %}
                 {% endblock %}
