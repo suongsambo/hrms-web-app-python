@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unauthorized</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+    </style>
+</head>
+
+<body class="bg-gradient-to-r from-blue-500 to-purple-600 h-screen flex items-center justify-center">
+    <div class="container mx-auto p-8 rounded-lg bg-white shadow-xl transform transition-transform hover:scale-105">
+        <h1 class="text-4xl font-extrabold mb-4 text-gray-900">Unauthorized Access</h1>
+        <p class="text-xl text-gray-700 mb-4">You do not have permission to view this page.</p>
+        <p class="text-xl text-gray-700 mb-4">Please login to view the content of this page.</p>
+
+        <form action="{{ url_for('logout') }}" method="post" class="mt-4">
+            <button type="submit"
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Logout</button>
+        </form>
+        <!-- <a href="{{ url_for('login') }}"
+            class="block mt-4 text-center text-blue-500 hover:text-blue-700 underline">Login</a> -->
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Employees{% endblock %}
+
+{% block content %}
+
+<body class="bg-gray-100">
+    <div class="container mx-auto py-8">
+        <h2 class="text-2xl font-bold mb-6">Add User</h2>
+        <!-- <h2 class="text-xl font-bold mb-4 text-center">Add New User</h2> -->
+        <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block text-gray-700">Username</label>
+                <input type="text" name="username" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">Password</label>
+                <input type="password" name="password" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">Email</label>
+                <input type="email" name="email" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">Mobile1</label>
+                <input type="text" name="mobile1" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">First Name (Khmer)</label>
+                <input type="text" name="first_name_kh" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">Last Name (Khmer)</label>
+                <input type="text" name="last_name_kh" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">First Name (English)</label>
+                <input type="text" name="first_name_en" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">Last Name (English)</label>
+                <input type="text" name="last_name_en" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+            <div>
+                <label class="block text-gray-700">Branch</label>
+                <input type="text" name="branch" required class="w-full px-3 py-2 border rounded-md">
+            </div>
+
+
+
+            <div class="flex items-center">
+                <input type="checkbox" name="is_admin" value="1" class="mr-2">
+                <label class="text-gray-700">Is Admin</label>
+            </div>
+
+
+            <button
+                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                type="submit">
+                Add User
+            </button>
+
+
+        </form>
+        <br>
+        <a href="{{ url_for('list_users') }}"
+            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Back</a>
+    </div>
+</body>
+
+{% endblock %}

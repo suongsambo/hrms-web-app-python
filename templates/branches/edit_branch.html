@@ -1,0 +1,99 @@
+{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block content %}
+
+<!-- <body class="bg-gray-100">
+    <h2 class="text-2xl font-bold mb-6">Edit Branch</h2>
+    <form method="POST" class="space-y-6">
+        <div class="flex flex-col">
+            <label for="branch" class="block text-sm font-medium text-gray-700">Branch Name:</label>
+            <input type="text" id="branch" name="branch" value="{{ branch.Branch }}" required
+                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+        </div>
+        <div class="flex flex-col">
+            <label for="branch_manager" class="block text-sm font-medium text-gray-700">Branch Manager:</label>
+            <input type="text" id="branch_manager" name="branch_manager" value="{{ branch.BranchManager }}" required
+                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+        </div>
+
+        <div class="flex flex-col">
+            <label for="status" class="block text-sm font-medium text-gray-700">Status:</label>
+            <select id="status" name="status" required
+                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+                <option value="Active" {% if branch.Status=='Active' %}selected{% endif %}>Active</option>
+                <option value="Inactive" {% if branch.Status=='Inactive' %}selected{% endif %}>Inactive</option>
+            </select>
+        </div>
+
+        <div class="flex flex-col">
+            <label for="description" class="block text-sm font-medium text-gray-700">Description:</label>
+            <textarea id="description" name="description" required
+                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">{{ branch.Description }}</textarea>
+        </div>
+
+        <div class="flex flex-col">
+            <label for="contact_number" class="block text-sm font-medium text-gray-700">Contact Number:</label>
+            <input type="text" id="contact_number" name="contact_number" value="{{ branch.ContactNumber }}" required
+                class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+        </div>
+
+        <button type="submit"
+            class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update</button>
+        <a href="{{ url_for('list_branches') }}"
+            class="text-blue-500 hover:underline mr-2 transition-transform transform hover:scale-105 bg-gray-200 rounded-md px-4 py-2">Cancel</a>
+    </form>
+</body> -->
+
+
+
+<body class="bg-gray-100">
+    <div class="container mx-auto py-8">
+        <h1 class="text-3xl font-bold mb-6">Edit Branch</h1>
+        <form method="POST" class="space-y-6">
+            <div class="flex flex-col">
+                <label for="branch_name" class="block text-sm font-medium text-gray-700">Branch Name</label>
+                <input type="text" id="branch_name" name="branch" value="{{ branch['Branch'] }}" required
+                    class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+            </div>
+            <div class="flex flex-col">
+                <label for="branch_manager" class="block text-sm font-medium text-gray-700">Branch Manager</label>
+                <input type="text" id="branch_manager" name="branch_manager" value="{{ branch['BranchManagerName'] }}"
+                    required
+                    class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+            </div>
+            <div class="flex flex-col">
+                <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+                <input type="text" id="address" name="address" value="{{ branch['Address'] }}" required
+                    class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+            </div>
+
+            <div class="flex flex-col">
+                <label for="contact_number" class="block text-sm font-medium text-gray-700">Contact Number</label>
+                <input type="text" id="contact_number" name="contact_number" value="{{ branch['ContactNumber'] }}"
+                    required
+                    class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+            </div>
+            <div class="flex flex-col">
+                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                <select id="status" name="status" required
+                    class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">
+                    <option value="Active" {% if branch['Status']=='Active' %}selected{% endif %}>Active</option>
+                    <option value="Inactive" {% if branch['Status']=='Inactive' %}selected{% endif %}>Inactive</option>
+                </select>
+            </div>
+
+            <div class="flex flex-col">
+                <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                <textarea id="description" name="description" rows="3" required
+                    class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400">{{ branch['Description'] }}</textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update
+                Branch</button>
+            <a href="{{ url_for('list_branches') }}"
+                class="text-blue-500 hover:underline mr-2 transition-transform transform hover:scale-105 bg-gray-200 rounded-md px-4 py-2">Cancel</a>
+        </form>
+    </div>
+
+
+</body>
+
+
+{% endblock %}

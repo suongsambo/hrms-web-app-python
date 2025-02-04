@@ -1,12 +1,52 @@
+# from flask import Flask, render_template, request, redirect, url_for, session
+# import sqlite3
+# import hashlib
+# import os
+# app = Flask(__name__)
+# app.secret_key = "your_secret_key"
+
 from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import hashlib
 import os
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key"
+app.secret_key = "Suong_Sambo_Admin_System@#$9999_Key546444"
+app.config['SESSION_COOKIE_NAME'] = 'Suong_Sambo_Admin_System@#$9999'
+
 
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database/hr_management.db')
+# Initialize the Flask-Login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# Setup database connection
+def get_db_connection():
+    conn = sqlite3.connect(DATABASE)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+# User class to integrate with Flask-Login
+class User(UserMixin):
+    def __init__(self, id, username, password, email):
+        self.id = id
+        self.username = username
+        self.password = password
+        self.email = email
+
+
+# User loader function for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    with get_db_connection() as conn:
+        user_data = conn.execute('SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
+        if user_data:
+            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'])
+        return None
+
+
+
 
 def get_db_connection():
     conn = sqlite3.connect(DATABASE)
@@ -55,7 +95,37 @@ def init_db():
                 salary REAL NOT NULL
             )
         ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS branches (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,        
+                CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, 
+                UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, 
+                Status TEXT CHECK(Status IN ('Active', 'Inactive')) DEFAULT 'Active',                         
+                CreateDate DATETIME,                          
+                StartDate DATETIME,                           
+                Description TEXT,                             
+                Branch TEXT NOT NULL,                         
+                BranchManagerName TEXT,                       
+                ContactNumber TEXT,                           
+                Address TEXT,                                 
+                DistrictProvince TEXT,                        
+                RegisterDate DATETIME,                        
+                LocalDescription TEXT,                        
+                LocalAddress TEXT,                            
+                LocalBranchManagerName TEXT,                  
+                BranchProjectId TEXT,                         
+                CapitalInjectionId TEXT,                      
+                GroupID TEXT,                                 
+                MemberID TEXT                                                         
+            )
+        ''')
         conn.commit()
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    return render_template('unauthorized.html'), 401
+
 
 @app.route('/')
 def index():
@@ -83,6 +153,23 @@ def register():
 
     return render_template('register.html')
 
+# @app.route('/login', methods=['POST'])
+# def login():
+#     username = request.form['username']
+#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
+
+#     with get_db_connection() as conn:
+#         user = conn.execute('''
+#             SELECT * FROM users WHERE UserName = ? AND Password = ?
+#         ''', (username, password)).fetchone()
+
+#     if user:
+#         session['user'] = username
+#         return redirect(url_for('dashboard'))
+#     else:
+#         return render_template('404.html'), 404
+
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
@@ -94,44 +181,50 @@ def login():
         ''', (username, password)).fetchone()
 
     if user:
-        session['user'] = username
+        user_obj = User(id=user['ID'], username=user['UserName'], password=user['Password'], email=user['Email'])
+        login_user(user_obj)  # Store the user session with Flask-Login
         return redirect(url_for('dashboard'))
     else:
         return render_template('404.html'), 404
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    session.pop('user', None)
+    logout_user()
     return redirect(url_for('index'))
 
-@app.route('/users')
+@app.route('/users/', methods=['GET'])
+@login_required
 def users():
     with get_db_connection() as conn:
         users = conn.execute("SELECT * FROM users").fetchall()
     return render_template('/users/users.html', users=users)
 
-
 @app.route('/users/add', methods=['GET', 'POST'])
+@login_required
 def add_user():
     if request.method == 'POST':
         username = request.form['username']
         password = hashlib.sha256(request.form['password'].encode()).hexdigest()
         email = request.form['email']
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
+        first_name_kh = request.form['first_name_kh']
+        last_name_kh = request.form['last_name_kh']
+        first_name_en = request.form['first_name_en']
+        last_name_en = request.form['last_name_en']
         branch = request.form['branch']
         is_admin = request.form.get('is_admin', 0)
+        mobile1 = request.form['mobile1']
         
         with get_db_connection() as conn:
             conn.execute("""
-                INSERT INTO users (UserName, Password, Email, FirstNameEn, LastNameEn, Branch, IsAdmin)
-                VALUES (?, ?, ?, ?, ?, ?, ?)""",
-                (username, password, email, first_name, last_name, branch, is_admin))
+                INSERT INTO users (UserName, Password, Email, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, Mobile1)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (username, password, email, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, mobile1))
             conn.commit()
         return redirect(url_for('list_users'))
     return render_template('/users/add_user.html')
 
 @app.route('/users/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_user(id):
     with get_db_connection() as conn:
         user = conn.execute("SELECT * FROM users WHERE ID = ?", (id,)).fetchone()
@@ -139,50 +232,94 @@ def edit_user(id):
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
+        first_name_kh = request.form['first_name_kh']
+        last_name_kh = request.form['last_name_kh']
+        first_name_en = request.form['first_name_en']
+        last_name_en = request.form['last_name_en']
         branch = request.form['branch']
         is_admin = request.form.get('is_admin', 0)
+        mobile1 = request.form['mobile1']
         
         with get_db_connection() as conn:
             conn.execute("""
-                UPDATE users SET UserName = ?, Email = ?, FirstNameEn = ?, LastNameEn = ?, Branch = ?, IsAdmin = ?, UpdatedAt = CURRENT_TIMESTAMP
+                UPDATE users SET UserName = ?, Email = ?, FirstNameKh = ?, LastNameKh = ?, FirstNameEn = ?, LastNameEn = ?, Branch = ?, IsAdmin = ?, Mobile1 = ?, UpdatedAt = CURRENT_TIMESTAMP
                 WHERE ID = ?""",
-                (username, email, first_name, last_name, branch, is_admin, id))
+                (username, email, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, mobile1, id))
             conn.commit()
         return redirect(url_for('list_users'))
     
     return render_template('/users/edit_user.html', user=user)
 
 @app.route('/users/delete/<int:id>', methods=['POST'])
+@login_required
 def delete_user(id):
     with get_db_connection() as conn:
         conn.execute("DELETE FROM users WHERE ID = ?", (id,))
         conn.commit()
-    return redirect(url_for('/users/list_users'))
+    return redirect(url_for('list_users'))
 
+
+# @app.route('/dashboard')
+# def dashboard():
+#     if 'user' not in session:
+#         return redirect(url_for('index'))
+#     return render_template('dashboard.html')
 
 @app.route('/dashboard')
+@login_required
 def dashboard():
-    if 'user' not in session:
-        return redirect(url_for('index'))
-    return render_template('dashboard.html')
+    return render_template('dashboard.html', username=current_user.username)
+    
+@app.route('/users' , methods=['GET'])
+@login_required
+def list_users():
+    # if 'user' not in session:
+    #     return render_template('unauthorized.html'), 401
+
+    with get_db_connection() as conn:
+        users = conn.execute("SELECT * FROM users").fetchall()
+
+    return render_template('/users/users.html', users=users)
+
+@app.route('/users/<int:id>')
+@login_required
+def view_user(id):
+    with get_db_connection() as conn:
+        user = conn.execute("SELECT * FROM users WHERE ID = ?", (id,)).fetchone()
+
+    if user:
+        return render_template('/users/view_user.html', user=user)
+    else:
+        return "User not found", 404
+
+
+@app.route('/users/search', methods=['GET'])
+@login_required
+def search_users():
+    # if 'user' not in session:
+    #     return redirect(url_for('index'))
+
+    query = request.args.get('query', '')
+
+    with get_db_connection() as conn:
+        users = conn.execute("SELECT * FROM users WHERE UserName LIKE ?", ('%' + query + '%',)).fetchall()
+
+    return render_template('/users/users.html', users=users)
 
 
 @app.route('/employees')
+@login_required
 def list_employees():
-    if 'user' not in session:
-        return redirect(url_for('index'))
-
     with get_db_connection() as conn:
         employees = conn.execute("SELECT * FROM employees").fetchall()
 
     return render_template('/employees/employees.html', employees=employees)
 
 @app.route('/employees/search', methods=['GET'])
+@login_required
 def search_employees():
-    if 'user' not in session:
-        return redirect(url_for('index'))
+    # if 'user' not in session:
+    #     return redirect(url_for('index'))
 
     query = request.args.get('query', '')
 
@@ -193,9 +330,10 @@ def search_employees():
 
 
 @app.route('/employees/add', methods=['GET', 'POST'])
+@login_required
 def add_employee():
-    if 'user' not in session:
-        return redirect(url_for('index'))
+    # if 'user' not in session:
+    #     return redirect(url_for('index'))
 
     if request.method == 'POST':
         name = request.form['name']
@@ -213,9 +351,10 @@ def add_employee():
     return render_template('/employees/add_employee.html')
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_employee(id):
-    if 'user' not in session:
-        return redirect(url_for('index'))
+    # if 'user' not in session:
+    #     return redirect(url_for('index'))
 
     with get_db_connection() as conn:
         employee = conn.execute("SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
@@ -236,9 +375,10 @@ def edit_employee(id):
     return render_template('/employees/edit_employee.html', employee=employee)
 
 @app.route('/employees/delete/<int:id>', methods=['POST'])
+@login_required
 def delete_employee(id):
-    if 'user' not in session:
-        return redirect(url_for('index'))
+    # if 'user' not in session:
+    #     return redirect(url_for('index'))
 
     with get_db_connection() as conn:
         conn.execute("DELETE FROM employees WHERE id = ?", (id,))
@@ -247,7 +387,8 @@ def delete_employee(id):
     return redirect(url_for('list_employees'))
 
 
-@app.route('/employee/<int:id>')
+@app.route('/employees/<int:id>')
+@login_required
 def view_employee(id):
     with get_db_connection() as conn:
         employee = conn.execute("SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
@@ -256,6 +397,103 @@ def view_employee(id):
         return render_template('/employees/view_employee.html', employee=employee)
     else:
         return "Employee not found", 404
+
+
+@app.route('/branches')
+@login_required
+def list_branches():
+    conn = get_db_connection()
+    branches = conn.execute('SELECT * FROM branches').fetchall()
+    conn.close()
+    return render_template('/branches/branches.html', branches=branches)
+
+# Route to add a new branch
+@app.route('/branches/add', methods=['GET', 'POST'])
+@login_required
+def add_branch():
+    if request.method == 'POST':
+        description = request.form['description']
+        branch = request.form['branch']
+        branch_manager = request.form['branch_manager']
+        contact_number = request.form['contact_number']
+        address = request.form['address']
+        register_date = request.form['register_date']
+        local_description = request.form['local_description']
+        local_address = request.form['local_address']
+        local_branch_manager = request.form['local_branch_manager']
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO branches (Description, Branch, BranchManagerName, ContactNumber, Address,
+                                      RegisterDate, LocalDescription, LocalAddress, LocalBranchManagerName)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                (description, branch, branch_manager, contact_number, address,
+                 register_date, local_description, local_address, local_branch_manager,
+                ))
+            conn.commit()
+        return redirect(url_for('list_branches'))
+
+    return render_template('/branches/add_branch.html')
+
+# Route to update a branch
+@app.route('/branches/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_branch(id):
+
+    conn = get_db_connection()
+    branch = conn.execute('SELECT * FROM branches WHERE ID = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        status = request.form['status']
+        branch_manager = request.form['branch_manager']
+        address = request.form['address']
+        description = request.form['description']
+        branch_name = request.form['branch']
+        contact_number = request.form['contact_number']
+        
+        conn.execute('''
+            UPDATE branches 
+            SET Status = ?, BranchManagerName = ?, Address = ?, Description = ?, Branch = ?, ContactNumber = ?, UpdatedAt = CURRENT_TIMESTAMP
+            WHERE ID = ?''', 
+            (status, branch_manager, address, description, branch_name, contact_number, id))
+        conn.commit()
+        conn.close()
+        return redirect(url_for('list_branches'))
+
+    conn.close()
+    return render_template('/branches/edit_branch.html', branch=branch)
+
+# Route to delete a branch
+@app.route('/branches/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_branch(id):
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM branches WHERE ID = ?', (id,))
+        conn.commit()
+    return redirect(url_for('list_branches'))
+
+@app.route('/branches/<int:id>')
+@login_required
+def view_branch(id):
+    with get_db_connection() as conn:
+        branch = conn.execute("SELECT * FROM branches WHERE ID = ?", (id,)).fetchone()
+
+    if branch:
+        return render_template('/branches/view_branch.html', branch=branch)
+    else:
+        return "Branch not found", 404
+
+@app.route('/branches/search', methods=['GET'])
+@login_required
+def search_branches():
+    # if 'user' not in session:
+    #     return redirect(url_for('index'))
+
+    query = request.args.get('query', '')
+
+    with get_db_connection() as conn:
+        branches = conn.execute("SELECT * FROM branches WHERE Branch LIKE ?", ('%' + query + '%',)).fetchall()
+
+    return render_template('/branches/branches.html', branches=branches)
 
 
 if __name__ == '__main__':
