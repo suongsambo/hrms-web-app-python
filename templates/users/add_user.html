@@ -53,7 +53,7 @@
                 <select name="branch" required class="w-full px-3 py-2 border rounded-md">
                     <option value="">Select a Branch</option>
                     {% for branch in branches %}
-                    <option value="{{ branch['ID'] }}" {% if selected_branch==branch['ID'] %}selected{% endif %}>{{
+                    <option value="{{ branch['Branch'] }}" {% if selected_branch==branch['ID'] %}selected{% endif %}>{{
                         branch['Branch'] }}</option>
                     {% endfor %}
                 </select>

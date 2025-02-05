@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 import hashlib
 import os
@@ -262,12 +262,19 @@ def add_user():
         branch = request.form['branch']
         branch_id = request.form['branch']  # Get the branch ID from the form
         is_admin = request.form.get('is_admin', 0)  # Checkbox will return '1' if checked, else default to 0
-
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
         # Insert user into 'users' table
         with get_db_connection() as conn:
             cursor = conn.cursor()
+                 # Check if username already exists
+            cursor.execute('SELECT * FROM users WHERE UserName = ?', (username,))
+            existing_user = cursor.fetchone()
+
+            if existing_user:
+                flash('Username already exists. Please choose another one.', 'danger')
+                return redirect(url_for('add_user'))
+
             cursor.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -288,7 +295,6 @@ def add_user():
         branches = conn.execute('SELECT * FROM branches').fetchall()
 
     return render_template('/users/add_user.html', branches=branches)
-
 
 
 

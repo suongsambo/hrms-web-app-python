@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}" />
     <script src="https://unpkg.com/alpinejs" defer></script>
     <script src="{{ url_for('static', filename='app.js') }}" defer></script>
@@ -17,7 +17,7 @@
 <header class="bg-gray-800 text-white p-4">
     <div class="container mx-auto flex justify-between items-center">
         <a href="/" class="flex items-center gap-x-2">
-            <img src="/static/images/logo.png" alt="Company Logo" class="h-8 w-auto">
+            <img src="/static/images/logo.png" alt="Company Logo" class="h-8 w-auto" />
             <span class="text-2xl font-semibold">Company</span>
         </a>
         <div class="flex space-x-4 items-center">
@@ -25,13 +25,15 @@
                 class="block py-2 px-4 text-sm text-gray-white hover:bg-gray-200 flex items-center gap-x-2">
                 <span class="material-symbols-outlined">logout</span>
                 <button type="submit" class="w-full text-left"
-                    onclick="return confirm('Are you sure you want to logout?');">Logout</button>
+                    onclick="return confirm('Are you sure you want to logout?');">
+                    Logout
+                </button>
             </form>
         </div>
     </div>
 </header>
 
-<body class="flex flex-col">
+<body class="flex flex-col h-[calc(100vh-300px)]">
     <!-- Sidebar -->
     <div class="flex-1 flex">
         <div x-data="{ sidebarOpen: true, lang: 'en', translations: {
@@ -48,7 +50,15 @@
                     manageBranches: 'Manage Branches',
                     settings: 'Settings',
                     profile: 'Profile',
-                    security: 'Security'
+                    security: 'Security',
+                    addLeaveAndAttendance: 'Add Leave and Attendance',
+                    leaveAndAttendance: 'Leave and Attendance',
+                    resourcesAllocations : 'Resources Allocations',
+                    allocateResource : 'Allocate Resources',
+                    payroll : 'Payroll',
+                    addPayroll : 'Add Payroll',
+                    managePayroll : 'Manage Payroll',
+                    
                 },
                 km: {
                     home: 'ទំព័រដើម',
@@ -63,34 +73,23 @@
                     manageBranches: 'គ្រប់គ្រងសាខា',
                     settings: 'ការកំណត់',
                     profile: 'ប្រវត្តិរូប',
-                    security: 'សន្តិសុខ'
+                    security: 'សន្តិសុខ',
+                    leaveAndAttendance: 'ការត្រួតពិនិត្យអវត្តមាន​និងការបង្រៀន',
+                    addLeaveAndAttendance: 'បន្ថែមការត្រួតពិនិត្យអវត្តមាននិងការបង្រៀន',
+                    resourcesAllocations : 'ការចំណែក​ធនធាន',
+                    allocateResource : 'ការចំណែក​ធនធានទៅកាន់អ្នកប្រើប្រាស់',
+                    payroll : 'ប្រាក់បៀវត្សរ៍',
+                    addPayroll : 'បន្ថែមប្រាក់បៀវត្សរ៍',
+                    managePayroll : 'គ្រប់គ្រងប្រាក់បៀវត្សរ៍',
+
+
                 }
             } }" :class="{ 'hidden': !sidebarOpen }" class="w-90 h-screen bg-gray-900 text-white p-4">
-
-
-
-            <!-- 
-            <button @click="lang = lang === 'en' ? 'km' : 'en'; localStorage.setItem('lang', lang)"
-                class="mb-4 bg-gray-800 text-white px-4 py-2 rounded flex items-center justify-center space-x-1 transition duration-200 ease-in-out hover:bg-gray-700 focus:outline-none focus:shadow-outline">
-                <span x-text="lang === 'en' ? 'Switch to Khmer' : 'Switch to English'"></span>
-                <span class="material-symbols-outlined" x-show="lang === 'en'">language</span>
-                <span class="material-symbols-outlined" x-show="lang === 'km'">translate</span>
-            </button> -->
-
-
             <button @click="lang = lang === 'en' ? 'km' : 'en'"
                 class="mb-4 bg-gray-800 text-white px-4 py-2 rounded flex items-center justify-center space-x-2 transition duration-200 ease-in-out hover:bg-gray-700 focus:outline-none focus:shadow-outline">
-
-
                 <span x-text="lang === 'en' ? 'ភាសាខ្មែរ' : 'English'"></span>
-
-
                 <span x-show="lang === 'en'" class="text-xl">🇬🇧</span>
-
-
                 <span x-show="lang === 'km'" class="text-xl">🇰🇭</span>
-
-
             </button>
 
             <ul>
@@ -111,15 +110,18 @@
                         <span>&#9662;</span>
                     </button>
                     <ul id="submenu1" class="hidden pl-4">
-                        <li class="mb-2"><a href="/users/add"
-                                class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                        <li class="mb-2">
+                            <a href="/users/add" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">person_add</span>
                                 <span class="ml-2" x-text="translations[lang].addUser"></span>
-                            </a></li>
-                        <li><a href="/users" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/users" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">people</span>
                                 <span class="ml-2" x-text="translations[lang].manageUsers"></span>
-                            </a></li>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
@@ -133,15 +135,18 @@
                         <span>&#9662;</span>
                     </button>
                     <ul id="submenu2" class="hidden pl-4">
-                        <li class="mb-2"><a href="/employees/add"
-                                class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                        <li class="mb-2">
+                            <a href="/employees/add" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">person_add</span>
                                 <span class="ml-2" x-text="translations[lang].addEmployee"></span>
-                            </a></li>
-                        <li><a href="/employees" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/employees" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">people</span>
                                 <span class="ml-2" x-text="translations[lang].manageEmployees"></span>
-                            </a></li>
+                            </a>
+                        </li>
                     </ul>
                 </li>
 
@@ -155,17 +160,83 @@
                         <span>&#9662;</span>
                     </button>
                     <ul id="submenu3" class="hidden pl-4">
-                        <li class="mb-2"><a href="/branches/add"
-                                class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                        <li class="mb-2">
+                            <a href="/branches/add" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">storefront</span>
                                 <span class="ml-2" x-text="translations[lang].addBranch"></span>
-                            </a></li>
-                        <li><a href="/branches" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/branches" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">storefront</span>
                                 <span class="ml-2" x-text="translations[lang].manageBranches"></span>
-                            </a></li>
+                            </a>
+                        </li>
                     </ul>
                 </li>
+
+                <!-- Leave and Attendance Tracking -->
+                <li class="mb-2">
+                    <button onclick="toggleMenu('submenu5')"
+                        class="w-full text-left p-2 hover:bg-gray-700 rounded flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined">engineering</span>
+                            <span class="text-left ml-3" x-text="translations[lang].leaveAndAttendance"></span>
+                        </div>
+                        <span>&#9662;</span>
+                    </button>
+                    <ul id="submenu5" class="hidden pl-4">
+                        <li class="mb-2">
+                            <a href="/leave_and_attendance_tracking"
+                                class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                                <span class="material-symbols-outlined">memory</span>
+                                <span class="ml-2" x-text="translations[lang].addLeaveAndAttendance"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <li class="mb-2">
+                    <button onclick="toggleMenu('submenu6')"
+                        class="w-full text-left p-2 hover:bg-gray-700 rounded flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined">engineering</span>
+                            <span class="text-left ml-3" x-text="translations[lang].resourcesAllocations"></span>
+                        </div>
+                        <span>&#9662;</span>
+                    </button>
+                    <ul id="submenu6" class="hidden pl-4">
+                        <li class="mb-2">
+                            <a href="/resources_allocations"
+                                class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                                <span class="material-symbols-outlined">memory</span>
+                                <span class="ml-2" x-text="translations[lang].allocateResource"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <!-- Payroll -->
+                <li class="mb-2">
+                    <button onclick="toggleMenu('submenu7')"
+                        class="w-full text-left p-2 hover:bg-gray-700 rounded flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined">engineering</span>
+                            <span class="text-left ml-3" x-text="translations[lang].payroll"></span>
+                        </div>
+                        <span>&#9662;</span>
+                    </button>
+                    <ul id="submenu7" class="hidden pl-4">
+                        <li class="mb-2">
+                            <a href="/payroll" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                                <span class="material-symbols-outlined">memory</span>
+                                <span class="ml-2" x-text="translations[lang].addPayroll"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                <hr />
 
                 <li class="mb-2">
                     <button onclick="toggleMenu('submenu4')"
@@ -177,57 +248,54 @@
                         <span>&#9662;</span>
                     </button>
                     <ul id="submenu4" class="hidden pl-4">
-                        <li class="mb-2"><a href="#" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                        <li class="mb-2">
+                            <a href="#" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">person</span>
                                 <span class="ml-2" x-text="translations[lang].profile"></span>
-                            </a></li>
-                        <li><a href="#" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="block p-2 hover:bg-gray-700 rounded flex items-center">
                                 <span class="material-symbols-outlined">lock</span>
                                 <span class="ml-2" x-text="translations[lang].security"></span>
-                            </a></li>
+                            </a>
+                        </li>
                     </ul>
                 </li>
             </ul>
         </div>
         <!-- Main Content -->
         <div class="flex-1 p-6">
-            <!-- <button @click="sidebarOpen = !sidebarOpen" class="mb-4 bg-gray-800 text-white px-4 py-2 rounded">
-                Toggle Sidebar
-            </button> -->
-            <main>
-                {% block content %}
-                {% endblock %}
-            </main>
+            <main>{% block content %} {% endblock %}</main>
         </div>
     </div>
 
     <script>
         function toggleMenu(id) {
-            document.getElementById(id).classList.toggle('hidden');
+            document.getElementById(id).classList.toggle("hidden");
         }
 
-        if (localStorage.getItem('lang') === 'km') {
-            document.querySelector('[x-data]')._x_data.lang = 'km';
+        if (localStorage.getItem("lang") === "km") {
+            document.querySelector("[x-data]")._x_data.lang = "km";
         }
     </script>
-</body>
-
-{% block scripts %}
-<footer class="bg-gradient-to-r from-gray-800 to-gray-600 text-white py-2">
-    <div class="container mx-auto text-center">
-        <div class="flex flex-col sm:flex-row justify-between items-center">
-            <div class="mb-4 sm:mb-0">
-                <p>&copy; 2025 Your Company. All rights reserved.</p>
-            </div>
-            <div class="flex space-x-4">
-                <a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a>
-                <a href="#" class="text-gray-400 hover:text-white">Terms of Service</a>
-                <a href="#" class="text-gray-400 hover:text-white">Contact Us</a>
+    {% block scripts %}
+    <footer class="bg-gradient-to-r from-gray-800 to-gray-600 text-white py-2">
+        <div class="container mx-auto text-center">
+            <div class="flex flex-col sm:flex-row justify-between items-center">
+                <div class="mb-4 sm:mb-0">
+                    <p>&copy; 2025 Your Company. All rights reserved.</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Terms of Service</a>
+                    <a href="#" class="text-gray-400 hover:text-white">Contact Us</a>
+                </div>
             </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
-{% endblock %}
+    {% endblock %}
+</body>
 
 </html>

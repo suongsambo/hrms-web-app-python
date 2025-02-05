@@ -4,8 +4,15 @@
 
 {% block content %}
 
-<div class="container mx-auto py-8">
-  <h2 class="text-2xl font-bold mb-6">Users List</h2>
+<div class="container mx-auto py-1 bg-white p-6 rounded-lg shadow-md">
+  <!-- <h2 class="text-2xl font-bold mb-1">Users List</h2>
+  <span>Total: {{ users|length }}</span> -->
+
+  <h3 class="text-2xl font-bold mb-1 text-gray-800 hover:text-blue-500 transition-colors duration-300">
+    Users List
+  </h3>
+  <span class="text-lg text-gray-500">Total: <span class="font-semibold">{{ users|length }}</span></span>
+
 
   <div class="flex justify-end items-center mr-4 mb-2 gap-x-2">
     <!-- Search Form -->
