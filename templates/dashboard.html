@@ -22,7 +22,12 @@
   <h1>Welcome, {{ current_user.username }}!</h1>
   <p>Username: {{ current_user.username }}</p>
   <p>Email: {{ current_user.email }}</p>
-  <p>Is Admin: {{ current_user.is_admin }}</p>
+  <p>Is Admin: {% if current_user.is_admin == 1 %}
+    Yes
+    {% else %}
+    No
+    {% endif %}
+  </p>
   <p>Branch: {{ current_user.branch }}</p>
 
 

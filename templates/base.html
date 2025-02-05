@@ -58,6 +58,11 @@
                     payroll : 'Payroll',
                     addPayroll : 'Add Payroll',
                     managePayroll : 'Manage Payroll',
+                    mediaAndFiles : 'Media And Files',
+                    addFile : 'Add Files',
+                    addMultiFile : 'Add Multi Files',
+                    manageFiles: 'Manage Files',
+                
                     
                 },
                 km: {
@@ -81,6 +86,11 @@
                     payroll : 'ប្រាក់បៀវត្សរ៍',
                     addPayroll : 'បន្ថែមប្រាក់បៀវត្សរ៍',
                     managePayroll : 'គ្រប់គ្រងប្រាក់បៀវត្សរ៍',
+                    mediaAndFiles : 'ឯកសារ',
+                    addFile : 'បន្ថែមឯកសារ',
+                    manageFiles: 'គ្រប់គ្រងឯកសារ',
+                    addMultiFile: 'បន្ថែមឯកសារច្រើន'
+                
 
 
                 }
@@ -100,6 +110,9 @@
                     </a>
                 </li>
 
+                <!-- Users -->
+
+                {% if current_user.is_admin == 1 %}
                 <li class="mb-2">
                     <button onclick="toggleMenu('submenu1')"
                         class="w-full text-left p-2 hover:bg-gray-700 rounded flex items-center justify-between">
@@ -124,7 +137,16 @@
                         </li>
                     </ul>
                 </li>
+                {% else %}
+                <span></span>
+                {% endif %}
+                </p>
 
+
+
+                <!-- Employee -->
+
+                {% if current_user.is_admin == 1 %}
                 <li class="mb-2">
                     <button onclick="toggleMenu('submenu2')"
                         class="w-full text-left p-2 hover:bg-gray-700 rounded flex items-center justify-between">
@@ -150,6 +172,14 @@
                     </ul>
                 </li>
 
+                {% else %}
+                <span></span>
+                {% endif %}
+                </p>
+
+                <!-- Branchs -->
+
+                {% if current_user.is_admin == 1 %}
                 <li class="mb-2">
                     <button onclick="toggleMenu('submenu3')"
                         class="w-full text-left p-2 hover:bg-gray-700 rounded flex items-center justify-between">
@@ -174,6 +204,49 @@
                         </li>
                     </ul>
                 </li>
+
+                {% else %}
+                <span></span>
+                {% endif %}
+                </p>
+
+
+                <!-- Media And Files -->
+                <li class="mb-2">
+                    <button onclick="toggleMenu('submenu6')"
+                        class="w-full text-left p-2 hover:bg-gray-700 rounded flex items-center justify-between">
+                        <div class="flex items-center">
+                            <span class="material-symbols-outlined">folder</span>
+                            <span class="text-left ml-3" x-text="translations[lang].mediaAndFiles"></span>
+                        </div>
+                        <span>&#9662;</span>
+                    </button>
+                    <ul id="submenu6" class="hidden pl-4">
+                        <li class="mb-2">
+                            <a href="/file" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                                <span class="material-symbols-outlined">cloud_upload</span>
+                                <span class="ml-2" x-text="translations[lang].addFile"></span>
+                            </a>
+                        </li>
+
+
+                        <li class="mb-2">
+                            <a href="/upload_files" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                                <span class="material-symbols-outlined">cloud_upload</span>
+                                <span class="ml-2" x-text="translations[lang].addMultiFile"></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/files" class="block p-2 hover:bg-gray-700 rounded flex items-center">
+                                <span class="material-symbols-outlined">folder</span>
+                                <span class="ml-2" x-text="translations[lang].manageFiles"></span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+
+
 
                 <!-- Leave and Attendance Tracking -->
                 <li class="mb-2">

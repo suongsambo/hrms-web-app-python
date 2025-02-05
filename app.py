@@ -2,11 +2,22 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import hashlib
 import os
+import glob
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = "Suong_Sambo_Admin_System@#$9999_Key546444"
 app.config['SESSION_COOKIE_NAME'] = 'Suong_Sambo_Admin_System@#$9999'
+
+
+# Set the folder for image uploads
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif' , 'doc', 'docx'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max upload size
+
 
 
 DATABASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'database/hr_management.db')
@@ -29,9 +40,6 @@ class User(UserMixin):
         self.email = email
         self.branch = branch
         self.is_admin = is_admin
-
-
-
 
 # User loader function for Flask-Login
 @login_manager.user_loader
@@ -134,6 +142,123 @@ def unauthorized():
     return render_template('unauthorized.html'), 401
 
 
+# Example uploaded_file route for displaying the uploaded image
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/file', methods=['GET', 'POST'])
+@login_required
+def upload_image():
+    if request.method == 'POST':
+
+        if 'file' not in request.files:
+            return 'No file part', 400
+    
+        file = request.files['file']
+        
+        if file.filename == '':
+            return 'No selected file', 400
+        
+        if file and allowed_file(file.filename):
+            filename = f"{current_user.id}_{current_user.username}_{current_user.branch}_{secure_filename(file.filename)}"
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename)) 
+            return redirect(url_for('list_user_files', filename=filename))
+    
+    return render_template('uploaded_file.html', current_user=current_user)
+
+
+
+# # Search File
+@app.route('/search_files', methods=['GET'])
+@login_required
+def search_files():
+    query = request.args.get('query', '').lower()
+
+    files = []
+    if query:
+        # Construct the search pattern
+        search_pattern = os.path.join(
+            app.config['UPLOAD_FOLDER'],
+            f"{current_user.id}_{current_user.username}_{current_user.branch}_{query}*"
+        )
+        # Use glob to find files matching the pattern
+        files = glob.glob(search_pattern)
+        # Extract filenames from the full paths
+        files = [os.path.basename(file) for file in files]
+
+    return render_template('list_files.html', files=files, query=query, current_user=current_user)
+
+
+@app.route('/delete_file/<filename>', methods=['POST'])
+@login_required
+def delete_file(filename):
+    # Construct the full path of the file
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    
+    # Check if the file exists
+    if os.path.exists(file_path):
+        os.remove(file_path)  # Delete the file
+        flash('File deleted successfully', 'success')
+    else:
+        flash('File not found', 'error')
+    
+    # Redirect to the file listing page
+    return redirect(url_for('list_user_files'))
+
+@app.route('/files', methods=['GET'])
+@login_required
+def list_user_files():
+    # Get the directory of the uploaded files
+    upload_folder = app.config['UPLOAD_FOLDER']
+    
+    # Get the user's file prefix based on their ID, username, and branch
+    file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
+    
+    # List all files in the upload folder
+    files = os.listdir(upload_folder)
+    
+    # Filter the files that match the pattern
+    user_files = [file for file in files if file.startswith(file_prefix)]
+    
+    # Render a template to display the files (or return as a JSON response)
+    return render_template('list_files.html', files=user_files, current_user=current_user)
+
+
+
+
+@app.route('/upload_files', methods=['GET', 'POST'])
+@login_required
+def upload_files():
+    if request.method == 'POST':
+        if 'files' not in request.files:
+            return 'No file part', 400
+
+        files = request.files.getlist('files')
+        if not files:
+            return 'No selected files', 400
+
+        upload_folder = app.config['UPLOAD_FOLDER']
+        file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
+
+        for file in files:
+            if file.filename == '':
+                continue
+            if file and allowed_file(file.filename):
+                filename = f"{file_prefix}_{secure_filename(file.filename)}"
+                file.save(os.path.join(upload_folder, filename))
+
+        return redirect(url_for('list_user_files'))
+
+    return render_template('upload_files.html', current_user=current_user)
+
+
+
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return f'Image uploaded successfully: <img src="/static/uploads/{filename}" alt="uploaded image">'
+
 @app.route('/')
 def index():
     return render_template('login.html')
@@ -144,13 +269,14 @@ def register():
         username = request.form['username']
         password = request.form['password']
         email = request.form['email']
+        mobile1 = request.form['mobile1']
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
         with get_db_connection() as conn:
             try:
                 conn.execute('''
-                    INSERT INTO users (UserName, Password, Email)
-                    VALUES (?, ?, ?)
-                ''', (username, hashed_password, email))
+                    INSERT INTO users (UserName, Password, Email, Mobile1)
+                    VALUES (?, ?, ?, ?)
+                ''', (username, hashed_password, email,  mobile1))
                 conn.commit()
                 return redirect(url_for('index'))
             except sqlite3.IntegrityError:
@@ -173,6 +299,7 @@ def login():
         user_obj = User(id=user['ID'], username=user['UserName'], password=user['Password'], email=user['Email'])
         login_user(user_obj)  # Store the user session with Flask-Login
         return redirect(url_for('dashboard'))
+    
     else:
         return render_template('404.html'), 404
 

@@ -18,3 +18,8 @@ uwsgi --http 0.0.0.0:5000 --wsgi-file app.py --callable app --processes 4 --thre
 
 python3 -m pip install flask-login
 python3 -m pip install flask_sqlalchemy
+
+python -m pip install flask-wtf
+
+File
+python3 install flask werkzeug
