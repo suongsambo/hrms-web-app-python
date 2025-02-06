@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify OTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full sm:w-96">
+      <h2 class="text-2xl font-semibold text-center text-gray-800 mb-6">
+        Verify Your OTP
+      </h2>
+      <p class="text-center text-gray-600 mb-4">
+        Enter the 6-digit code sent to your Telegram.
+      </p>
+
+      <form
+        action="{{ url_for('verify_otp') }}"
+        method="POST"
+        class="space-y-4"
+      >
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <div
+          class="mb-4 p-2 text-center rounded-lg {% if messages[0] == 'Registration successful! Check your Telegram for OTP.' %} bg-blue-200 {% else %} bg-red-200 {% endif %}"
+        >
+          {{ messages[0] }}
+        </div>
+        {% endif %} {% endwith %}
+
+        <div>
+          <label for="otp" class="block text-sm font-medium text-gray-700"
+            >OTP Code</label
+          >
+          <input
+            type="text"
+            id="otp"
+            name="otp"
+            maxlength="6"
+            required
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="Enter 6-digit OTP"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Verify OTP
+        </button>
+      </form>
+
+      <div class="mt-4 text-center">
+        <a
+          href="{{ url_for('register') }}"
+          class="text-sm text-blue-500 hover:underline"
+          >Back to Registration</a
+        >
+      </div>
+    </div>
+  </body>
+</html>
