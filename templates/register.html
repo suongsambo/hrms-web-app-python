@@ -1,55 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>Register</title>
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-</head>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  </head>
 
-<body class="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500">
-
+  <body class="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500">
     <div class="flex items-center justify-center min-h-screen">
-        <form method="post" action="{{ url_for('register') }}"
-            class="bg-white shadow-lg rounded-lg p-8 max-w-md mx-auto space-y-6">
-            <h2 class="text-3xl font-semibold text-center text-gray-800">Register</h2>
+      <form
+        method="post"
+        action="{{ url_for('register') }}"
+        class="bg-white shadow-lg rounded-lg p-8 max-w-md mx-auto space-y-6"
+      >
+        <h2 class="text-3xl font-semibold text-center text-gray-800">
+          Register
+        </h2>
 
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-medium mb-2" for="email">Email:</label>
-                <input type="email" id="email" name="email" required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700">
-            </div>
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <div class="mb-4 p-2 text-center rounded-lg bg-red-200">
+          {{ messages[0] }}
+        </div>
+        {% endif %} {% endwith %}
 
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-medium mb-2" for="mobile1">Mobile:</label>
-                <input type="text" id="mobile1" name="mobile1" required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700">
-            </div>
+        <div class="mb-4">
+          <label
+            class="block text-gray-700 text-sm font-medium mb-2"
+            for="email"
+            >Email:</label
+          >
+          <input
+            type="email"
+            id="email"
+            name="email"
+            required
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
+          />
+        </div>
 
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-medium mb-2" for="username">Username:</label>
-                <input type="text" id="username" name="username" required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700">
-            </div>
+        <div class="mb-4">
+          <label
+            class="block text-gray-700 text-sm font-medium mb-2"
+            for="mobile1"
+            >Mobile:</label
+          >
+          <input
+            type="text"
+            id="mobile1"
+            name="mobile1"
+            required
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
+          />
+        </div>
 
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-medium mb-2" for="password">Password:</label>
-                <input type="password" id="password" name="password" required
-                    class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700">
-            </div>
+        <div class="mb-4">
+          <label
+            class="block text-gray-700 text-sm font-medium mb-2"
+            for="username"
+            >Username:</label
+          >
+          <input
+            type="text"
+            id="username"
+            name="username"
+            required
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
+          />
+        </div>
 
-            <button type="submit"
-                class="w-full py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500">
-                Register
-            </button>
+        <div class="mb-6">
+          <label
+            class="block text-gray-700 text-sm font-medium mb-2"
+            for="password"
+            >Password:</label
+          >
+          <input
+            type="password"
+            id="password"
+            name="password"
+            required
+            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
+          />
+        </div>
 
-            <p class="text-center mt-4 text-sm text-gray-600">Already have an account?
-                <a href="{{ url_for('index') }}" class="text-teal-600 hover:text-teal-700">Login here</a>.
-            </p>
-        </form>
+        <button
+          type="submit"
+          class="w-full py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
+        >
+          Register
+        </button>
+
+        <p class="text-center mt-4 text-sm text-gray-600">
+          Already have an account?
+          <a
+            href="{{ url_for('index') }}"
+            class="text-teal-600 hover:text-teal-700"
+            >Login here</a
+          >.
+        </p>
+      </form>
     </div>
-
-</body>
-
+  </body>
 </html>

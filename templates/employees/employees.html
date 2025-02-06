@@ -7,39 +7,6 @@
 <div class="container mx-auto py-8">
   <h2 class="text-2xl font-bold mb-6">Employee List</h2>
 
-  <!-- <div class="flex justify-end align-center mr-4  mb-2 gap-x-2">
-    <form action="{{ url_for('search_employees') }}" method="get" class="flex items-center space-x-2">
-      <input type="text" name="query" placeholder="Search employees..." value="{{ request.args.get('query', '') }}"
-        class="flex-1 px-4 py-2 border rounded-md" />
-      <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-
-        <span class="material-symbols-outlined">
-          search
-        </span>
-      </button>
-    </form>
-
-
-    <button type="button" onclick="printTable()"
-      class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-      <span class="material-symbols-outlined">
-        print
-      </span>
-    </button>
-    <button type="button" onclick="window.location.reload()"
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-      <span class="material-symbols-outlined">
-        autorenew
-      </span>
-    </button>
-    <a href="{{ url_for('add_employee') }}"
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-      <span class="material-symbols-outlined">
-        add_box
-      </span>
-    </a>
-
-  </div> -->
 
   <div class="flex justify-end items-center mr-4 mb-2 gap-x-2">
     <!-- Search Form -->
@@ -137,7 +104,7 @@
 
 
   <div class="overflow-x-auto">
-    <table class="min-w-full bg-white shadow-md rounded-lg">
+    <table id="employee-table" class="min-w-full bg-white shadow-md rounded-lg">
       <thead class="bg-gray-800 text-white">
         <tr>
           <th class="py-2 px-4 text-left">ID</th>
@@ -158,9 +125,9 @@
           <td class="py-2 px-4">${{ employee.salary }}</td>
           <td class="py-2 px-4 text-center">
             <a href="{{ url_for('edit_employee', id=employee.id) }}" class="text-blue-500 hover:underline mr-2">Edit</a>
-
+    
             <a href="{{ url_for('view_employee', id=employee.id) }}" class="text-blue-500 hover:underline mr-2">View</a>
-
+    
             <form class="inline-block text-red-500 hover:underline"
               action="{{ url_for('delete_employee', id=employee.id) }}" method="POST">
               <button type="submit" class="text-red-500 hover:underline"
@@ -173,8 +140,23 @@
         {% endfor %}
       </tbody>
     </table>
+    
   </div>
 </div>
+
+<script>
+  $(document).ready(function() {
+    // Initialize DataTables on the employee table
+    $('#employee-table').DataTable({
+      paging: true,         // Enable pagination
+      searching: true,      // Enable search bar
+      ordering: true,       // Enable column sorting
+      info: true,           // Display information (e.g., "Showing 1 to 10 of 100 entries")
+      autoWidth: false      // Disable auto column width for more control
+    });
+  });
+</script>
+
 </main>
 
 {% endblock %}
