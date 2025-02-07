@@ -1,3 +1,4 @@
+from flask import request, jsonify
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
 import hashlib
@@ -637,6 +638,104 @@ def logout():
 
     flash('You have been logged out successfully.', 'success')
     return redirect(url_for('index'))
+
+
+# @app.route('/change_password', methods=['GET', 'POST'])
+# @login_required  # Ensure the user is logged in before accessing this route
+# def change_password():
+#     if request.method == 'POST':
+#         old_password = request.form['old_password']
+#         new_password = request.form['new_password']
+#         confirm_password = request.form['confirm_password']
+
+#         # Ensure new password and confirm password match
+#         if new_password != confirm_password:
+#             flash("New password and confirmation do not match", 'error')
+#             return render_template('change_password.html')
+
+#         # Hash the old password and check it against the stored password
+#         old_password_hashed = hashlib.sha256(old_password.encode()).hexdigest()
+
+#         with get_db_connection() as conn:
+#             user = conn.execute('''
+#                 SELECT * FROM users WHERE ID = ?
+#             ''', (current_user.id,)).fetchone()
+
+#             if user and user['Password'] == old_password_hashed:
+#                 # Hash the new password and update the database
+#                 new_password_hashed = hashlib.sha256(
+#                     new_password.encode()).hexdigest()
+#                 conn.execute('''
+#                     UPDATE users
+#                     SET Password = ?
+#                     WHERE ID = ?
+#                 ''', (new_password_hashed, current_user.id))
+#                 conn.commit()
+
+#                 flash("Your password has been updated successfully", 'success')
+#                 return redirect(url_for('dashboard'))
+
+#             else:
+#                 flash("Incorrect old password", 'error')
+
+#     return render_template('change_password.html')
+
+@app.route('/change_password', methods=['GET', 'POST'])
+@login_required  # Ensure the user is logged in
+def change_password():
+    if request.method != 'POST':
+        return render_template('change_password.html')
+    old_password = request.form['old_password']
+    new_password = request.form['new_password']
+    confirm_password = request.form['confirm_password']
+
+    # Validate old password
+    old_password_hashed = hashlib.sha256(old_password.encode()).hexdigest()
+
+    with get_db_connection() as conn:
+        user = conn.execute('''
+                SELECT * FROM users WHERE ID = ?
+            ''', (current_user.id,)).fetchone()
+
+        if not user or user['Password'] != old_password_hashed:
+            flash("Old password is incorrect.", 'error')
+            return render_template('change_password.html', old_password_error="Old password is incorrect")
+
+        # Check if new password and confirm password match
+        if new_password != confirm_password:
+            flash("New password and confirm password do not match.", 'error')
+            return render_template('change_password.html', confirm_password_error="New password and confirmation do not match.")
+
+        # Hash the new password and update in database
+        new_password_hashed = hashlib.sha256(
+            new_password.encode()).hexdigest()
+        conn.execute('''
+                UPDATE users
+                SET Password = ?
+                WHERE ID = ?
+            ''', (new_password_hashed, current_user.id))
+        conn.commit()
+
+    flash("Your password has been updated successfully", 'success')
+    return redirect(url_for('dashboard'))
+
+
+@app.route('/validate_old_password', methods=['POST'])
+@login_required  # Ensure the user is logged in
+def validate_old_password():
+    old_password = request.form['old_password']
+    old_password_hashed = hashlib.sha256(old_password.encode()).hexdigest()
+
+    # Check if the old password matches the stored password in the database
+    with get_db_connection() as conn:
+        user = conn.execute('''
+            SELECT * FROM users WHERE ID = ?
+        ''', (current_user.id,)).fetchone()
+
+        if user and user['Password'] == old_password_hashed:
+            return jsonify({'valid': True})
+        else:
+            return jsonify({'valid': False}), 400
 
 
 @app.route('/users/', methods=['GET'])

@@ -1,38 +1,29 @@
-{% extends 'base.html' %}
+{% extends 'base.html' %} {% block title %}Dashboard{% endblock %} {% block
+content %}
+<div class="container mx-auto py-8 px-3">
+  <h1 class="text-3xl font-bold mb-4">Dashboard</h1>
+  <div class="grid grid-cols-3 gap-4">
+    <div class="bg-white rounded shadow p-4">
+      <h2 class="text-lg font-bold mb-2">Total Employees</h2>
+      <p class="text-2xl font-bold">{{ total_employees }}</p>
+    </div>
+    <div class="bg-white rounded shadow p-4">
+      <h2 class="text-lg font-bold mb-2">Average Age</h2>
+      <p class="text-2xl font-bold">{{ average_age }}</p>
+    </div>
+    <div class="bg-white rounded shadow p-4">
+      <h2 class="text-lg font-bold mb-2">Total Salary</h2>
+      <p class="text-2xl font-bold">${{ total_salary }}</p>
+    </div>
 
-{% block title %}Dashboard{% endblock %}
-
-{% block content %}
-<h1 class="text-3xl font-bold mb-4">Dashboard</h1>
-<div class="grid grid-cols-3 gap-4">
-  <div class="bg-white rounded shadow p-4">
-    <h2 class="text-lg font-bold mb-2">Total Employees</h2>
-    <p class="text-2xl font-bold">{{ total_employees }}</p>
+    <h1>Welcome, {{ current_user.username }}!</h1>
+    <p>Username: {{ current_user.username }}</p>
+    <p>Email: {{ current_user.email }}</p>
+    <p>
+      Is Admin: {% if current_user.is_admin == 1 %} Yes {% else %} No {% endif
+      %}
+    </p>
+    <p>Branch: {{ current_user.branch }}</p>
   </div>
-  <div class="bg-white rounded shadow p-4">
-    <h2 class="text-lg font-bold mb-2">Average Age</h2>
-    <p class="text-2xl font-bold">{{ average_age }}</p>
-  </div>
-  <div class="bg-white rounded shadow p-4">
-    <h2 class="text-lg font-bold mb-2">Total Salary</h2>
-    <p class="text-2xl font-bold">${{ total_salary }}</p>
-  </div>
-
-
-  <h1>Welcome, {{ current_user.username }}!</h1>
-  <p>Username: {{ current_user.username }}</p>
-  <p>Email: {{ current_user.email }}</p>
-  <p>Is Admin: {% if current_user.is_admin == 1 %}
-    Yes
-    {% else %}
-    No
-    {% endif %}
-  </p>
-  <p>Branch: {{ current_user.branch }}</p>
-
-
-
-
-
 </div>
 {% endblock %}
