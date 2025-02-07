@@ -1,0 +1,6 @@
+Flask
+Flask-Login
+Werkzeug
+pyotp
+requests
+sqlite3 

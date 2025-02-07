@@ -23,3 +23,7 @@ python -m pip install flask-wtf
 
 File
 python3 install flask werkzeug
+
+pip install -r requirements.txt
+pip install -r requirements.txt
+pip freeze > requirements.txt

@@ -5,148 +5,24 @@ import os
 import pyotp
 import requests
 import glob
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
+from config import Config
+from models.models import User
 
 app = Flask(__name__)
-app.secret_key = "Suong_Sambo_Admin_System@#$9999_Key546444"
-app.config['SESSION_COOKIE_NAME'] = 'Suong_Sambo_Admin_System@#$9999'
+app.config.from_object(Config)
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-
-# Set the folder for image uploads
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'doc', 'docx'}
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max upload size
-
-# Telegram Bot Credentials
-TELEGRAM_BOT_TOKEN = "7464737681:AAHV0YACIHFxLfE3og4UOdumKdISeTsldqc"
-TELEGRAM_CHAT_ID = "822586998"  # Replace with user's chat ID
-
-
-DATABASE = os.path.join(os.path.dirname(
-    os.path.abspath(__file__)), 'database/hr_management.db')
 # Initialize the Flask-Login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
-
 
 # Setup database connection
 
 
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-# User class to integrate with Flask-Login
-
-
-class User(UserMixin):
-    def __init__(self, id, username, password, email, branch=None, is_admin=False):
-        self.id = id
-        self.username = username
-        self.password = password
-        self.email = email
-        self.branch = branch
-        self.is_admin = is_admin
-
-
-# Function to send OTP via Telegram
-def send_telegram_message(message):
-    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    payload = {"chat_id": TELEGRAM_CHAT_ID, "text": message}
-    response = requests.post(url, data=payload)
-    print(response.status_code, response.text)  # Debugging: Check API response
-    if response.status_code == 200:
-        print("\007")  # Alert sound
-        return True
-    else:
-        return False
-
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-        mobile1 = request.form['mobile1']
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
-        # Insert user data into the database
-        with get_db_connection() as conn:
-            try:
-                conn.execute('''
-                    INSERT INTO users (UserName, Password, Email, Mobile1)
-                    VALUES (?, ?, ?, ?)
-                ''', (username, hashed_password, email, mobile1))
-                conn.commit()
-
-                # Generate OTP and store it in session
-                session["otp"] = pyotp.TOTP(pyotp.random_base32()).now()
-
-                # Send OTP and mobile number to the user's Telegram account
-                otp_message = f"Your verification code is: {session['otp']}\nYour mobile number: {mobile1}"
-                if send_telegram_message(otp_message):
-                    flash(
-                        "Registration successful! Check your Telegram for OTP.", "info")
-                else:
-                    flash(
-                        "Failed to send OTP via Telegram. Please try again.", "danger")
-
-                # Redirect to OTP verification page
-                return redirect(url_for('verify_otp'))
-
-            except sqlite3.IntegrityError:
-                flash("Username or Email already exists. Try again.", "danger")
-                return render_template('register.html')
-
-    return render_template('register.html')
-
-# OTP verification route
-
-
-@app.route("/verify", methods=["GET", "POST"])
-def verify_otp():
-    if request.method == "POST":
-        user_otp = request.form.get("otp")  # OTP entered by the user
-
-        # Check if OTP entered by user matches the one in the session
-        if user_otp and session.get("otp") == user_otp:
-            flash("Account verified successfully!", "success")
-            # Redirect to dashboard or other page
-            return redirect(url_for("dashboard"))
-        else:
-            flash("Invalid OTP! Try again.", "danger")
-
-    return render_template("verify.html")
-
-
-# Test route for Telegram (for debugging)
-@app.route("/test_telegram")
-def test_telegram():
-    test_message = "This is a test message from Flask!"
-    try:
-        send_telegram_message(test_message)
-        return "Test message sent successfully!"
-    except Exception as e:
-        return f"Failed to send test message: {e}"
-
-
-@login_manager.user_loader
-def load_user(user_id):
-    with get_db_connection() as conn:
-        user_data = conn.execute(
-            'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
-        if user_data:
-            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'], branch=user_data['Branch'], is_admin=user_data['IsAdmin'])
-        return None
-
-
-def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(app.config['DATABASE'])
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -195,26 +71,26 @@ def init_db():
         ''')
         conn.execute('''
             CREATE TABLE IF NOT EXISTS branches (
-                ID INTEGER PRIMARY KEY AUTOINCREMENT,        
-                CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, 
-                UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP, 
-                Status TEXT CHECK(Status IN ('Active', 'Inactive')) DEFAULT 'Active',                         
-                CreateDate DATETIME,                          
-                StartDate DATETIME,                           
-                Description TEXT,                             
-                Branch TEXT NOT NULL,                         
-                BranchManagerName TEXT,                       
-                ContactNumber TEXT,                           
-                Address TEXT,                                 
-                DistrictProvince TEXT,                        
-                RegisterDate DATETIME,                        
-                LocalDescription TEXT,                        
-                LocalAddress TEXT,                            
-                LocalBranchManagerName TEXT,                  
-                BranchProjectId TEXT,                         
-                CapitalInjectionId TEXT,                      
-                GroupID TEXT,                                 
-                MemberID TEXT                                                         
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                Status TEXT CHECK(Status IN ('Active', 'Inactive')) DEFAULT 'Active',
+                CreateDate DATETIME,
+                StartDate DATETIME,
+                Description TEXT,
+                Branch TEXT NOT NULL,
+                BranchManagerName TEXT,
+                ContactNumber TEXT,
+                Address TEXT,
+                DistrictProvince TEXT,
+                RegisterDate DATETIME,
+                LocalDescription TEXT,
+                LocalAddress TEXT,
+                LocalBranchManagerName TEXT,
+                BranchProjectId TEXT,
+                CapitalInjectionId TEXT,
+                GroupID TEXT,
+                MemberID TEXT
             )
         ''')
 
@@ -227,7 +103,144 @@ def init_db():
                 PRIMARY KEY (user_id, branch_id)
             )
         ''')
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS login_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                ip_address TEXT NOT NULL,
+                city TEXT,
+                region TEXT,
+                country TEXT,
+                user_agent TEXT,
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (ID)
+            )
+        ''')
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS online_users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                login_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                last_active_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (ID)
+            )
+        ''')
         conn.commit()
+
+# Function to send OTP via Telegram
+
+
+@app.before_request
+def update_last_active_time():
+    if current_user.is_authenticated:
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE online_users
+                SET last_active_time = CURRENT_TIMESTAMP
+                WHERE user_id = ?
+            ''', (current_user.id,))
+            conn.commit()
+
+
+def send_telegram_message(message):
+    url = f"https://api.telegram.org/bot{app.config['TELEGRAM_BOT_TOKEN']}/sendMessage"
+    payload = {"chat_id": app.config['TELEGRAM_CHAT_ID'], "text": message}
+    response = requests.post(url, data=payload)
+    print(response.status_code, response.text)  # Debugging: Check API response
+    if response.status_code != 200:
+        return False
+    print("\007")  # Alert sound
+    return True
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        email = request.form['email']
+        mobile1 = request.form['mobile1']
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+        # Check if username or email already exists in the database
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
+            existing_user = cursor.fetchone()
+
+            if existing_user:
+                flash('Username or Email already exists. Try again.', 'danger')
+                return render_template('register.html')
+
+        # Insert user data into the database
+        with get_db_connection() as conn:
+            try:
+                conn.execute('''
+                    INSERT INTO users (UserName, Password, Email, Mobile1)
+                    VALUES (?, ?, ?, ?)
+                ''', (username, hashed_password, email, mobile1))
+                conn.commit()
+
+                # Generate OTP and store it in session
+                session["otp"] = pyotp.TOTP(pyotp.random_base32()).now()
+
+                # Send OTP and mobile number to the user's Telegram account
+                otp_message = f"Verification Code: {session['otp']}\nYour mobile number: {mobile1}\nYour email: {email}"
+                if send_telegram_message(otp_message):
+                    flash(
+                        "Registration successful! Check your Telegram for OTP.", "info")
+                else:
+                    flash(
+                        "Failed to send OTP via Telegram. Please try again.", "danger")
+
+                # Redirect to OTP verification page
+                return redirect(url_for('verify_otp'))
+
+            except sqlite3.IntegrityError:
+                flash("Username or Email already exists. Try again.", "danger")
+                return render_template('register.html')
+
+    return render_template('register.html')
+
+# OTP verification route
+
+
+@app.route("/verify", methods=["GET", "POST"])
+def verify_otp():
+    if request.method == "POST":
+        user_otp = request.form.get("otp")  # OTP entered by the user
+        # Check if OTP entered by user matches the one in the session
+        if user_otp and session.get("otp") == user_otp:
+            flash("Account verified successfully!", "success")
+            # Redirect to dashboard or other page
+            return redirect(url_for("dashboard"))
+        else:
+            flash("Invalid OTP! Try again.", "danger")
+    return render_template("verify.html")
+
+
+# Test route for Telegram (for debugging)
+@app.route("/test_telegram")
+def test_telegram():
+    test_message = "This is a test message from Flask!"
+    try:
+        send_telegram_message(test_message)
+        return "Test message sent successfully!"
+    except Exception as e:
+        return f"Failed to send test message: {e}"
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    with get_db_connection() as conn:
+        user_data = conn.execute(
+            'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
+        if user_data:
+            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'], branch=user_data['Branch'], is_admin=user_data['IsAdmin'])
+        return None
 
 
 @login_manager.unauthorized_handler
@@ -238,31 +251,147 @@ def unauthorized():
 # Example uploaded_file route for displaying the uploaded image
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
+# @app.route('/file', methods=['GET', 'POST'])
+# @login_required
+# def upload_image():
+#     if request.method == 'POST':
+
+#         if 'file' not in request.files:
+#             return 'No file part', 400
+
+#         file = request.files['file']
+
+#         if file.filename == '':
+#             return 'No selected file', 400
+
+#         if file and allowed_file(file.filename):
+#             filename = f"{current_user.id}_{current_user.username}_{current_user.branch}_{secure_filename(file.filename)}"
+#             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+#             return redirect(url_for('list_user_files', filename=filename))
+
+#     return render_template('/uploads/uploaded_file.html', current_user=current_user)
+
+
+# # # Search File
+# @app.route('/search_files', methods=['GET'])
+# @login_required
+# def search_files():
+#     query = request.args.get('query', '').lower()
+
+#     files = []
+#     if query:
+#         # Construct the search pattern
+#         search_pattern = os.path.join(
+#             app.config['UPLOAD_FOLDER'],
+#             f"{current_user.id}_{current_user.username}_{current_user.branch}*{query}*"
+#         )
+#         # Use glob to find files matching the pattern
+#         files = glob.glob(search_pattern)
+#         # Extract filenames from the full paths
+#         files = [os.path.basename(file) for file in files]
+
+#     return render_template('/uploads/list_files.html', files=files, query=query, current_user=current_user)
+
+
+# @app.route('/delete_file/<filename>', methods=['POST'])
+# @login_required
+# def delete_file(filename):
+#     # Construct the full path of the file
+#     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+#     # Check if the file exists
+#     if os.path.exists(file_path):
+#         os.remove(file_path)  # Delete the file
+#         flash('File deleted successfully', 'success')
+#     else:
+#         flash('File not found', 'error')
+
+#     # Redirect to the file listing page
+#     return redirect(url_for('list_user_files'))
+
+
+# @app.route('/files', methods=['GET'])
+# @login_required
+# def list_user_files():
+#     # Get the directory of the uploaded files
+#     upload_folder = app.config['UPLOAD_FOLDER']
+
+#     # Get the user's file prefix based on their ID, username, and branch
+#     file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
+
+#     # List all files in the upload folder
+#     files = os.listdir(upload_folder)
+
+#     # Filter the files that match the pattern
+#     user_files = [file for file in files if file.startswith(file_prefix)]
+
+#     # Render a template to display the files (or return as a JSON response)
+#     return render_template('/uploads/list_files.html', files=user_files, current_user=current_user)
+
+
+# @app.route('/upload_files', methods=['GET', 'POST'])
+# @login_required
+# def upload_files():
+#     if request.method != 'POST':
+#         return render_template('/uploads/upload_files.html', current_user=current_user)
+#     if 'files' not in request.files:
+#         return 'No file part', 400
+
+#     files = request.files.getlist('files')
+#     if not files:
+#         return 'No selected files', 400
+
+#     upload_folder = app.config['UPLOAD_FOLDER']
+#     file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
+
+#     for file in files:
+#         if file.filename == '':
+#             continue
+#         if file and allowed_file(file.filename):
+#             filename = f"{file_prefix}_{secure_filename(file.filename)}"
+#             file.save(os.path.join(upload_folder, filename))
+
+#     return redirect(url_for('list_user_files'))
+
+
+# @app.route('/uploads/<filename>')
+# def uploaded_file(filename):
+#     return f'Image uploaded successfully: <img src="/static/uploads/{filename}" alt="uploaded image">'
+
+
+# File upload route with Flash messages
 @app.route('/file', methods=['GET', 'POST'])
 @login_required
 def upload_image():
     if request.method == 'POST':
-
         if 'file' not in request.files:
-            return 'No file part', 400
+            flash('No file part', 'error')  # Flash error message
+            return redirect(request.url)
 
         file = request.files['file']
 
         if file.filename == '':
-            return 'No selected file', 400
+            flash('No selected file', 'error')  # Flash error message
+            return redirect(request.url)
 
         if file and allowed_file(file.filename):
             filename = f"{current_user.id}_{current_user.username}_{current_user.branch}_{secure_filename(file.filename)}"
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            # Flash success message
+            flash('File uploaded successfully', 'success')
             return redirect(url_for('list_user_files', filename=filename))
+        else:
+            # Flash error for invalid file type
+            flash('Invalid file type. Only jpg, png, and gif are allowed.', 'error')
+            return redirect(request.url)
 
     return render_template('/uploads/uploaded_file.html', current_user=current_user)
 
 
-# # Search File
+# Search File route with Flash messages
 @app.route('/search_files', methods=['GET'])
 @login_required
 def search_files():
@@ -270,81 +399,77 @@ def search_files():
 
     files = []
     if query:
-        # Construct the search pattern
         search_pattern = os.path.join(
             app.config['UPLOAD_FOLDER'],
             f"{current_user.id}_{current_user.username}_{current_user.branch}*{query}*"
         )
-        # Use glob to find files matching the pattern
         files = glob.glob(search_pattern)
-        # Extract filenames from the full paths
         files = [os.path.basename(file) for file in files]
 
     return render_template('/uploads/list_files.html', files=files, query=query, current_user=current_user)
 
 
+# Delete file route with Flash messages
 @app.route('/delete_file/<filename>', methods=['POST'])
 @login_required
 def delete_file(filename):
-    # Construct the full path of the file
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 
-    # Check if the file exists
     if os.path.exists(file_path):
-        os.remove(file_path)  # Delete the file
-        flash('File deleted successfully', 'success')
+        os.remove(file_path)
+        flash('File deleted successfully', 'success')  # Flash success message
     else:
-        flash('File not found', 'error')
+        flash('File not found', 'error')  # Flash error message
 
-    # Redirect to the file listing page
     return redirect(url_for('list_user_files'))
 
 
+# List user files route with Flash messages
 @app.route('/files', methods=['GET'])
 @login_required
 def list_user_files():
-    # Get the directory of the uploaded files
     upload_folder = app.config['UPLOAD_FOLDER']
-
-    # Get the user's file prefix based on their ID, username, and branch
     file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
-
-    # List all files in the upload folder
     files = os.listdir(upload_folder)
-
-    # Filter the files that match the pattern
     user_files = [file for file in files if file.startswith(file_prefix)]
-
-    # Render a template to display the files (or return as a JSON response)
     return render_template('/uploads/list_files.html', files=user_files, current_user=current_user)
 
 
+# Multiple file upload route with Flash messages
 @app.route('/upload_files', methods=['GET', 'POST'])
 @login_required
 def upload_files():
-    if request.method == 'POST':
-        if 'files' not in request.files:
-            return 'No file part', 400
+    if request.method != 'POST':
+        return render_template('/uploads/upload_files.html', current_user=current_user)
+    if 'files' not in request.files:
+        flash('No file part', 'error')  # Flash error message
+        return redirect(request.url)
 
-        files = request.files.getlist('files')
-        if not files:
-            return 'No selected files', 400
+    files = request.files.getlist('files')
+    if not files:
+        flash('No selected files', 'error')  # Flash error message
+        return redirect(request.url)
 
-        upload_folder = app.config['UPLOAD_FOLDER']
-        file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
+    upload_folder = app.config['UPLOAD_FOLDER']
+    file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
 
-        for file in files:
-            if file.filename == '':
-                continue
-            if file and allowed_file(file.filename):
-                filename = f"{file_prefix}_{secure_filename(file.filename)}"
-                file.save(os.path.join(upload_folder, filename))
+    for file in files:
+        if file.filename == '':
+            continue
+        if file and allowed_file(file.filename):
+            filename = f"{file_prefix}_{secure_filename(file.filename)}"
+            file.save(os.path.join(upload_folder, filename))
+        else:
+            flash(
+                f"Invalid file type: {file.filename}. Only jpg, png, and gif are allowed.", 'error')
+            # Flash error message and return on failure
+            return redirect(request.url)
 
-        return redirect(url_for('list_user_files'))
+    flash('Files uploaded successfully', 'success')  # Flash success message
+    return redirect(url_for('list_user_files'))
 
-    return render_template('/uploads/upload_files.html', current_user=current_user)
 
-
+# Route to view uploaded file
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return f'Image uploaded successfully: <img src="/static/uploads/{filename}" alt="uploaded image">'
@@ -355,27 +480,92 @@ def index():
     return render_template('login.html')
 
 
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         email = request.form['email']
-#         mobile1 = request.form['mobile1']
-#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-#         with get_db_connection() as conn:
-#             try:
-#                 conn.execute('''
-#                     INSERT INTO users (UserName, Password, Email, Mobile1)
-#                     VALUES (?, ?, ?, ?)
-#                 ''', (username, hashed_password, email,  mobile1))
-#                 conn.commit()
-#                 return redirect(url_for('index'))
-#             except sqlite3.IntegrityError:
-#                 return render_template('username_or_email_exists.html')
-#                 #  "Username or Email already exists. Try again."
+# Function to get geolocation based on IP address (optional)
+def get_geolocation(ip):
+    # Replace with your geolocation API (e.g., ipstack, ipinfo.io, etc.)
+    api_url = f"http://ipinfo.io/{ip}/json"  # Example API (ipinfo.io)
+    response = requests.get(api_url)
+    data = response.json()
+    city = data.get('city', 'Unknown')
+    region = data.get('region', 'Unknown')
+    return city, region, data.get('country', 'Unknown')
 
-#     return render_template('register.html')
+# @app.route('/login', methods=['POST'])
+# def login():
+#     username = request.form['username']
+#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
+
+#     with get_db_connection() as conn:
+#         user = conn.execute('''
+#             SELECT * FROM users WHERE UserName = ? AND Password = ?
+#         ''', (username, password)).fetchone()
+
+#     if user:
+#         user_obj = User(id=user['ID'], username=user['UserName'],
+#                         password=user['Password'], email=user['Email'])
+#         login_user(user_obj)  # Store the user session with Flask-Login
+#         return redirect(url_for('dashboard'))
+
+#     else:
+#         return render_template('404.html'), 404
+
+
+@app.route('/online_users', methods=['GET'])
+# @login_required
+def online_users():
+    # Define the timeout threshold (e.g., 15 minutes)
+    timeout_threshold = 15  # minutes
+
+    with get_db_connection() as conn:
+        online_users = conn.execute('''
+            SELECT u.UserName, u.Email, ou.last_active_time
+            FROM online_users ou
+            JOIN users u ON ou.user_id = u.ID
+            WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
+        ''', (timeout_threshold,)).fetchall()
+
+    return render_template('online_users.html', online_users=online_users)
+
+
+# @app.route('/login', methods=['POST'])
+# def login():
+#     username = request.form['username']
+#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
+
+#     # Get the user's IP address and user agent (browser/device info)
+#     ip_address = request.remote_addr
+#     user_agent = request.user_agent.string
+
+#     # Optionally get the geolocation (City, Region, Country) based on IP address
+#     city, region, country = get_geolocation(ip_address)
+
+#     with get_db_connection() as conn:
+#         user = conn.execute('''
+#             SELECT * FROM users WHERE UserName = ? AND Password = ?
+#         ''', (username, password)).fetchone()
+
+#     if user:
+#         # Log the login event (store user location and device info)
+#         # You can log this information into the database, or print/log it
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO login_logs (user_id, ip_address, city, region, country, user_agent)
+#                 VALUES (?, ?, ?, ?, ?, ?)
+#             ''', (user['ID'], ip_address, city, region, country, user_agent))
+#             conn.commit()
+
+#         # Create the user object and log the user in with Flask-Login
+#         user_obj = User(id=user['ID'], username=user['UserName'],
+#                         password=user['Password'], email=user['Email'])
+#         login_user(user_obj)  # Store the user session with Flask-Login
+
+#         flash(
+#             f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
+#         return redirect(url_for('dashboard'))
+
+#     else:
+#         flash("Invalid username or password", 'error')
+#         return render_template('404.html'), 404
 
 
 @app.route('/login', methods=['POST'])
@@ -383,24 +573,69 @@ def login():
     username = request.form['username']
     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
 
+    # Get the user's IP address and user agent (browser/device info)
+    ip_address = request.remote_addr
+    user_agent = request.user_agent.string
+
+    # Optionally get the geolocation (City, Region, Country) based on IP address
+    city, region, country = get_geolocation(ip_address)
+
     with get_db_connection() as conn:
         user = conn.execute('''
             SELECT * FROM users WHERE UserName = ? AND Password = ?
         ''', (username, password)).fetchone()
 
     if user:
+        # Log the login event (store user location and device info)
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO login_logs (user_id, ip_address, city, region, country, user_agent)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (user['ID'], ip_address, city, region, country, user_agent))
+
+            # Add user to online_users table or update if already exists
+            conn.execute('''
+                INSERT OR REPLACE INTO online_users (user_id, login_time, last_active_time)
+                VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+            ''', (user['ID'],))
+            conn.commit()
+
+        # Create the user object and log the user in with Flask-Login
         user_obj = User(id=user['ID'], username=user['UserName'],
                         password=user['Password'], email=user['Email'])
         login_user(user_obj)  # Store the user session with Flask-Login
+
+        flash(
+            f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
         return redirect(url_for('dashboard'))
 
     else:
+        flash("Invalid username or password", 'error')
         return render_template('404.html'), 404
 
 
+# @app.route('/logout', methods=['POST'])
+# def logout():
+#     logout_user()
+#     return redirect(url_for('index'))
+
+
 @app.route('/logout', methods=['POST'])
+# @login_required
 def logout():
+    # Remove the user from the online_users table if logged in
+    if current_user.is_authenticated:
+        with get_db_connection() as conn:
+            conn.execute('''
+                DELETE FROM online_users WHERE user_id = ?
+            ''', (current_user.id,))
+            conn.commit()
+        # Remove the user from the online_users table
+
+    # Log out the user using Flask-Login
     logout_user()
+
+    flash('You have been logged out successfully.', 'success')
     return redirect(url_for('index'))
 
 
@@ -414,6 +649,10 @@ def users():
 
 @app.route('/users/add', methods=['GET', 'POST'])
 def add_user():
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -466,6 +705,10 @@ def add_user():
 @app.route('/users/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_user(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
     with get_db_connection() as conn:
         user = conn.execute(
             "SELECT * FROM users WHERE ID = ?", (id,)).fetchone()
@@ -495,6 +738,10 @@ def edit_user(id):
 @app.route('/users/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_user(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
     with get_db_connection() as conn:
         conn.execute("DELETE FROM users WHERE ID = ?", (id,))
         conn.commit()
@@ -507,22 +754,44 @@ def dashboard():
     return render_template('dashboard.html', username=current_user.username)
 
 
+# @app.route('/users', methods=['GET'])
+# @login_required
+# def list_users():
+#     if current_user.is_admin == 0:
+#         flash("You don't have permission to view this page.", "danger")
+#         return redirect(url_for('dashboard'))
+#     with get_db_connection() as conn:
+#         users = conn.execute("SELECT * FROM users").fetchall()
+#     return render_template('/users/users.html', users=users)
+
 @app.route('/users', methods=['GET'])
 @login_required
 def list_users():
-    with get_db_connection() as conn:
-        users = conn.execute("SELECT * FROM users").fetchall()
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
 
-    return render_template('/users/users.html', users=users)
+    with get_db_connection() as conn:
+        users = conn.execute("SELECT * FROM users ORDER BY ID DESC").fetchall()
+        last_user = users[0] if users else None
+        notifications = [
+            {"title": "New User Added",
+                "message": f"User {last_user['username']} has been added."} if last_user else None
+        ]
+
+    return render_template('/users/users.html', users=users, notifications=notifications)
 
 
 @app.route('/users/<int:id>')
 @login_required
 def view_user(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
     with get_db_connection() as conn:
         user = conn.execute(
             "SELECT * FROM users WHERE ID = ?", (id,)).fetchone()
-
     if user:
         return render_template('/users/view_user.html', user=user)
     else:
@@ -532,13 +801,14 @@ def view_user(id):
 @app.route('/users/search', methods=['GET'])
 @login_required
 def search_users():
-
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
     query = request.args.get('query', '')
-
     with get_db_connection() as conn:
         users = conn.execute(
-            "SELECT * FROM users WHERE UserName LIKE ?", ('%' + query + '%',)).fetchall()
-
+            "SELECT * FROM users WHERE UserName LIKE ?", (f'%{query}%',)
+        ).fetchall()
     return render_template('/users/users.html', users=users)
 
 
@@ -546,9 +816,14 @@ def search_users():
 @login_required
 def list_employees():
     with get_db_connection() as conn:
-        employees = conn.execute("SELECT * FROM employees").fetchall()
-
-    return render_template('/employees/employees.html', employees=employees)
+        employees = conn.execute(
+            "SELECT * FROM employees ORDER BY id DESC").fetchall()
+        last_employee = employees[0] if employees else None
+        notifications_employees = [
+            {"title": "New Employee Added",
+             "message": f"Employee {last_employee['name']} has been added."} if last_employee else None
+        ]
+    return render_template('/employees/employees.html', employees=employees, notifications_employees=notifications_employees)
 
 
 @app.route('/employees/search', methods=['GET'])
@@ -559,7 +834,8 @@ def search_employees():
 
     with get_db_connection() as conn:
         employees = conn.execute(
-            "SELECT * FROM employees WHERE name LIKE ?", ('%' + query + '%',)).fetchall()
+            "SELECT * FROM employees WHERE name LIKE ?", (f'%{query}%',)
+        ).fetchall()
 
     return render_template('/employees/employees.html', employees=employees)
 
@@ -573,49 +849,39 @@ def add_employee():
         age = request.form['age']
         department = request.form['department']
         salary = request.form['salary']
-
         with get_db_connection() as conn:
             conn.execute("INSERT INTO employees (name, age, department, salary) VALUES (?, ?, ?, ?)",
                          (name, age, department, salary))
             conn.commit()
-
         return redirect(url_for('list_employees'))
-
     return render_template('/employees/add_employee.html')
 
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_employee(id):
-
     with get_db_connection() as conn:
         employee = conn.execute(
             "SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
-
     if request.method == 'POST':
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
         salary = request.form['salary']
-
         with get_db_connection() as conn:
             conn.execute("UPDATE employees SET name = ?, age = ?, department = ?, salary = ? WHERE id = ?",
                          (name, age, department, salary, id))
             conn.commit()
-
         return redirect(url_for('list_employees'))
-
     return render_template('/employees/edit_employee.html', employee=employee)
 
 
 @app.route('/employees/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_employee(id):
-
     with get_db_connection() as conn:
         conn.execute("DELETE FROM employees WHERE id = ?", (id,))
         conn.commit()
-
     return redirect(url_for('list_employees'))
 
 
@@ -625,7 +891,6 @@ def view_employee(id):
     with get_db_connection() as conn:
         employee = conn.execute(
             "SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
-
     if employee:
         return render_template('/employees/view_employee.html', employee=employee)
     else:
@@ -639,8 +904,6 @@ def list_branches():
     branches = conn.execute('SELECT * FROM branches').fetchall()
     conn.close()
     return render_template('/branches/branches.html', branches=branches)
-
-# Route to add a new branch
 
 
 @app.route('/branches/add', methods=['GET', 'POST'])
@@ -666,7 +929,6 @@ def add_branch():
                           ))
             conn.commit()
         return redirect(url_for('list_branches'))
-
     return render_template('/branches/add_branch.html')
 
 # Route to update a branch
@@ -675,11 +937,9 @@ def add_branch():
 @app.route('/branches/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_branch(id):
-
     conn = get_db_connection()
     branch = conn.execute(
         'SELECT * FROM branches WHERE ID = ?', (id,)).fetchone()
-
     if request.method == 'POST':
         status = request.form['status']
         branch_manager = request.form['branch_manager']
@@ -687,7 +947,6 @@ def edit_branch(id):
         description = request.form['description']
         branch_name = request.form['branch']
         contact_number = request.form['contact_number']
-
         conn.execute('''
             UPDATE branches 
             SET Status = ?, BranchManagerName = ?, Address = ?, Description = ?, Branch = ?, ContactNumber = ?, UpdatedAt = CURRENT_TIMESTAMP
@@ -718,7 +977,6 @@ def view_branch(id):
     with get_db_connection() as conn:
         branch = conn.execute(
             "SELECT * FROM branches WHERE ID = ?", (id,)).fetchone()
-
     if branch:
         return render_template('/branches/view_branch.html', branch=branch)
     else:
@@ -728,13 +986,11 @@ def view_branch(id):
 @app.route('/branches/search', methods=['GET'])
 @login_required
 def search_branches():
-
     query = request.args.get('query', '')
-
     with get_db_connection() as conn:
         branches = conn.execute(
-            "SELECT * FROM branches WHERE Branch LIKE ?", ('%' + query + '%',)).fetchall()
-
+            "SELECT * FROM branches WHERE Branch LIKE ?", (f'%{query}%',)
+        ).fetchall()
     return render_template('/branches/branches.html', branches=branches)
 
 

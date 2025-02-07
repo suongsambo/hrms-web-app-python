@@ -17,7 +17,7 @@
     <!-- DataTables JS (Add before closing </body> tag) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-
+    
 
     <style>
         #user-table {
@@ -39,32 +39,110 @@
         #user-table td:last-child {
           box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
         }
-
-
-
-         
-
       </style>
 </head>
 
-<header class="bg-gray-800 text-white p-4">
+
+
+<header class="bg-gray-800 text-white p-1">
     <div class="container mx-auto flex justify-between items-center">
         <a href="/" class="flex items-center gap-x-2">
             <img src="/static/images/logo.png" alt="Company Logo" class="h-8 w-auto" />
             <span class="text-2xl font-semibold">Company</span>
         </a>
         <div class="flex space-x-4 items-center">
-            <form action="{{ url_for('logout') }}" method="post"
-                class="block py-2 px-4 text-sm text-gray-white hover:bg-gray-200 flex items-center gap-x-2">
-                <span class="material-symbols-outlined">logout</span>
-                <button type="submit" class="w-full text-left"
-                    onclick="return confirm('Are you sure you want to logout?');">
-                    Logout
+            <!-- Notifications Section -->
+            <div class="relative top-1">
+                <button class="text-white flex items-center gap-x-2 notification-button hover:bg-gray-700 bg-gray-600 rounded-full p-2">
+                    <span class="material-symbols-outlined">notifications_active</span>
+                    <span class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {{ notifications_employees|length + notifications|length  }}
+                    </span> <!-- Notification count -->
+                </button>
+                <!-- Dropdown for Notifications -->
+                <div class="absolute right-0 mt-2 w-64 bg-white text-black rounded-lg shadow-lg hidden notification-dropdown max-h-64 overflow-y-auto">
+                    <div class="bg-gray-200 p-2 border-b">
+                        <p class="text-sm text-gray-500">Notifications</p>
+                    </div>
+                    <ul>
+                        {% for notification in notifications %}
+                        <li class="p-2 border-b hover:bg-gray-100">
+                            <span class="font-semibold">{{ notification.title }}</span>
+                            <p class="text-sm text-gray-500">{{ notification.message }}</p>
+                        </li>
+                        {% else %}
+                        <li class="p-2">
+                            <p class="text-sm text-gray-500">No notifications available.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                 
+                    <ul>
+                        {% for notifications_employee in  notifications_employees %}
+                        <li class="p-2 border-b hover:bg-gray-100">
+                            <span class="font-semibold">{{ notifications_employee.title }}</span>
+                            <p class="text-sm text-gray-500">{{ notifications_employee.message }}</p>
+                        </li>
+                        {% else %}
+                        <li class="p-2">
+                            <p class="text-sm text-gray-500">No notifications available.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    
+                   
+                </div>
+            </div>
+
+            <!-- Logout Form -->
+            <form action="{{ url_for('logout') }}" method="post" class="block py-2 px-4 text-sm text-gray-white flex items-center gap-x-2">
+                <!-- Custom logout button with Tailwind CSS and icon -->
+                <button type="submit" class="flex items-center justify-between w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none transition duration-300 ease-in-out" id="logoutButton">
+                    <span class="material-symbols-outlined text-lg">logout</span>
+                    <span class="ml-2 font-semibold">Logout</span>
                 </button>
             </form>
+            
+            
         </div>
     </div>
 </header>
+
+
+
+<script>
+    // Get elements for notification button and dropdown
+    const notificationButton = document.querySelector('.notification-button');
+    const notificationDropdown = document.querySelector('.notification-dropdown');
+    
+    // Toggle notification dropdown visibility when clicked
+    notificationButton.addEventListener('click', () => {
+        notificationDropdown.classList.toggle('hidden');
+    });
+
+    // Optionally, you can close the notification dropdown if clicking outside
+    document.addEventListener('click', (event) => {
+        if (!notificationButton.contains(event.target) && !notificationDropdown.contains(event.target)) {
+            notificationDropdown.classList.add('hidden');
+        }
+    });
+
+    $(document).ready(function() {
+        $('#logoutButton').click(function(event) {
+            event.preventDefault();  // Prevent the form from submitting immediately
+            // Custom confirmation message
+            var userConfirmed = confirm("Are you sure you want to logout?\nYou will be redirected to the login page.");
+            if (userConfirmed) {
+                // Submit the form if user confirms
+                $(this).closest('form').submit();
+            }
+        });
+    });
+</script>
+
+
 
 <body class="flex flex-col h-[calc(100vh-300px)]">
     <!-- Sidebar -->
@@ -371,8 +449,8 @@
             </ul>
         </div>
         <!-- Main Content -->
-        <div class="flex-1 p-6">
-            <main>{% block content %} {% endblock %}</main>
+        <div class="flex-1 p-0 max-w-[calc(100vw-200px)] bg-red-">
+            <main>{% block content %}{% endblock %}</main>
         </div>
     </div>
 
