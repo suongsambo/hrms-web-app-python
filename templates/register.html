@@ -5,6 +5,11 @@
     <title>Register</title>
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <!-- Include Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
   </head>
 
   <body class="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500">
@@ -12,7 +17,7 @@
       <form
         method="post"
         action="{{ url_for('register') }}"
-        class="bg-white shadow-lg rounded-lg p-8 max-w-md mx-auto space-y-6"
+        class="bg-white shadow-lg rounded-lg p-7 max-w-3xl mx-auto space-y-3"
       >
         <h2 class="text-3xl font-semibold text-center text-gray-800">
           Register
@@ -24,71 +29,100 @@
         </div>
         {% endif %} {% endwith %}
 
-        <div class="mb-4">
-          <label
-            class="block text-gray-700 text-sm font-medium mb-2"
-            for="email"
-            >Email:</label
-          >
-          <input
-            type="email"
-            id="email"
-            name="email"
-            required
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
-          />
-        </div>
+        <!-- Grid Layout with Two Columns -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <!-- Email Field with Icon -->
+          <div class="mb-4">
+            <label
+              class="block text-gray-700 text-sm font-medium mb-2"
+              for="email"
+              >Email:</label
+            >
+            <div class="relative">
+              <input
+                type="email"
+                id="email"
+                name="email"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700 pl-10"
+              />
+              <i
+                class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+            </div>
+          </div>
 
-        <div class="mb-4">
-          <label
-            class="block text-gray-700 text-sm font-medium mb-2"
-            for="mobile1"
-            >Mobile:</label
-          >
-          <input
-            type="text"
-            id="mobile1"
-            name="mobile1"
-            required
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
-          />
-        </div>
+          <!-- Mobile Field with Icon -->
+          <div class="mb-4">
+            <label
+              class="block text-gray-700 text-sm font-medium mb-2"
+              for="mobile1"
+              >Mobile:</label
+            >
+            <div class="relative">
+              <input
+                type="text"
+                id="mobile1"
+                name="mobile1"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700 pl-10"
+              />
+              <i
+                class="fas fa-phone-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+            </div>
+          </div>
 
-        <div class="mb-4">
-          <label
-            class="block text-gray-700 text-sm font-medium mb-2"
-            for="username"
-            >Username:</label
-          >
-          <input
-            type="text"
-            id="username"
-            name="username"
-            required
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
-          />
-        </div>
+          <!-- Username Field with Icon -->
+          <div class="mb-4">
+            <label
+              class="block text-gray-700 text-sm font-medium mb-2"
+              for="username"
+              >Username:</label
+            >
+            <div class="relative">
+              <input
+                type="text"
+                id="username"
+                name="username"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700 pl-10"
+              />
+              <i
+                class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+              ></i>
+            </div>
+          </div>
 
-        <div class="mb-6">
-          <label
-            class="block text-gray-700 text-sm font-medium mb-2"
-            for="password"
-            >Password:</label
-          >
-          <input
-            type="password"
-            id="password"
-            name="password"
-            required
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700"
-          />
+          <!-- Password Field with Show/Hide Icon -->
+          <div class="mb-6">
+            <label
+              class="block text-gray-700 text-sm font-medium mb-2"
+              for="password"
+              >Password:</label
+            >
+            <div class="relative">
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-gray-700 pr-10"
+              />
+              <i
+                id="togglePassword"
+                class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+                onclick="togglePasswordVisibility()"
+              ></i>
+            </div>
+          </div>
         </div>
 
         <button
           type="submit"
           class="w-full py-3 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-500"
         >
-          Register
+          <i class="fas fa-user-plus mr-2"></i> Register
         </button>
 
         <p class="text-center mt-4 text-sm text-gray-600">
@@ -101,5 +135,37 @@
         </p>
       </form>
     </div>
+
+    <script>
+      // Toggle password visibility
+      function togglePasswordVisibility() {
+        const passwordField = document.getElementById("password");
+        const toggleIcon = document.getElementById("togglePassword");
+
+        if (passwordField.type === "password") {
+          // Show password
+          passwordField.type = "text";
+          toggleIcon.classList.remove("fa-eye-slash"); // Remove the eye-slash (hidden password)
+          toggleIcon.classList.add("fa-eye"); // Add the eye (visible password)
+        } else {
+          // Hide password
+          passwordField.type = "password";
+          toggleIcon.classList.remove("fa-eye"); // Remove the eye (visible password)
+          toggleIcon.classList.add("fa-eye-slash"); // Add the eye-slash (hidden password)
+        }
+      }
+
+      // Initialize the default state (hidden password and eye-slash icon)
+      window.onload = function () {
+        const passwordField = document.getElementById("password");
+        const toggleIcon = document.getElementById("togglePassword");
+
+        // Set the initial state for the password field and the icon
+        if (passwordField.type === "password") {
+          toggleIcon.classList.remove("fa-eye"); // Ensure eye icon is not shown
+          toggleIcon.classList.add("fa-eye-slash"); // Show eye-slash (hidden password)
+        }
+      };
+    </script>
   </body>
 </html>

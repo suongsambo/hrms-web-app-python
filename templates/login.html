@@ -5,6 +5,11 @@
     <title>Login</title>
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <!-- Include Font Awesome -->
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+      rel="stylesheet"
+    />
   </head>
 
   <body>
@@ -19,38 +24,73 @@
       >
         <h2 class="text-3xl font-semibold text-center text-gray-800">Login</h2>
 
+        <!-- Username Input with Icon -->
         <div class="mb-4">
           <label
             class="block text-gray-700 text-sm font-medium mb-2"
             for="username"
             >Username:</label
           >
-          <input
-            type="text"
-            id="username"
-            name="username"
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
-          />
+          <div class="relative">
+            <input
+              type="text"
+              id="username"
+              name="username"
+              class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-700 pl-10"
+            />
+            <i
+              class="fas fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            ></i>
+          </div>
         </div>
+
+        <!-- Password Input with Icon and Show/Hide Toggle -->
         <div class="mb-6">
           <label
             class="block text-gray-700 text-sm font-medium mb-2"
             for="password"
             >Password:</label
           >
-          <input
-            type="password"
-            id="password"
-            name="password"
-            class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-700"
-          />
+          <div class="relative">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="w-full px-4 py-3 rounded-lg border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-700 pl-10"
+            />
+            <i
+              class="fas fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+            ></i>
+            <i
+              id="togglePassword"
+              class="fas fa-eye absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-500"
+              onclick="togglePasswordVisibility()"
+            ></i>
+          </div>
         </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="flex items-center mb-4">
+          <input
+            type="checkbox"
+            id="rememberMe"
+            name="rememberMe"
+            class="mr-2"
+          />
+          <label for="rememberMe" class="text-sm text-gray-600"
+            >Remember me</label
+          >
+        </div>
+
         <button
           type="submit"
-          class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="w-full py-3 bg-gradient-to-r from-indigo-600 to-indigo-800 text-white font-semibold rounded-lg shadow-md hover:shadow-lg transform transition-all duration-200 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center justify-center"
         >
+          <!-- Icon on the left -->
+          <i class="fas fa-sign-in-alt mr-2"></i>
           Login
         </button>
+
         <p class="text-center mt-4 text-sm text-gray-600">
           Don't have an account?
           <a
@@ -61,7 +101,39 @@
         </p>
       </form>
     </div>
+
     <script>
+      // Toggle password visibility
+      function togglePasswordVisibility() {
+        const passwordField = document.getElementById("password");
+        const toggleIcon = document.getElementById("togglePassword");
+
+        if (passwordField.type === "password") {
+          // Show password
+          passwordField.type = "text";
+          toggleIcon.classList.remove("fa-eye-slash"); // Remove the eye-slash (hidden password)
+          toggleIcon.classList.add("fa-eye"); // Add the eye (visible password)
+        } else {
+          // Hide password
+          passwordField.type = "password";
+          toggleIcon.classList.remove("fa-eye"); // Remove the eye (visible password)
+          toggleIcon.classList.add("fa-eye-slash"); // Add the eye-slash (hidden password)
+        }
+      }
+
+      // Initialize the default state (hidden password and eye-slash icon)
+      window.onload = function () {
+        const passwordField = document.getElementById("password");
+        const toggleIcon = document.getElementById("togglePassword");
+
+        // Set the initial state for the password field and the icon
+        if (passwordField.type === "password") {
+          toggleIcon.classList.remove("fa-eye"); // Ensure eye icon is not shown
+          toggleIcon.classList.add("fa-eye-slash"); // Show eye-slash (hidden password)
+        }
+      };
+
+      // Validate form (optional)
       function validateForm() {
         const username = document.getElementById("username").value.trim();
         const password = document.getElementById("password").value.trim();

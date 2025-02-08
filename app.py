@@ -10,16 +10,25 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from werkzeug.utils import secure_filename
 from config import Config
 from models.models import User
+from flask_socketio import SocketIO, send
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Initialize the Flask-Login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 
 # Setup database connection
+
+
+@socketio.on("message")
+def handle_message(msg):
+    print(f"Message: {msg}")
+    send(msg, broadcast=True)  # Broadcast message to all clients
 
 
 def get_db_connection():
