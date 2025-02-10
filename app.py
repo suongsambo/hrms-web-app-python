@@ -40,8 +40,9 @@ def get_db_connection():
 def init_db():
     """Initialize the database and create tables if they don't exist."""
     with get_db_connection() as conn:
+        # Create users table
         conn.execute('''
-               CREATE TABLE IF NOT EXISTS users (
+            CREATE TABLE IF NOT EXISTS users (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Hash TEXT,
                 CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -70,15 +71,20 @@ def init_db():
                 RoleDefault TEXT
             )
         ''')
+
+        # Create employees table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 age INTEGER NOT NULL,
                 department TEXT NOT NULL,
-                salary REAL NOT NULL
+                salary REAL NOT NULL,
+                branch TEXT
             )
         ''')
+
+        # Create branches table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS branches (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -104,6 +110,20 @@ def init_db():
             )
         ''')
 
+        # Create roles table to manage user roles and related info
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS roles (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                UserID INTEGER NOT NULL,
+                CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                Status TEXT CHECK(Status IN ('Active', 'Inactive')) DEFAULT 'Active',
+                Description TEXT,
+                FOREIGN KEY (UserID) REFERENCES users(ID) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create user_branches table (many-to-many relationship between users and branches)
         conn.execute('''
             CREATE TABLE IF NOT EXISTS user_branches (
                 user_id INTEGER,
@@ -114,6 +134,7 @@ def init_db():
             )
         ''')
 
+        # Create login_logs table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS login_logs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -128,6 +149,7 @@ def init_db():
             )
         ''')
 
+        # Create online_users table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS online_users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -137,7 +159,193 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users (ID)
             )
         ''')
+
+        # Create attendance table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS Attendance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                employee_name TEXT NOT NULL,
+                date TEXT NOT NULL DEFAULT CURRENT_DATE,
+                status TEXT NOT NULL,
+                checkin_time TEXT,
+                checkout_time TEXT,
+                total_hours REAL DEFAULT 0,
+                workday_count REAL DEFAULT 0
+            )
+        ''')
+
+        # Create role table on user
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS role (
+                UserID INTEGER NOT NULL,
+                UserRoleID INTEGER NOT NULL,
+                PRIMARY KEY (UserID, UserRoleID),
+                FOREIGN KEY (UserID) REFERENCES users (ID) ON DELETE CASCADE,
+                FOREIGN KEY (UserRoleID) REFERENCES roles (ID) ON DELETE CASCADE
+            )
+        ''')
+
         conn.commit()
+
+# 📌 List Attendance Records
+
+
+@app.route('/roles', methods=['GET'])
+def list_roles():
+    """Display all roles in the system."""
+    with get_db_connection() as conn:
+        roles = conn.execute('SELECT * FROM roles').fetchall()
+    return render_template('/roles/list_roles.html', roles=roles)
+
+
+@app.route('/roles/create', methods=['GET', 'POST'])
+def create_role():
+    """Create a new role."""
+    if request.method == 'POST':
+        user_id = request.form['user_id']
+        status = request.form['status']
+        description = request.form.get('description')
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO roles (UserID, Status, Description)
+                VALUES (?, ?, ?)
+            ''', (user_id, status, description))
+            conn.commit()
+
+        flash('Role created successfully!', 'success')
+        # Redirect to the roles list page
+        return redirect(url_for('list_roles'))
+
+    # For GET request, render the form with available users
+    with get_db_connection() as conn:
+        users = conn.execute('SELECT id, UserName FROM users').fetchall()
+
+    return render_template('/roles/create_role.html', users=users)
+
+
+@app.route('/roles/update/<int:role_id>', methods=['GET', 'POST'])
+def update_role(role_id):
+    """Update an existing role."""
+    with get_db_connection() as conn:
+        role = conn.execute(
+            'SELECT * FROM roles WHERE ID = ?', (role_id,)).fetchone()
+
+    if request.method == 'POST':
+        user_id = request.form['user_id']
+        status = request.form['status']
+        description = request.form['description']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE roles
+                SET UserID = ?, Status = ?, Description = ?
+                WHERE ID = ?
+            ''', (user_id, status, description, role_id))
+            conn.commit()
+
+        flash('Role updated successfully!', 'success')
+        return redirect(url_for('list_roles'))
+
+    return render_template('/roles/update_role.html', role=role)
+
+
+@app.route('/roles/delete/<int:role_id>', methods=['POST'])
+def delete_role(role_id):
+    """Delete a role."""
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM roles WHERE ID = ?', (role_id,))
+        conn.commit()
+
+    flash('Role deleted successfully!', 'danger')
+    return redirect(url_for('list_roles'))
+
+
+@app.route('/attendance')
+@login_required
+def list_attendance():
+    with get_db_connection() as conn:
+        records = conn.execute(
+            "SELECT * FROM attendance ORDER BY id DESC").fetchall()
+        last_record = records[0] if records else None
+        notifications_attendance = [
+            {"title": "New Attendance Recorded",
+             "message": f"{last_record['employee_name']} marked as {last_record['status']}."} if last_record else None
+        ]
+    return render_template('attendance/attendance.html', records=records, notifications_attendance=notifications_attendance)
+
+# 📌 Search Attendance
+
+
+@app.route('/attendance/search', methods=['GET'])
+@login_required
+def search_attendance():
+    query = request.args.get('query', '')
+    with get_db_connection() as conn:
+        records = conn.execute(
+            "SELECT * FROM attendance WHERE employee_name LIKE ?", (f'%{query}%',)).fetchall()
+    return render_template('attendance/attendance.html', records=records)
+
+# 📌 Add Attendance
+
+
+@app.route('/attendance/add', methods=['GET', 'POST'])
+@login_required
+def add_attendance():
+    if request.method == 'POST':
+        employee_name = request.form['employee_name']
+        status = request.form['status']
+        with get_db_connection() as conn:
+            conn.execute("INSERT INTO attendance (employee_name, status) VALUES (?, ?)",
+                         (employee_name, status))
+            conn.commit()
+        return redirect(url_for('list_attendance'))
+    return render_template('attendance/add_attendance.html')
+
+# 📌 Edit Attendance
+
+
+@app.route('/attendance/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_attendance(id):
+    with get_db_connection() as conn:
+        record = conn.execute(
+            "SELECT * FROM attendance WHERE id = ?", (id,)).fetchone()
+    if request.method == 'POST':
+        employee_name = request.form['employee_name']
+        status = request.form['status']
+        with get_db_connection() as conn:
+            conn.execute("UPDATE attendance SET employee_name = ?, status = ? WHERE id = ?",
+                         (employee_name, status, id))
+            conn.commit()
+        return redirect(url_for('list_attendance'))
+    return render_template('attendance/edit_attendance.html', record=record)
+
+# 📌 Delete Attendance
+
+
+@app.route('/attendance/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_attendance(id):
+    with get_db_connection() as conn:
+        conn.execute("DELETE FROM attendance WHERE id = ?", (id,))
+        conn.commit()
+    return redirect(url_for('list_attendance'))
+
+# 📌 View Attendance Record
+
+
+@app.route('/attendance/<int:id>')
+@login_required
+def view_attendance(id):
+    with get_db_connection() as conn:
+        record = conn.execute(
+            "SELECT * FROM attendance WHERE id = ?", (id,)).fetchone()
+    if record:
+        return render_template('attendance/view_attendance.html', record=record)
+    else:
+        return "Record not found", 404
+
 
 # Function to send OTP via Telegram
 
@@ -856,10 +1064,126 @@ def delete_user(id):
     return redirect(url_for('list_users'))
 
 
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     return render_template('dashboard.html', username=current_user.username)
+
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     timeout_threshold = 15  # minutes
+
+#     with get_db_connection() as conn:
+#         total_users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+#         total_employees = conn.execute(
+#             "SELECT COUNT(*) FROM employees").fetchone()[0]
+#         average_age = conn.execute(
+#             "SELECT AVG(Age) FROM employees").fetchone()[0]
+#         total_salary = conn.execute(
+#             "SELECT SUM(Salary) FROM employees").fetchone()[0]
+#         employees = conn.execute("SELECT * FROM employees").fetchall()
+
+#         # Fetch online users
+#         online_users = conn.execute('''
+#             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
+#             FROM online_users ou
+#             JOIN users u ON ou.user_id = u.ID
+#             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
+#         ''', (timeout_threshold,)).fetchall()
+
+#     # Ensure all values are serializable
+#     for user in online_users:
+#         # Replace None with empty string
+#         user_dict = dict(user)
+#         user_dict['last_active_time'] = user_dict['last_active_time'] or ''
+#         online_users[online_users.index(user)] = user_dict
+
+#     return render_template(
+#         'dashboard.html',
+#         total_users=total_users,
+#         total_employees=total_employees,
+#         average_age=average_age,
+#         total_salary=total_salary,
+#         employees=employees,
+#         online_users=online_users,
+#     )
+
+
+# User profile page (view and edit)
+# @app.route('/profile', methods=['GET', 'POST'])
+# @login_required
+# def profile():
+#     # Fetch user data from the database
+#     with get_db_connection() as conn:
+#         user = conn.execute("SELECT * FROM users WHERE id = ?",
+#                             (current_user.id,)).fetchone()
+
+#     if request.method == 'POST':
+#         # Handle profile update
+#         username = request.form['username']
+#         email = request.form['email']
+#         password = request.form['password']
+
+#         # Password handling
+#         if password:
+#             hashed_password = generate_password_hash(password)
+#             conn.execute("UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?",
+#                          (username, email, hashed_password, current_user.id))
+#         else:
+#             conn.execute("UPDATE users SET username = ?, email = ? WHERE id = ?",
+#                          (username, email, current_user.id))
+#         conn.commit()
+
+#         flash('Profile updated successfully!', 'success')
+#         return redirect(url_for('profile'))
+
+#     return render_template('profile.html', user=user)
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    return render_template('dashboard.html', username=current_user.username)
+    timeout_threshold = 15  # minutes
+
+    with get_db_connection() as conn:
+        total_users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        total_employees = conn.execute(
+            "SELECT COUNT(*) FROM employees").fetchone()[0]
+        average_age = conn.execute(
+            "SELECT AVG(Age) FROM employees").fetchone()[0]
+        total_salary = conn.execute(
+            "SELECT SUM(Salary) FROM employees").fetchone()[0]
+
+        # Employee count and total salary by branch
+        branch_data = conn.execute("""
+            SELECT Branch, COUNT(*) AS employee_count, SUM(Salary) AS total_salary
+            FROM employees
+            GROUP BY Branch
+        """).fetchall()
+
+        branch_names = [row['Branch'] for row in branch_data]
+        branch_counts = [row['employee_count'] for row in branch_data]
+        branch_salaries = [row['total_salary'] for row in branch_data]
+
+        # Fetch online users
+        online_users = conn.execute('''
+            SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
+            FROM online_users ou
+            JOIN users u ON ou.user_id = u.ID
+            WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
+        ''', (timeout_threshold,)).fetchall()
+
+    return render_template(
+        'dashboard.html',
+        total_users=total_users,
+        total_employees=total_employees,
+        average_age=average_age,
+        total_salary=total_salary,
+        branch_names=branch_names,  # Pass the branch names
+        branch_counts=branch_counts,  # Pass the employee counts per branch
+        branch_salaries=branch_salaries,  # Pass the total salaries per branch
+        online_users=online_users
+    )
 
 
 # @app.route('/users', methods=['GET'])
@@ -871,6 +1195,7 @@ def dashboard():
 #     with get_db_connection() as conn:
 #         users = conn.execute("SELECT * FROM users").fetchall()
 #     return render_template('/users/users.html', users=users)
+
 
 @app.route('/users', methods=['GET'])
 @login_required
@@ -951,18 +1276,22 @@ def search_employees():
 @app.route('/employees/add', methods=['GET', 'POST'])
 @login_required
 def add_employee():
+    branches = []
+    with get_db_connection() as conn:
+        branches = conn.execute("SELECT * FROM branches").fetchall()
 
     if request.method == 'POST':
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
         salary = request.form['salary']
+        branch = request.form['branch']
         with get_db_connection() as conn:
-            conn.execute("INSERT INTO employees (name, age, department, salary) VALUES (?, ?, ?, ?)",
-                         (name, age, department, salary))
+            conn.execute("INSERT INTO employees (name, age, department, salary, branch) VALUES (?, ?, ?, ?, ?)",
+                         (name, age, department, salary, branch))
             conn.commit()
         return redirect(url_for('list_employees'))
-    return render_template('/employees/add_employee.html')
+    return render_template('/employees/add_employee.html', branches=branches)
 
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
@@ -1003,6 +1332,27 @@ def view_employee(id):
         return render_template('/employees/view_employee.html', employee=employee)
     else:
         return "Employee not found", 404
+
+
+# @app.route('/generate_payslip/<int:employee_id>')
+# @login_required
+# def generate_payslip(employee_id):
+#     employee = Employee.query.get_or_404(employee_id)
+#     net_salary = employee.salary - employee.deductions
+
+#     filename = f"payslip_{employee.name}.pdf"
+#     pdf_path = os.path.join("payslips", filename)
+#     os.makedirs("payslips", exist_ok=True)
+
+#     c = canvas.Canvas(pdf_path, pagesize=letter)
+#     c.drawString(100, 750, f"Payslip for: {employee.name}")
+#     c.drawString(100, 730, f"Position: {employee.position}")
+#     c.drawString(100, 710, f"Gross Salary: ${employee.salary}")
+#     c.drawString(100, 690, f"Deductions: ${employee.deductions}")
+#     c.drawString(100, 670, f"Net Salary: ${net_salary}")
+#     c.save()
+
+#     return send_file(pdf_path, as_attachment=True)
 
 
 @app.route('/branches')

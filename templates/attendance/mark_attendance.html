@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mark Attendance</title>
+  </head>
+  <body>
+    <h1>Mark Attendance</h1>
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <p>
+        {{ form.employee_name.label }} <br />
+        {{ form.employee_name() }}
+      </p>
+      <p>
+        {{ form.date.label }} <br />
+        {{ form.date() }}
+      </p>
+      <p>
+        {{ form.status.label }} <br />
+        {{ form.status() }}
+      </p>
+      <p>{{ form.submit() }}</p>
+    </form>
+  </body>
+</html>

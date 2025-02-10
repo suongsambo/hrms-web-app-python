@@ -1,19 +1,28 @@
-{% extends 'base.html' %} {% block title %}Users{% endblock %} {% block
-content%}
+{% extends 'base.html' %} {% block title %}Users{% endblock %} {% block content
+%}
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-xl mt-10">
+  <!-- Section Header -->
+  <div
+    class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 p-6 rounded-t-lg shadow-lg mb-6"
+  >
+    <h1 class="text-4xl font-bold text-white text-center">
+      Upload Your Images
+    </h1>
+    <p class="text-lg text-white text-center mt-2">
+      Easily upload and manage your image files
+    </p>
+  </div>
 
-<div class="max-w-lg mx-auto bg-white p-8 rounded-lg shadow-lg mt-10">
-  <h1 class="text-3xl font-semibold text-center text-gray-800 mb-6">
-    Upload Your Images
-  </h1>
-
+  <!-- Upload Form -->
   <form
     action="{{ url_for('upload_files') }}"
     method="POST"
     enctype="multipart/form-data"
     class="space-y-6"
   >
+    <!-- Drop Area -->
     <div
-      class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer"
+      class="border-2 border-dashed border-gray-300 rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:border-blue-500 transition-all duration-300 ease-in-out"
       id="drop-area"
     >
       <input
@@ -30,22 +39,25 @@ content%}
       </p>
       <p class="text-xs text-gray-400">PNG, JPG, or GIF (Max. 5MB)</p>
     </div>
+
+    <!-- File Previews -->
     <div id="file-previews" class="space-y-4"></div>
 
+    <!-- Action Buttons -->
     <div class="flex justify-start items-center mr-4 mb-2 gap-x-2">
       <button
         type="submit"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-1"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-1 transition duration-300 ease-in-out"
       >
-        <span class="material-symbols-outlined">upload</span>
+        <span class="material-icons">upload</span>
         <span>Upload</span>
       </button>
       <button
         type="button"
         onclick="window.location.href='{{ url_for('list_user_files') }}'"
-        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-1"
+        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg flex items-center space-x-1 transition duration-300 ease-in-out"
       >
-        <span class="material-symbols-outlined">close</span>
+        <span class="material-icons">close</span>
         <span>Cancel</span>
       </button>
     </div>
@@ -106,23 +118,20 @@ content%}
         const filePreview = document.createElement("div");
         filePreview.classList.add("flex", "items-center", "space-x-4");
         filePreview.innerHTML = `
-                <img src="${e.target.result}" alt="${
+            <img src="${e.target.result}" alt="${
           file.name
         }" class="w-16 h-16 object-cover rounded-md">
-                <div>
-                    <p class="text-sm font-medium text-gray-800">${
-                      file.name
-                    }</p>
-                    <p class="text-xs text-gray-500">${(
-                      file.size / 1024
-                    ).toFixed(2)} KB</p>
-                </div>
-            `;
+            <div>
+                <p class="text-sm font-medium text-gray-800">${file.name}</p>
+                <p class="text-xs text-gray-500">${(file.size / 1024).toFixed(
+                  2
+                )} KB</p>
+            </div>
+        `;
         previewContainer.appendChild(filePreview);
       };
       reader.readAsDataURL(file);
     });
   }
 </script>
-
 {% endblock %}

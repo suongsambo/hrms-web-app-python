@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>View Attendance</title>
+  </head>
+  <body>
+    <h1>Attendance Details</h1>
+    <p><strong>Employee Name:</strong> {{ record['employee_name'] }}</p>
+    <p><strong>Date:</strong> {{ record['date'] }}</p>
+    <p><strong>Status:</strong> {{ record['status'] }}</p>
+    <a href="{{ url_for('list_attendance') }}">Back</a>
+  </body>
+</html>

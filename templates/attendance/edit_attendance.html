@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Edit Attendance</title>
+  </head>
+  <body>
+    <h1>Edit Attendance</h1>
+    <form method="POST">
+      <p>
+        <label>Employee Name:</label>
+        <input
+          type="text"
+          name="employee_name"
+          value="{{ record['employee_name'] }}"
+          required
+        />
+      </p>
+      <p>
+        <label>Status:</label>
+        <input
+          type="text"
+          name="status"
+          value="{{ record['status'] }}"
+          required
+        />
+      </p>
+      <button type="submit">Update</button>
+    </form>
+    <a href="{{ url_for('list_attendance') }}">Back</a>
+  </body>
+</html>

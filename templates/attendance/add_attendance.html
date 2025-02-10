@@ -1,0 +1,72 @@
+{% extends 'base.html' %} {% block title %}Add Attendance{% endblock %} {% block
+content %}
+
+<body class="bg-gray-100 font-sans text-gray-800">
+  <!-- Container for the content -->
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <h1 class="text-3xl font-bold text-center text-blue-600 mb-6">
+      Add Attendance
+    </h1>
+
+    <!-- Attendance Form -->
+    <form method="POST" class="bg-white p-6 rounded-lg shadow-lg space-y-4">
+      <div class="space-y-2">
+        <label
+          for="employee_name"
+          class="block text-lg font-medium text-gray-700"
+          >Employee Name:</label
+        >
+        <select
+          name="employee_name"
+          id="employee_name"
+          required
+          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="" disabled selected hidden>
+            Select Employee Name
+          </option>
+          {% for employee in employees %}
+          <option value="{{ employee['name'] }}">{{ employee['name'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="space-y-2">
+        <label for="status" class="block text-lg font-medium text-gray-700"
+          >Status:</label
+        >
+        <select
+          name="status"
+          id="status"
+          required
+          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="" disabled selected hidden>Select Status</option>
+          <option value="Present">Present</option>
+          <option value="Absent">Absent</option>
+          <option value="Late">Late</option>
+        </select>
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 transition duration-300"
+      >
+        Mark Attendance
+      </button>
+    </form>
+
+    <!-- Back Link -->
+    <div class="mt-6 text-center">
+      <a
+        href="{{ url_for('list_attendance') }}"
+        class="text-blue-600 hover:underline text-lg"
+      >
+        Back to Attendance List
+      </a>
+    </div>
+  </div>
+</body>
+
+{% endblock %}

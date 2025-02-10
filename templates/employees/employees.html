@@ -102,7 +102,6 @@
     }
   </script>
 
-
   <div class="overflow-x-auto">
     <table id="employee-table" class="min-w-full bg-white shadow-md rounded-lg">
       <thead class="bg-gray-800 text-white">
@@ -111,6 +110,7 @@
           <th class="py-2 px-4 text-left">Name</th>
           <th class="py-2 px-4 text-left">Age</th>
           <th class="py-2 px-4 text-left">Department</th>
+          <th class="py-2 px-4 text-left">Branch</th> <!-- Added Branch Column -->
           <th class="py-2 px-4 text-left">Salary</th>
           <th class="py-2 px-4 text-center">Actions</th>
         </tr>
@@ -122,12 +122,11 @@
           <td class="py-2 px-4">{{ employee.name }}</td>
           <td class="py-2 px-4">{{ employee.age }}</td>
           <td class="py-2 px-4">{{ employee.department }}</td>
+          <td class="py-2 px-4">{{ employee.branch }}</td> <!-- Render Branch -->
           <td class="py-2 px-4">${{ employee.salary }}</td>
           <td class="py-2 px-4 text-center">
             <a href="{{ url_for('edit_employee', id=employee.id) }}" class="text-blue-500 hover:underline mr-2">Edit</a>
-    
             <a href="{{ url_for('view_employee', id=employee.id) }}" class="text-blue-500 hover:underline mr-2">View</a>
-    
             <form class="inline-block text-red-500 hover:underline"
               action="{{ url_for('delete_employee', id=employee.id) }}" method="POST">
               <button type="submit" class="text-red-500 hover:underline"
@@ -140,7 +139,6 @@
         {% endfor %}
       </tbody>
     </table>
-    
   </div>
 </div>
 
