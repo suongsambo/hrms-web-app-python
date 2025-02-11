@@ -244,8 +244,7 @@
           </a>
         </div>
       </div>
-      {% endif %}
-
+      {% endif %} {% if current_user.is_admin == 1 %}
       <!-- Menu Branch -->
       <div class="relative">
         <button
@@ -277,7 +276,7 @@
           </a>
         </div>
       </div>
-
+      {% endif %}
       <!-- Employees -->
       {% if current_user.is_admin == 1 %}
       <div class="relative">
@@ -313,6 +312,8 @@
       {% endif %}
 
       <!-- Payroll -->
+
+      {% if current_user.is_admin == 1 %}
       <div class="relative">
         <button
           @click="activeMenu = activeMenu === 'payroll' ? '' : 'payroll'"
@@ -328,14 +329,14 @@
           class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
         >
           <a
-            href="/payroll/add"
+            href="/payroll_form"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
           >
             <span class="material-symbols-outlined">event</span>
             <span>Add Payroll</span>
           </a>
           <a
-            href="/payroll"
+            href="/payroll_list"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
           >
             <span class="material-symbols-outlined">event</span>
@@ -343,7 +344,7 @@
           </a>
         </div>
       </div>
-
+      {% endif %} {% if current_user.is_admin == 1 %}
       <!-- Attendance -->
       <div class="relative">
         <button
@@ -375,6 +376,8 @@
           </a>
         </div>
       </div>
+
+      {% endif %}
 
       <!-- Media and Files -->
       <div class="relative">
@@ -444,6 +447,31 @@
           >
             <span class="material-symbols-outlined">lock</span>
             <span>Security</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Contact Us -->
+      <div class="relative">
+        <button
+          @click="activeMenu = activeMenu === 'contact' ? '' : 'contact'"
+          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          <span class="material-symbols-outlined">contact_support</span>
+          <span class="ml-2">Contact Us</span>
+          <span class="ml-2">&#9662;</span>
+        </button>
+        <div
+          x-show="activeMenu === 'contact'"
+          @click.away="activeMenu = ''"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+        >
+          <a
+            href="/contact"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">contact_support</span>
+            <span>Contact Us</span>
           </a>
         </div>
       </div>

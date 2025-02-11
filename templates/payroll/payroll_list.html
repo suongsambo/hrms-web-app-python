@@ -1,0 +1,192 @@
+{% extends 'base.html' %} {% block title %}Payroll List{% endblock %} {% block
+content %}
+<div class="bg-gray-100 font-sans">
+  <div class="container mx-auto p-8">
+    <h1 class="text-4xl font-semibold text-center mb-8 text-blue-600">
+      Payroll List
+    </h1>
+
+    <!-- Filter Section -->
+    <div class="flex justify-center space-x-4 mb-8">
+      <!-- Employee ID Search -->
+      <div class="flex items-center space-x-2">
+        <label for="employee_id" class="text-lg text-gray-700"
+          >Employee ID:</label
+        >
+        <input
+          type="number"
+          id="employee_id"
+          class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter Employee ID"
+        />
+      </div>
+
+      <!-- Date Range Search -->
+      <div class="flex items-center space-x-2">
+        <label for="start_date" class="text-lg text-gray-700"
+          >Start Date:</label
+        >
+        <input
+          type="date"
+          id="start_date"
+          class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+
+        <label for="end_date" class="text-lg text-gray-700">End Date:</label>
+        <input
+          type="date"
+          id="end_date"
+          class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <!-- Search Button -->
+      <button
+        onclick="fetchPayroll()"
+        class="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
+      >
+        Search
+      </button>
+    </div>
+
+    <!-- Add Payroll and Mark as Paid Buttons -->
+    <div class="flex justify-end space-x-4 mt-10">
+      <a
+        href="{{ url_for('payroll_form') }}"
+        class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full flex items-center justify-center space-x-2 transition duration-300"
+      >
+        <span class="text-sm font-semibold">Add Payroll</span>
+        <i class="fas fa-plus ml-2"></i>
+      </a>
+
+      <!-- Print Payroll Button -->
+      <button
+        onclick="printPayroll()"
+        class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-full flex items-center justify-center space-x-2 transition duration-300"
+      >
+        <i class="fas fa-print mr-2"></i>
+        <span class="text-sm font-semibold">Print Payroll</span>
+      </button>
+    </div>
+
+    <!-- Payroll List Section -->
+    <div id="payrollList" class="space-y-6 mt-8">
+      {% if payroll_records %} {% for record in payroll_records %}
+      <div
+        class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition duration-300"
+      >
+        <h2 class="text-2xl font-semibold text-blue-600">
+          Payroll ID: {{ record.id }}
+        </h2>
+        <div class="mt-4">
+          <p>
+            <strong class="text-gray-700">Employee ID:</strong> {{
+            record.employee_id }}
+          </p>
+          <p>
+            <strong class="text-gray-700">Employee Name:</strong> {{
+            record.employee_name }}
+          </p>
+          <p>
+            <strong class="text-gray-700">Period Start Date:</strong> {{
+            record.period_start_date }}
+          </p>
+          <p>
+            <strong class="text-gray-700">Period End Date:</strong> {{
+            record.period_end_date }}
+          </p>
+          <p>
+            <strong class="text-gray-700">Base Salary:</strong> ${{
+            record.base_salary }}
+          </p>
+          <p>
+            <strong class="text-gray-700">Bonus:</strong> ${{ record.bonus }}
+          </p>
+          <p>
+            <strong class="text-gray-700">Deductions:</strong> ${{
+            record.deductions }}
+          </p>
+          <p><strong class="text-gray-700">Tax:</strong> ${{ record.tax }}</p>
+          <p>
+            <strong class="text-gray-700">Total Salary:</strong> ${{
+            record.total_salary }}
+          </p>
+          <p>
+            <strong class="text-gray-700">Payment Date:</strong> {{
+            record.payment_date }}
+          </p>
+        </div>
+      </div>
+      {% endfor %} {% else %}
+      <div class="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+        <p>No payroll records found.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+  // Function to fetch payroll records based on filters
+  function fetchPayroll() {
+    const employee_id = document.getElementById("employee_id").value;
+    const start_date = document.getElementById("start_date").value;
+    const end_date = document.getElementById("end_date").value;
+
+    let url = "/payroll_list?";
+
+    if (employee_id) {
+      url += `employee_id=${employee_id}&`;
+    }
+    if (start_date) {
+      url += `start_date=${start_date}&`;
+    }
+    if (end_date) {
+      url += `end_date=${end_date}`;
+    }
+
+    // Remove trailing '&' if any
+    if (url.endsWith("&")) {
+      url = url.slice(0, -1);
+    }
+
+    window.location.href = url; // Reload page with query string
+  }
+
+  // Function to print the payroll list
+  function printPayroll() {
+    const printContent = document.getElementById("payrollList").innerHTML;
+    const printWindow = window.open("", "", "height=600,width=800");
+    printWindow.document.write("<html><head><title>Print Payroll</title>");
+    printWindow.document.write(
+      "<style>body { font-family: 'Inter', sans-serif; }</style>"
+    );
+    printWindow.document.write(
+      "<style>table { width: 100%; border-collapse: collapse; }</style>"
+    );
+    printWindow.document.write(
+      "<style>th, td { padding: 8px; border: 1px solid #ddd; }</style>"
+    );
+    printWindow.document.write(
+      "<style>th { background-color: #f4f4f4; text-align: left; }</style>"
+    );
+    printWindow.document.write(
+      "<style>tr:nth-child(even) { background-color: #f9f9f9; }</style>"
+    );
+    printWindow.document.write("</head><body>");
+    const date = new Date();
+    printWindow.document.write(`<h1 class="text-3xl font-bold">KPCC</h1>`);
+    printWindow.document.write(`<p>Port Phillip, Victoria, Australia</p>`);
+    printWindow.document.write(`<p>${date.toLocaleDateString()}</p>`);
+    printWindow.document.write("<hr>");
+    printWindow.document.write(printContent);
+    printWindow.document.write("<hr>");
+    printWindow.document.write(
+      `<p class="text-center">Note: Data export from system HRMS.</p>`
+    );
+    printWindow.document.write("</body></html>");
+    printWindow.document.close();
+    printWindow.print();
+  }
+</script>
+{% endblock %}

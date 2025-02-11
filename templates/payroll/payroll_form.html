@@ -1,0 +1,159 @@
+{% extends 'base.html' %} {% block title %}Create Payroll Record{% endblock %}
+{% block content %}
+<div class="bg-gray-100 flex items-center justify-center mt-20">
+  <div
+    class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg md:min-w-[700px]"
+  >
+    <h1 class="text-3xl font-semibold text-center mb-6 text-blue-600">
+      Create Payroll Record
+    </h1>
+
+    <form id="payrollForm" class="space-y-4">
+      <div class="flex flex-col">
+        <label for="employee_id" class="font-medium text-gray-700"
+          >Employee ID:</label
+        >
+        <input
+          type="number"
+          id="employee_id"
+          name="employee_id"
+          required
+          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="period_start_date" class="font-medium text-gray-700"
+          >Period Start Date:</label
+        >
+        <input
+          type="date"
+          id="period_start_date"
+          name="period_start_date"
+          required
+          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="period_end_date" class="font-medium text-gray-700"
+          >Period End Date:</label
+        >
+        <input
+          type="date"
+          id="period_end_date"
+          name="period_end_date"
+          required
+          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="base_salary" class="font-medium text-gray-700"
+          >Base Salary:</label
+        >
+        <input
+          type="number"
+          step="0.01"
+          id="base_salary"
+          name="base_salary"
+          required
+          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="bonus" class="font-medium text-gray-700">Bonus:</label>
+        <input
+          type="number"
+          step="0.01"
+          id="bonus"
+          name="bonus"
+          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="deductions" class="font-medium text-gray-700"
+          >Deductions:</label
+        >
+        <input
+          type="number"
+          step="0.01"
+          id="deductions"
+          name="deductions"
+          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <div class="flex flex-col">
+        <label for="tax" class="font-medium text-gray-700">Tax:</label>
+        <input
+          type="number"
+          step="0.01"
+          id="tax"
+          name="tax"
+          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="w-full bg-blue-500 text-white p-3 rounded-md hover:bg-blue-600 transition duration-300"
+      >
+        Create Payroll
+      </button>
+
+      <a
+        href="{{ url_for('payroll_list') }}"
+        class="mt-4 block text-center text-blue-600 hover:underline"
+      >
+        Back to Payroll List
+      </a>
+    </form>
+
+    <p
+      id="responseMessage"
+      class="mt-4 text-center text-green-600 font-medium"
+    ></p>
+  </div>
+</div>
+
+<script>
+  // Handle form submission
+  document
+    .getElementById("payrollForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const formData = new FormData(this);
+
+      const data = {
+        employee_id: formData.get("employee_id"),
+        period_start_date: formData.get("period_start_date"),
+        period_end_date: formData.get("period_end_date"),
+        base_salary: formData.get("base_salary"),
+        bonus: formData.get("bonus") || 0,
+        deductions: formData.get("deductions") || 0,
+        tax: formData.get("tax") || 0,
+      };
+
+      fetch("/create_payroll", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          document.getElementById("responseMessage").innerText = data.message;
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          document.getElementById("responseMessage").innerText =
+            "Error creating payroll record!";
+        });
+    });
+</script>
+{% endblock %}

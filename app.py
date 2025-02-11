@@ -1,3 +1,4 @@
+
 from flask import request, jsonify
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
@@ -11,8 +12,8 @@ from werkzeug.utils import secure_filename
 from config import Config
 from models.models import User
 from flask_socketio import SocketIO, send
-
-
+from apscheduler.schedulers.background import BackgroundScheduler
+from datetime import datetime
 app = Flask(__name__)
 app.config.from_object(Config)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -81,6 +82,23 @@ def init_db():
                 department TEXT NOT NULL,
                 salary REAL NOT NULL,
                 branch TEXT
+            )
+        ''')
+
+        # Create payroll table for employee payments
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS payroll (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                employee_id INTEGER NOT NULL,
+                period_start_date TEXT NOT NULL,
+                period_end_date TEXT NOT NULL,
+                base_salary REAL NOT NULL,
+                bonus REAL DEFAULT 0,
+                deductions REAL DEFAULT 0,
+                tax REAL DEFAULT 0,
+                total_salary REAL NOT NULL,
+                payment_date TEXT DEFAULT CURRENT_DATE,
+                FOREIGN KEY (employee_id) REFERENCES employees (id)
             )
         ''')
 
@@ -185,7 +203,233 @@ def init_db():
             )
         ''')
 
+        # Create messages table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                message TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         conn.commit()
+
+
+# CRUD functions for Payroll
+def create_payroll(employee_id, period_start_date, period_end_date, base_salary, bonus=0, deductions=0, tax=0):
+    """Create a new payroll record for an employee."""
+    total_salary = float(base_salary) + float(bonus) - \
+        float(deductions) - float(tax)
+    with get_db_connection() as conn:
+        conn.execute('''
+            INSERT INTO payroll (employee_id, period_start_date, period_end_date, base_salary, bonus, deductions, tax, total_salary)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (employee_id, period_start_date, period_end_date, base_salary, bonus, deductions, tax, total_salary))
+        conn.commit()
+
+
+def get_payroll_by_employee_and_period(employee_id, period_start_date, period_end_date):
+    """Retrieve payroll details for a specific employee and period."""
+    with get_db_connection() as conn:
+        cursor = conn.execute('''
+            SELECT * FROM payroll
+            WHERE employee_id = ? AND period_start_date = ? AND period_end_date = ?
+        ''', (employee_id, period_start_date, period_end_date))
+        payroll = cursor.fetchone()
+        return payroll
+
+
+def list_payroll_for_employee(employee_id):
+    """Retrieve all payroll records for a specific employee."""
+    with get_db_connection() as conn:
+        cursor = conn.execute('''
+            SELECT * FROM payroll WHERE employee_id = ?
+        ''', (employee_id,))
+        payroll_records = cursor.fetchall()
+        return payroll_records
+
+
+def list_payroll_for_employee_name(employee_name):
+    """Retrieve all payroll records for a specific employee."""
+    with get_db_connection() as conn:
+        cursor = conn.execute('''
+            SELECT p.* FROM payroll p
+            INNER JOIN employees e ON p.employee_id = e.id
+            WHERE e.name = ?
+        ''', (employee_name,))
+        payroll_records = cursor.fetchall()
+        return payroll_records
+
+# Endpoint to manually create payroll
+
+
+def list_all_payroll():
+    """Retrieve all payroll records."""
+    with get_db_connection() as conn:
+        cursor = conn.execute('SELECT * FROM payroll')
+        payroll_records = cursor.fetchall()
+        return payroll_records
+
+
+def get_all_employees():
+    """Fetch all employees from the database."""
+    try:
+        employees = Employee.query.all()  # Replace with your actual database query method
+        return employees
+    except Exception as e:
+        print(f"Error fetching employees: {e}")
+        return []
+
+
+@app.route('/payroll_form', methods=['GET'])
+def payroll_form():
+    employees = get_all_employees()  # Assuming a function to fetch all employees
+    return render_template('/payroll/payroll_form.html', employees=employees)
+
+
+@app.route('/payroll', methods=['GET'])
+def get_payroll():
+    employee_id = request.args.get('employee_id', type=int)
+    employee_name = request.args.get('employee_name')
+
+    period_start_date = request.args.get('period_start_date')
+    period_end_date = request.args.get('period_end_date')
+
+    if employee_id and period_start_date and period_end_date:
+        payroll = get_payroll_by_employee_and_period(
+            employee_id, period_start_date, period_end_date)
+    elif employee_id:
+        payroll = list_payroll_for_employee(employee_id)
+    elif employee_name:
+        payroll = list_payroll_for_employee_name(employee_name)
+    else:
+        payroll = list_all_payroll()
+
+    # If no records found, return a 404 response
+    if not payroll:
+        return "No payroll records found", 404
+
+    # Modify payroll data to include employee name and branch
+    payroll_with_details = []
+    for record in payroll:
+        employee = get_employee_by_id(record['employee_id'])
+        if employee:
+            record = dict(record)  # Create a mutable copy
+            # Default to 'Unknown' if name not found
+            record['employee_name'] = employee.get('name', 'Unknown')
+        payroll_with_details.append(record)
+
+    return jsonify(payroll_with_details)
+
+
+def get_employee_by_id(employee_id):
+    # Query your database for the employee using employee_id
+    query = "SELECT name, branch FROM employees WHERE id = ?"
+    cursor.execute(query, (employee_id,))
+    result = cursor.fetchone()
+
+    if result:
+        return {'name': result[0], 'branch': result[1]}
+    return None
+
+
+@app.route('/create_payroll', methods=['POST'])
+def create_payroll_endpoint():
+    data = request.json
+    create_payroll(
+        data['employee_id'],
+        data['period_start_date'],
+        data['period_end_date'],
+        data['base_salary'],
+        data.get('bonus', 0),
+        data.get('deductions', 0),
+        data.get('tax', 0)
+    )
+    return jsonify({"message": "Payroll record created successfully."})
+
+# Function to generate payroll for all employees on the 25th of each month
+
+
+# Endpoint to list payroll records
+@app.route('/payroll_list', methods=['GET'])
+def payroll_list():
+    # Optional filter for specific employee
+    employee_id = request.args.get('employee_id', type=int)
+
+    if employee_id:
+        payroll_records = list_payroll_for_employee(employee_id)
+    else:
+        payroll_records = list_all_payroll()
+
+    # If no records found, return a 404 response
+    if not payroll_records:
+        return "No payroll records found", 404
+
+    # Render the HTML template with the payroll records
+    return render_template('/payroll/payroll_list.html', payroll_records=payroll_records)
+
+# Function to generate payroll for all employees on the 25th of each month
+
+
+def generate_monthly_payroll():
+    """Create payroll for all employees on the 25th of every month."""
+    today = datetime.today()
+    if today.day == 25:  # Check if today is the 25th
+        start_date = today.replace(day=1)
+        end_date = today.replace(day=1)
+        end_date = end_date.replace(
+            month=today.month + 1) - timedelta(days=1)  # Last day of the month
+
+        with get_db_connection() as conn:
+            cursor = conn.execute('SELECT * FROM employees')
+            employees = cursor.fetchall()
+
+            for employee in employees:
+                create_payroll(
+                    employee['id'],
+                    start_date.strftime('%Y-%m-%d'),
+                    end_date.strftime('%Y-%m-%d'),
+                    employee['salary'],
+                    bonus=500,  # Example bonus
+                    deductions=50,  # Example deduction
+                    tax=100  # Example tax
+                )
+        print(f"Payroll generated for {len(employees)} employees.")
+
+
+# Scheduler to run payroll generation every day, but only triggers on the 25th
+scheduler = BackgroundScheduler()
+scheduler.add_job(generate_monthly_payroll, 'interval',
+                  days=1)  # Run daily, check if it's the 25th
+scheduler.start()
+
+
+@app.route('/contact', methods=['GET'])
+def contact():
+    return render_template('/contact/contact.html')
+
+
+@app.route('/send_message', methods=['POST'])
+def send_message():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    message = request.form.get('message')
+
+    # Save the contact message to the database
+    with get_db_connection() as conn:
+        conn.execute(
+            'INSERT INTO messages (name, email, message) VALUES (?, ?, ?)', (name, email, message))
+        conn.commit()
+
+    # Redirect to a thank-you page or display a success message
+    return redirect(url_for('thank_you'))
+
+
+@app.route('/thank_you', methods=['GET'])
+def thank_you():
+    return render_template('/contact/thank_you.html')
 
 # 📌 List Attendance Records
 
@@ -346,7 +590,6 @@ def view_attendance(id):
     else:
         return "Record not found", 404
 
-
 # Function to send OTP via Telegram
 
 
@@ -439,8 +682,9 @@ def verify_otp():
             flash("Invalid OTP! Try again.", "danger")
     return render_template("verify.html")
 
-
 # Test route for Telegram (for debugging)
+
+
 @app.route("/test_telegram")
 def test_telegram():
     test_message = "This is a test message from Flask!"
@@ -465,122 +709,15 @@ def load_user(user_id):
 def unauthorized():
     return render_template('unauthorized.html'), 401
 
-
 # Example uploaded_file route for displaying the uploaded image
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
-
-# @app.route('/file', methods=['GET', 'POST'])
-# @login_required
-# def upload_image():
-#     if request.method == 'POST':
-
-#         if 'file' not in request.files:
-#             return 'No file part', 400
-
-#         file = request.files['file']
-
-#         if file.filename == '':
-#             return 'No selected file', 400
-
-#         if file and allowed_file(file.filename):
-#             filename = f"{current_user.id}_{current_user.username}_{current_user.branch}_{secure_filename(file.filename)}"
-#             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#             return redirect(url_for('list_user_files', filename=filename))
-
-#     return render_template('/uploads/uploaded_file.html', current_user=current_user)
-
-
-# # # Search File
-# @app.route('/search_files', methods=['GET'])
-# @login_required
-# def search_files():
-#     query = request.args.get('query', '').lower()
-
-#     files = []
-#     if query:
-#         # Construct the search pattern
-#         search_pattern = os.path.join(
-#             app.config['UPLOAD_FOLDER'],
-#             f"{current_user.id}_{current_user.username}_{current_user.branch}*{query}*"
-#         )
-#         # Use glob to find files matching the pattern
-#         files = glob.glob(search_pattern)
-#         # Extract filenames from the full paths
-#         files = [os.path.basename(file) for file in files]
-
-#     return render_template('/uploads/list_files.html', files=files, query=query, current_user=current_user)
-
-
-# @app.route('/delete_file/<filename>', methods=['POST'])
-# @login_required
-# def delete_file(filename):
-#     # Construct the full path of the file
-#     file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
-#     # Check if the file exists
-#     if os.path.exists(file_path):
-#         os.remove(file_path)  # Delete the file
-#         flash('File deleted successfully', 'success')
-#     else:
-#         flash('File not found', 'error')
-
-#     # Redirect to the file listing page
-#     return redirect(url_for('list_user_files'))
-
-
-# @app.route('/files', methods=['GET'])
-# @login_required
-# def list_user_files():
-#     # Get the directory of the uploaded files
-#     upload_folder = app.config['UPLOAD_FOLDER']
-
-#     # Get the user's file prefix based on their ID, username, and branch
-#     file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
-
-#     # List all files in the upload folder
-#     files = os.listdir(upload_folder)
-
-#     # Filter the files that match the pattern
-#     user_files = [file for file in files if file.startswith(file_prefix)]
-
-#     # Render a template to display the files (or return as a JSON response)
-#     return render_template('/uploads/list_files.html', files=user_files, current_user=current_user)
-
-
-# @app.route('/upload_files', methods=['GET', 'POST'])
-# @login_required
-# def upload_files():
-#     if request.method != 'POST':
-#         return render_template('/uploads/upload_files.html', current_user=current_user)
-#     if 'files' not in request.files:
-#         return 'No file part', 400
-
-#     files = request.files.getlist('files')
-#     if not files:
-#         return 'No selected files', 400
-
-#     upload_folder = app.config['UPLOAD_FOLDER']
-#     file_prefix = f"{current_user.id}_{current_user.username}_{current_user.branch}"
-
-#     for file in files:
-#         if file.filename == '':
-#             continue
-#         if file and allowed_file(file.filename):
-#             filename = f"{file_prefix}_{secure_filename(file.filename)}"
-#             file.save(os.path.join(upload_folder, filename))
-
-#     return redirect(url_for('list_user_files'))
-
-
-# @app.route('/uploads/<filename>')
-# def uploaded_file(filename):
-#     return f'Image uploaded successfully: <img src="/static/uploads/{filename}" alt="uploaded image">'
-
-
 # File upload route with Flash messages
+
+
 @app.route('/file', methods=['GET', 'POST'])
 @login_required
 def upload_image():
@@ -708,25 +845,6 @@ def get_geolocation(ip):
     region = data.get('region', 'Unknown')
     return city, region, data.get('country', 'Unknown')
 
-# @app.route('/login', methods=['POST'])
-# def login():
-#     username = request.form['username']
-#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
-
-#     with get_db_connection() as conn:
-#         user = conn.execute('''
-#             SELECT * FROM users WHERE UserName = ? AND Password = ?
-#         ''', (username, password)).fetchone()
-
-#     if user:
-#         user_obj = User(id=user['ID'], username=user['UserName'],
-#                         password=user['Password'], email=user['Email'])
-#         login_user(user_obj)  # Store the user session with Flask-Login
-#         return redirect(url_for('dashboard'))
-
-#     else:
-#         return render_template('404.html'), 404
-
 
 @app.route('/online_users', methods=['GET'])
 # @login_required
@@ -743,47 +861,6 @@ def online_users():
         ''', (timeout_threshold,)).fetchall()
 
     return render_template('online_users.html', online_users=online_users)
-
-
-# @app.route('/login', methods=['POST'])
-# def login():
-#     username = request.form['username']
-#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
-
-#     # Get the user's IP address and user agent (browser/device info)
-#     ip_address = request.remote_addr
-#     user_agent = request.user_agent.string
-
-#     # Optionally get the geolocation (City, Region, Country) based on IP address
-#     city, region, country = get_geolocation(ip_address)
-
-#     with get_db_connection() as conn:
-#         user = conn.execute('''
-#             SELECT * FROM users WHERE UserName = ? AND Password = ?
-#         ''', (username, password)).fetchone()
-
-#     if user:
-#         # Log the login event (store user location and device info)
-#         # You can log this information into the database, or print/log it
-#         with get_db_connection() as conn:
-#             conn.execute('''
-#                 INSERT INTO login_logs (user_id, ip_address, city, region, country, user_agent)
-#                 VALUES (?, ?, ?, ?, ?, ?)
-#             ''', (user['ID'], ip_address, city, region, country, user_agent))
-#             conn.commit()
-
-#         # Create the user object and log the user in with Flask-Login
-#         user_obj = User(id=user['ID'], username=user['UserName'],
-#                         password=user['Password'], email=user['Email'])
-#         login_user(user_obj)  # Store the user session with Flask-Login
-
-#         flash(
-#             f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
-#         return redirect(url_for('dashboard'))
-
-#     else:
-#         flash("Invalid username or password", 'error')
-#         return render_template('404.html'), 404
 
 
 @app.route('/login', methods=['POST'])
@@ -856,46 +933,6 @@ def logout():
     flash('You have been logged out successfully.', 'success')
     return redirect(url_for('index'))
 
-
-# @app.route('/change_password', methods=['GET', 'POST'])
-# @login_required  # Ensure the user is logged in before accessing this route
-# def change_password():
-#     if request.method == 'POST':
-#         old_password = request.form['old_password']
-#         new_password = request.form['new_password']
-#         confirm_password = request.form['confirm_password']
-
-#         # Ensure new password and confirm password match
-#         if new_password != confirm_password:
-#             flash("New password and confirmation do not match", 'error')
-#             return render_template('change_password.html')
-
-#         # Hash the old password and check it against the stored password
-#         old_password_hashed = hashlib.sha256(old_password.encode()).hexdigest()
-
-#         with get_db_connection() as conn:
-#             user = conn.execute('''
-#                 SELECT * FROM users WHERE ID = ?
-#             ''', (current_user.id,)).fetchone()
-
-#             if user and user['Password'] == old_password_hashed:
-#                 # Hash the new password and update the database
-#                 new_password_hashed = hashlib.sha256(
-#                     new_password.encode()).hexdigest()
-#                 conn.execute('''
-#                     UPDATE users
-#                     SET Password = ?
-#                     WHERE ID = ?
-#                 ''', (new_password_hashed, current_user.id))
-#                 conn.commit()
-
-#                 flash("Your password has been updated successfully", 'success')
-#                 return redirect(url_for('dashboard'))
-
-#             else:
-#                 flash("Incorrect old password", 'error')
-
-#     return render_template('change_password.html')
 
 @app.route('/change_password', methods=['GET', 'POST'])
 @login_required  # Ensure the user is logged in
@@ -1067,11 +1104,6 @@ def delete_user(id):
 # @app.route('/dashboard')
 # @login_required
 # def dashboard():
-#     return render_template('dashboard.html', username=current_user.username)
-
-# @app.route('/dashboard')
-# @login_required
-# def dashboard():
 #     timeout_threshold = 15  # minutes
 
 #     with get_db_connection() as conn:
@@ -1082,7 +1114,17 @@ def delete_user(id):
 #             "SELECT AVG(Age) FROM employees").fetchone()[0]
 #         total_salary = conn.execute(
 #             "SELECT SUM(Salary) FROM employees").fetchone()[0]
-#         employees = conn.execute("SELECT * FROM employees").fetchall()
+
+#         # Employee count and total salary by branch
+#         branch_data = conn.execute("""
+#             SELECT Branch, COUNT(*) AS employee_count, SUM(Salary) AS total_salary
+#             FROM employees
+#             GROUP BY Branch
+#         """).fetchall()
+
+#         branch_names = [row['Branch'] for row in branch_data]
+#         branch_counts = [row['employee_count'] for row in branch_data]
+#         branch_salaries = [row['total_salary'] for row in branch_data]
 
 #         # Fetch online users
 #         online_users = conn.execute('''
@@ -1092,53 +1134,18 @@ def delete_user(id):
 #             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
 #         ''', (timeout_threshold,)).fetchall()
 
-#     # Ensure all values are serializable
-#     for user in online_users:
-#         # Replace None with empty string
-#         user_dict = dict(user)
-#         user_dict['last_active_time'] = user_dict['last_active_time'] or ''
-#         online_users[online_users.index(user)] = user_dict
-
 #     return render_template(
 #         'dashboard.html',
 #         total_users=total_users,
 #         total_employees=total_employees,
 #         average_age=average_age,
 #         total_salary=total_salary,
-#         employees=employees,
-#         online_users=online_users,
+#         branch_names=branch_names,  # Pass the branch names
+#         branch_counts=branch_counts,  # Pass the employee counts per branch
+#         branch_salaries=branch_salaries,  # Pass the total salaries per branch
+#         online_users=online_users
 #     )
 
-
-# User profile page (view and edit)
-# @app.route('/profile', methods=['GET', 'POST'])
-# @login_required
-# def profile():
-#     # Fetch user data from the database
-#     with get_db_connection() as conn:
-#         user = conn.execute("SELECT * FROM users WHERE id = ?",
-#                             (current_user.id,)).fetchone()
-
-#     if request.method == 'POST':
-#         # Handle profile update
-#         username = request.form['username']
-#         email = request.form['email']
-#         password = request.form['password']
-
-#         # Password handling
-#         if password:
-#             hashed_password = generate_password_hash(password)
-#             conn.execute("UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?",
-#                          (username, email, hashed_password, current_user.id))
-#         else:
-#             conn.execute("UPDATE users SET username = ?, email = ? WHERE id = ?",
-#                          (username, email, current_user.id))
-#         conn.commit()
-
-#         flash('Profile updated successfully!', 'success')
-#         return redirect(url_for('profile'))
-
-#     return render_template('profile.html', user=user)
 
 @app.route('/dashboard')
 @login_required
@@ -1165,6 +1172,12 @@ def dashboard():
         branch_counts = [row['employee_count'] for row in branch_data]
         branch_salaries = [row['total_salary'] for row in branch_data]
 
+        # Fetch total number of branches
+        total_branches = len(branch_names)
+
+        # Fetch total payroll (sum of all salaries)
+        total_payroll = total_salary
+
         # Fetch online users
         online_users = conn.execute('''
             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
@@ -1179,22 +1192,13 @@ def dashboard():
         total_employees=total_employees,
         average_age=average_age,
         total_salary=total_salary,
+        total_branches=total_branches,  # Pass total number of branches
+        total_payroll=total_payroll,  # Pass total payroll (total salary)
         branch_names=branch_names,  # Pass the branch names
         branch_counts=branch_counts,  # Pass the employee counts per branch
         branch_salaries=branch_salaries,  # Pass the total salaries per branch
         online_users=online_users
     )
-
-
-# @app.route('/users', methods=['GET'])
-# @login_required
-# def list_users():
-#     if current_user.is_admin == 0:
-#         flash("You don't have permission to view this page.", "danger")
-#         return redirect(url_for('dashboard'))
-#     with get_db_connection() as conn:
-#         users = conn.execute("SELECT * FROM users").fetchall()
-#     return render_template('/users/users.html', users=users)
 
 
 @app.route('/users', methods=['GET'])
