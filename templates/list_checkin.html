@@ -1,0 +1,115 @@
+{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
+content %}
+
+<body class="bg-gray-100">
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-semibold text-center text-gray-700 mb-8">
+      Check-in List
+    </h1>
+
+    <div class="flex justify-center space-x-4 mb-6">
+      <a
+        href="{{ url_for('checkin', user_id=current_user.id) }}"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center justify-center space-x-2 transition duration-200 ease-in-out"
+      >
+        <span class="material-symbols-outlined text-lg">login</span>
+        <span class="text-sm font-semibold">Check-in</span>
+      </a>
+
+      <a
+        href="{{ url_for('checkout', user_id=current_user.id) }}"
+        class="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-full flex items-center justify-center space-x-2 transition duration-200 ease-in-out"
+      >
+        <span class="material-symbols-outlined text-lg">logout</span>
+        <span class="text-sm font-semibold">Check-out</span>
+      </a>
+    </div>
+
+    <!-- Create the table with the DataTable structure -->
+    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+      <table id="checkinTable" class="min-w-full table-auto">
+        <thead class="bg-gray-200 text-gray-600">
+          <tr>
+            <th class="py-2 px-4 text-left">Employee Name</th>
+            <th class="py-2 px-4 text-left">Status</th>
+            <th class="py-2 px-4 text-left">Check-in Time</th>
+            <th class="py-2 px-4 text-left">Check-out Time</th>
+            <th class="py-2 px-4 text-left">Total Hours</th>
+            <th class="py-2 px-4 text-left">Workday Count</th>
+            <th class="py-2 px-4 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700">
+          {% for checkin in checkins %}
+          <tr class="border-b hover:bg-gray-50">
+            <td class="py-2 px-4">{{ checkin['employee_name'] }}</td>
+            <td class="py-2 px-4">{{ checkin['status'] }}</td>
+            <td class="py-2 px-4">{{ checkin['checkin_time'] }}</td>
+            <td class="py-2 px-4">
+              {{ checkin['checkout_time'] if checkin['checkout_time'] else 'N/A'
+              }}
+            </td>
+            <td class="py-2 px-4">
+              {% if checkin['checkout_time'] %} {{ checkin['total_hours'] }} {%
+              else %} N/A {% endif %}
+            </td>
+            <td class="py-2 px-4">{{ checkin['workday_count'] }}</td>
+            <td class="py-2 px-4">
+              {% if checkin['status'] == 'Checked In' %}
+              <form
+                method="POST"
+                action="{{ url_for('checkout', user_id=checkin['id']) }}"
+                class="inline"
+              >
+                <button
+                  type="submit"
+                  class="bg-red-500 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                >
+                  Checkout
+                </button>
+              </form>
+              {% else %}
+              <button
+                disabled
+                class="bg-gray-500 text-white py-2 px-4 rounded-lg"
+              >
+                Checkout Completed
+              </button>
+              {% endif %} {% if checkin['status'] == 'Checked Out' %}
+              <form
+                method="POST"
+                action="{{ url_for('checkin', user_id=checkin['id']) }}"
+                class="inline"
+              >
+                <button
+                  type="submit"
+                  class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 ease-in-out"
+                >
+                  Check-in
+                </button>
+              </form>
+              {% else %}
+              <button
+                disabled
+                class="bg-gray-500 text-white py-2 px-4 rounded-lg"
+              >
+                Already Checked-in
+              </button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Initialize the DataTable -->
+  <script>
+    $(document).ready(function () {
+      $("#checkinTable").DataTable();
+    });
+  </script>
+</body>
+
+{% endblock %}

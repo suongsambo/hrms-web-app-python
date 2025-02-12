@@ -1,0 +1,55 @@
+{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
+content %}
+<body class="bg-gray-100">
+  <div class="container mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+  
+    <div
+    class="bg-white p-8 rounded-lg shadow-2xl max-w-sm w-full mx-auto"
+    style="width: 100%"
+  >
+  <h1 class="text-3xl font-semibold text-center text-gray-700 mb-6">
+    Check-in for {{ user['UserName'] }}
+  </h1>
+    <div class="space-y-4 mb-6">
+      <p>
+        <strong class="font-medium">User Name:</strong> {{ user['UserName'] }}
+      </p>
+      <p><strong class="font-medium">Email:</strong> {{ user['Email'] }}</p>
+    </div>
+
+    <form method="POST" class="space-y-4">
+      <div class="flex flex-col">
+        <label for="checkin_time" class="text-gray-700 font-medium mb-2"
+          >Check-in Time</label
+        >
+        <input
+          type="text"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          id="checkin_time"
+          name="checkin_time"
+          value="{{ now }}"
+          readonly
+          placeholder="Current Time"
+        />
+      </div>
+
+      <button
+        type="submit"
+        class="w-full py-2 mt-4 bg-blue-500 hover:bg-blue-700 text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        Check In
+      </button>
+      <div class="mt-6 text-center">
+        <a
+          href="{{ url_for('list_checkin') }}"
+          class="text-blue-500 hover:text-blue-700 text-sm font-semibold underline"
+        >
+          Back to Check-in List
+        </a>
+    </div>
+    </form>
+  </div>
+
+   
+</body>
+{% endblock %}

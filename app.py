@@ -1,4 +1,5 @@
 
+from flask import render_template
 from flask import request, jsonify
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import sqlite3
@@ -217,6 +218,131 @@ def init_db():
         conn.commit()
 
 
+# Route to check-in an employee
+@app.route('/checkin/<int:user_id>', methods=['GET', 'POST'])
+def checkin(user_id):
+    with get_db_connection() as conn:
+        user = conn.execute(
+            'SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+
+        # Check if user exists
+        if user:
+            # Convert sqlite3.Row to dictionary to avoid attribute errors
+            user_dict = dict(user)
+
+            # Check if employee exists
+            if request.method == 'POST':
+                # Process the check-in form submission
+                checkin_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                conn.execute('''
+                    INSERT INTO Attendance (employee_name, status, checkin_time)
+                    VALUES (?, ?, ?)
+                ''', (user_dict['UserName'], 'Checked In', checkin_time))
+                conn.commit()
+
+                # Redirect back to the user list or another page after check-in
+                return redirect(url_for('list_checkin'))
+
+            # Render the check-in form with the user data
+            return render_template('checkin.html', user=user_dict)
+
+    # Redirect if user doesn't exist
+    return redirect(url_for('list_checkin'))
+
+
+@app.route('/list_checkin', methods=['GET'])
+def list_checkin():
+    with get_db_connection() as conn:
+        # Fetch all check-in records from the Attendance table
+        checkins = conn.execute('SELECT * FROM Attendance').fetchall()
+
+        # Convert the check-ins to a list of dictionaries to make it more readable
+        checkins_list = [dict(checkin) for checkin in checkins]
+
+        # Calculate the total hours for each checkin
+        for checkin in checkins_list:
+            if checkin['checkout_time']:
+                checkin_time = datetime.strptime(
+                    checkin['checkin_time'], '%Y-%m-%d %H:%M:%S')
+                checkout_time = datetime.strptime(
+                    checkin['checkout_time'], '%Y-%m-%d %H:%M:%S')
+                total_hours = (checkout_time -
+                               checkin_time).total_seconds() / 3600
+                checkin['total_hours'] = round(total_hours, 2)
+
+        # Render the list_checkin.html template with the check-ins data
+    return render_template('list_checkin.html', checkins=checkins_list)
+
+# Route to check-out an employee
+
+
+@app.route('/checkout/<int:user_id>', methods=['GET', 'POST'])
+def checkout(user_id):
+    with get_db_connection() as conn:
+        user = conn.execute(
+            'SELECT * FROM users WHERE id = ?', (user_id,)).fetchone()
+
+        # Check if user exists
+        if user:
+            # Convert sqlite3.Row to dictionary to avoid attribute errors
+            user_dict = dict(user)
+
+            # Handle the checkout form submission
+            if request.method == 'POST':
+                # Record the current time as the checkout time
+                checkout_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+                # Update the attendance record with the checkout time and status
+                conn.execute('''
+                    UPDATE Attendance
+                    SET status = ?, checkout_time = ?
+                    WHERE employee_name = ? AND status = 'Checked In'
+                ''', ('Checked Out', checkout_time, user_dict['UserName']))
+                conn.commit()
+
+                # Redirect back to the check-in list after checkout
+                return redirect(url_for('list_checkin'))
+
+            # Render the checkout form with the user data
+            return render_template('checkout.html', user=user_dict)
+
+    # Redirect if user doesn't exist
+    return redirect(url_for('list_checkin'))
+
+
+# Route to calculate worked time
+
+
+@app.route('/worked_time/<int:user_id>')
+def worked_time(user_id):
+    with get_db_connection() as conn:
+        # Fetch employee details based on user ID
+        employee = conn.execute('''
+            SELECT * FROM users WHERE id = ?
+        ''', (user_id,)).fetchone()
+
+        if employee:
+            # Fetch the most recent attendance records for the employee for the current day
+            attendance = conn.execute('''
+                SELECT * FROM Attendance WHERE employee_name = ? AND strftime('%Y-%m-%d', checkin_time) = date('now')
+                ORDER BY id DESC
+            ''', (employee['UserName'],)).fetchall()
+
+            worked_duration = 0
+            workday_hours = 0
+            if attendance:
+                # Calculate worked duration (in hours) for all attendance records for the current day
+                for record in attendance:
+                    if record['checkout_time']:
+                        worked_duration += (datetime.strptime(record['checkout_time'], '%Y-%m-%d %H:%M:%S') -
+                                            datetime.strptime(record['checkin_time'], '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600
+                        workday_hours += 8  # Assuming an 8-hour workday
+
+                return render_template('worked_time.html', employee=employee, worked_duration=worked_duration, workday_hours=workday_hours)
+            return render_template('worked_time.html', employee=employee, worked_duration=None)
+        return "Employee not found."
+
+
 # CRUD functions for Payroll
 def create_payroll(employee_id, period_start_date, period_end_date, base_salary, bonus=0, deductions=0, tax=0):
     """Create a new payroll record for an employee."""
@@ -290,41 +416,6 @@ def payroll_form():
     return render_template('/payroll/payroll_form.html', employees=employees)
 
 
-# @app.route('/payroll', methods=['GET'])
-# def get_payroll():
-#     employee_id = request.args.get('employee_id', type=int)
-#     employee_name = request.args.get('employee_name')
-
-#     period_start_date = request.args.get('period_start_date')
-#     period_end_date = request.args.get('period_end_date')
-
-#     if employee_id and period_start_date and period_end_date:
-#         payroll = get_payroll_by_employee_and_period(
-#             employee_id, period_start_date, period_end_date)
-#     elif employee_id:
-#         payroll = list_payroll_for_employee(employee_id)
-#     elif employee_name:
-#         payroll = list_payroll_for_employee_name(employee_name)
-#     else:
-#         payroll = list_all_payroll()
-
-#     # If no records found, return a 404 response
-#     if not payroll:
-#         return "No payroll records found", 404
-
-#     # Modify payroll data to include employee name and branch
-#     payroll_with_details = []
-#     for record in payroll:
-#         employee = get_employee_by_id(record['employee_id'])
-#         if employee:
-#             record = dict(record)  # Create a mutable copy
-#             record['employee_name'] = employee.get('name', 'Unknown')
-#             record['branch'] = employee.get('branch', 'Unknown')
-#         payroll_with_details.append(record)
-
-#     return jsonify(payroll_with_details)
-
-
 @app.route('/payroll', methods=['GET'])
 def get_payroll():
     employee_id = request.args.get('employee_id', type=int)
@@ -388,17 +479,6 @@ def get_employee_by_name(employee_name):
     return None
 
 
-# def get_employee_by_id(employee_id):
-#     # Query your database for the employee using employee_id
-#     query = "SELECT name, branch FROM employees WHERE id = ?"
-#     cursor.execute(query, (employee_id,))
-#     result = cursor.fetchone()
-
-#     if result:
-#         return {'name': result[0], 'branch': result[1]}
-#     return None
-
-
 @app.route('/create_payroll', methods=['POST'])
 def create_payroll_endpoint():
     data = request.json
@@ -412,67 +492,6 @@ def create_payroll_endpoint():
         data.get('tax', 0)
     )
     return jsonify({"message": "Payroll record created successfully."})
-
-
-# Endpoint to list payroll records
-# @app.route('/payroll_list', methods=['GET'])
-# def payroll_list():
-#     # Optional filter for specific employee
-#     employee_id = request.args.get('employee_id', type=int)
-#     employee_name = request.args.get('employee_name')
-
-#     # Determine which payroll query to execute based on provided parameters
-#     if employee_id and employee_name:
-#         payroll_records = list_payroll_for_employee_name_and_id(
-#             employee_id, employee_name)
-#     elif employee_id:
-#         payroll_records = list_payroll_for_employee(employee_id)
-#     elif employee_name:
-#         payroll_records = list_payroll_for_employee_name(employee_name)
-#     else:
-#         payroll_records = list_all_payroll()
-
-#     # If no records found, return a 404 response
-#     if not payroll_records:
-#         return "No payroll records found", 404
-
-#     # Fetch all employees for the dropdown or other purposes
-#     employees = get_all_employees()
-
-#     # Render the HTML template with the payroll records
-#     return render_template('/payroll/payroll_list.html', employees=employees, payroll_records=payroll_records)
-
-
-# @app.route('/payroll_list', methods=['GET'])
-# def payroll_list():
-#     # Optional filter for specific employee
-#     employee_id = request.args.get('employee_id', type=int)
-#     employee_name = request.args.get('employee_name')
-
-#     # Determine which payroll query to execute based on provided parameters
-#     if employee_id and employee_name:
-#         payroll_records = list_payroll_for_employee_name_and_id(
-#             employee_id, employee_name)
-#     elif employee_id:
-#         payroll_records = list_payroll_for_employee(employee_id)
-#     elif employee_name:
-#         payroll_records = list_payroll_for_employee_name(employee_name)
-#     else:
-#         payroll_records = list_all_payroll()
-
-#     # If no records found, return a 404 response
-#     if not payroll_records:
-#         return "No payroll records found", 404
-
-#     # Ensure all employees are fetched before rendering
-#     employees = get_all_employees()
-#     print("Employees:", employees)  # Debugging employees
-
-#     if not employees:
-#         return "Failed to retrieve employee information", 500
-
-#     # Render the HTML template with the payroll records and employees
-#     return render_template('payroll/payroll_list.html', payroll_records=payroll_records, employees=employees)
 
 
 @app.route('/payroll_list', methods=['GET'])

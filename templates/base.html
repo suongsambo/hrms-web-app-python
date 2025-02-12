@@ -367,6 +367,30 @@
             <span class="material-symbols-outlined">event</span>
             <span>Add Attendance</span>
           </a>
+
+          <a
+            href="{{ url_for('checkin', user_id=current_user.id) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Check In</span>
+          </a>
+
+          <a
+            href="{{ url_for('checkout', user_id=current_user.id) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Check Out</span>
+          </a>
+
+          <a
+            href="{{ url_for('worked_time', user_id=current_user.id) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">timer</span>
+            <span>Work Time</span>
+          </a>
           <a
             href="/attendance"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"

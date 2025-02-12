@@ -93,17 +93,27 @@ content %}
     >
       Currently Online:
     </label>
+
     {% if online_users|length > 0 %}
-    <ul class="list-disc list-inside" id="online-users">
+    <ul class="space-y-4" id="online-users">
       {% for user in online_users %}
-      <li class="text-green-600 font-semibold">
-        <span class="text-gray-600 text-sm">Name:</span>
-        {{ user['UserName'] }}
-        <span class="text-gray-600 text-sm">Email:</span>
-        {{ user['Email'] }}
-        <span class="text-gray-600 text-sm">(Last Active:</span>
-        {{ user['last_active_time'] }}
-        <span class="text-gray-600 text-sm">)</span>
+      <li class="flex items-center space-x-3 text-gray-700">
+        <!-- User Icon -->
+        <i class="fas fa-user-circle text-2xl text-blue-600"></i>
+
+        <div>
+          <!-- User Name -->
+          <span class="font-semibold text-lg">{{ user['UserName'] }}</span>
+
+          <!-- User Email -->
+          <p class="text-sm text-gray-500">{{ user['Email'] }}</p>
+
+          <!-- Last Active Time -->
+          <p class="text-xs text-gray-400">
+            <span class="font-semibold">Last Active:</span> {{
+            user['last_active_time'] }}
+          </p>
+        </div>
       </li>
       {% endfor %}
     </ul>
