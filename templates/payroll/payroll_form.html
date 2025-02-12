@@ -8,18 +8,29 @@
       Create Payroll Record
     </h1>
 
+    <p
+      id="responseMessage"
+      class="mt-4 text-center text-green-600 font-medium"
+    ></p>
+
     <form id="payrollForm" class="space-y-4">
       <div class="flex flex-col">
-        <label for="employee_id" class="font-medium text-gray-700"
-          >Employee ID:</label
+        <label for="employee_name" class="font-medium text-gray-700"
+          >Employee Name:</label
         >
-        <input
-          type="number"
-          id="employee_id"
+        <select
           name="employee_id"
+          id="employee_id"
           required
-          class="border border-gray-300 p-3 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+          class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="" disabled selected hidden>
+            Select Employee Name
+          </option>
+          {% for employee in employees %}
+          <option value="{{ employee.id }}">{{ employee.name }}</option>
+          {% endfor %}
+        </select>
       </div>
 
       <div class="flex flex-col">
@@ -111,11 +122,6 @@
         Back to Payroll List
       </a>
     </form>
-
-    <p
-      id="responseMessage"
-      class="mt-4 text-center text-green-600 font-medium"
-    ></p>
   </div>
 </div>
 

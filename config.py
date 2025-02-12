@@ -18,3 +18,7 @@ class Config:
     TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', 'your_default_chat_id')
     DATABASE = os.path.join(os.path.dirname(
         os.path.abspath(__file__)), 'database/hr_management.db')
+    APP_NAME = 'KPCA'
+    APP_DESCRIPTION = 'Port Phillip, Victoria, Australia'
+    APP_FOOTER = '© 2023 KPCA. All rights reserved.'
+    APP_VERSION = '1.0.0'

@@ -276,10 +276,11 @@ def list_all_payroll():
 def get_all_employees():
     """Fetch all employees from the database."""
     try:
-        employees = Employee.query.all()  # Replace with your actual database query method
+        with get_db_connection() as conn:
+            cursor = conn.execute('SELECT * FROM employees')
+            employees = cursor.fetchall()
         return employees
-    except Exception as e:
-        print(f"Error fetching employees: {e}")
+    except Exception:
         return []
 
 
@@ -289,14 +290,49 @@ def payroll_form():
     return render_template('/payroll/payroll_form.html', employees=employees)
 
 
+# @app.route('/payroll', methods=['GET'])
+# def get_payroll():
+#     employee_id = request.args.get('employee_id', type=int)
+#     employee_name = request.args.get('employee_name')
+
+#     period_start_date = request.args.get('period_start_date')
+#     period_end_date = request.args.get('period_end_date')
+
+#     if employee_id and period_start_date and period_end_date:
+#         payroll = get_payroll_by_employee_and_period(
+#             employee_id, period_start_date, period_end_date)
+#     elif employee_id:
+#         payroll = list_payroll_for_employee(employee_id)
+#     elif employee_name:
+#         payroll = list_payroll_for_employee_name(employee_name)
+#     else:
+#         payroll = list_all_payroll()
+
+#     # If no records found, return a 404 response
+#     if not payroll:
+#         return "No payroll records found", 404
+
+#     # Modify payroll data to include employee name and branch
+#     payroll_with_details = []
+#     for record in payroll:
+#         employee = get_employee_by_id(record['employee_id'])
+#         if employee:
+#             record = dict(record)  # Create a mutable copy
+#             record['employee_name'] = employee.get('name', 'Unknown')
+#             record['branch'] = employee.get('branch', 'Unknown')
+#         payroll_with_details.append(record)
+
+#     return jsonify(payroll_with_details)
+
+
 @app.route('/payroll', methods=['GET'])
 def get_payroll():
     employee_id = request.args.get('employee_id', type=int)
     employee_name = request.args.get('employee_name')
-
     period_start_date = request.args.get('period_start_date')
     period_end_date = request.args.get('period_end_date')
 
+    # Determine which payroll query to execute based on provided parameters
     if employee_id and period_start_date and period_end_date:
         payroll = get_payroll_by_employee_and_period(
             employee_id, period_start_date, period_end_date)
@@ -307,32 +343,60 @@ def get_payroll():
     else:
         payroll = list_all_payroll()
 
-    # If no records found, return a 404 response
+    # If no payroll records are found, return a 404 response
     if not payroll:
         return "No payroll records found", 404
 
-    # Modify payroll data to include employee name and branch
+    # Add employee details (name and branch) to each payroll record
     payroll_with_details = []
     for record in payroll:
-        employee = get_employee_by_id(record['employee_id'])
+        employee = get_employee_by_id(
+            record['employee_id'])  # Get employee by ID
+        if not employee and employee_name:  # If employee is not found by ID, try by name
+            employee = get_employee_by_name(employee_name)
+
         if employee:
-            record = dict(record)  # Create a mutable copy
-            # Default to 'Unknown' if name not found
+            record = dict(record)  # Make a mutable copy of the record
             record['employee_name'] = employee.get('name', 'Unknown')
+            record['branch'] = employee.get('branch', 'Unknown')
         payroll_with_details.append(record)
 
     return jsonify(payroll_with_details)
 
 
 def get_employee_by_id(employee_id):
-    # Query your database for the employee using employee_id
-    query = "SELECT name, branch FROM employees WHERE id = ?"
-    cursor.execute(query, (employee_id,))
-    result = cursor.fetchone()
-
+    """Fetch employee by ID."""
+    with get_db_connection() as conn:
+        cursor = conn.execute(
+            "SELECT id, name, branch FROM employees WHERE id = ?", (employee_id,))
+        result = cursor.fetchone()
     if result:
-        return {'name': result[0], 'branch': result[1]}
+        return {'id': result['id'], 'name': result['name'], 'branch': result['branch']}
+        # Example SQLAlchemy query (adjust based on your actual setup)
     return None
+
+
+def get_employee_by_name(employee_name):
+    """Fetch employee by name."""
+    with get_db_connection() as conn:
+        cursor = conn.execute(
+            "SELECT id, name, branch FROM employees WHERE name = ?", (employee_name,))
+        result = cursor.fetchone()
+    if result:
+        return {'id': result['id'], 'name': result['name'], 'branch': result['branch']}
+        # Example SQLAlchemy query (adjust based on your actual setup)
+    return None
+
+
+# def get_employee_by_id(employee_id):
+#     # Query your database for the employee using employee_id
+#     query = "SELECT name, branch FROM employees WHERE id = ?"
+#     cursor.execute(query, (employee_id,))
+#     result = cursor.fetchone()
+
+#     if result:
+#         return {'name': result[0], 'branch': result[1]}
+#     return None
 
 
 @app.route('/create_payroll', methods=['POST'])
@@ -349,17 +413,50 @@ def create_payroll_endpoint():
     )
     return jsonify({"message": "Payroll record created successfully."})
 
-# Function to generate payroll for all employees on the 25th of each month
-
 
 # Endpoint to list payroll records
+# @app.route('/payroll_list', methods=['GET'])
+# def payroll_list():
+#     # Optional filter for specific employee
+#     employee_id = request.args.get('employee_id', type=int)
+#     employee_name = request.args.get('employee_name')
+
+#     # Determine which payroll query to execute based on provided parameters
+#     if employee_id and employee_name:
+#         payroll_records = list_payroll_for_employee_name_and_id(
+#             employee_id, employee_name)
+#     elif employee_id:
+#         payroll_records = list_payroll_for_employee(employee_id)
+#     elif employee_name:
+#         payroll_records = list_payroll_for_employee_name(employee_name)
+#     else:
+#         payroll_records = list_all_payroll()
+
+#     # If no records found, return a 404 response
+#     if not payroll_records:
+#         return "No payroll records found", 404
+
+#     # Fetch all employees for the dropdown or other purposes
+#     employees = get_all_employees()
+
+#     # Render the HTML template with the payroll records
+#     return render_template('/payroll/payroll_list.html', employees=employees, payroll_records=payroll_records)
+
+
 @app.route('/payroll_list', methods=['GET'])
 def payroll_list():
     # Optional filter for specific employee
     employee_id = request.args.get('employee_id', type=int)
+    employee_name = request.args.get('employee_name')
 
-    if employee_id:
+    # Determine which payroll query to execute based on provided parameters
+    if employee_id and employee_name:
+        payroll_records = list_payroll_for_employee_name_and_id(
+            employee_id, employee_name)
+    elif employee_id:
         payroll_records = list_payroll_for_employee(employee_id)
+    elif employee_name:
+        payroll_records = list_payroll_for_employee_name(employee_name)
     else:
         payroll_records = list_all_payroll()
 
@@ -367,10 +464,69 @@ def payroll_list():
     if not payroll_records:
         return "No payroll records found", 404
 
-    # Render the HTML template with the payroll records
-    return render_template('/payroll/payroll_list.html', payroll_records=payroll_records)
+    # Ensure all employees are fetched before rendering
+    employees = get_all_employees()
+    print("Employees:", employees)  # Debugging employees
 
-# Function to generate payroll for all employees on the 25th of each month
+    if not employees:
+        return "Failed to retrieve employee information", 500
+
+    # Render the HTML template with the payroll records and employees
+    return render_template('payroll/payroll_list.html', payroll_records=payroll_records, employees=employees)
+
+
+def get_all_employees():
+    with get_db_connection() as connection:
+        cursor = connection.cursor()
+        query = "SELECT id, name, branch, department FROM employees"
+        cursor.execute(query)
+        employees = cursor.fetchall()
+
+        # Convert rows to dictionaries with column names
+        column_names = [description[0] for description in cursor.description]
+        employees_dict = [dict(zip(column_names, employee))
+                          for employee in employees]
+
+    return employees_dict
+
+
+def list_payroll_for_employee_name(employee_name):
+    with get_db_connection() as connection:
+        cursor = connection.cursor()
+
+        query = """
+        SELECT * FROM payroll
+        WHERE employee_name LIKE ?
+        """
+        cursor.execute(query, (f'%{employee_name}%',))
+        payroll_records = cursor.fetchall()
+
+        column_names = [description[0] for description in cursor.description]
+        payroll_records_dict = [dict(zip(column_names, record))
+                                for record in payroll_records]
+
+    return payroll_records_dict
+
+
+def list_payroll_for_employee_name_and_id(employee_id, employee_name):
+    # Use context manager to handle the database connection
+    with get_db_connection() as connection:
+        cursor = connection.cursor()
+        # Query to filter by employee_id and employee_name
+        query = """
+        SELECT * FROM payroll
+        WHERE employee_id = ? AND employee_name LIKE ?
+        """
+        cursor.execute(query, (employee_id, f'%{employee_name}%'))
+        payroll_records = cursor.fetchall()
+
+        # Assuming you return the records as a list of dictionaries
+        column_names = [description[0] for description in cursor.description]
+        payroll_records_dict = [dict(zip(column_names, record))
+                                for record in payroll_records]
+
+    # No need to explicitly close cursor or connection as 'with' handles that
+    return payroll_records_dict
 
 
 def generate_monthly_payroll():
@@ -897,7 +1053,8 @@ def login():
 
         # Create the user object and log the user in with Flask-Login
         user_obj = User(id=user['ID'], username=user['UserName'],
-                        password=user['Password'], email=user['Email'])
+                        password=user['Password'], email=user['Email'], branch=user['Branch'], is_admin=user['IsAdmin'])
+
         login_user(user_obj)  # Store the user session with Flask-Login
 
         flash(
@@ -907,7 +1064,6 @@ def login():
     else:
         flash("Invalid username or password", 'error')
         return render_template('404.html'), 404
-
 
 # @app.route('/logout', methods=['POST'])
 # def logout():
@@ -1410,7 +1566,7 @@ def edit_branch(id):
         branch_name = request.form['branch']
         contact_number = request.form['contact_number']
         conn.execute('''
-            UPDATE branches 
+            UPDATE branches
             SET Status = ?, BranchManagerName = ?, Address = ?, Description = ?, Branch = ?, ContactNumber = ?, UpdatedAt = CURRENT_TIMESTAMP
             WHERE ID = ?''',
                      (status, branch_manager, address, description, branch_name, contact_number, id))
