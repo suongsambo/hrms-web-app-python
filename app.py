@@ -443,20 +443,76 @@ def create_payroll_endpoint():
 #     return render_template('/payroll/payroll_list.html', employees=employees, payroll_records=payroll_records)
 
 
+# @app.route('/payroll_list', methods=['GET'])
+# def payroll_list():
+#     # Optional filter for specific employee
+#     employee_id = request.args.get('employee_id', type=int)
+#     employee_name = request.args.get('employee_name')
+
+#     # Determine which payroll query to execute based on provided parameters
+#     if employee_id and employee_name:
+#         payroll_records = list_payroll_for_employee_name_and_id(
+#             employee_id, employee_name)
+#     elif employee_id:
+#         payroll_records = list_payroll_for_employee(employee_id)
+#     elif employee_name:
+#         payroll_records = list_payroll_for_employee_name(employee_name)
+#     else:
+#         payroll_records = list_all_payroll()
+
+#     # If no records found, return a 404 response
+#     if not payroll_records:
+#         return "No payroll records found", 404
+
+#     # Ensure all employees are fetched before rendering
+#     employees = get_all_employees()
+#     print("Employees:", employees)  # Debugging employees
+
+#     if not employees:
+#         return "Failed to retrieve employee information", 500
+
+#     # Render the HTML template with the payroll records and employees
+#     return render_template('payroll/payroll_list.html', payroll_records=payroll_records, employees=employees)
+
+
 @app.route('/payroll_list', methods=['GET'])
 def payroll_list():
-    # Optional filter for specific employee
+    # Optional filters for employee ID, employee name, and date range
     employee_id = request.args.get('employee_id', type=int)
     employee_name = request.args.get('employee_name')
+    start_date_str = request.args.get('start_date')
+    end_date_str = request.args.get('end_date')
+
+    # Convert the date strings to datetime objects if valid
+    try:
+        if start_date_str:
+            start_date = datetime.strptime(start_date_str, '%Y-%m-%d')
+        else:
+            start_date = None
+
+        if end_date_str:
+            end_date = datetime.strptime(end_date_str, '%Y-%m-%d')
+        else:
+            end_date = None
+    except ValueError:
+        return "Invalid date format. Please use 'YYYY-MM-DD'.", 400
 
     # Determine which payroll query to execute based on provided parameters
-    if employee_id and employee_name:
-        payroll_records = list_payroll_for_employee_name_and_id(
-            employee_id, employee_name)
+    if employee_id and employee_name and start_date and end_date:
+        payroll_records = list_payroll_for_employee_name_and_id_with_date_range(
+            employee_id, employee_name, start_date, end_date)
+    elif employee_id and start_date and end_date:
+        payroll_records = list_payroll_for_employee_with_date_range(
+            employee_id, start_date, end_date)
+    elif employee_name and start_date and end_date:
+        payroll_records = list_payroll_for_employee_name_with_date_range(
+            employee_name, start_date, end_date)
     elif employee_id:
         payroll_records = list_payroll_for_employee(employee_id)
     elif employee_name:
         payroll_records = list_payroll_for_employee_name(employee_name)
+    elif start_date and end_date:
+        payroll_records = list_payroll_for_date_range(start_date, end_date)
     else:
         payroll_records = list_all_payroll()
 
@@ -473,6 +529,17 @@ def payroll_list():
 
     # Render the HTML template with the payroll records and employees
     return render_template('payroll/payroll_list.html', payroll_records=payroll_records, employees=employees)
+
+
+def list_payroll_for_date_range(start_date, end_date):
+    """Retrieve payroll records within a specified date range."""
+    with get_db_connection() as conn:
+        cursor = conn.execute('''
+            SELECT * FROM payroll
+            WHERE period_start_date >= ? AND period_end_date <= ?
+        ''', (start_date, end_date))
+        payroll_records = cursor.fetchall()
+        return payroll_records
 
 
 def get_all_employees():
@@ -1019,6 +1086,13 @@ def online_users():
     return render_template('online_users.html', online_users=online_users)
 
 
+@app.route('/health', methods=['GET'])
+def health_check():
+    # You can customize this status if needed.
+    status = "healthy"
+    return render_template('health_check.html', status=status)
+
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
@@ -1334,6 +1408,17 @@ def dashboard():
         # Fetch total payroll (sum of all salaries)
         total_payroll = total_salary
 
+        # Fetch payroll by branch
+        payroll_by_branch = conn.execute("""
+            SELECT Branch, SUM(Salary) AS total_salary
+            FROM employees
+            GROUP BY Branch
+        """).fetchall()
+
+        payroll_branch_names = [row['Branch'] for row in payroll_by_branch]
+        payroll_branch_salaries = [row['total_salary']
+                                   for row in payroll_by_branch]
+
         # Fetch online users
         online_users = conn.execute('''
             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
@@ -1353,6 +1438,9 @@ def dashboard():
         branch_names=branch_names,  # Pass the branch names
         branch_counts=branch_counts,  # Pass the employee counts per branch
         branch_salaries=branch_salaries,  # Pass the total salaries per branch
+        payroll_branch_names=payroll_branch_names,  # Pass the branch names
+        # Pass the total salaries per branch
+        payroll_branch_salaries=payroll_branch_salaries,
         online_users=online_users
     )
 

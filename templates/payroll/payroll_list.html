@@ -6,49 +6,6 @@ content %}
       Payroll List
     </h1>
 
-    <!-- Filter Section -->
-    <div class="flex justify-center space-x-4 mb-8">
-      <!-- Employee ID Search -->
-      <div class="flex items-center space-x-2">
-        <label for="employee_id" class="text-lg text-gray-700"
-          >Employee ID:</label
-        >
-        <input
-          type="number"
-          id="employee_id"
-          class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          placeholder="Enter Employee ID"
-        />
-      </div>
-
-      <!-- Date Range Search -->
-      <div class="flex items-center space-x-2">
-        <label for="start_date" class="text-lg text-gray-700"
-          >Start Date:</label
-        >
-        <input
-          type="date"
-          id="start_date"
-          class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-
-        <label for="end_date" class="text-lg text-gray-700">End Date:</label>
-        <input
-          type="date"
-          id="end_date"
-          class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-      </div>
-
-      <!-- Search Button -->
-      <button
-        onclick="fetchPayroll()"
-        class="ml-2 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition duration-300"
-      >
-        Search
-      </button>
-    </div>
-
     <!-- Add Payroll and Mark as Paid Buttons -->
     <div class="flex justify-end space-x-4 mt-10">
       <a
@@ -67,85 +24,192 @@ content %}
         <i class="fas fa-print mr-2"></i>
         <span class="text-sm font-semibold">Print Payroll</span>
       </button>
+
+      <!-- Refresh Page Button -->
+      <button
+        onclick="window.location.reload()"
+        class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-full flex items-center justify-center space-x-2 transition duration-300"
+      >
+        <i class="fas fa-sync-alt mr-2"></i>
+        <span class="text-sm font-semibold">Refresh Page</span>
+      </button>
+    </div>
+    <div class="mt-5"></div>
+
+    <!-- Filter Section -->
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-lg"
+    >
+      <!-- Employee ID Search -->
+      <div
+        class="flex items-center bg-white p-4 rounded-lg shadow-md space-x-4"
+      >
+        <!-- Employee ID Label -->
+        <label for="employee_id" class="text-lg text-gray-800 font-semibold">
+          Employee ID:
+        </label>
+
+        <!-- Employee ID Input -->
+        <input
+          type="number"
+          id="employee_id"
+          class="w-36 p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          placeholder="Enter Employee ID"
+        />
+
+        <!-- Search Button -->
+        <button
+          onclick="fetchPayroll()"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-all duration-300"
+        >
+          Search
+        </button>
+
+        <!-- Clear Button -->
+        <button
+          onclick="cancelSearch()"
+          class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 transition-all duration-300"
+        >
+          Clear
+        </button>
+      </div>
+
+      <!-- Date Range Search -->
+      <div
+        class="flex items-center justify-start bg-white p-2 rounded-lg shadow-md space-x-4"
+      >
+        <!-- Start Date -->
+        <div class="flex items-center space-x-2">
+          <label for="start_date" class="text-lg text-gray-800 font-semibold"
+            >Start Date:</label
+          >
+          <input
+            type="date"
+            id="start_date"
+            name="start_date"
+            class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- End Date -->
+        <div class="flex items-center space-x-2">
+          <label for="end_date" class="text-lg text-gray-800 font-semibold"
+            >End Date:</label
+          >
+          <input
+            type="date"
+            id="end_date"
+            name="end_date"
+            class="p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <!-- Search Button -->
+        <button
+          onclick="fetchPayroll()"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition-all duration-300"
+        >
+          Search
+        </button>
+      </div>
     </div>
 
-    <!-- Payroll List Section -->
-    <div id="payrollList" class="space-y-6 mt-8">
+    <div id="payrollList" class="space-y-6 mt-4">
       {% if payroll_records %} {% for record in payroll_records %}
       <div
-        class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition duration-300"
+        class="bg-white p-6 rounded-lg shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300"
       >
-        <h2 class="text-2xl font-semibold text-blue-600">
+        <h2 class="text-2xl font-semibold text-blue-600 mb-3">
           Payroll ID: {{ record.id }}
         </h2>
 
-        <div class="mt-4">
-          <p>
-            <strong class="text-gray-700">Employee ID:</strong> {{
-            record.employee_id }}
-          </p>
+        <!-- Print Button -->
+        <button
+          onclick="printPayrollID({{ record.id }})"
+          class="mb-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+        >
+          Print Payroll ID: {{ record.id }}
+        </button>
 
-          {% if employees %}
-          <ul class="space-y-4">
-            {% for employee in employees %} {% if employee.id ==
-            record.employee_id %}
-            <li
-              class="bg-white p-4 rounded-lg shadow-lg border border-gray-200 hover:shadow-xl transition duration-300"
-            >
-              <h4 class="text-xl font-semibold">{{ employee.name }}</h4>
-              <p>
-                <strong class="text-gray-700">Employee ID:</strong> {{
-                employee.id }}
-              </p>
-              <p>
-                <strong class="text-gray-700">Branch:</strong> {{
-                employee.branch }}
-              </p>
-              <p>
-                <strong class="text-gray-700">Position:</strong> {{
-                employee.position }}
-              </p>
-            </li>
-            {% endif %} {% endfor %}
-          </ul>
-          {% else %}
-          <div class="bg-yellow-100 text-yellow-700 p-4 rounded-lg text-center">
+        <!-- Employee Information Section -->
+
+        <div class="mb-4" id="employee-{{ record.id }}">
+          {% if employees %} {% for employee in employees %} {% if employee.id
+          == record.employee_id %}
+          <p>
+            <strong class="text-blue-700">Employee Name:</strong>
+            {{ employee.name }}
+          </p>
+          <p>
+            <strong class="text-blue-700">Employee ID:</strong> {{ employee.id
+            }}
+          </p>
+          <p>
+            <strong class="text-blue-700">Branch:</strong> {{ employee.branch }}
+          </p>
+          <p>
+            <strong class="text-blue-700">Position:</strong> {{
+            employee.department }}
+          </p>
+          {% endif %} {% endfor %} {% else %}
+          <div
+            class="bg-yellow-50 text-yellow-800 p-5 rounded-xl text-center shadow-md"
+          >
             <p>No employees found.</p>
           </div>
           {% endif %}
+        </div>
 
-          <p>
-            <strong class="text-gray-700">Period Start Date:</strong> {{
-            record.period_start_date }}
+        <!-- Horizontal rule after employee data -->
+        <hr class="my-4" />
+
+        <!-- Payroll Details Section -->
+        <h3 class="text-lg font-semibold text-gray-700 mb-2">
+          Payroll Details
+        </h3>
+        <div id="payroll-{{ record.id }}" class="space-y-3">
+          <p class="font-medium text-gray-700">
+            <strong class="text-gray-700">Employee ID:</strong>
+            <span class="text-gray-900">{{ record.employee_id }}</span>
           </p>
           <p>
-            <strong class="text-gray-700">Period End Date:</strong> {{
-            record.period_end_date }}
+            <strong class="text-gray-700">Period Start Date:</strong>
+            <span class="text-gray-900">{{ record.period_start_date }}</span>
           </p>
           <p>
-            <strong class="text-gray-700">Base Salary:</strong> ${{
-            record.base_salary }}
+            <strong class="text-gray-700">Period End Date:</strong>
+            <span class="text-gray-900">{{ record.period_end_date }}</span>
           </p>
           <p>
-            <strong class="text-gray-700">Bonus:</strong> ${{ record.bonus }}
+            <strong class="text-gray-700">Base Salary:</strong>
+            <span class="text-gray-900">${{ record.base_salary }}</span>
           </p>
           <p>
-            <strong class="text-gray-700">Deductions:</strong> ${{
-            record.deductions }}
-          </p>
-          <p><strong class="text-gray-700">Tax:</strong> ${{ record.tax }}</p>
-          <p>
-            <strong class="text-gray-700">Total Salary:</strong> ${{
-            record.total_salary }}
+            <strong class="text-gray-700">Bonus:</strong>
+            <span class="text-gray-900">${{ record.bonus }}</span>
           </p>
           <p>
-            <strong class="text-gray-700">Payment Date:</strong> {{
-            record.payment_date }}
+            <strong class="text-gray-700">Deductions:</strong>
+            <span class="text-gray-900">${{ record.deductions }}</span>
+          </p>
+          <p>
+            <strong class="text-gray-700">Tax:</strong>
+            <span class="text-gray-900">${{ record.tax }}</span>
+          </p>
+          <p>
+            <strong class="text-gray-700">Total Salary:</strong>
+            <span class="text-green-600 font-semibold"
+              >${{ record.total_salary }}</span
+            >
+          </p>
+          <p>
+            <strong class="text-gray-700">Payment Date:</strong>
+            <span class="text-gray-900">{{ record.payment_date }}</span>
           </p>
         </div>
       </div>
       {% endfor %} {% else %}
-      <div class="bg-red-100 text-red-700 p-4 rounded-lg text-center">
+      <div class="bg-red-100 text-red-700 p-5 rounded-lg text-center shadow-md">
         <p>No payroll records found.</p>
       </div>
       {% endif %}
@@ -154,6 +218,32 @@ content %}
 </div>
 
 <script>
+  function cancelSearch() {
+    // Clear the Employee ID input field
+    document.getElementById("employee_id").value = "";
+    document.getElementById("start_date").value = "";
+    document.getElementById("end_date").value = "";
+
+    // Optionally, you could reload the page to reset any filtering
+    // location.reload();
+  }
+
+  // Example fetchPayroll function (you should already have this)
+  function fetchPayroll() {
+    const employee_id = document.getElementById("employee_id").value;
+    const start_date = document.getElementById("start_date").value;
+    const end_date = document.getElementById("end_date").value;
+
+    console.log("Searching for payroll with Employee ID:", employee_id);
+    console.log("Date range:", start_date, "to", end_date);
+  }
+  // Example fetchPayroll function (you should already have this)
+  function fetchPayroll() {
+    const employee_id = document.getElementById("employee_id").value;
+
+    // Do your search logic here (e.g., sending request to server)
+    console.log("Searching for payroll with Employee ID:", employee_id);
+  }
   // Function to fetch payroll records based on filters
   function fetchPayroll() {
     const employee_id = document.getElementById("employee_id").value;
@@ -257,88 +347,97 @@ content %}
     printWindow.document.close();
     printWindow.print();
   }
+
+  // Function to handle print by Payroll ID
+  function printPayrollID(id) {
+    // Get the payroll details by ID
+    var printContent = document.getElementById("payroll-" + id).innerHTML;
+    var employeeContent = document.getElementById("employee-" + id).innerHTML;
+
+    // Define the header and footer content for invoice style
+    var headerContent = `
+        <div style="background-color: #1e40af; color: white; padding: 0; margin: 0; text-align: left;">
+            <p style="font-size: 12px; font-weight: 500; margin: 0; padding: 0;">Payroll ID: ${id}</p>
+            <p style="font-size: 12px; font-weight: 300; margin: 0; padding: 0;">Generated on: ${new Date().toLocaleString()}</p>
+        </div>
+
+    `;
+
+    var footerContent = `
+        <div style="background-color: #f3f4f6; text-align: center; padding: 0; margin: 0; margin-top: 24px; font-size: 12px;">
+            <p style="margin: 0; padding: 0;">Generated on: ${new Date().toLocaleString()}</p>
+        </div>
+        
+    `;
+
+    // Open a new window for printing
+    var printWindow = window.open("", "", "height=600,width=800");
+    printWindow.document.write(
+      "<html><head><title>Payroll Invoice - ID: " + id + "</title>"
+    );
+
+    // Add custom styles to remove margins and paddings
+    printWindow.document.write(`
+        <style>
+            body, html {
+                margin: 0;
+                padding: 0;
+                font-family: Arial, sans-serif;
+            }
+            h1, h2, h3, p {
+                margin: 0;
+                padding: 0;
+            }
+            .container {
+                margin: 0;
+                padding: 0;
+            }
+            .space-y-2 > * + * {
+                margin-top: 0;
+            }
+        </style>
+    `);
+
+    // Add company name and description to the header
+    printWindow.document.write(`
+        <h1 style="font-size: 24px; font-weight: bold; text-align: left; margin: 0; padding: 0;">{{ config['APP_NAME'] }} Payroll Invoice</h1>
+    `);
+    printWindow.document.write(`
+        <p style="font-size: 16px; text-align: left; margin: 0; padding: 0;">{{ config['APP_DESCRIPTION'] }}</p>
+    `);
+
+    printWindow.document.write("</head><body>");
+
+    // Add header, employee data, payroll content, and footer
+    printWindow.document.write(headerContent);
+
+    // Section 1: Employee Details Section
+    printWindow.document.write(`
+        <div style="background-color: #f3f4f6; padding: 0; margin: 0; margin-bottom: 16px;">
+            <h2 style="font-size: 18px; font-weight: 600; color: #4b5563; margin-bottom: 8px;">Employee Details</h2>
+            <div style="margin-bottom: 8px;">
+                ${employeeContent}
+            </div>
+        </div>
+        <hr style="margin-top: 16px; margin-bottom: 16px; padding: 0; border: 0; border-top: 1px solid #e5e7eb;">
+    `);
+
+    // Section 2: Payroll Breakdown Section
+    printWindow.document.write(`
+        <div style="background-color: white; padding: 0; margin: 0; border: 1px solid #e5e7eb; margin-bottom: 16px;">
+            <h3 style="font-size: 16px; font-weight: 600; color: #4b5563; margin-bottom: 12px;">Payroll Breakdown</h3>
+            <div style="margin-bottom: 16px;">
+                ${printContent}
+            </div>
+        </div>
+    `);
+
+    // Add footer
+    printWindow.document.write(footerContent);
+
+    printWindow.document.write("</body></html>");
+    printWindow.document.close(); // Close the document
+    printWindow.print(); // Trigger the print dialog
+  }
 </script>
 {% endblock %}
-
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Payroll List</title>
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-    />
-  </head>
-  <body>
-    <div class="container">
-      <h2 class="mt-5">Payroll Records</h2>
-
-      <!-- Form for filtering payroll records -->
-      <form action="/payroll_list" method="get" class="mb-4">
-        <div class="form-row">
-          <div class="form-group col-md-3">
-            <label for="employee_id">Employee ID</label>
-            <input
-              type="number"
-              id="employee_id"
-              name="employee_id"
-              class="form-control"
-              value="{{ request.args.get('employee_id') }}"
-            />
-          </div>
-          <div class="form-group col-md-3">
-            <label for="employee_name">Employee Name</label>
-            <input
-              type="text"
-              id="employee_name"
-              name="employee_name"
-              class="form-control"
-              value="{{ request.args.get('employee_name') }}"
-            />
-          </div>
-          <div class="form-group col-md-3">
-            <button type="submit" class="btn btn-primary mt-4">Filter</button>
-          </div>
-        </div>
-      </form>
-
-      <!-- Payroll Table -->
-      <h3>Payroll Results</h3>
-      {% if payroll_records %}
-      <table class="table table-bordered">
-        <thead>
-          <tr>
-            <th>Employee Name</th>
-            <th>Employee ID</th>
-            <th>Branch</th>
-            <th>Period Start</th>
-            <th>Period End</th>
-            <th>Salary</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for record in payroll_records %}
-          <tr>
-            <td>{{ record.employee_name }}</td>
-            <td>{{ record.employee_id }}</td>
-            <td>{{ record.branch }}</td>
-            <td>{{ record.period_start_date }}</td>
-            <td>{{ record.period_end_date }}</td>
-            <td>{{ record.salary }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      {% else %}
-      <p>No payroll records found.</p>
-      {% endif %}
-    </div>
-
-    <!-- Bootstrap JS and dependencies (optional) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </body>
-</html>

@@ -451,6 +451,32 @@
         </div>
       </div>
 
+      {% if current_user.is_admin == 1 %}
+      <div class="relative">
+        <button
+          @click="activeMenu = activeMenu === 'health_check' ? '' : 'health_check'"
+          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          <span class="material-symbols-outlined">health_and_safety</span>
+          <span class="ml-2">Health Check</span>
+          <span class="ml-2">&#9662;</span>
+        </button>
+        <div
+          x-show="activeMenu === 'health_check'"
+          @click.away="activeMenu = ''"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+        >
+          <a
+            href="/health"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Health Check</span>
+          </a>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Contact Us -->
       <div class="relative">
         <button
