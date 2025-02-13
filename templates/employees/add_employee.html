@@ -1,93 +1,295 @@
-{% extends 'base.html' %} {% block title %}Add Employee{% endblock %} {% block
+{% extends 'base.html' %} {% block title %} Add Employee {% endblock %} {% block
 content %}
-<div class="max-w-[1472px] mx-auto bg-white p-6 rounded-lg shadow-md">
-  <h2 class="text-2xl font-semibold text-gray-800 mb-4">Add Employee</h2>
+<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+  <!-- Form Title -->
+  <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">
+    Add New Employee
+  </h2>
 
-  <form action="{{ url_for('add_employee') }}" method="POST" class="space-y-4">
-    <div>
-      <label for="name" class="block text-sm font-medium text-gray-700"
-        >Name:</label
-      >
-      <input
-        type="text"
-        id="name"
-        name="name"
-        required
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-      />
+  <form action="{{ url_for('add_employee') }}" method="POST" class="space-y-6">
+    <!-- Employee Information Section -->
+    <div class="border-b pb-4 mb-6">
+      <h3 class="text-xl font-semibold text-gray-800 mb-4">
+        Employee Information
+      </h3>
+
+      <!-- Grid Layout with 2 columns -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Name Field -->
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700"
+            >Name:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="text"
+              id="name"
+              name="name"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Age Field -->
+        <div>
+          <label for="age" class="block text-sm font-medium text-gray-700"
+            >Age:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="number"
+              id="age"
+              name="age"
+              required
+              min="18"
+              max="99"
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Department Field -->
+        <div>
+          <label
+            for="department"
+            class="block text-sm font-medium text-gray-700"
+            >Department:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="text"
+              id="department"
+              name="department"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Position Field -->
+        <div>
+          <label for="position" class="block text-sm font-medium text-gray-700"
+            >Position:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="text"
+              id="position"
+              name="position"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Joining Date Field -->
+        <div>
+          <label
+            for="joining_date"
+            class="block text-sm font-medium text-gray-700"
+            >Joining Date:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="date"
+              id="joining_date"
+              name="joining_date"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Status Field -->
+        <div>
+          <label for="status" class="block text-sm font-medium text-gray-700"
+            >Status:</label
+          >
+          <div class="mt-2 relative">
+            <select
+              id="status"
+              name="status"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="" disabled selected>Select a Status</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="On Leave">On Leave</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Branch Field -->
+        <div>
+          <label for="branch" class="block text-sm font-medium text-gray-700"
+            >Branch:</label
+          >
+          <div class="mt-2 relative">
+            <select
+              id="branch"
+              name="branch"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="" disabled selected>Select a Branch</option>
+              {% for branch in branches %}
+              <option value="{{ branch['Branch'] }}">
+                {{ branch['Branch'] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- User ID Field -->
+        <div>
+          <label for="user_id" class="block text-sm font-medium text-gray-700"
+            >User ID:</label
+          >
+          <div class="mt-2 relative">
+            <select
+              id="user_id"
+              name="user_id"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="" disabled selected>Select a User</option>
+              {% for user in users %}
+              <option value="{{ user.id }}">
+                {{ user.id }} - {{ user.UserName }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Phone Number Field -->
+        <div>
+          <label
+            for="phone_number"
+            class="block text-sm font-medium text-gray-700"
+            >Phone Number:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="text"
+              id="phone_number"
+              name="phone_number"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700"
+            >Email:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Emergency Contact Name Field -->
+        <div>
+          <label
+            for="emergency_contact_name"
+            class="block text-sm font-medium text-gray-700"
+            >Emergency Contact Name:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="text"
+              id="emergency_contact_name"
+              name="emergency_contact_name"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Emergency Contact Phone Field -->
+        <div>
+          <label
+            for="emergency_contact_phone"
+            class="block text-sm font-medium text-gray-700"
+            >Emergency Contact Phone:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="text"
+              id="emergency_contact_phone"
+              name="emergency_contact_phone"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+
+        <!-- Address Field -->
+        <div>
+          <label for="address" class="block text-sm font-medium text-gray-700"
+            >Address:</label
+          >
+          <div class="mt-2 relative">
+            <textarea
+              id="address"
+              name="address"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              rows="3"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Salary Field -->
+        <div>
+          <label for="salary" class="block text-sm font-medium text-gray-700"
+            >Salary:</label
+          >
+          <div class="mt-2 relative">
+            <input
+              type="number"
+              id="salary"
+              name="salary"
+              step="0.01"
+              required
+              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
+    <!-- Submit Button -->
     <div>
-      <label for="age" class="block text-sm font-medium text-gray-700"
-        >Age:</label
+      <button
+        type="submit"
+        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300"
       >
-      <input
-        type="number"
-        id="age"
-        name="age"
-        required
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-      />
+        Add Employee
+      </button>
     </div>
-
-    <div>
-      <label for="department" class="block text-sm font-medium text-gray-700"
-        >Department:</label
-      >
-      <input
-        type="text"
-        id="department"
-        name="department"
-        required
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-      />
-    </div>
-
-    <div>
-      <label for="salary" class="block text-sm font-medium text-gray-700"
-        >Salary:</label
-      >
-      <input
-        type="number"
-        id="salary"
-        name="salary"
-        step="0.01"
-        required
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-      />
-    </div>
-
-    <div>
-      <label for="branch" class="block text-sm font-medium text-gray-700"
-        >Branch:</label
-      >
-      <select
-        id="branch"
-        name="branch"
-        required
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-      >
-        <option value="" disabled selected>Select a Branch</option>
-        {% for branch in branches %}
-        <option value="{{ branch['Branch'] }}">{{ branch['Branch'] }}</option>
-        {% endfor %}
-      </select>
-    </div>
-
-    <button
-      type="submit"
-      class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition"
-    >
-      Add Employee
-    </button>
   </form>
 
-  <div class="mt-4">
+  <!-- Back Link -->
+  <div class="mt-6 text-center">
     <a
       href="{{ url_for('list_employees') }}"
-      class="text-blue-500 hover:text-blue-700 transition"
-      >← Back to Employees List</a
+      class="text-blue-500 hover:text-blue-700 transition duration-300"
     >
+      ← Back to Employees List
+    </a>
   </div>
 </div>
+
 {% endblock %}

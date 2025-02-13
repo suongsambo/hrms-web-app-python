@@ -1,34 +1,221 @@
-{% extends 'base.html' %}
-
-{% block title %}Employees{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
+content %}
 
 <div class="container mx-auto py-8">
-    <h2 class="text-2xl font-bold mb-6">Edit Employee</h2>
-    <form method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-        <label for="name" class="block text-gray-700 text-sm font-bold mb-2">Name:</label>
-        <input type="text" id="name" name="name" value="{{ employee['name'] }}" required
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+  <h2 class="text-2xl font-bold mb-6">Edit Employee</h2>
+  <form method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="name" class="block text-gray-700 text-sm font-bold mb-2"
+          >Name:</label
+        >
+        <input
+          type="text"
+          id="name"
+          name="name"
+          value="{{ employee['name'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
 
-        <label for="age" class="block text-gray-700 text-sm font-bold mb-2">Age:</label>
-        <input type="number" id="age" name="age" value="{{ employee['age'] }}" required
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <div>
+        <label for="age" class="block text-gray-700 text-sm font-bold mb-2"
+          >Age:</label
+        >
+        <input
+          type="number"
+          id="age"
+          name="age"
+          value="{{ employee['age'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
 
-        <label for="department" class="block text-gray-700 text-sm font-bold mb-2">Department:</label>
-        <input type="text" id="department" name="department" value="{{ employee['department'] }}" required
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      <div>
+        <label
+          for="department"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Department:</label
+        >
+        <input
+          type="text"
+          id="department"
+          name="department"
+          value="{{ employee['department'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
 
-        <label for="salary" class="block text-gray-700 text-sm font-bold mb-2">Salary:</label>
-        <input type="number" id="salary" name="salary" step="0.01" value="{{ employee['salary'] }}" required
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-        <br>
-        <br>
-        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Update
-            Employee</button>
-        <a href="{{ url_for('list_employees') }}"
-            class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">Cancel</a>
-    </form>
+      <div>
+        <label for="salary" class="block text-gray-700 text-sm font-bold mb-2"
+          >Salary:</label
+        >
+        <input
+          type="number"
+          id="salary"
+          name="salary"
+          step="0.01"
+          value="{{ employee['salary'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label for="position" class="block text-gray-700 text-sm font-bold mb-2"
+          >Position:</label
+        >
+        <input
+          type="text"
+          id="position"
+          name="position"
+          value="{{ employee['position'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label
+          for="joining_date"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Joining Date:</label
+        >
+        <input
+          type="date"
+          id="joining_date"
+          name="joining_date"
+          value="{{ employee['joining_date'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label for="status" class="block text-gray-700 text-sm font-bold mb-2"
+          >Status:</label
+        >
+        <select
+          id="status"
+          name="status"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        >
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+          <option value="On Leave">On Leave</option>
+        </select>
+      </div>
+
+      <div>
+        <label for="branch" class="block text-gray-700 text-sm font-bold mb-2"
+          >Branch:</label
+        >
+        <input
+          type="text"
+          id="branch"
+          name="branch"
+          value="{{ employee['branch'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label
+          for="phone_number"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Phone Number:</label
+        >
+        <input
+          type="text"
+          id="phone_number"
+          name="phone_number"
+          value="{{ employee['phone_number'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label for="email" class="block text-gray-700 text-sm font-bold mb-2"
+          >Email:</label
+        >
+        <input
+          type="email"
+          id="email"
+          name="email"
+          value="{{ employee['email'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label for="address" class="block text-gray-700 text-sm font-bold mb-2"
+          >Address:</label
+        >
+        <input
+          type="text"
+          id="address"
+          name="address"
+          value="{{ employee['address'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label
+          for="emergency_contact_name"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Emergency Contact Name:</label
+        >
+        <input
+          type="text"
+          id="emergency_contact_name"
+          name="emergency_contact_name"
+          value="{{ employee['emergency_contact_name'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label
+          for="emergency_contact_phone"
+          class="block text-gray-700 text-sm font-bold mb-2"
+          >Emergency Contact Phone:</label
+        >
+        <input
+          type="text"
+          id="emergency_contact_phone"
+          name="emergency_contact_phone"
+          value="{{ employee['emergency_contact_phone'] }}"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-between mt-6">
+      <button
+        type="submit"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Update Employee
+      </button>
+      <a
+        href="{{ url_for('list_employees') }}"
+        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+      >
+        Cancel
+      </a>
+    </div>
+  </form>
 </div>
 
 {% endblock %}

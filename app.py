@@ -100,11 +100,19 @@ def init_db():
              CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                age INTEGER NOT NULL,
+                age INTEGER NOT NULL CHECK(age >= 18 AND age <= 100),  -- Ensures age is between 18 and 100
                 department TEXT NOT NULL,
-                salary REAL NOT NULL,
-                branch TEXT,
-                user_id INTEGER,
+                salary REAL NOT NULL CHECK(salary > 0),  -- Ensures salary is positive
+                position TEXT,  -- Position of the employee (e.g., Manager, Developer)
+                joining_date TEXT DEFAULT CURRENT_TIMESTAMP,  -- Date the employee joined
+                status TEXT CHECK(status IN ('Active', 'Inactive', 'On Leave')) DEFAULT 'Active',  -- Employee status
+                branch TEXT,  -- Branch of the employee
+                user_id INTEGER,  -- Reference to the user table
+                phone_number TEXT,  -- Contact number of the employee
+                email TEXT UNIQUE,  -- Email address of the employee
+                address TEXT,  -- Employee address
+                emergency_contact_name TEXT,  -- Emergency contact name
+                emergency_contact_phone TEXT,  -- Emergency contact phone number
                 FOREIGN KEY (user_id) REFERENCES users(ID)
             )
         ''')
@@ -237,6 +245,17 @@ def init_db():
                 email TEXT NOT NULL,
                 message TEXT NOT NULL,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
+        # Create departments table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS departments (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT NOT NULL,
+                Description TEXT,
+                CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
 
@@ -411,8 +430,9 @@ def worked_time(user_id):
             return render_template('worked_time.html', employee=employee, worked_duration=None)
         return "Employee not found."
 
-
 # CRUD functions for Payroll
+
+
 def create_payroll(employee_id, period_start_date, period_end_date, base_salary, bonus=0, deductions=0, tax=0):
     """Create a new payroll record for an employee."""
     total_salary = float(base_salary) + float(bonus) - \
@@ -457,8 +477,6 @@ def list_payroll_for_employee_name(employee_name):
         payroll_records = cursor.fetchall()
         return payroll_records
 
-# Endpoint to manually create payroll
-
 
 def list_all_payroll():
     """Retrieve all payroll records."""
@@ -466,17 +484,6 @@ def list_all_payroll():
         cursor = conn.execute('SELECT * FROM payroll')
         payroll_records = cursor.fetchall()
         return payroll_records
-
-
-# def get_all_employees():
-#     """Fetch all employees from the database."""
-#     try:
-#         with get_db_connection() as conn:
-#             cursor = conn.execute('SELECT * FROM employees')
-#             employees = cursor.fetchall()
-#         return employees
-#     except Exception:
-#         return []
 
 
 @app.route('/payroll_form', methods=['GET'])
@@ -1173,53 +1180,6 @@ def health_check():
     return render_template('health_check.html', status=status)
 
 
-# @app.route('/login', methods=['POST'])
-# def login():
-#     username = request.form['username']
-#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
-
-#     # Get the user's IP address and user agent (browser/device info)
-#     ip_address = request.remote_addr
-#     user_agent = request.user_agent.string
-
-#     # Optionally get the geolocation (City, Region, Country) based on IP address
-#     city, region, country = get_geolocation(ip_address)
-
-#     with get_db_connection() as conn:
-#         user = conn.execute('''
-#             SELECT * FROM users WHERE UserName = ? AND Password = ?
-#         ''', (username, password)).fetchone()
-
-#     if user:
-#         # Log the login event (store user location and device info)
-#         with get_db_connection() as conn:
-#             conn.execute('''
-#                 INSERT INTO login_logs (user_id, ip_address, city, region, country, user_agent)
-#                 VALUES (?, ?, ?, ?, ?, ?)
-#             ''', (user['ID'], ip_address, city, region, country, user_agent))
-
-#             # Add user to online_users table or update if already exists
-#             conn.execute('''
-#                 INSERT OR REPLACE INTO online_users (user_id, login_time, last_active_time)
-#                 VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-#             ''', (user['ID'],))
-#             conn.commit()
-
-#         # Create the user object and log the user in with Flask-Login
-#         user_obj = User(id=user['ID'], username=user['UserName'],
-#                         password=user['Password'], email=user['Email'], branch=user['Branch'], is_admin=user['IsAdmin'], role_default=user['RoleDefault'])
-
-#         login_user(user_obj)  # Store the user session with Flask-Login
-
-#         flash(
-#             f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
-#         return redirect(url_for('dashboard'))
-
-#     else:
-#         flash("Invalid username or password", 'error')
-#         return render_template('404.html'), 404
-
-
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
@@ -1280,12 +1240,6 @@ def login():
     else:
         flash("Invalid username or password", 'error')
         return render_template('404.html'), 404
-
-
-# @app.route('/logout', methods=['POST'])
-# def logout():
-#     logout_user()
-#     return redirect(url_for('index'))
 
 
 @app.route('/logout', methods=['POST'])
@@ -1629,21 +1583,42 @@ def search_employees():
 @login_required
 def add_employee():
     branches = []
+    users = []
+
     with get_db_connection() as conn:
         branches = conn.execute("SELECT * FROM branches").fetchall()
+        users = conn.execute(
+            "SELECT id, UserName FROM users").fetchall()  # Fetch users
 
     if request.method == 'POST':
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
         salary = request.form['salary']
+        position = request.form['position']
+        joining_date = request.form['joining_date']
+        status = request.form['status']
         branch = request.form['branch']
+        user_id = request.form['user_id']
+        phone_number = request.form['phone_number']
+        email = request.form['email']
+        address = request.form['address']
+        emergency_contact_name = request.form['emergency_contact_name']
+        emergency_contact_phone = request.form['emergency_contact_phone']
+
         with get_db_connection() as conn:
-            conn.execute("INSERT INTO employees (name, age, department, salary, branch) VALUES (?, ?, ?, ?, ?)",
-                         (name, age, department, salary, branch))
+            conn.execute(
+                """INSERT INTO employees (name, age, department, salary, position, joining_date, status, 
+                                           branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone) 
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (name, age, department, salary, position, joining_date, status, branch, user_id,
+                 phone_number, email, address, emergency_contact_name, emergency_contact_phone)
+            )
             conn.commit()
         return redirect(url_for('list_employees'))
-    return render_template('/employees/add_employee.html', branches=branches)
+
+    # Pass users and branches to template
+    return render_template('/employees/add_employee.html', branches=branches, users=users)
 
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
@@ -1652,16 +1627,33 @@ def edit_employee(id):
     with get_db_connection() as conn:
         employee = conn.execute(
             "SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
+
     if request.method == 'POST':
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
         salary = request.form['salary']
+        position = request.form['position']
+        joining_date = request.form['joining_date']
+        status = request.form['status']
+        branch = request.form['branch']
+        phone_number = request.form['phone_number']
+        email = request.form['email']
+        address = request.form['address']
+        emergency_contact_name = request.form['emergency_contact_name']
+        emergency_contact_phone = request.form['emergency_contact_phone']
+
         with get_db_connection() as conn:
-            conn.execute("UPDATE employees SET name = ?, age = ?, department = ?, salary = ? WHERE id = ?",
-                         (name, age, department, salary, id))
+            conn.execute(
+                """UPDATE employees SET name = ?, age = ?, department = ?, salary = ?, position = ?, joining_date = ?, 
+                   status = ?, branch = ?, phone_number = ?, email = ?, address = ?, emergency_contact_name = ?, emergency_contact_phone = ? 
+                   WHERE id = ?""",
+                (name, age, department, salary, position, joining_date, status, branch,
+                 phone_number, email, address, emergency_contact_name, emergency_contact_phone, id)
+            )
             conn.commit()
         return redirect(url_for('list_employees'))
+
     return render_template('/employees/edit_employee.html', employee=employee)
 
 
