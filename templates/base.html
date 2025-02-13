@@ -179,7 +179,7 @@
 
       <!-- Users -->
       {% if current_user.is_admin == 1 %}
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'users' ? '' : 'users'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -200,6 +200,14 @@
             <span class="material-symbols-outlined">person_add</span>
             <span>Add User</span>
           </a>
+
+          <a
+            href="/users/roles"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+            <span>Roles</span>
+          </a>
           <a
             href="/users"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -211,9 +219,9 @@
       </div>
       {% endif %}
 
-      <!-- Roles Menu (Only visible to Admins) -->
+      <!-- Roles Menu (Only visible to Admins) 
       {% if current_user.is_admin == 1 %}
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'roles' ? '' : 'roles'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -244,9 +252,12 @@
           </a>
         </div>
       </div>
-      {% endif %} {% if current_user.is_admin == 1 %}
+      {% endif %}
+      -->
+
+      {% if current_user.is_admin == 1 %}
       <!-- Menu Branch -->
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'branch' ? '' : 'branch'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -258,7 +269,7 @@
         <div
           x-show="activeMenu === 'branch'"
           @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
         >
           <a
             href="/branches/add"
@@ -279,7 +290,7 @@
       {% endif %}
       <!-- Employees -->
       {% if current_user.is_admin == 1 %}
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'employees' ? '' : 'employees'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -314,7 +325,7 @@
       <!-- Payroll -->
 
       {% if current_user.is_admin == 1 %}
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'payroll' ? '' : 'payroll'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -346,7 +357,7 @@
       </div>
       {% endif %} {% if current_user.is_admin == 1 %}
       <!-- Attendance -->
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -358,16 +369,8 @@
         <div
           x-show="activeMenu === 'attendance'"
           @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
         >
-          <a
-            href="/attendance/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Attendance</span>
-          </a>
-
           <a
             href="{{ url_for('checkin', user_id=current_user.id) }}"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -391,6 +394,14 @@
             <span class="material-symbols-outlined">timer</span>
             <span>Work Time</span>
           </a>
+
+          <a
+            href="/attendance/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">event</span>
+            <span>Add Attendance</span>
+          </a>
           <a
             href="/attendance"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -401,10 +412,51 @@
         </div>
       </div>
 
-      {% endif %}
+      {% endif %} {% if current_user.role_default == 20 %}
+      <!-- Attendance -->
+      <div class="relative z-10">
+        <button
+          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          <span class="material-symbols-outlined">event</span>
+          <span class="ml-2">Attendance</span>
+          <span class="ml-2">&#9662;</span>
+        </button>
+        <div
+          x-show="activeMenu === 'attendance'"
+          @click.away="activeMenu = ''"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+        >
+          <a
+            href="{{ url_for('checkin', user_id=current_user.id) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Check In</span>
+          </a>
 
+          <a
+            href="{{ url_for('checkout', user_id=current_user.id) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">check_circle</span>
+            <span>Check Out</span>
+          </a>
+
+          <a
+            href="{{ url_for('worked_time', user_id=current_user.id) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">timer</span>
+            <span>Work Time</span>
+          </a>
+        </div>
+      </div>
+
+      {% endif %} {% if current_user.is_admin == 1 %}
       <!-- Media and Files -->
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'media' ? '' : 'media'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -443,8 +495,9 @@
         </div>
       </div>
 
+      {% endif %}
       <!-- Settings -->
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'settings' ? '' : 'settings'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -458,6 +511,7 @@
           @click.away="activeMenu = ''"
           class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
         >
+          <!--
           <a
             href="/profile"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -465,6 +519,7 @@
             <span class="material-symbols-outlined">person</span>
             <span>Profile</span>
           </a>
+           -->
           <a
             href="/change_password"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -476,7 +531,7 @@
       </div>
 
       {% if current_user.is_admin == 1 %}
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'health_check' ? '' : 'health_check'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -502,7 +557,7 @@
       {% endif %}
 
       <!-- Contact Us -->
-      <div class="relative">
+      <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'contact' ? '' : 'contact'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"

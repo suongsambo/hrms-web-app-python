@@ -20,11 +20,15 @@ content %}
     </div>
     <div class="bg-white rounded shadow p-4">
       <h2 class="text-lg font-bold mb-2">Average Age</h2>
-      <p class="text-2xl font-bold">{{ "%.2f"|format(average_age) }}</p>
+      <p class="text-2xl font-bold">
+        {{ average_age is not none and "%.2f"|format(average_age) }}
+      </p>
     </div>
     <div class="bg-white rounded shadow p-4">
       <h2 class="text-lg font-bold mb-2">Total Salary</h2>
-      <p class="text-2xl font-bold">${{ '%.2f'|format(total_salary) }}</p>
+      <p class="text-2xl font-bold">
+        {{ total_salary is not none and "$%.2f"|format(total_salary) }}
+      </p>
     </div>
   </div>
   <div class="bg-white rounded-lg shadow-lg p-6">
@@ -75,13 +79,19 @@ content %}
     <p><strong>Email:</strong> {{ current_user.email }}</p>
     <p>
       <strong>Is Admin:</strong>
-      {% if current_user.is_admin == 1 %}
+      {% if current_user.is_admin is not none and current_user.is_admin == 1 %}
       <span class="text-green-600 font-bold">Yes</span>
       {% else %}
       <span class="text-red-600 font-bold">No</span>
       {% endif %}
     </p>
-    <p><strong>Branch:</strong> {{ current_user.branch }}</p>
+    <p>
+      <strong>Branch:</strong> {{ current_user.branch|default('N/A', true) }}
+    </p>
+    <p>
+      <strong>Role Default:</strong>
+      {{ current_user.role_default }}
+    </p>
   </div>
 
   <!-- Online Users -->

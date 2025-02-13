@@ -8,23 +8,44 @@ import os
 import pyotp
 import requests
 import glob
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from config import Config
-from models.models import User
+# from models.models import User
 from flask_socketio import SocketIO, send
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime
+from typing import Optional
+
 app = Flask(__name__)
 app.config.from_object(Config)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
 
-# Initialize the Flask-Login manager
+
+class User(UserMixin):
+    def __init__(self, id: int, username: str, password: str, email: str,
+                 branch: Optional[str] = None, is_admin: bool = False,
+                 role_default: Optional[int] = 0):
+        self.id = id
+        self.username = username
+        self.password = password
+        self.email = email
+        self.branch = branch
+        self.is_admin = is_admin
+        self.role_default = role_default
+
+    def get_id(self):
+        """Override get_id method to work with Flask-Login."""
+        return str(self.id)
+
+    def __repr__(self):
+        return f"<User(id={self.id}, username={self.username}, email={self.email})>"
+
+
 login_manager = LoginManager()
 login_manager.init_app(app)
-
-# Setup database connection
+login_manager.login_view = 'login'
 
 
 @socketio.on("message")
@@ -70,19 +91,21 @@ def init_db():
                 Status TEXT,
                 Note TEXT,
                 RequestRole TEXT,
-                RoleDefault TEXT
+                RoleDefault INTEGER DEFAULT 0
             )
         ''')
 
         # Create employees table
         conn.execute('''
-            CREATE TABLE IF NOT EXISTS employees (
+             CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 age INTEGER NOT NULL,
                 department TEXT NOT NULL,
                 salary REAL NOT NULL,
-                branch TEXT
+                branch TEXT,
+                user_id INTEGER,
+                FOREIGN KEY (user_id) REFERENCES users(ID)
             )
         ''')
 
@@ -134,6 +157,8 @@ def init_db():
             CREATE TABLE IF NOT EXISTS roles (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
+                Role TEXT NOT NULL, 
+                RoleNumber INTEGER NOT NULL, 
                 CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
                 UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
                 Status TEXT CHECK(Status IN ('Active', 'Inactive')) DEFAULT 'Active',
@@ -251,7 +276,13 @@ def checkin(user_id):
 
 
 @app.route('/list_checkin', methods=['GET'])
+@login_required
 def list_checkin():
+    # Check if the current user is not an admin (is_admin == 0)
+    if current_user.is_admin == 0:
+        # Redirect non-admin users to their specific check-ins page
+        return redirect(url_for('list_checkin_by_user_id', user_id=current_user.id))
+
     with get_db_connection() as conn:
         # Fetch all check-in records from the Attendance table
         checkins = conn.execute('SELECT * FROM Attendance').fetchall()
@@ -270,9 +301,50 @@ def list_checkin():
                                checkin_time).total_seconds() / 3600
                 checkin['total_hours'] = round(total_hours, 2)
 
-        # Render the list_checkin.html template with the check-ins data
+    # Render the list_checkin.html template with the check-ins data
     return render_template('list_checkin.html', checkins=checkins_list)
 
+
+@app.route('/list_checkin/<int:user_id>', methods=['GET'])
+def list_checkin_by_user_id(user_id):
+    try:
+        with get_db_connection() as conn:
+            # Fetch all check-in records for the specific user from the Attendance table
+            checkins = conn.execute(
+                '''
+                SELECT * FROM Attendance
+                WHERE employee_name = (SELECT UserName FROM users WHERE id = ?)
+                ''', (user_id,)
+            ).fetchall()
+
+            # If no check-ins found, return an empty list
+            if not checkins:
+                return render_template('list_checkin.html', checkins=[])
+
+            # Convert the check-ins to a list of dictionaries to make it more readable
+            checkins_list = [dict(checkin) for checkin in checkins]
+
+            # Calculate the total hours for each checkin
+            for checkin in checkins_list:
+                if checkin.get('checkout_time'):  # Check for None in checkout_time
+                    checkin_time = datetime.strptime(
+                        checkin['checkin_time'], '%Y-%m-%d %H:%M:%S')
+                    checkout_time = datetime.strptime(
+                        checkin['checkout_time'], '%Y-%m-%d %H:%M:%S')
+                    total_hours = (checkout_time -
+                                   checkin_time).total_seconds() / 3600
+                    checkin['total_hours'] = round(total_hours, 2)
+                else:
+                    # Set total_hours to 0 if no checkout_time
+                    checkin['total_hours'] = 0
+
+            # Render the list_checkin.html template with the check-ins data
+            return render_template('list_checkin.html', checkins=checkins_list)
+
+    except Exception as e:
+        # Log or handle the exception
+        print(f"Error fetching check-ins: {e}")
+        return render_template('error.html', message="An error occurred while fetching check-ins.")
 # Route to check-out an employee
 
 
@@ -308,9 +380,6 @@ def checkout(user_id):
 
     # Redirect if user doesn't exist
     return redirect(url_for('list_checkin'))
-
-
-# Route to calculate worked time
 
 
 @app.route('/worked_time/<int:user_id>')
@@ -399,15 +468,15 @@ def list_all_payroll():
         return payroll_records
 
 
-def get_all_employees():
-    """Fetch all employees from the database."""
-    try:
-        with get_db_connection() as conn:
-            cursor = conn.execute('SELECT * FROM employees')
-            employees = cursor.fetchall()
-        return employees
-    except Exception:
-        return []
+# def get_all_employees():
+#     """Fetch all employees from the database."""
+#     try:
+#         with get_db_connection() as conn:
+#             cursor = conn.execute('SELECT * FROM employees')
+#             employees = cursor.fetchall()
+#         return employees
+#     except Exception:
+#         return []
 
 
 @app.route('/payroll_form', methods=['GET'])
@@ -788,8 +857,6 @@ def add_attendance():
         return redirect(url_for('list_attendance'))
     return render_template('attendance/add_attendance.html')
 
-# 📌 Edit Attendance
-
 
 @app.route('/attendance/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -806,8 +873,6 @@ def edit_attendance(id):
             conn.commit()
         return redirect(url_for('list_attendance'))
     return render_template('attendance/edit_attendance.html', record=record)
-
-# 📌 Delete Attendance
 
 
 @app.route('/attendance/delete/<int:id>', methods=['POST'])
@@ -908,8 +973,6 @@ def register():
 
     return render_template('register.html')
 
-# OTP verification route
-
 
 @app.route("/verify", methods=["GET", "POST"])
 def verify_otp():
@@ -923,8 +986,6 @@ def verify_otp():
         else:
             flash("Invalid OTP! Try again.", "danger")
     return render_template("verify.html")
-
-# Test route for Telegram (for debugging)
 
 
 @app.route("/test_telegram")
@@ -943,7 +1004,7 @@ def load_user(user_id):
         user_data = conn.execute(
             'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
         if user_data:
-            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'], branch=user_data['Branch'], is_admin=user_data['IsAdmin'])
+            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'], branch=user_data['Branch'], is_admin=user_data['IsAdmin'], role_default=user_data['RoleDefault'])
         return None
 
 
@@ -1112,6 +1173,53 @@ def health_check():
     return render_template('health_check.html', status=status)
 
 
+# @app.route('/login', methods=['POST'])
+# def login():
+#     username = request.form['username']
+#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
+
+#     # Get the user's IP address and user agent (browser/device info)
+#     ip_address = request.remote_addr
+#     user_agent = request.user_agent.string
+
+#     # Optionally get the geolocation (City, Region, Country) based on IP address
+#     city, region, country = get_geolocation(ip_address)
+
+#     with get_db_connection() as conn:
+#         user = conn.execute('''
+#             SELECT * FROM users WHERE UserName = ? AND Password = ?
+#         ''', (username, password)).fetchone()
+
+#     if user:
+#         # Log the login event (store user location and device info)
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO login_logs (user_id, ip_address, city, region, country, user_agent)
+#                 VALUES (?, ?, ?, ?, ?, ?)
+#             ''', (user['ID'], ip_address, city, region, country, user_agent))
+
+#             # Add user to online_users table or update if already exists
+#             conn.execute('''
+#                 INSERT OR REPLACE INTO online_users (user_id, login_time, last_active_time)
+#                 VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+#             ''', (user['ID'],))
+#             conn.commit()
+
+#         # Create the user object and log the user in with Flask-Login
+#         user_obj = User(id=user['ID'], username=user['UserName'],
+#                         password=user['Password'], email=user['Email'], branch=user['Branch'], is_admin=user['IsAdmin'], role_default=user['RoleDefault'])
+
+#         login_user(user_obj)  # Store the user session with Flask-Login
+
+#         flash(
+#             f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
+#         return redirect(url_for('dashboard'))
+
+#     else:
+#         flash("Invalid username or password", 'error')
+#         return render_template('404.html'), 404
+
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
@@ -1125,11 +1233,18 @@ def login():
     city, region, country = get_geolocation(ip_address)
 
     with get_db_connection() as conn:
+        conn.row_factory = sqlite3.Row  # Fetch rows as dictionaries
         user = conn.execute('''
-            SELECT * FROM users WHERE UserName = ? AND Password = ?
+            SELECT ID, UserName, Password, Email, Branch, IsAdmin, 
+                   COALESCE(RoleDefault, 1) AS RoleDefault  
+            FROM users 
+            WHERE UserName = ? AND Password = ?
         ''', (username, password)).fetchone()
 
     if user:
+        user = dict(user)  # Convert row to dictionary for easy access
+        print("Fetched User Data:", user)  # Debugging print statement
+
         # Log the login event (store user location and device info)
         with get_db_connection() as conn:
             conn.execute('''
@@ -1145,9 +1260,17 @@ def login():
             conn.commit()
 
         # Create the user object and log the user in with Flask-Login
-        user_obj = User(id=user['ID'], username=user['UserName'],
-                        password=user['Password'], email=user['Email'], branch=user['Branch'], is_admin=user['IsAdmin'])
+        user_obj = User(
+            id=user['ID'],
+            username=user['UserName'],
+            password=user['Password'],
+            email=user['Email'],
+            branch=user['Branch'],
+            is_admin=user['IsAdmin'],
+            role_default=user['RoleDefault']  # Ensure correct retrieval
+        )
 
+        print("Logged in user:", user_obj)  # Debugging print
         login_user(user_obj)  # Store the user session with Flask-Login
 
         flash(
@@ -1157,6 +1280,7 @@ def login():
     else:
         flash("Invalid username or password", 'error')
         return render_template('404.html'), 404
+
 
 # @app.route('/logout', methods=['POST'])
 # def logout():
@@ -1268,6 +1392,7 @@ def add_user():
         branch_id = request.form['branch']  # Get the branch ID from the form
         # Checkbox will return '1' if checked, else default to 0
         is_admin = request.form.get('is_admin', 0)
+        role_default = request.form.get('role_default', 0)
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
         # Insert user into 'users' table
@@ -1283,9 +1408,9 @@ def add_user():
                 return redirect(url_for('add_user'))
 
             cursor.execute('''
-                INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin))
+                INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default))
             user_id = cursor.lastrowid
 
             # Insert relationship into 'user_branches' table
@@ -1348,52 +1473,6 @@ def delete_user(id):
         conn.execute("DELETE FROM users WHERE ID = ?", (id,))
         conn.commit()
     return redirect(url_for('list_users'))
-
-
-# @app.route('/dashboard')
-# @login_required
-# def dashboard():
-#     timeout_threshold = 15  # minutes
-
-#     with get_db_connection() as conn:
-#         total_users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-#         total_employees = conn.execute(
-#             "SELECT COUNT(*) FROM employees").fetchone()[0]
-#         average_age = conn.execute(
-#             "SELECT AVG(Age) FROM employees").fetchone()[0]
-#         total_salary = conn.execute(
-#             "SELECT SUM(Salary) FROM employees").fetchone()[0]
-
-#         # Employee count and total salary by branch
-#         branch_data = conn.execute("""
-#             SELECT Branch, COUNT(*) AS employee_count, SUM(Salary) AS total_salary
-#             FROM employees
-#             GROUP BY Branch
-#         """).fetchall()
-
-#         branch_names = [row['Branch'] for row in branch_data]
-#         branch_counts = [row['employee_count'] for row in branch_data]
-#         branch_salaries = [row['total_salary'] for row in branch_data]
-
-#         # Fetch online users
-#         online_users = conn.execute('''
-#             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
-#             FROM online_users ou
-#             JOIN users u ON ou.user_id = u.ID
-#             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
-#         ''', (timeout_threshold,)).fetchall()
-
-#     return render_template(
-#         'dashboard.html',
-#         total_users=total_users,
-#         total_employees=total_employees,
-#         average_age=average_age,
-#         total_salary=total_salary,
-#         branch_names=branch_names,  # Pass the branch names
-#         branch_counts=branch_counts,  # Pass the employee counts per branch
-#         branch_salaries=branch_salaries,  # Pass the total salaries per branch
-#         online_users=online_users
-#     )
 
 
 @app.route('/dashboard')
@@ -1462,6 +1541,12 @@ def dashboard():
         payroll_branch_salaries=payroll_branch_salaries,
         online_users=online_users
     )
+
+
+@app.route('/users/roles', methods=['GET'])
+def get_roles():
+
+    return render_template('/users/roles.html')
 
 
 @app.route('/users', methods=['GET'])
@@ -1599,27 +1684,6 @@ def view_employee(id):
         return render_template('/employees/view_employee.html', employee=employee)
     else:
         return "Employee not found", 404
-
-
-# @app.route('/generate_payslip/<int:employee_id>')
-# @login_required
-# def generate_payslip(employee_id):
-#     employee = Employee.query.get_or_404(employee_id)
-#     net_salary = employee.salary - employee.deductions
-
-#     filename = f"payslip_{employee.name}.pdf"
-#     pdf_path = os.path.join("payslips", filename)
-#     os.makedirs("payslips", exist_ok=True)
-
-#     c = canvas.Canvas(pdf_path, pagesize=letter)
-#     c.drawString(100, 750, f"Payslip for: {employee.name}")
-#     c.drawString(100, 730, f"Position: {employee.position}")
-#     c.drawString(100, 710, f"Gross Salary: ${employee.salary}")
-#     c.drawString(100, 690, f"Deductions: ${employee.deductions}")
-#     c.drawString(100, 670, f"Net Salary: ${net_salary}")
-#     c.save()
-
-#     return send_file(pdf_path, as_attachment=True)
 
 
 @app.route('/branches')
