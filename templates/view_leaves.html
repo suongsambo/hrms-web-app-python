@@ -1,0 +1,135 @@
+{% extends 'base.html' %} {% block title %}Leave Records{% endblock %} {% block
+content %}
+<body class="bg-gray-100">
+  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Leave Records</h1>
+
+    <div class="flex items-center justify-start mb-4">
+      <a
+        href="{{ url_for('add_leave') }}"
+        class="inline-block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center"
+        ><i class="fas fa-plus mr-2"></i> Add New Leave</a
+      >
+
+      <div class="mx-2"></div>
+      <a
+        href="{{ url_for('get_all_leave_dates') }}"
+        class="inline-block px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center"
+        ><i class="fas fa-sync mr-2"></i> Leave Day All</a
+      >
+
+      <div class="mx-2"></div>
+      <a
+        href="{{ url_for('view_leaves') }}"
+        class="inline-block px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center"
+        ><i class="fas fa-sync mr-2"></i> Refresh</a
+      >
+    </div>
+
+    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+      <table id="leaveTable" class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              EmployeeID
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              LeaveType
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              StartDate
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              EndDate
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Reason
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Status
+            </th>
+
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              ServiceCount
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for leave in leaves %}
+          <tr>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+            >
+              {{ leave['employee_id'] }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ leave['leave_type'] }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ leave['start_date'] }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ leave['end_date'] }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ leave['reason'] }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <span
+                class="{% if leave['status'] == 'Approved' %}text-green-500{% elif leave['status'] == 'Pending' %}text-green-500{% else %}text-red-500{% endif %}"
+              >
+                {{ leave['status'] }}
+              </span>
+            </td>
+
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              {{ leave['service_count'] }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <a
+                href="{{ url_for('edit_leave', id=leave['id']) }}"
+                class="text-blue-600 hover:text-blue-900"
+                >Edit</a
+              >
+              |
+              <a
+                href="{{ url_for('delete_leave', id=leave['id']) }}"
+                onclick="return confirm('Are you sure you want to delete this leave?')"
+                class="text-red-600 hover:text-red-900"
+                >Delete</a
+              >
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    $(document).ready(function () {
+      // Initialize DataTables
+      $("#leaveTable").DataTable();
+    });
+  </script>
+</body>
+{% endblock %}

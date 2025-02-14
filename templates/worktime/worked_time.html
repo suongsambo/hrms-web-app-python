@@ -1,0 +1,55 @@
+{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
+content %}
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <header class="bg-blue-600 text-white p-6">
+    <h1 class="text-3xl font-semibold">
+      Worked Time Report for {{ employee['name'] }}
+    </h1>
+    <p class="mt-2 text-lg">Department: {{ employee['department'] }}</p>
+    <p class="text-lg">Username: {{ employee['UserName'] }}</p>
+  </header>
+
+  <section class="mt-8 p-6 max-w-4xl mx-auto bg-white shadow-lg rounded-lg">
+    <h2 class="text-2xl font-semibold text-center mb-4">Attendance Summary</h2>
+    <table class="min-w-full table-auto border-collapse">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="px-4 py-2 text-left">Date</th>
+          <th class="px-4 py-2 text-left">Worked Hours</th>
+          <th class="px-4 py-2 text-left">Overtime</th>
+          <th class="px-4 py-2 text-left">Leave Taken</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for day in worked_hours_per_day %}
+        <tr class="border-t">
+          <td class="px-4 py-2">{{ day }}</td>
+          <td class="px-4 py-2">
+            {{ worked_hours_per_day[day] | round(2) }} hours
+          </td>
+          <td class="px-4 py-2">
+            {% if day in overtime_per_day %} {{ overtime_per_day[day] | round(2)
+            }} hours {% else %} 0 hours {% endif %}
+          </td>
+          <td class="px-4 py-2">
+            {% if day in leave_taken_per_day %} {{ leave_taken_per_day[day] }}
+            day(s) {% else %} 0 day(s) {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="text-center mt-8">
+    <p>
+      <a
+        href="{{ url_for('list_checkin') }}"
+        class="text-blue-600 hover:underline"
+        >Back to Check-in List</a
+      >
+    </p>
+  </footer>
+</body>
+
+{% endblock %}

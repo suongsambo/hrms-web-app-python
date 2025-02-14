@@ -1,140 +1,81 @@
 {% extends 'base.html' %} {% block title %}Users{% endblock %} {% block content
 %}
 
-<body class="bg-gray-100">
-  <div class="bg-white p-6 rounded-lg shadow-md">
-    <div class="grid grid-cols-2 gap-4 p-3">
+<div class="container mx-auto py-8 px-3">
+  <div>
+    <!-- Title and Buttons -->
+    <div class="grid grid-cols-2 gap-4 mb-6">
+      <!-- Title Section -->
       <div class="flex justify-start">
-        <!-- First Column Content -->
-
-        <h2 class="text-2xl font-bold mb-4">Branch List</h2>
+        <h2 class="text-2xl font-semibold text-gray-800">Branch List</h2>
       </div>
 
-      <div class="flex justify-end">
-        <!-- Second Column Content -->
-
+      <!-- Buttons Section -->
+      <div class="flex justify-end gap-4">
         <!-- Print Button -->
         <button
           type="button"
           onclick="printTable()"
-          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out"
+          class="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out"
         >
           <span class="material-symbols-outlined">print</span>
-          <span class="text-xs">Print</span>
+          <span class="text-sm">Print</span>
         </button>
 
         <!-- Refresh Button -->
         <button
           type="button"
           onclick="window.location.reload()"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out"
         >
           <span class="material-symbols-outlined">autorenew</span>
-          <span class="text-xs">Refresh</span>
+          <span class="text-sm">Refresh</span>
         </button>
 
         <!-- Add Branch Button -->
         <a
           href="{{ url_for('add_branch') }}"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out"
         >
-          <span class="material-symbols-outlined mr-2 text-lg">add_box</span>
-          <span class="text-sm font-semibold">Add Branch</span>
+          <span class="material-symbols-outlined">add_box</span>
+          <span class="text-sm font-medium">Add Branch</span>
         </a>
       </div>
     </div>
 
-    <script>
-      function printTable() {
-        let table = document.querySelector("#branch-table").cloneNode(true);
-        // Hide columns Actions
-        let columnsToHide = [5];
-        table.querySelectorAll("thead tr th").forEach((th, index) => {
-          if (columnsToHide.includes(index)) {
-            th.style.display = "none";
-          }
-        });
-
-        table.querySelectorAll("tbody tr").forEach((tr) => {
-          tr.querySelectorAll("td").forEach((td, index) => {
-            if (columnsToHide.includes(index)) {
-              td.style.display = "none";
-            }
-          });
-        });
-
-        // Add a header with company name and location
-        let date = new Date();
-        let header = document.createElement("div");
-        header.classList.add("text-center", "mb-4");
-        header.innerHTML = `
-                    <h1 class="text-3xl font-bold">KPCC</h1>
-                    <p>Port Phillip, Victoria, Australia</p>
-                    <p>${date.toLocaleDateString()}</p>
-                `;
-
-        // Add a footer with note
-        let footer = document.createElement("p");
-        footer.classList.add("text-center", "mt-4");
-        footer.innerHTML = `
-                    Note: Data export from system HRMS.
-                `;
-
-        // Open a new window and print
-        let newWin = window.open("", "", "width=800,height=600");
-        newWin.document.write(`
-                    <html>
-                        <head>
-                            <title>Print Users</title>
-                            <style>
-                                body { padding: 24px; font-family: Arial, sans-serif; }
-                                table { width: 100%; border-collapse: collapse; }
-                                th, td { border: 1px solid #ddd; padding: 8px; }
-                                th { background-color: #f4f4f4; text-align: left; }
-                                tr:nth-child(even) { background-color: #f9f9f9; }
-                            </style>
-                        </head>
-                        <body>
-                            ${header.outerHTML}
-                            ${table.outerHTML}
-                            ${footer.outerHTML}
-                            <script>window.onload = function() { window.print(); window.close(); }<\/script>
-                        </body>
-                    </html>
-                `);
-        newWin.document.close();
-      }
-    </script>
-    <table class="min-w-full bg-white shadow-md mt-4" id="branch-table">
+    <!-- Branch Table -->
+    <table class="min-w-full bg-white shadow-md rounded-lg" id="branch-table">
       <thead class="bg-gray-800 text-white">
         <tr>
-          <th class="py-2 px-4 text-left">ID</th>
-          <th class="py-2 px-4 text-left">Branch</th>
-          <th class="py-2 px-4 text-left">Branch Manager</th>
-          <th class="py-2 px-4 text-left">Status</th>
-          <th class="py-2 px-4 text-left">Contact Number</th>
-          <th class="py-2 px-4 text-center">Actions</th>
+          <th class="py-3 px-6 text-left">ID</th>
+          <th class="py-3 px-6 text-left">Branch</th>
+          <th class="py-3 px-6 text-left">Branch Manager</th>
+          <th class="py-3 px-6 text-left">Status</th>
+          <th class="py-3 px-6 text-left">Contact Number</th>
+          <th class="py-3 px-6 text-center">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for branch in branches %}
-        <tr class="border-b">
-          <td class="py-2 px-4">{{ branch['ID'] }}</td>
-          <td class="py-2 px-4">{{ branch['Branch'] }}</td>
-          <td class="py-2 px-4">{{ branch['BranchManagerName'] }}</td>
-          <td class="py-2 px-4">{{ branch['Status'] }}</td>
-          <td class="py-2 px-4">{{ branch['ContactNumber'] }}</td>
-          <td class="py-2 px-4 text-center">
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-2 px-6">{{ branch['ID'] }}</td>
+          <td class="py-2 px-6">{{ branch['Branch'] }}</td>
+          <td class="py-2 px-6">{{ branch['BranchManagerName'] }}</td>
+          <td class="py-2 px-6">{{ branch['Status'] }}</td>
+          <td class="py-2 px-6">{{ branch['ContactNumber'] }}</td>
+          <td class="py-2 px-6 text-center">
             <a
               href="{{ url_for('edit_branch', id=branch['ID']) }}"
-              class="text-blue-500"
-              >Edit</a
+              class="text-blue-500 hover:text-blue-700 font-semibold transition-colors duration-300"
             >
+              Edit
+            </a>
             <a
               href="{{ url_for('view_branch', id=branch['ID']) }}"
-              class="text-green-500 hover:underline"
-              >View</a
+              class="text-green-500 hover:text-green-700 font-semibold transition-colors duration-300"
             >
+              View
+            </a>
             <form
               action="{{ url_for('delete_branch', id=branch['ID']) }}"
               method="POST"
@@ -142,7 +83,7 @@
             >
               <button
                 type="submit"
-                class="text-red-500"
+                class="text-red-500 hover:text-red-700 font-semibold transition-colors duration-300"
                 onclick="return confirm('Delete branch?')"
               >
                 Delete
@@ -154,18 +95,77 @@
       </tbody>
     </table>
   </div>
+
+  <!-- Print Functionality Script -->
+  <script>
+    function printTable() {
+      let table = document.querySelector("#branch-table").cloneNode(true);
+
+      // Hide the last column (Actions)
+      let columnsToHide = [5];
+      table.querySelectorAll("thead tr th").forEach((th, index) => {
+        if (columnsToHide.includes(index)) {
+          th.style.display = "none";
+        }
+      });
+
+      table.querySelectorAll("tbody tr").forEach((tr) => {
+        tr.querySelectorAll("td").forEach((td, index) => {
+          if (columnsToHide.includes(index)) {
+            td.style.display = "none";
+          }
+        });
+      });
+
+      let date = new Date();
+      let header = `
+        <div style="text-align: center; margin-bottom: 20px;">
+          <h1 style="font-size: 24px; font-weight: bold;">KPCC</h1>
+          <p>Port Phillip, Victoria, Australia</p>
+          <p>${date.toLocaleDateString()}</p>
+        </div>
+      `;
+
+      let footer = `
+        <p style="text-align: center; margin-top: 20px;">Note: Data exported from HRMS system.</p>
+      `;
+
+      let printWindow = window.open("", "", "width=800,height=600");
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Print Users</title>
+            <style>
+              body { padding: 24px; font-family: Arial, sans-serif; }
+              table { width: 100%; border-collapse: collapse; }
+              th, td { border: 1px solid #ddd; padding: 8px; }
+              th { background-color: #f4f4f4; text-align: left; }
+              tr:nth-child(even) { background-color: #f9f9f9; }
+            </style>
+          </head>
+          <body>
+            ${header}
+            ${table.outerHTML}
+            ${footer}
+            <script>window.onload = function() { window.print(); window.close(); }<\/script>
+          </body>
+        </html>
+      `);
+      printWindow.document.close();
+    }
+  </script>
+
+  <!-- DataTable Initialization -->
   <script>
     $(document).ready(function () {
-      // Initialize the DataTable
       $("#branch-table").DataTable({
-        paging: true, // Enable pagination
-        searching: true, // Enable search box
-        ordering: true, // Enable sorting
-        info: true, // Display table info (e.g., showing entries 1-10 of 50)
-        autoWidth: false, // Disable automatic column width adjustment
+        paging: true,
+        searching: true,
+        ordering: true,
+        info: true,
+        autoWidth: false,
       });
     });
   </script>
-</body>
-
+</div>
 {% endblock %}

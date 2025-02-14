@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import hashlib
 import os
+from flask_sqlalchemy import SQLAlchemy
 import pyotp
 import requests
 import glob
@@ -14,7 +15,7 @@ from config import Config
 # from models.models import User
 from flask_socketio import SocketIO, send
 from apscheduler.schedulers.background import BackgroundScheduler
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 app = Flask(__name__)
@@ -259,7 +260,332 @@ def init_db():
             )
         ''')
 
+        # Create leave table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS leaves (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                employee_id INTEGER NOT NULL,
+                leave_type TEXT NOT NULL,
+                start_date TEXT NOT NULL,
+                end_date TEXT NOT NULL,
+                reason TEXT NOT NULL,
+                start_date_obj DATE,
+                end_date_obj DATE,
+                service_count INTEGER,
+                status TEXT DEFAULT 'Pending',
+                FOREIGN KEY (employee_id) REFERENCES employees(ID) ON DELETE CASCADE
+            )
+        ''')
+
         conn.commit()
+
+
+# Route to view all leaves
+@app.route('/leaves')
+def view_leaves():
+    if current_user.is_authenticated and not current_user.is_admin:
+        with get_db_connection() as conn:
+            leaves = conn.execute(
+                'SELECT * FROM leaves WHERE employee_id = ?', (current_user.id,)).fetchall()
+    else:
+        with get_db_connection() as conn:
+            leaves = conn.execute('SELECT * FROM leaves').fetchall()
+
+    return render_template('view_leaves.html', leaves=leaves)
+
+
+@app.route('/leave/add', methods=['GET', 'POST'])
+def add_leave():
+    employees = []
+
+    # Fetch employee list from the database
+    with get_db_connection() as conn:
+        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+
+    if request.method == 'POST':
+        employee_id = request.form['employee_id']
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + \
+            1  # Include both start and end date
+
+        # Insert the leave record into the database
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, service_count))
+
+        # Redirect to view leaves page after insertion
+        return redirect(url_for('view_leaves'))
+
+    # Render the form page with employees list
+    return render_template('add_leave.html', employees=employees)
+
+
+# @app.route('/leaves/all', methods=['GET'])
+# def get_all_leave_dates():
+#     # Fetch all leave records with employee names, start and end dates
+#     with get_db_connection() as conn:
+#         leaves = conn.execute('''
+#             SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#         ''').fetchall()
+
+#     # Initialize total_leave_days to accumulate total leave days
+#     total_leave_days = 0
+#     leave_records = []
+
+#     # Create a dictionary to count leave types and accumulate their leave days
+#     leave_type_count = {}
+
+#     for leave in leaves:
+#         # Ensure employee_name is available and handle missing data
+#         employee_name = leave['employee_name'] if leave['employee_name'] else "Unknown Employee"
+
+#         # Parse the start and end dates (ensure they're in 'YYYY-MM-DD' format)
+#         try:
+#             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
+#             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
+#         except ValueError:
+#             # If the date format is incorrect, continue to the next record
+#             continue
+
+#         # Calculate the leave days for each record
+#         leave_days = (end_date_obj - start_date_obj).days + 1
+#         total_leave_days += leave_days
+
+#         # Update leave type count (both count of leaves and total leave duration)
+#         if leave['leave_type'] not in leave_type_count:
+#             leave_type_count[leave['leave_type']] = {
+#                 'count': 0, 'total_days': 0}
+#         leave_type_count[leave['leave_type']]['count'] += 1
+#         leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+#         # Append the leave record with calculated leave_days
+#         leave_records.append({
+#             'employee_name': employee_name,
+#             'leave_type': leave['leave_type'],
+#             'start_date': leave['start_date'],
+#             'end_date': leave['end_date'],
+#             'leave_days': leave_days
+#         })
+
+#     # Return the leave records, total leave days, and leave type counts to the template
+#     return render_template('all_leaves.html',
+#                            leaves=leave_records,
+#                            total_leave_days=total_leave_days,
+#                            leave_type_count=leave_type_count)
+
+
+# @app.route('/leaves/all', methods=['GET'])
+# def get_all_leave_dates():
+#     # Get the optional date range parameters from the request
+#     start_date_filter = request.args.get('start_date')
+#     end_date_filter = request.args.get('end_date')
+
+#     # Prepare SQL query based on whether the date filters are provided
+#     query = '''
+#         SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#     '''
+
+#     # Add conditions to the query if date filters are provided
+#     if start_date_filter and end_date_filter:
+#         query += ' WHERE l.start_date BETWEEN ? AND ?'
+#         date_params = (start_date_filter, end_date_filter)
+#     elif start_date_filter:
+#         query += ' WHERE l.start_date >= ?'
+#         date_params = (start_date_filter,)
+#     elif end_date_filter:
+#         query += ' WHERE l.start_date <= ?'
+#         date_params = (end_date_filter,)
+#     else:
+#         date_params = ()
+
+#     # Fetch the leave records based on the query
+#     with get_db_connection() as conn:
+#         leaves = conn.execute(query, date_params).fetchall()
+
+#     # Initialize total_leave_days to accumulate total leave days
+#     total_leave_days = 0
+#     leave_records = []
+
+#     # Create a dictionary to count leave types and accumulate their leave days
+#     leave_type_count = {}
+
+#     for leave in leaves:
+#         # Ensure employee_name is available and handle missing data
+#         employee_name = leave['employee_name'] if leave['employee_name'] else "Unknown Employee"
+
+#         # Parse the start and end dates (ensure they're in 'YYYY-MM-DD' format)
+#         try:
+#             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
+#             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
+#         except ValueError:
+#             # If the date format is incorrect, continue to the next record
+#             continue
+
+#         # Calculate the leave days for each record
+#         leave_days = (end_date_obj - start_date_obj).days + 1
+#         total_leave_days += leave_days
+
+#         # Update leave type count (both count of leaves and total leave duration)
+#         if leave['leave_type'] not in leave_type_count:
+#             leave_type_count[leave['leave_type']] = {
+#                 'count': 0, 'total_days': 0}
+#         leave_type_count[leave['leave_type']]['count'] += 1
+#         leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+#         # Append the leave record with calculated leave_days
+#         leave_records.append({
+#             'employee_name': employee_name,
+#             'leave_type': leave['leave_type'],
+#             'start_date': leave['start_date'],
+#             'end_date': leave['end_date'],
+#             'leave_days': leave_days
+#         })
+
+#     # Return the leave records, total leave days, and leave type counts to the template
+#     return render_template('all_leaves.html',
+#                            leaves=leave_records,
+#                            total_leave_days=total_leave_days,
+#                            leave_type_count=leave_type_count,
+#                            start_date=start_date_filter,
+#                            end_date=end_date_filter)
+
+
+@app.route('/leaves/all', methods=['GET'])
+def get_all_leave_dates():
+    # Get the optional date range parameters from the request
+    start_date_filter = request.args.get('start_date')
+    end_date_filter = request.args.get('end_date')
+
+    # Prepare SQL query based on whether the date filters are provided
+    query = '''
+        SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+    '''
+
+    # Add conditions to the query if date filters are provided
+    if start_date_filter and end_date_filter:
+        query += ' WHERE l.start_date BETWEEN ? AND ?'
+        date_params = (start_date_filter, end_date_filter)
+    elif start_date_filter:
+        query += ' WHERE l.start_date >= ?'
+        date_params = (start_date_filter,)
+    elif end_date_filter:
+        query += ' WHERE l.start_date <= ?'
+        date_params = (end_date_filter,)
+    else:
+        date_params = ()
+
+    # Fetch the leave records based on the query
+    with get_db_connection() as conn:
+        leaves = conn.execute(query, date_params).fetchall()
+
+    # Initialize total_leave_days to accumulate total leave days
+    total_leave_days = 0
+    leave_records = []
+
+    # Create a dictionary to count leave types and accumulate their leave days
+    leave_type_count = {}
+
+    for leave in leaves:
+        # Ensure employee_name is available and handle missing data
+        employee_name = leave['employee_name'] if leave['employee_name'] else "Unknown Employee"
+
+        # Parse the start and end dates (ensure they're in 'YYYY-MM-DD' format)
+        try:
+            start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
+            end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
+        except ValueError:
+            # If the date format is incorrect, continue to the next record
+            continue
+
+        # Calculate the leave days for each record
+        leave_days = (end_date_obj - start_date_obj).days + 1
+        total_leave_days += leave_days
+
+        # Generate a list of all the leave days (mapping days between start and end date)
+        leave_day_list = []
+        current_day = start_date_obj
+        while current_day <= end_date_obj:
+            leave_day_list.append(current_day.strftime('%Y-%m-%d'))
+            current_day += timedelta(days=1)
+
+        # Update leave type count (both count of leaves and total leave duration)
+        if leave['leave_type'] not in leave_type_count:
+            leave_type_count[leave['leave_type']] = {
+                'count': 0, 'total_days': 0}
+        leave_type_count[leave['leave_type']]['count'] += 1
+        leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+        # Append the leave record with calculated leave days and the list of all leave days
+        leave_records.append({
+            'employee_name': employee_name,
+            'leave_type': leave['leave_type'],
+            'start_date': leave['start_date'],
+            'end_date': leave['end_date'],
+            'leave_days': leave_days,
+            'leave_day_list': leave_day_list
+        })
+
+    # Return the leave records, total leave days, and leave type counts to the template
+    return render_template('all_leaves.html',
+                           leaves=leave_records,
+                           total_leave_days=total_leave_days,
+                           leave_type_count=leave_type_count,
+                           start_date=start_date_filter,
+                           end_date=end_date_filter)
+
+
+@app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])
+def edit_leave(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        status = request.form['status']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + \
+            1  # Include both start and end date
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves 
+                SET leave_type = ?, start_date = ?, end_date = ?, reason = ?, status = ?, service_count = ?
+                WHERE id = ?
+            ''', (leave_type, start_date, end_date, reason, status, service_count, id))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('edit_leave.html', leave=leave)
+
+
+@app.route('/leave/delete/<int:id>')
+def delete_leave(id):
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM leaves WHERE id = ?', (id,))
+
+    return redirect(url_for('view_leaves'))
 
 
 # Route to check-in an employee
@@ -288,7 +614,7 @@ def checkin(user_id):
                 return redirect(url_for('list_checkin'))
 
             # Render the check-in form with the user data
-            return render_template('checkin.html', user=user_dict)
+            return render_template('/worktime/checkin.html', user=user_dict)
 
     # Redirect if user doesn't exist
     return redirect(url_for('list_checkin'))
@@ -321,7 +647,7 @@ def list_checkin():
                 checkin['total_hours'] = round(total_hours, 2)
 
     # Render the list_checkin.html template with the check-ins data
-    return render_template('list_checkin.html', checkins=checkins_list)
+    return render_template('/worktime/list_checkin.html', checkins=checkins_list)
 
 
 @app.route('/list_checkin/<int:user_id>', methods=['GET'])
@@ -338,7 +664,7 @@ def list_checkin_by_user_id(user_id):
 
             # If no check-ins found, return an empty list
             if not checkins:
-                return render_template('list_checkin.html', checkins=[])
+                return render_template('/worktime/list_checkin.html', checkins=[])
 
             # Convert the check-ins to a list of dictionaries to make it more readable
             checkins_list = [dict(checkin) for checkin in checkins]
@@ -358,7 +684,7 @@ def list_checkin_by_user_id(user_id):
                     checkin['total_hours'] = 0
 
             # Render the list_checkin.html template with the check-ins data
-            return render_template('list_checkin.html', checkins=checkins_list)
+            return render_template('/worktime/list_checkin.html', checkins=checkins_list)
 
     except Exception as e:
         # Log or handle the exception
@@ -395,10 +721,98 @@ def checkout(user_id):
                 return redirect(url_for('list_checkin'))
 
             # Render the checkout form with the user data
-            return render_template('checkout.html', user=user_dict)
+            return render_template('/worktime/checkout.html', user=user_dict)
 
     # Redirect if user doesn't exist
     return redirect(url_for('list_checkin'))
+
+
+# @app.route('/worked_time/<int:user_id>')
+# def worked_time(user_id):
+#     with get_db_connection() as conn:
+#         # Fetch employee details based on user ID
+#         employee = conn.execute('''
+#             SELECT * FROM users WHERE id = ?
+#         ''', (user_id,)).fetchone()
+
+#         if employee:
+#             # Fetch the most recent attendance records for the employee for the current day
+#             attendance = conn.execute('''
+#                 SELECT * FROM Attendance WHERE employee_name = ? AND strftime('%Y-%m-%d', checkin_time) = date('now')
+#                 ORDER BY id DESC
+#             ''', (employee['UserName'],)).fetchall()
+
+#             worked_duration = 0
+#             workday_hours = 0
+#             if attendance:
+#                 # Calculate worked duration (in hours) for all attendance records for the current day
+#                 for record in attendance:
+#                     if record['checkout_time']:
+#                         worked_duration += (datetime.strptime(record['checkout_time'], '%Y-%m-%d %H:%M:%S') -
+#                                             datetime.strptime(record['checkin_time'], '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600
+#                         workday_hours += 8  # Assuming an 8-hour workday
+
+#                 return render_template('/worktime/worked_time.html', employee=employee, worked_duration=worked_duration, workday_hours=workday_hours)
+#             return render_template('/worktime/worked_time.html', employee=employee, worked_duration=None)
+#         return "Employee not found."
+
+
+# @app.route('/worked_time/<int:user_id>')
+# def worked_time(user_id):
+#     with get_db_connection() as conn:
+#         # Fetch employee details based on user ID
+#         employee = conn.execute('''
+#             SELECT u.id, u.UserName, e.name, e.department
+#             FROM users u
+#             INNER JOIN employees e ON u.id = e.user_id
+#             WHERE u.id = ?
+#         ''', (user_id,)).fetchone()
+
+#         if employee:
+#             # Fetch the most recent attendance records for the employee for the current day
+#             attendance = conn.execute('''
+#                 SELECT * FROM Attendance WHERE employee_name = ? AND strftime('%Y-%m-%d', checkin_time) = date('now')
+#                 ORDER BY id DESC
+#             ''', (employee['UserName'],)).fetchall()
+
+#             worked_duration = 0
+#             workday_hours = 0
+#             overtime = 0
+#             leave_taken = 0
+#             if attendance:
+#                 # Calculate worked duration (in hours) for all attendance records for the current day
+#                 for record in attendance:
+#                     if record['checkout_time']:
+#                         # Calculate worked duration in hours
+#                         worked_duration += (datetime.strptime(record['checkout_time'], '%Y-%m-%d %H:%M:%S') -
+#                                             datetime.strptime(record['checkin_time'], '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600
+
+#                         # Assuming an 8-hour workday
+#                         workday_hours += 8
+
+#                         # If the worked hours exceed 8 hours, calculate overtime
+#                         if worked_duration > 8:
+#                             overtime = worked_duration - 8
+
+#                 # Calculate leave taken based on leaves table
+#                 leave_taken_records = conn.execute('''
+#                     SELECT * FROM leaves WHERE employee_id = ? AND strftime('%Y-%m-%d', start_date) = date('now')
+#                 ''', (employee['id'],)).fetchall()
+
+#                 leave_taken = sum(
+#                     (datetime.strptime(leave['end_date'], "%Y-%m-%d") -
+#                      datetime.strptime(leave['start_date'], "%Y-%m-%d")).days + 1
+#                     for leave in leave_taken_records
+#                 )
+
+#                 return render_template('worktime/worked_time.html',
+#                                        employee=employee,
+#                                        worked_duration=worked_duration,
+#                                        workday_hours=workday_hours,
+#                                        overtime=overtime,
+#                                        leave_taken=leave_taken)
+#             return render_template('worktime/worked_time.html', employee=employee, worked_duration=None)
+#         return "Employee not found."
 
 
 @app.route('/worked_time/<int:user_id>')
@@ -406,31 +820,76 @@ def worked_time(user_id):
     with get_db_connection() as conn:
         # Fetch employee details based on user ID
         employee = conn.execute('''
-            SELECT * FROM users WHERE id = ?
+            SELECT u.id, u.UserName, e.name, e.department
+            FROM users u
+            INNER JOIN employees e ON u.id = e.user_id
+            WHERE u.id = ?
         ''', (user_id,)).fetchone()
 
         if employee:
-            # Fetch the most recent attendance records for the employee for the current day
+            # Fetch attendance records for the employee for the current month
             attendance = conn.execute('''
-                SELECT * FROM Attendance WHERE employee_name = ? AND strftime('%Y-%m-%d', checkin_time) = date('now')
-                ORDER BY id DESC
+                SELECT * FROM Attendance WHERE employee_name = ? 
+                AND strftime('%Y-%m-%d', checkin_time) BETWEEN date('now', '-30 days') AND date('now')
+                ORDER BY checkin_time DESC
             ''', (employee['UserName'],)).fetchall()
 
-            worked_duration = 0
-            workday_hours = 0
-            if attendance:
-                # Calculate worked duration (in hours) for all attendance records for the current day
-                for record in attendance:
-                    if record['checkout_time']:
-                        worked_duration += (datetime.strptime(record['checkout_time'], '%Y-%m-%d %H:%M:%S') -
-                                            datetime.strptime(record['checkin_time'], '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600
-                        workday_hours += 8  # Assuming an 8-hour workday
+            worked_hours_per_day = {}
+            overtime_per_day = {}
+            leave_taken_per_day = {}
 
-                return render_template('worked_time.html', employee=employee, worked_duration=worked_duration, workday_hours=workday_hours)
-            return render_template('worked_time.html', employee=employee, worked_duration=None)
+            for record in attendance:
+                checkin_time = datetime.strptime(
+                    record['checkin_time'], '%Y-%m-%d %H:%M:%S')
+                checkout_time = datetime.strptime(
+                    record['checkout_time'], '%Y-%m-%d %H:%M:%S') if record['checkout_time'] else None
+
+                # Skip if there's no checkout time
+                if not checkout_time:
+                    continue
+
+                # Calculate worked duration in hours for this record
+                worked_duration = (
+                    checkout_time - checkin_time).total_seconds() / 3600
+                workday = checkin_time.date()
+
+                # Track worked hours per day
+                if workday not in worked_hours_per_day:
+                    worked_hours_per_day[workday] = 0
+                worked_hours_per_day[workday] += worked_duration
+
+                # Calculate overtime (if worked more than 8 hours)
+                if workday not in overtime_per_day:
+                    overtime_per_day[workday] = 0
+                if worked_hours_per_day[workday] > 8:
+                    overtime_per_day[workday] += worked_hours_per_day[workday] - 8
+
+            # Calculate leave taken for each day
+            leave_taken_records = conn.execute('''
+                SELECT * FROM leaves WHERE employee_id = ? 
+                AND strftime('%Y-%m-%d', start_date) BETWEEN date('now', '-30 days') AND date('now')
+            ''', (employee['id'],)).fetchall()
+
+            for leave in leave_taken_records:
+                leave_start = datetime.strptime(
+                    leave['start_date'], "%Y-%m-%d").date()
+                leave_end = datetime.strptime(
+                    leave['end_date'], "%Y-%m-%d").date()
+
+                # Iterate over the leave days and record leave taken
+                current_day = leave_start
+                while current_day <= leave_end:
+                    if current_day not in leave_taken_per_day:
+                        leave_taken_per_day[current_day] = 0
+                    leave_taken_per_day[current_day] += 1
+                    current_day += timedelta(days=1)
+
+            return render_template('worktime/worked_time.html',
+                                   employee=employee,
+                                   worked_hours_per_day=worked_hours_per_day,
+                                   overtime_per_day=overtime_per_day,
+                                   leave_taken_per_day=leave_taken_per_day)
         return "Employee not found."
-
-# CRUD functions for Payroll
 
 
 def create_payroll(employee_id, period_start_date, period_end_date, base_salary, bonus=0, deductions=0, tax=0):
