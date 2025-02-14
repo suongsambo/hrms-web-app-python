@@ -12,6 +12,8 @@
         method="POST"
         class="bg-white shadow-md rounded-lg p-6"
       >
+
+{% if current_user.is_admin == 1 %}
         <div class="mb-4">
           <label
             for="employee_id"
@@ -30,6 +32,31 @@
             {% endfor %}
           </select>
         </div>
+
+        {% endif %} 
+
+
+        {% if current_user.is_admin == 1 %}
+        <!-- Admin View: Select Employee -->
+        <div class="mb-4">
+          <label for="employee_id" class="block text-gray-700 text-sm font-medium">Select Employee</label>
+          <select
+            name="employee_id"
+            id="employee_id"
+            required
+            class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled selected hidden>Select an Employee</option>
+            {% for employee in employees %}
+              <option value="{{ employee.id }}">{{ employee.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+    {% else %}
+        <!-- Non-admin View: Auto Select User's Employee ID -->
+        <input type="hidden" name="employee_id" value="{{ current_user.id }}">
+    {% endif %}
+     
 
         <div class="mb-4">
           <label
@@ -95,14 +122,18 @@
           <button
             type="submit"
             class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center"
+            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
           >
             <i class="fas fa-paper-plane mr-2"></i> Submit
+            Submit
           </button>
           <a
             href="{{ url_for('view_leaves') }}"
             class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 ml-2 flex items-center"
+            class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 ml-2"
           >
             <i class="fas fa-arrow-left mr-2"></i> Back
+            Back
           </a>
         </div>
       </form>

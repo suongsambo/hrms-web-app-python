@@ -15,7 +15,7 @@ content %}
       <a
         href="{{ url_for('get_all_leave_dates') }}"
         class="inline-block px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center"
-        ><i class="fas fa-sync mr-2"></i> Leave Day All</a
+        ><i class="fas fa-calendar-alt mr-2"></i> Leave Day All</a
       >
 
       <div class="mx-2"></div>
@@ -24,9 +24,22 @@ content %}
         class="inline-block px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center"
         ><i class="fas fa-sync mr-2"></i> Refresh</a
       >
+
+      <!-- Print Table Button -->
+      <div class="mx-2"></div>
+      <button
+        onclick="printTable()"
+        class="inline-block px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 flex items-center"
+      >
+        <i class="fas fa-print mr-2"></i> Print Table
+      </button>
     </div>
 
-    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+    <!-- Table Section -->
+    <div
+      class="overflow-x-auto bg-white shadow-md rounded-lg"
+      id="tableToPrint"
+    >
       <table id="leaveTable" class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
@@ -130,6 +143,66 @@ content %}
       // Initialize DataTables
       $("#leaveTable").DataTable();
     });
+
+    function printTable() {
+      let table = document.querySelector("#leaveTable").cloneNode(true);
+      // Hide columns Active, Menu, Language, Status, Note, RequestRole, RoleDefault, Actions, DisplayName, LoginName, IsAdmin
+      let columnsToHide = [7];
+      table.querySelectorAll("thead tr th").forEach((th, index) => {
+        if (columnsToHide.includes(index)) {
+          th.style.display = "none";
+        }
+      });
+
+      table.querySelectorAll("tbody tr").forEach((tr) => {
+        tr.querySelectorAll("td").forEach((td, index) => {
+          if (columnsToHide.includes(index)) {
+            td.style.display = "none";
+          }
+        });
+      });
+
+      // Add a header with company name and location
+      let date = new Date();
+      let header = document.createElement("div");
+      header.classList.add("text-center", "mb-4");
+      header.innerHTML = `
+            <h1 class="text-3xl font-bold">{{ config.APP_NAME }}</h1>
+            <p>{{ config.APP_DESCRIPTION }}</p>
+            <p>${date.toLocaleDateString()}</p>
+        `;
+
+      // Add a footer with note
+      let footer = document.createElement("p");
+      footer.classList.add("text-center", "mt-4");
+      footer.innerHTML = `
+            Note: Data export from system {{ config.APP_NAME_FOOTER }}.
+        `;
+
+      // Open a new window and print
+      let newWin = window.open("", "", "width=800,height=600");
+      newWin.document.write(`
+            <html>
+                <head>
+                    <title>Print Users</title>
+                    <style>
+                        body { padding: 24px; font-family: Arial, sans-serif; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th, td { border: 1px solid #ddd; padding: 8px; }
+                        th { background-color: #f4f4f4; text-align: left; }
+                        tr:nth-child(even) { background-color: #f9f9f9; }
+                    </style>
+                </head>
+                <body>
+                    ${header.outerHTML}
+                    ${table.outerHTML}
+                    ${footer.outerHTML}
+                    <script>window.onload = function() { window.print(); window.close(); }<\/script>
+                </body>
+            </html>
+        `);
+      newWin.document.close();
+    }
   </script>
 </body>
 {% endblock %}

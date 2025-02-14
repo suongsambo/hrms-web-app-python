@@ -5,7 +5,7 @@ content %}
     <h1 class="text-4xl font-semibold text-center mb-8 text-blue-600">
       Payroll List
     </h1>
-
+    {% if current_user.is_admin == 1 %}
     <!-- Add Payroll and Mark as Paid Buttons -->
     <div class="flex justify-end space-x-4 mt-10">
       <a
@@ -40,16 +40,13 @@ content %}
     <div
       class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gradient-to-r from-blue-50 to-white rounded-xl shadow-lg"
     >
-      <!-- Employee ID Search -->
       <div
         class="flex items-center bg-white p-4 rounded-lg shadow-md space-x-4"
       >
-        <!-- Employee ID Label -->
         <label for="employee_id" class="text-lg text-gray-800 font-semibold">
           Employee ID:
         </label>
 
-        <!-- Employee ID Input -->
         <input
           type="number"
           id="employee_id"
@@ -113,6 +110,8 @@ content %}
         </button>
       </div>
     </div>
+
+    {% endif %}
 
     <div id="payrollList" class="space-y-6 mt-4">
       {% if payroll_records %} {% for record in payroll_records %}

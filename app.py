@@ -464,8 +464,13 @@ def add_leave():
 
 
 @app.route('/leaves/all', methods=['GET'])
+@login_required
 def get_all_leave_dates():
-    # Get the optional date range parameters from the request
+    if current_user.is_admin == 0:
+        # Redirect non-admin users to their specific check-ins page
+        return redirect(url_for('leaves_user_id', user_id=current_user.id))
+
+        # Get the optional date range parameters from the request
     start_date_filter = request.args.get('start_date')
     end_date_filter = request.args.get('end_date')
 
@@ -542,6 +547,99 @@ def get_all_leave_dates():
 
     # Return the leave records, total leave days, and leave type counts to the template
     return render_template('all_leaves.html',
+                           leaves=leave_records,
+                           total_leave_days=total_leave_days,
+                           leave_type_count=leave_type_count,
+                           start_date=start_date_filter,
+                           end_date=end_date_filter)
+
+
+@app.route('/leaves/user/<int:user_id>', methods=['GET'])
+@login_required
+def leaves_user_id(user_id):
+    if current_user.id != user_id:
+        # Make sure that users can only see their own leave records
+        # or another page you prefer, e.g., homepage
+        return redirect(url_for('index'))
+
+    # Get the optional date range parameters from the request
+    start_date_filter = request.args.get('start_date')
+    end_date_filter = request.args.get('end_date')
+
+    # Prepare SQL query to get leave records for the specific user
+    query = '''
+        SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE l.employee_id = ?
+    '''
+
+    # Add conditions to the query if date filters are provided
+    if start_date_filter and end_date_filter:
+        query += ' AND l.start_date BETWEEN ? AND ?'
+        date_params = (user_id, start_date_filter, end_date_filter)
+    elif start_date_filter:
+        query += ' AND l.start_date >= ?'
+        date_params = (user_id, start_date_filter)
+    elif end_date_filter:
+        query += ' AND l.start_date <= ?'
+        date_params = (user_id, end_date_filter)
+    else:
+        date_params = (user_id,)
+
+    # Fetch the leave records for the specific user
+    with get_db_connection() as conn:
+        leaves = conn.execute(query, date_params).fetchall()
+
+    # Initialize total_leave_days to accumulate total leave days
+    total_leave_days = 0
+    leave_records = []
+
+    # Create a dictionary to count leave types and accumulate their leave days
+    leave_type_count = {}
+
+    for leave in leaves:
+        # Ensure employee_name is available and handle missing data
+        employee_name = leave['employee_name'] if leave['employee_name'] else "Unknown Employee"
+
+        # Parse the start and end dates (ensure they're in 'YYYY-MM-DD' format)
+        try:
+            start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
+            end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
+        except ValueError:
+            # If the date format is incorrect, continue to the next record
+            continue
+
+        # Calculate the leave days for each record
+        leave_days = (end_date_obj - start_date_obj).days + 1
+        total_leave_days += leave_days
+
+        # Generate a list of all the leave days (mapping days between start and end date)
+        leave_day_list = []
+        current_day = start_date_obj
+        while current_day <= end_date_obj:
+            leave_day_list.append(current_day.strftime('%Y-%m-%d'))
+            current_day += timedelta(days=1)
+
+        # Update leave type count (both count of leaves and total leave duration)
+        if leave['leave_type'] not in leave_type_count:
+            leave_type_count[leave['leave_type']] = {
+                'count': 0, 'total_days': 0}
+        leave_type_count[leave['leave_type']]['count'] += 1
+        leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+        # Append the leave record with calculated leave days and the list of all leave days
+        leave_records.append({
+            'employee_name': employee_name,
+            'leave_type': leave['leave_type'],
+            'start_date': leave['start_date'],
+            'end_date': leave['end_date'],
+            'leave_days': leave_days,
+            'leave_day_list': leave_day_list
+        })
+
+    # Return the leave records, total leave days, and leave type counts to the template
+    return render_template('all_leaves.html',  # You can create a custom template for user leaves
                            leaves=leave_records,
                            total_leave_days=total_leave_days,
                            leave_type_count=leave_type_count,
@@ -1031,7 +1129,11 @@ def create_payroll_endpoint():
 
 @app.route('/payroll_list', methods=['GET'])
 def payroll_list():
-    # Optional filters for employee ID, employee name, and date range
+    if current_user.is_admin == 0:
+        # Redirect non-admin users to their specific check-ins page
+        return redirect(url_for('payroll_user_id', user_id=current_user.id))
+
+        # Optional filters for employee ID, employee name, and date range
     employee_id = request.args.get('employee_id', type=int)
     employee_name = request.args.get('employee_name')
     start_date_str = request.args.get('start_date')
@@ -1083,6 +1185,23 @@ def payroll_list():
 
     # Render the HTML template with the payroll records and employees
     return render_template('payroll/payroll_list.html', payroll_records=payroll_records, employees=employees)
+
+
+@app.route('/payroll_user_id/<int:user_id>', methods=['GET'])
+def payroll_user_id(user_id):
+    # Check if the current user is trying to access their own payroll information
+    if current_user.id != user_id and current_user.is_admin == 0:
+        return "You are not authorized to view this payroll record.", 403
+
+    # Fetch payroll records for the given user_id
+    payroll_records = list_payroll_for_employee(user_id)
+
+    if not payroll_records:
+        return "No payroll records found for this user.", 404
+
+    employees = get_all_employees()
+    # Render the payroll details for the user
+    return render_template('payroll/payroll_list.html', payroll_records=payroll_records,  employees=employees)
 
 
 def list_payroll_for_date_range(start_date, end_date):
