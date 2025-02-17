@@ -72,7 +72,9 @@ content %}
             <td class="py-3 px-6">{{ employee.age }}</td>
             <td class="py-3 px-6">{{ employee.department }}</td>
             <td class="py-3 px-6">{{ employee.salary }}</td>
-            <td class="py-3 px-6">{{ employee.position }}</td>
+            {% set position = positions | selectattr("id", "equalto",
+            employee.position_id) | first %}
+            <td class="py-3 px-6">{{ position.PositionName }}</td>
             <td class="py-3 px-6">{{ employee.joining_date }}</td>
             <td class="py-3 px-6">{{ employee.status }}</td>
             <td class="py-3 px-6">{{ employee.branch }}</td>

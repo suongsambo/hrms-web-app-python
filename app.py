@@ -96,25 +96,26 @@ def init_db():
             )
         ''')
 
-        # Create employees table
+        # Create employees table with foreign key to position
         conn.execute('''
              CREATE TABLE IF NOT EXISTS employees (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
-                age INTEGER NOT NULL CHECK(age >= 18 AND age <= 100),  -- Ensures age is between 18 and 100
+                age INTEGER NOT NULL CHECK(age >= 18 AND age <= 100),
                 department TEXT NOT NULL,
-                salary REAL NOT NULL CHECK(salary > 0),  -- Ensures salary is positive
-                position TEXT,  -- Position of the employee (e.g., Manager, Developer)
-                joining_date TEXT DEFAULT CURRENT_TIMESTAMP,  -- Date the employee joined
-                status TEXT CHECK(status IN ('Active', 'Inactive', 'On Leave')) DEFAULT 'Active',  -- Employee status
+                salary REAL NOT NULL CHECK(salary > 0),
+                position_id INTEGER,  -- Reference to the position table
+                joining_date TEXT DEFAULT CURRENT_TIMESTAMP,
+                status TEXT CHECK(status IN ('Active', 'Inactive', 'On Leave')) DEFAULT 'Active',
                 branch TEXT,  -- Branch of the employee
                 user_id INTEGER,  -- Reference to the user table
                 phone_number TEXT,  -- Contact number of the employee
                 email TEXT UNIQUE,  -- Email address of the employee
                 address TEXT,  -- Employee address
-                emergency_contact_name TEXT,  -- Emergency contact name
-                emergency_contact_phone TEXT,  -- Emergency contact phone number
-                FOREIGN KEY (user_id) REFERENCES users(ID)
+                emergency_contact_name TEXT,
+                emergency_contact_phone TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(ID),
+                FOREIGN KEY (position_id) REFERENCES positions(ID)
             )
         ''')
 
@@ -166,8 +167,8 @@ def init_db():
             CREATE TABLE IF NOT EXISTS roles (
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 UserID INTEGER NOT NULL,
-                Role TEXT NOT NULL, 
-                RoleNumber INTEGER NOT NULL, 
+                Role TEXT NOT NULL,
+                RoleNumber INTEGER NOT NULL,
                 CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
                 UpdatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
                 Status TEXT CHECK(Status IN ('Active', 'Inactive')) DEFAULT 'Active',
@@ -260,6 +261,17 @@ def init_db():
             )
         ''')
 
+        # Create positions table with a foreign key reference to departments
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS positions (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                PositionName TEXT NOT NULL UNIQUE,  -- Name of the position (e.g., Manager, Developer)
+                Description TEXT,  -- Description of the position
+                department_id INTEGER,  -- Reference to the departments table
+                FOREIGN KEY (department_id) REFERENCES departments(ID)  -- Foreign key to departments
+            )
+        ''')
+
         # Create leave table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS leaves (
@@ -277,8 +289,305 @@ def init_db():
             )
         ''')
 
+        # Create bankstatement table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS bankstatement (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                employee_id INTEGER NOT NULL,
+                employee_name TEXT NOT NULL,
+                account_number TEXT NOT NULL,
+                bank_name TEXT NOT NULL,
+                salary REAL NOT NULL,
+                transaction_date DATE NOT NULL,
+                transaction_type TEXT CHECK(transaction_type IN ('Credit', 'Debit')) NOT NULL,
+                FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+            )
+        ''')
+
         conn.commit()
 
+
+# Route to create a bank statement
+@app.route('/bankstatement/add', methods=['GET', 'POST'])
+def create_bankstatement():
+    if request.method == 'GET':
+        # For GET requests, render the form and get the employees for the dropdown
+        with get_db_connection() as conn:
+            employees = conn.execute(
+                'SELECT id, name FROM employees').fetchall()
+        return render_template('add_bankstatement.html', employees=employees)
+
+    # Handle POST request to get form data and insert into database
+    employee_id = request.form.get('employee_id')
+    employee_name = request.form.get('employee_name')
+    account_number = request.form.get('account_number')
+    bank_name = request.form.get('bank_name')
+    salary = request.form.get('salary')
+    transaction_date = request.form.get('transaction_date')
+    transaction_type = request.form.get('transaction_type')
+
+    # Insert data into database
+    with get_db_connection() as conn:
+        conn.execute('''
+            INSERT INTO bankstatement (employee_id, employee_name, account_number, bank_name, salary, transaction_date, transaction_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        ''', (employee_id, employee_name, account_number, bank_name, salary, transaction_date, transaction_type))
+        conn.commit()
+
+    flash('Bank statement created successfully', 'success')
+    return redirect(url_for('get_all_bankstatements'))
+
+# Route to view all bank statements
+
+
+@app.route('/bankstatements')
+def get_all_bankstatements():
+    with get_db_connection() as conn:
+        bankstatements = conn.execute('SELECT * FROM bankstatement').fetchall()
+    return render_template('view_bankstatements.html', bankstatements=bankstatements)
+
+# Route to view a single bank statement
+
+
+@app.route('/bankstatement/view/<int:id>')
+def view_bankstatement(id):
+    with get_db_connection() as conn:
+        bankstatement = conn.execute(
+            'SELECT * FROM bankstatement WHERE id = ?', (id,)).fetchone()
+    return render_template('view_bankstatement.html', bankstatement=bankstatement)
+
+# Route to update a bank statement
+
+
+@app.route('/bankstatement/edit/<int:id>', methods=['GET', 'POST'])
+def update_bankstatement(id):
+    with get_db_connection() as conn:
+        bankstatement = conn.execute(
+            'SELECT * FROM bankstatement WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        # Get form data
+        employee_id = request.form.get('employee_id')
+        employee_name = request.form.get('employee_name')
+        account_number = request.form.get('account_number')
+        bank_name = request.form.get('bank_name')
+        salary = request.form.get('salary')
+        transaction_date = request.form.get('transaction_date')
+        transaction_type = request.form.get('transaction_type')
+
+        # Update the bank statement in the database
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE bankstatement
+                SET employee_id = ?, employee_name = ?, account_number = ?, bank_name = ?, salary = ?, transaction_date = ?, transaction_type = ?
+                WHERE id = ?
+            ''', (employee_id, employee_name, account_number, bank_name, salary, transaction_date, transaction_type, id))
+            conn.commit()
+
+        flash('Bank statement updated successfully', 'success')
+        return redirect(url_for('get_all_bankstatements'))
+
+    return render_template('edit_bankstatement.html', bankstatement=bankstatement)
+
+# Route to delete a bank statement
+
+
+@app.route('/bankstatement/delete/<int:id>', methods=['POST'])
+def delete_bankstatement(id):
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM bankstatement WHERE id = ?', (id,))
+        conn.commit()
+
+    flash('Bank statement deleted successfully', 'success')
+    return redirect(url_for('get_all_bankstatements'))
+
+
+# Create department
+@app.route('/departments/add', methods=['GET', 'POST'])
+def create_department():
+    if request.method != 'POST':
+        # For GET requests, render the form
+        return render_template('/departments/add_department.html')
+    # Use request.form.get() for form data
+    name = request.form.get('name')
+    description = request.form.get('description')
+
+    # Validate the form data
+    if not name:
+        flash('Department name is required', 'error')
+        return redirect(url_for('create_department'))
+
+    # Insert the data into the database
+    with get_db_connection() as conn:
+        conn.execute('''
+                INSERT INTO departments (Name, Description)
+                VALUES (?, ?)
+            ''', (name, description))
+        conn.commit()
+
+    flash('Department created successfully', 'success')
+    return redirect(url_for('get_all_departments'))
+
+
+@app.route('/departments')
+def get_all_departments():
+    with get_db_connection() as conn:
+        departments = conn.execute('SELECT * FROM departments').fetchall()
+    return render_template('/departments/departments.html', departments=departments)
+
+
+@app.route('/departments/view/<int:id>')
+def view_department(id):
+    with get_db_connection() as conn:
+        department = conn.execute(
+            'SELECT * FROM departments WHERE id = ?', (id,)).fetchone()
+    return render_template('/departments/view_department.html', department=department)
+
+# Route to update a department
+
+
+@app.route('/department/edit/<int:id>', methods=['GET', 'POST'])
+def update_department(id):
+    with get_db_connection() as conn:
+        department = conn.execute(
+            'SELECT * FROM departments WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+
+        if not name:
+            flash('Department name is required', 'error')
+            return redirect(url_for('edit_department', id=id))
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE departments 
+                SET Name = ?, Description = ?
+                WHERE id = ?
+            ''', (name, description, id))
+            conn.commit()
+
+        flash('Department updated successfully', 'success')
+        return redirect(url_for('get_all_departments'))
+
+    return render_template('/departments/edit_department.html', department=department)
+
+# Route to delete a department
+
+
+@app.route('/departments/delete/<int:id>', methods=['POST'])
+def delete_department(id):
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM departments WHERE id = ?', (id,))
+        conn.commit()
+
+    flash('Department deleted successfully', 'success')
+    return redirect(url_for('get_all_departments'))
+
+
+# Route to create a new position
+@app.route('/positions/add', methods=['GET', 'POST'])
+def create_position():
+    departments = []
+    with get_db_connection() as conn:
+        departments = conn.execute('SELECT * FROM departments').fetchall()
+
+    if request.method == 'POST':
+        position_name = request.form.get('position_name')
+        description = request.form.get('description')
+        department_id = request.form.get('department_id')
+
+        # Validate the form data
+        if not position_name:
+            flash('Position name is required', 'error')
+            return redirect(url_for('create_position'))
+
+        # Insert the new position into the database
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO positions (PositionName, Description, department_id)
+                VALUES (?, ?, ?)
+            ''', (position_name, description, department_id))
+            conn.commit()
+
+        flash('Position created successfully', 'success')
+        return redirect(url_for('get_all_positions'))
+
+    return render_template('/positions/add_position.html', departments=departments)
+
+# Route to get all positions
+
+
+@app.route('/positions')
+def get_all_positions():
+    with get_db_connection() as conn:
+        positions = conn.execute('SELECT * FROM positions').fetchall()
+    return render_template('/positions/positions.html', positions=positions)
+
+# Route to view a single position
+
+
+@app.route('/positions/view/<int:id>')
+def view_position(id):
+    with get_db_connection() as conn:
+        position = conn.execute(
+            'SELECT * FROM positions WHERE ID = ?', (id,)).fetchone()
+        employees = conn.execute('''
+            SELECT e.id, e.name, e.branch
+            FROM employees e
+            JOIN positions p ON p.ID = e.position_id
+            WHERE p.ID = ?
+        ''', (id,)).fetchall()
+    return render_template('/positions/view_position.html', position=position, employees=employees)
+
+# Route to update a position
+
+
+@app.route('/positions/edit/<int:id>', methods=['GET', 'POST'])
+def update_position(id):
+    with get_db_connection() as conn:
+        position = conn.execute(
+            'SELECT * FROM positions WHERE ID = ?', (id,)).fetchone()
+        departments = conn.execute('SELECT * FROM departments').fetchall()
+
+    if request.method == 'POST':
+        position_name = request.form.get('position_name')
+        description = request.form.get('description')
+        department_id = request.form.get('department_id')
+
+        if not position_name:
+            flash('Position name is required', 'error')
+            return redirect(url_for('update_position', id=id))
+
+        # Update the position in the database
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE positions
+                SET PositionName = ?, Description = ?, department_id = ?
+                WHERE ID = ?
+            ''', (position_name, description, department_id, id))
+            conn.commit()
+
+        flash('Position updated successfully', 'success')
+        return redirect(url_for('get_all_positions'))
+
+    return render_template('/positions/edit_position.html', position=position, departments=departments)
+
+# Route to delete a position
+
+
+@app.route('/positions/delete/<int:id>', methods=['POST'])
+def delete_position(id):
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM positions WHERE ID = ?', (id,))
+        conn.commit()
+
+    flash('Position deleted successfully', 'success')
+    return redirect(url_for('get_all_positions'))
+
+
+# Get department by ID
 
 @app.route('/static/<path:filename>')
 def static_files(filename):
@@ -297,7 +606,7 @@ def view_leaves():
         with get_db_connection() as conn:
             leaves = conn.execute('SELECT * FROM leaves').fetchall()
 
-    return render_template('view_leaves.html', leaves=leaves)
+    return render_template('/leaves/view_leaves.html', leaves=leaves)
 
 
 @app.route('/leave/add', methods=['GET', 'POST'])
@@ -332,141 +641,7 @@ def add_leave():
         return redirect(url_for('view_leaves'))
 
     # Render the form page with employees list
-    return render_template('add_leave.html', employees=employees)
-
-
-# @app.route('/leaves/all', methods=['GET'])
-# def get_all_leave_dates():
-#     # Fetch all leave records with employee names, start and end dates
-#     with get_db_connection() as conn:
-#         leaves = conn.execute('''
-#             SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
-#             FROM leaves l
-#             LEFT JOIN employees e ON l.employee_id = e.id
-#         ''').fetchall()
-
-#     # Initialize total_leave_days to accumulate total leave days
-#     total_leave_days = 0
-#     leave_records = []
-
-#     # Create a dictionary to count leave types and accumulate their leave days
-#     leave_type_count = {}
-
-#     for leave in leaves:
-#         # Ensure employee_name is available and handle missing data
-#         employee_name = leave['employee_name'] if leave['employee_name'] else "Unknown Employee"
-
-#         # Parse the start and end dates (ensure they're in 'YYYY-MM-DD' format)
-#         try:
-#             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
-#             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
-#         except ValueError:
-#             # If the date format is incorrect, continue to the next record
-#             continue
-
-#         # Calculate the leave days for each record
-#         leave_days = (end_date_obj - start_date_obj).days + 1
-#         total_leave_days += leave_days
-
-#         # Update leave type count (both count of leaves and total leave duration)
-#         if leave['leave_type'] not in leave_type_count:
-#             leave_type_count[leave['leave_type']] = {
-#                 'count': 0, 'total_days': 0}
-#         leave_type_count[leave['leave_type']]['count'] += 1
-#         leave_type_count[leave['leave_type']]['total_days'] += leave_days
-
-#         # Append the leave record with calculated leave_days
-#         leave_records.append({
-#             'employee_name': employee_name,
-#             'leave_type': leave['leave_type'],
-#             'start_date': leave['start_date'],
-#             'end_date': leave['end_date'],
-#             'leave_days': leave_days
-#         })
-
-#     # Return the leave records, total leave days, and leave type counts to the template
-#     return render_template('all_leaves.html',
-#                            leaves=leave_records,
-#                            total_leave_days=total_leave_days,
-#                            leave_type_count=leave_type_count)
-
-
-# @app.route('/leaves/all', methods=['GET'])
-# def get_all_leave_dates():
-#     # Get the optional date range parameters from the request
-#     start_date_filter = request.args.get('start_date')
-#     end_date_filter = request.args.get('end_date')
-
-#     # Prepare SQL query based on whether the date filters are provided
-#     query = '''
-#         SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
-#         FROM leaves l
-#         LEFT JOIN employees e ON l.employee_id = e.id
-#     '''
-
-#     # Add conditions to the query if date filters are provided
-#     if start_date_filter and end_date_filter:
-#         query += ' WHERE l.start_date BETWEEN ? AND ?'
-#         date_params = (start_date_filter, end_date_filter)
-#     elif start_date_filter:
-#         query += ' WHERE l.start_date >= ?'
-#         date_params = (start_date_filter,)
-#     elif end_date_filter:
-#         query += ' WHERE l.start_date <= ?'
-#         date_params = (end_date_filter,)
-#     else:
-#         date_params = ()
-
-#     # Fetch the leave records based on the query
-#     with get_db_connection() as conn:
-#         leaves = conn.execute(query, date_params).fetchall()
-
-#     # Initialize total_leave_days to accumulate total leave days
-#     total_leave_days = 0
-#     leave_records = []
-
-#     # Create a dictionary to count leave types and accumulate their leave days
-#     leave_type_count = {}
-
-#     for leave in leaves:
-#         # Ensure employee_name is available and handle missing data
-#         employee_name = leave['employee_name'] if leave['employee_name'] else "Unknown Employee"
-
-#         # Parse the start and end dates (ensure they're in 'YYYY-MM-DD' format)
-#         try:
-#             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
-#             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
-#         except ValueError:
-#             # If the date format is incorrect, continue to the next record
-#             continue
-
-#         # Calculate the leave days for each record
-#         leave_days = (end_date_obj - start_date_obj).days + 1
-#         total_leave_days += leave_days
-
-#         # Update leave type count (both count of leaves and total leave duration)
-#         if leave['leave_type'] not in leave_type_count:
-#             leave_type_count[leave['leave_type']] = {
-#                 'count': 0, 'total_days': 0}
-#         leave_type_count[leave['leave_type']]['count'] += 1
-#         leave_type_count[leave['leave_type']]['total_days'] += leave_days
-
-#         # Append the leave record with calculated leave_days
-#         leave_records.append({
-#             'employee_name': employee_name,
-#             'leave_type': leave['leave_type'],
-#             'start_date': leave['start_date'],
-#             'end_date': leave['end_date'],
-#             'leave_days': leave_days
-#         })
-
-#     # Return the leave records, total leave days, and leave type counts to the template
-#     return render_template('all_leaves.html',
-#                            leaves=leave_records,
-#                            total_leave_days=total_leave_days,
-#                            leave_type_count=leave_type_count,
-#                            start_date=start_date_filter,
-#                            end_date=end_date_filter)
+    return render_template('/leaves/add_leave.html', employees=employees)
 
 
 @app.route('/leaves/all', methods=['GET'])
@@ -552,7 +727,7 @@ def get_all_leave_dates():
         })
 
     # Return the leave records, total leave days, and leave type counts to the template
-    return render_template('all_leaves.html',
+    return render_template('/leaves/all_leaves.html',
                            leaves=leave_records,
                            total_leave_days=total_leave_days,
                            leave_type_count=leave_type_count,
@@ -645,7 +820,7 @@ def leaves_user_id(user_id):
         })
 
     # Return the leave records, total leave days, and leave type counts to the template
-    return render_template('all_leaves.html',  # You can create a custom template for user leaves
+    return render_template('/leaves/all_leaves.html',  # You can create a custom template for user leaves
                            leaves=leave_records,
                            total_leave_days=total_leave_days,
                            leave_type_count=leave_type_count,
@@ -681,7 +856,7 @@ def edit_leave(id):
 
         return redirect(url_for('view_leaves'))
 
-    return render_template('edit_leave.html', leave=leave)
+    return render_template('/leaves/edit_leave.html', leave=leave)
 
 
 @app.route('/leave/delete/<int:id>')
@@ -2141,12 +2316,16 @@ def list_employees():
     with get_db_connection() as conn:
         employees = conn.execute(
             "SELECT * FROM employees ORDER BY id DESC").fetchall()
+        positions = conn.execute("SELECT * FROM positions").fetchall()
+        departments = conn.execute("SELECT * FROM departments").fetchall()
         last_employee = employees[0] if employees else None
         notifications_employees = [
             {"title": "New Employee Added",
              "message": f"Employee {last_employee['name']} has been added."} if last_employee else None
         ]
-    return render_template('/employees/employees.html', employees=employees, notifications_employees=notifications_employees)
+
+    return render_template('/employees/employees.html', employees=employees, notifications_employees=notifications_employees,
+                           positions=positions, departments=departments)
 
 
 @app.route('/employees/search', methods=['GET'])
@@ -2168,18 +2347,20 @@ def search_employees():
 def add_employee():
     branches = []
     users = []
+    positions = []
 
     with get_db_connection() as conn:
         branches = conn.execute("SELECT * FROM branches").fetchall()
         users = conn.execute(
             "SELECT id, UserName FROM users").fetchall()  # Fetch users
+        positions = conn.execute("SELECT * FROM positions").fetchall()
 
     if request.method == 'POST':
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
         salary = request.form['salary']
-        position = request.form['position']
+        position_id = request.form['position_id']
         joining_date = request.form['joining_date']
         status = request.form['status']
         branch = request.form['branch']
@@ -2192,17 +2373,17 @@ def add_employee():
 
         with get_db_connection() as conn:
             conn.execute(
-                """INSERT INTO employees (name, age, department, salary, position, joining_date, status, 
+                """INSERT INTO employees (name, age, department, salary, position_id, joining_date, status, 
                                            branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone) 
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
-                (name, age, department, salary, position, joining_date, status, branch, user_id,
+                (name, age, department, salary, position_id, joining_date, status, branch, user_id,
                  phone_number, email, address, emergency_contact_name, emergency_contact_phone)
             )
             conn.commit()
         return redirect(url_for('list_employees'))
 
     # Pass users and branches to template
-    return render_template('/employees/add_employee.html', branches=branches, users=users)
+    return render_template('/employees/add_employee.html', branches=branches, users=users, positions=positions)
 
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
@@ -2211,13 +2392,15 @@ def edit_employee(id):
     with get_db_connection() as conn:
         employee = conn.execute(
             "SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
+        branches = conn.execute("SELECT * FROM branches").fetchall()
+        positions = conn.execute("SELECT * FROM positions").fetchall()
 
     if request.method == 'POST':
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
         salary = request.form['salary']
-        position = request.form['position']
+        position_id = request.form['position_id']
         joining_date = request.form['joining_date']
         status = request.form['status']
         branch = request.form['branch']
@@ -2229,16 +2412,16 @@ def edit_employee(id):
 
         with get_db_connection() as conn:
             conn.execute(
-                """UPDATE employees SET name = ?, age = ?, department = ?, salary = ?, position = ?, joining_date = ?, 
+                """UPDATE employees SET name = ?, age = ?, department = ?, salary = ?, position_id = ?, joining_date = ?, 
                    status = ?, branch = ?, phone_number = ?, email = ?, address = ?, emergency_contact_name = ?, emergency_contact_phone = ? 
                    WHERE id = ?""",
-                (name, age, department, salary, position, joining_date, status, branch,
+                (name, age, department, salary, position_id, joining_date, status, branch,
                  phone_number, email, address, emergency_contact_name, emergency_contact_phone, id)
             )
             conn.commit()
         return redirect(url_for('list_employees'))
 
-    return render_template('/employees/edit_employee.html', employee=employee)
+    return render_template('/employees/edit_employee.html', employee=employee, branches=branches, positions=positions)
 
 
 @app.route('/employees/delete/<int:id>', methods=['POST'])

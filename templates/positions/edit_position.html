@@ -1,0 +1,92 @@
+{% extends 'base.html' %} {% block title %} Edit Position {% endblock %} {%
+block content %}
+<div class="container mx-auto px-4 py-6">
+  <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+    Edit Position
+  </h1>
+
+  <!-- Flash message -->
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %}
+  <div class="mb-4">
+    {% for category, message in messages %}
+    <div
+      class="text-center text-white p-4 rounded-md {{ 'bg-red-500' if category == 'error' else 'bg-green-500' }}"
+    >
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %} {% endwith %}
+
+  <div class="max-w-xl mx-auto bg-white p-6 rounded-md shadow-md">
+    <form method="POST">
+      <div class="mb-4">
+        <label
+          for="position_name"
+          class="block text-sm font-medium text-gray-700"
+          >Position Name</label
+        >
+        <input
+          type="text"
+          id="position_name"
+          name="position_name"
+          value="{{ position['PositionName'] }}"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          required
+        />
+      </div>
+
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700"
+          >Description</label
+        >
+        <textarea
+          id="description"
+          name="description"
+          rows="4"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+{{ position['Description'] }}</textarea
+        >
+      </div>
+
+      <div class="mb-4">
+        <label
+          for="department_id"
+          class="block text-sm font-medium text-gray-700"
+          >Department</label
+        >
+        <select
+          id="department_id"
+          name="department_id"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          required
+        >
+          <option value="">Select Department</option>
+          {% for department in departments %}
+          <option value="{{ department.ID }}" {% if position['department_id'] == department.ID %}selected{% endif %}>
+            {{ department.Name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="flex justify-end gap-4">
+        <a
+          href="{{ url_for('get_all_positions') }}"
+          class="bg-gray-300 hover:bg-gray-400 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500"
+        >
+          Cancel
+        </a>
+        <button
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

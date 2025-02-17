@@ -1,0 +1,135 @@
+{% extends 'base.html' %} {% block title %} Add Bank Statement {% endblock %} {%
+block content %}
+<div class="container mx-auto px-4 py-6">
+  <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+    Add New Bank Statement
+  </h1>
+
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %}
+  <div class="alert alert-success mb-4">
+    {% for category, message in messages %}
+    <div class="text-green-500">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %} {% endwith %}
+
+  <form
+    action="{{ url_for('create_bankstatement') }}"
+    method="POST"
+    class="bg-white shadow-md rounded-lg p-6"
+  >
+    <!-- Select Employee -->
+    <div class="mb-4">
+      <label for="employee_id" class="block text-gray-700"
+        >Select Employee</label
+      >
+      <select
+        id="employee_id"
+        name="employee_id"
+        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required
+      >
+        <option value="" disabled selected hidden>Select an Employee</option>
+        {% for employee in employees %}
+        <option value="{{ employee.id }}">{{ employee.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Employee Name -->
+    <div class="mb-4">
+      <label for="employee_name" class="block text-gray-700"
+        >Employee Name</label
+      >
+      <input
+        type="text"
+        id="employee_name"
+        name="employee_name"
+        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required
+      />
+    </div>
+
+    <!-- Account Number -->
+    <div class="mb-4">
+      <label for="account_number" class="block text-gray-700"
+        >Account Number</label
+      >
+      <input
+        type="text"
+        id="account_number"
+        name="account_number"
+        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required
+      />
+    </div>
+
+    <!-- Bank Name -->
+    <div class="mb-4">
+      <label for="bank_name" class="block text-gray-700">Bank Name</label>
+      <input
+        type="text"
+        id="bank_name"
+        name="bank_name"
+        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required
+      />
+    </div>
+
+    <!-- Salary -->
+    <div class="mb-4">
+      <label for="salary" class="block text-gray-700">Salary</label>
+      <input
+        type="number"
+        id="salary"
+        name="salary"
+        step="0.01"
+        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required
+      />
+    </div>
+
+    <!-- Transaction Date -->
+    <div class="mb-4">
+      <label for="transaction_date" class="block text-gray-700"
+        >Transaction Date</label
+      >
+      <input
+        type="date"
+        id="transaction_date"
+        name="transaction_date"
+        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required
+      />
+    </div>
+
+    <!-- Transaction Type -->
+    <div class="mb-4">
+      <label for="transaction_type" class="block text-gray-700"
+        >Transaction Type</label
+      >
+      <select
+        id="transaction_type"
+        name="transaction_type"
+        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required
+      >
+        <option value="Credit">Credit</option>
+        <option value="Debit">Debit</option>
+      </select>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="mb-4">
+      <button
+        type="submit"
+        class="bg-blue-500 text-white p-2 w-full rounded-md hover:bg-blue-600"
+      >
+        Add Bank Statement
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

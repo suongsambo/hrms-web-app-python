@@ -64,18 +64,26 @@ content %}
         />
       </div>
 
+      <!-- Position Field -->
       <div>
-        <label for="position" class="block text-gray-700 text-sm font-bold mb-2"
-          >Position:</label
-        >
-        <input
-          type="text"
-          id="position"
-          name="position"
-          value="{{ employee['position'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
+        <label for="position" class="block text-sm font-medium text-gray-700">
+          Position:
+        </label>
+        <div class="mt-2 relative">
+          <select
+            id="position"
+            name="position_id"
+            required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled selected>Select a Position</option>
+            {% for position in positions %}
+            <option value="{{ position.id }}">
+              {{ position.Description }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
 
       <div>
@@ -110,18 +118,26 @@ content %}
         </select>
       </div>
 
+      <!-- Branch Field -->
       <div>
-        <label for="branch" class="block text-gray-700 text-sm font-bold mb-2"
+        <label for="branch" class="block text-sm font-medium text-gray-700"
           >Branch:</label
         >
-        <input
-          type="text"
-          id="branch"
-          name="branch"
-          value="{{ employee['branch'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
+        <div class="mt-2 relative">
+          <select
+            id="branch"
+            name="branch"
+            required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="" disabled selected>Select a Branch</option>
+            {% for branch in branches %}
+            <option value="{{ branch['Branch'] }}">
+              {{ branch['Branch'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
       </div>
 
       <div>

@@ -1,0 +1,72 @@
+{% extends 'base.html' %} {% block title %}View Position{% endblock %} {% block
+content %}
+<body class="bg-gray-100">
+  <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-12">
+    <h1 class="text-3xl font-semibold text-center text-gray-800 mb-6">
+      Position Details
+    </h1>
+
+    <!-- Flash messages for success or error -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <ul class="mb-4">
+      {% for category, message in messages %}
+      <li class="text-red-500">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+
+    <!-- Position Details -->
+    <div class="space-y-6">
+      <div class="bg-gray-50 p-4 rounded-lg shadow-md">
+        <h2 class="text-2xl font-semibold text-gray-800">
+          Position: {{ position.PositionName }}
+        </h2>
+        <p class="text-lg text-gray-600 mt-2">
+          Description: {{ position.Description }}
+        </p>
+        <p class="text-lg text-gray-600 mt-2">
+          Department ID: {{ position.department_id }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Employees in this position -->
+    <div class="mt-6">
+      <h3 class="text-xl font-semibold text-gray-800 mb-4">
+        Employees in this Position
+      </h3>
+      {% if employees %}
+      <table class="min-w-full table-auto border-collapse">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="px-4 py-2 text-left text-gray-600">Employee ID</th>
+            <th class="px-4 py-2 text-left text-gray-600">Name</th>
+            <th class="px-4 py-2 text-left text-gray-600">Branch</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for employee in employees %}
+          <tr class="border-t">
+            <td class="px-4 py-2">{{ employee.id }}</td>
+            <td class="px-4 py-2">{{ employee.name }}</td>
+            <td class="px-4 py-2">{{ employee.branch }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <p class="text-gray-600">No employees found for this position.</p>
+      {% endif %}
+    </div>
+
+    <div class="mt-6 text-center">
+      <a
+        href="{{ url_for('get_all_positions') }}"
+        class="text-blue-500 hover:underline"
+        >Back to Positions</a
+      >
+    </div>
+  </div>
+</body>
+{% endblock %}

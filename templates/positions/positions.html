@@ -1,0 +1,159 @@
+{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
+content %}
+<script>
+  $(document).ready(function () {
+    $("#positionsTable").DataTable();
+  });
+</script>
+
+<div class="container mx-auto py-1">
+  <div class="container mx-auto">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+      Positions List
+    </h1>
+    <div class="flex items-center justify-start gap-x-4 mb-2">
+      <!-- Print Button -->
+      <button
+        type="button"
+        onclick="printTable()"
+        class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 flex items-center justify-center space-x-1 transition duration-200 ease-in-out"
+      >
+        <span class="material-symbols-outlined">print</span>
+        <span class="text-xs">Print</span>
+      </button>
+
+      <!-- Refresh Button -->
+      <button
+        type="button"
+        onclick="window.location.reload()"
+        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center space-x-1 transition duration-200 ease-in-out"
+      >
+        <span class="material-symbols-outlined">autorenew</span>
+        <span class="text-xs">Refresh</span>
+      </button>
+
+      <!-- Add Position Button -->
+      <a
+        href="/positions/add"
+        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 flex items-center justify-center space-x-1 transition duration-200 ease-in-out"
+      >
+        <span class="material-symbols-outlined mr-2 text-lg">add_box</span>
+        <span class="text-sm font-semibold">Add Position</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table
+      id="positionsTable"
+      class="w-full table-auto bg-white shadow-md rounded-lg"
+    >
+      <thead class="bg-gray-800 text-white">
+        <tr>
+          <th class="py-2 px-4 text-left">ID</th>
+          <th class="py-2 px-4 text-left">Position Name</th>
+          <th class="py-2 px-4 text-left">Description</th>
+          <th class="py-2 px-4 text-left">Department ID</th>
+          <th class="py-2 px-4 text-center w-40">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for position in positions %}
+        <tr class="border-b">
+          <td class="py-2 px-4">{{ position.ID }}</td>
+          <td class="py-2 px-4">{{ position.PositionName }}</td>
+          <td class="py-2 px-4">{{ position.Description }}</td>
+          <td class="py-2 px-4">{{ position.department_id }}</td>
+          <td class="py-2 px-4 text-center w-40">
+            <div class="flex justify-center gap-x-2">
+              <a
+                href="/positions/view/{{ position.ID }}"
+                class="text-green-500 hover:underline flex items-center"
+              >
+                <i class="fas fa-eye mr-1"></i>View
+              </a>
+              <a
+                href="/positions/edit/{{ position.ID }}"
+                class="text-yellow-500 hover:underline flex items-center"
+              >
+                <i class="fas fa-edit mr-1"></i>Edit
+              </a>
+              <form
+                action="/positions/delete/{{ position.ID }}"
+                method="POST"
+                class="inline-block"
+              >
+                <button
+                  type="submit"
+                  class="text-red-500 hover:underline flex items-center"
+                  onclick="return confirm('Are you sure you want to delete this position?')"
+                >
+                  <i class="fas fa-trash-alt mr-1"></i>Delete
+                </button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  function printTable() {
+    let table = document.querySelector("#positionsTable").cloneNode(true);
+    // Remove the last column (Actions)
+    let columnsToHide = [4];
+    table.querySelectorAll("thead tr th").forEach((th, index) => {
+      if (columnsToHide.includes(index)) {
+        th.style.display = "none";
+      }
+    });
+
+    table.querySelectorAll("tbody tr").forEach((tr) => {
+      tr.querySelectorAll("td").forEach((td, index) => {
+        if (columnsToHide.includes(index)) {
+          td.style.display = "none";
+        }
+      });
+    });
+
+    let date = new Date();
+    let header = document.createElement("div");
+    header.classList.add("text-center", "mb-4");
+    header.innerHTML = `
+      <h1 class="text-3xl font-bold">KPCC</h1>
+      <p>Port Phillip, Victoria, Australia</p>
+      <p>${date.toLocaleDateString()}</p>
+    `;
+    let footer = document.createElement("p");
+    footer.classList.add("text-center", "mt-4");
+    footer.innerHTML = `Note: Data export from system HRMS.`;
+
+    let newWin = window.open("", "", "width=800,height=600");
+    newWin.document.write(`
+      <html>
+        <head>
+          <title>Print Positions</title>
+          <style>
+            body { padding: 24px; font-family: Arial, sans-serif; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 8px; }
+            th { background-color: #f4f4f4; text-align: left; }
+            tr:nth-child(even) { background-color: #f9f9f9; }
+          </style>
+        </head>
+        <body>
+          ${header.outerHTML}
+          ${table.outerHTML}
+          ${footer.outerHTML}
+          <script>window.onload = function() { window.print(); window.close(); }<\/script>
+        </body>
+      </html>
+    `);
+    newWin.document.close();
+  }
+</script>
+
+{% endblock %}

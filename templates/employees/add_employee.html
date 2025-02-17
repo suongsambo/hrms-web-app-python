@@ -69,17 +69,23 @@ content %}
 
         <!-- Position Field -->
         <div>
-          <label for="position" class="block text-sm font-medium text-gray-700"
-            >Position:</label
-          >
+          <label for="position" class="block text-sm font-medium text-gray-700">
+            Position:
+          </label>
           <div class="mt-2 relative">
-            <input
-              type="text"
+            <select
               id="position"
-              name="position"
+              name="position_id"
               required
               class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
+            >
+              <option value="" disabled selected>Select a Position</option>
+              {% for position in positions %}
+              <option value="{{ position.id }}">
+                {{ position.Description }}
+              </option>
+              {% endfor %}
+            </select>
           </div>
         </div>
 
