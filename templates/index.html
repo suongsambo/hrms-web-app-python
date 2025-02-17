@@ -1,32 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HR Management System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-</head>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='favicon.ico') }}"
+      type="image/x-icon"
+    />
 
-<body>
+    <link
+      rel="manifest"
+      href="{{ url_for('static', filename='manifest.json') }}"
+    />
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+    <link rel="manifest" href="/static/manifest.json" />
+    <link rel="icon" href="/static/icons/icon-192x192.png" />
+  </head>
+
+  <body>
     <header>
-        <h1>Welcome to HR Management System</h1>
+      <h1>Welcome to HR Management System</h1>
     </header>
 
     <main>
-        <p>Manage employees, track staff details, and streamline HR operations.</p>
+      <p>
+        Manage employees, track staff details, and streamline HR operations.
+      </p>
 
-        <div class="buttons">
-            <a href="{{ url_for('index') }}" class="btn">Login</a>
-            <a href="{{ url_for('register') }}" class="btn">Register</a>
-        </div>
+      <div class="buttons">
+        <a href="{{ url_for('index') }}" class="btn">Login</a>
+        <a href="{{ url_for('register') }}" class="btn">Register</a>
+      </div>
     </main>
 
     <footer>
-        <p>&copy; 2025 HR Management System. All rights reserved.</p>
+      <p>&copy; 2025 HR Management System. All rights reserved.</p>
     </footer>
-</body>
 
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/static/service-worker.js")
+          .then((registration) => {
+            console.log(
+              "Service Worker registered with scope:",
+              registration.scope
+            );
+          })
+          .catch((error) => {
+            console.error("Service Worker registration failed:", error);
+          });
+      }
+    </script>
+  </body>
 </html>

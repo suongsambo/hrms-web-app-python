@@ -1,7 +1,7 @@
 
 from flask import render_template
 from flask import request, jsonify
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 import sqlite3
 import hashlib
 import os
@@ -280,7 +280,13 @@ def init_db():
         conn.commit()
 
 
+@app.route('/static/<path:filename>')
+def static_files(filename):
+    return send_from_directory(app.static_folder, filename)
+
 # Route to view all leaves
+
+
 @app.route('/leaves')
 def view_leaves():
     if current_user.is_authenticated and not current_user.is_admin:
