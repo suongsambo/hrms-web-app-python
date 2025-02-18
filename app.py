@@ -293,8 +293,11 @@ def init_db():
         conn.execute('''
             CREATE TABLE IF NOT EXISTS bankstatement (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 employee_id INTEGER NOT NULL,
                 employee_name TEXT NOT NULL,
+                account_name TEXT NOT NULL,
                 account_number TEXT NOT NULL,
                 bank_name TEXT NOT NULL,
                 salary REAL NOT NULL,
@@ -315,11 +318,12 @@ def create_bankstatement():
         with get_db_connection() as conn:
             employees = conn.execute(
                 'SELECT id, name FROM employees').fetchall()
-        return render_template('add_bankstatement.html', employees=employees)
+        return render_template('/bankstatements/add_bankstatement.html', employees=employees)
 
     # Handle POST request to get form data and insert into database
     employee_id = request.form.get('employee_id')
     employee_name = request.form.get('employee_name')
+    account_name = request.form.get('account_name')
     account_number = request.form.get('account_number')
     bank_name = request.form.get('bank_name')
     salary = request.form.get('salary')
@@ -329,9 +333,9 @@ def create_bankstatement():
     # Insert data into database
     with get_db_connection() as conn:
         conn.execute('''
-            INSERT INTO bankstatement (employee_id, employee_name, account_number, bank_name, salary, transaction_date, transaction_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (employee_id, employee_name, account_number, bank_name, salary, transaction_date, transaction_type))
+            INSERT INTO bankstatement (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type))
         conn.commit()
 
     flash('Bank statement created successfully', 'success')
@@ -344,7 +348,7 @@ def create_bankstatement():
 def get_all_bankstatements():
     with get_db_connection() as conn:
         bankstatements = conn.execute('SELECT * FROM bankstatement').fetchall()
-    return render_template('view_bankstatements.html', bankstatements=bankstatements)
+    return render_template('/bankstatements/view_bankstatements.html', bankstatements=bankstatements)
 
 # Route to view a single bank statement
 
@@ -354,7 +358,7 @@ def view_bankstatement(id):
     with get_db_connection() as conn:
         bankstatement = conn.execute(
             'SELECT * FROM bankstatement WHERE id = ?', (id,)).fetchone()
-    return render_template('view_bankstatement.html', bankstatement=bankstatement)
+    return render_template('/bankstatements/view_bankstatement.html', bankstatement=bankstatement)
 
 # Route to update a bank statement
 
@@ -369,6 +373,7 @@ def update_bankstatement(id):
         # Get form data
         employee_id = request.form.get('employee_id')
         employee_name = request.form.get('employee_name')
+        account_name = request.form.get('account_name')
         account_number = request.form.get('account_number')
         bank_name = request.form.get('bank_name')
         salary = request.form.get('salary')
@@ -379,15 +384,15 @@ def update_bankstatement(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE bankstatement
-                SET employee_id = ?, employee_name = ?, account_number = ?, bank_name = ?, salary = ?, transaction_date = ?, transaction_type = ?
+                SET employee_id = ?, employee_name = ?, account_name = ?, account_number = ?, bank_name = ?, salary = ?, transaction_date = ?, transaction_type = ?
                 WHERE id = ?
-            ''', (employee_id, employee_name, account_number, bank_name, salary, transaction_date, transaction_type, id))
+            ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type, id))
             conn.commit()
 
         flash('Bank statement updated successfully', 'success')
         return redirect(url_for('get_all_bankstatements'))
 
-    return render_template('edit_bankstatement.html', bankstatement=bankstatement)
+    return render_template('/bankstatements/edit_bankstatement.html', bankstatement=bankstatement)
 
 # Route to delete a bank statement
 

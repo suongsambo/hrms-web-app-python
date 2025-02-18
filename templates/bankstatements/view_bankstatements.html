@@ -20,7 +20,7 @@ block content %}
   function printBankStatements() {
     let table = document.querySelector("#bankstatements-table").cloneNode(true);
     // Hide unnecessary columns or customize as needed
-    let columnsToHide = [7]; // Example: Hide the "Actions" column
+    let columnsToHide = [8]; // Example: Hide the "Actions" column
     table.querySelectorAll("thead tr th").forEach((th, index) => {
       if (columnsToHide.includes(index)) {
         th.style.display = "none";
@@ -125,6 +125,7 @@ block content %}
             <th class="px-4 py-2 text-left text-gray-700">ID</th>
             <th class="px-4 py-2 text-left text-gray-700">Employee Name</th>
             <th class="px-4 py-2 text-left text-gray-700">Account Number</th>
+            <th class="px-4 py-2 text-left text-gray-700">Account Name</th>
             <th class="px-4 py-2 text-left text-gray-700">Bank Name</th>
             <th class="px-4 py-2 text-left text-gray-700">Salary</th>
             <th class="px-4 py-2 text-left text-gray-700">Transaction Date</th>
@@ -138,6 +139,7 @@ block content %}
             <td class="px-4 py-2">{{ bankstatement.id }}</td>
             <td class="px-4 py-2">{{ bankstatement.employee_name }}</td>
             <td class="px-4 py-2">{{ bankstatement.account_number }}</td>
+            <td class="px-4 py-2">{{ bankstatement.account_name }}</td>
             <td class="px-4 py-2">{{ bankstatement.bank_name }}</td>
             <td class="px-4 py-2">{{ bankstatement.salary }}</td>
             <td class="px-4 py-2">{{ bankstatement.transaction_date }}</td>
