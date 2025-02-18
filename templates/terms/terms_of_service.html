@@ -1,0 +1,74 @@
+{% extends 'base.html' %} {% block title %}Terms of Service{% endblock %} {%
+block content %}
+<body class="bg-gray-100 font-sans">
+  <div class="max-w-3xl mx-auto px-4 py-2 bg-white rounded-lg shadow-lg">
+
+    <div class="container mx-auto px-4 py-2">
+
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-6">
+            Terms of Service
+          </h1>
+      
+          <p class="text-xl text-gray-700 mb-4">
+            Please read and accept the following terms of service to continue using
+            our service:
+          </p>
+      
+      
+          <!-- Terms Content Block -->
+          <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">
+              <i class="fas fa-info-circle text-blue-500 mr-2"></i> Introduction
+            </h2>
+            <p class="text-gray-600 mb-4">
+              Welcome to our website. By using our services, you agree to the
+              following terms and conditions...
+            </p>
+      
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">
+              <i class="fas fa-gavel text-blue-500 mr-2"></i> Terms of Use
+            </h2>
+            <p class="text-gray-600 mb-4">
+              These terms govern your use of the website. You are responsible for
+              maintaining the confidentiality of your account...
+            </p>
+      
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">
+              <i class="fas fa-user-shield text-blue-500 mr-2"></i> Privacy Policy
+            </h2>
+            <p class="text-gray-600 mb-4">
+              We take your privacy seriously. The information we collect will only be
+              used for the purposes outlined here...
+            </p>
+      
+            <h2 class="text-2xl font-semibold text-gray-700 mb-4">
+              <i class="fas fa-exclamation-triangle text-yellow-500 mr-2"></i>
+              Disclaimers
+            </h2>
+            <p class="text-gray-600 mb-8">
+              We are not liable for any damages that may result from using our site.
+              You use the site at your own risk...
+            </p>
+      
+    </div>
+
+    <!-- Form to accept terms -->
+    <form method="POST" action="{{ url_for('accept_terms') }}">
+      <button
+        type="submit"
+        class="w-full py-3 px-6 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center space-x-2"
+      >
+        <i class="fas fa-check-circle text-lg"></i>
+        <span>Accept Terms</span>
+      </button>
+    </form>
+
+    <div class="mt-6 text-center">
+      <a href="{{ url_for('dashboard') }}" class="text-blue-600 hover:underline"
+        >Go to Dashboard</a
+      >
+    </div>
+  </div>
+</body>
+
+{% endblock %}

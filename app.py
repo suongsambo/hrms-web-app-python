@@ -92,7 +92,8 @@ def init_db():
                 Status TEXT,
                 Note TEXT,
                 RequestRole TEXT,
-                RoleDefault INTEGER DEFAULT 0
+                RoleDefault INTEGER DEFAULT 0,
+                AcceptedTerms INTEGER DEFAULT 0
             )
         ''')
 
@@ -310,7 +311,81 @@ def init_db():
         conn.commit()
 
 
+@app.route('/list-accepted-terms')
+def list_accepted_terms():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT * FROM users WHERE AcceptedTerms = 1')
+        users = cursor.fetchall()
+
+    return render_template('/terms/list_accepted_terms.html', users=users)
+
+
+@app.route('/accept-terms', methods=['GET', 'POST'])
+@login_required
+def accept_terms():
+    # Redirect non-admin users to their specific check-ins page
+    if current_user.is_admin == 0:  # Non-admin users
+        return redirect(url_for('term_user_id', user_id=current_user.id))
+
+    email = current_user.email
+    user_id = current_user.id  # Defining user_id from current_user
+
+    if request.method == 'POST':
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+
+            if current_user.is_admin == 0:  # Regular user
+                cursor.execute(
+                    'UPDATE users SET AcceptedTerms = 1 WHERE ID = ?', (user_id,))
+            # If it's an admin (or any user with admin rights), update by email
+            else:
+                cursor.execute(
+                    'UPDATE users SET AcceptedTerms = 1 WHERE Email = ?', (email,))
+
+            conn.commit()
+            flash('You have successfully accepted the Terms of Service.', 'success')
+            return redirect(url_for('list_accepted_terms'))
+
+    # If it's a GET request, render the terms page
+    return render_template('terms/terms_of_service.html')
+
+
+@app.route('/term_user_id/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def term_user_id(user_id):
+    # Ensure that the current user is accessing their own page
+    if user_id != current_user.id:
+        flash('You cannot access another user\'s terms.', 'danger')
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT AcceptedTerms FROM users WHERE ID = ?', (user_id,))
+        accepted_terms = cursor.fetchone()[0]
+
+    # Handle POST request for accepting terms
+    if request.method == 'POST':
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                'UPDATE users SET AcceptedTerms = 1 WHERE ID = ?', (user_id,))
+            conn.commit()
+            flash('You have successfully accepted the Terms of Service.', 'success')
+            return redirect(url_for('dashboard'))
+
+    # Render the page showing terms of service for this user
+    return render_template('/terms/accepted_terms.html', user_id=user_id, accepted_terms=accepted_terms)
+
+
+@app.route('/privacy-policy')
+def privacy_policy():
+    return render_template('/policy/privacy_policy.html')
+
 # Route to create a bank statement
+
+
 @app.route('/bankstatement/add', methods=['GET', 'POST'])
 def create_bankstatement():
     if request.method == 'GET':
@@ -467,7 +542,7 @@ def update_department(id):
 
         with get_db_connection() as conn:
             conn.execute('''
-                UPDATE departments 
+                UPDATE departments
                 SET Name = ?, Description = ?
                 WHERE id = ?
             ''', (name, description, id))
@@ -632,8 +707,7 @@ def add_leave():
         # Calculate service count (difference between start_date and end_date)
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-        service_count = (end_date_obj - start_date_obj).days + \
-            1  # Include both start and end date
+        service_count = (end_date_obj - start_date_obj).days + 1
 
         # Insert the leave record into the database
         with get_db_connection() as conn:
@@ -849,12 +923,11 @@ def edit_leave(id):
         # Calculate service count (difference between start_date and end_date)
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-        service_count = (end_date_obj - start_date_obj).days + \
-            1  # Include both start and end date
+        service_count = (end_date_obj - start_date_obj).days + 1
 
         with get_db_connection() as conn:
             conn.execute('''
-                UPDATE leaves 
+                UPDATE leaves
                 SET leave_type = ?, start_date = ?, end_date = ?, reason = ?, status = ?, service_count = ?
                 WHERE id = ?
             ''', (leave_type, start_date, end_date, reason, status, service_count, id))
@@ -1011,94 +1084,6 @@ def checkout(user_id):
     return redirect(url_for('list_checkin'))
 
 
-# @app.route('/worked_time/<int:user_id>')
-# def worked_time(user_id):
-#     with get_db_connection() as conn:
-#         # Fetch employee details based on user ID
-#         employee = conn.execute('''
-#             SELECT * FROM users WHERE id = ?
-#         ''', (user_id,)).fetchone()
-
-#         if employee:
-#             # Fetch the most recent attendance records for the employee for the current day
-#             attendance = conn.execute('''
-#                 SELECT * FROM Attendance WHERE employee_name = ? AND strftime('%Y-%m-%d', checkin_time) = date('now')
-#                 ORDER BY id DESC
-#             ''', (employee['UserName'],)).fetchall()
-
-#             worked_duration = 0
-#             workday_hours = 0
-#             if attendance:
-#                 # Calculate worked duration (in hours) for all attendance records for the current day
-#                 for record in attendance:
-#                     if record['checkout_time']:
-#                         worked_duration += (datetime.strptime(record['checkout_time'], '%Y-%m-%d %H:%M:%S') -
-#                                             datetime.strptime(record['checkin_time'], '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600
-#                         workday_hours += 8  # Assuming an 8-hour workday
-
-#                 return render_template('/worktime/worked_time.html', employee=employee, worked_duration=worked_duration, workday_hours=workday_hours)
-#             return render_template('/worktime/worked_time.html', employee=employee, worked_duration=None)
-#         return "Employee not found."
-
-
-# @app.route('/worked_time/<int:user_id>')
-# def worked_time(user_id):
-#     with get_db_connection() as conn:
-#         # Fetch employee details based on user ID
-#         employee = conn.execute('''
-#             SELECT u.id, u.UserName, e.name, e.department
-#             FROM users u
-#             INNER JOIN employees e ON u.id = e.user_id
-#             WHERE u.id = ?
-#         ''', (user_id,)).fetchone()
-
-#         if employee:
-#             # Fetch the most recent attendance records for the employee for the current day
-#             attendance = conn.execute('''
-#                 SELECT * FROM Attendance WHERE employee_name = ? AND strftime('%Y-%m-%d', checkin_time) = date('now')
-#                 ORDER BY id DESC
-#             ''', (employee['UserName'],)).fetchall()
-
-#             worked_duration = 0
-#             workday_hours = 0
-#             overtime = 0
-#             leave_taken = 0
-#             if attendance:
-#                 # Calculate worked duration (in hours) for all attendance records for the current day
-#                 for record in attendance:
-#                     if record['checkout_time']:
-#                         # Calculate worked duration in hours
-#                         worked_duration += (datetime.strptime(record['checkout_time'], '%Y-%m-%d %H:%M:%S') -
-#                                             datetime.strptime(record['checkin_time'], '%Y-%m-%d %H:%M:%S')).total_seconds() / 3600
-
-#                         # Assuming an 8-hour workday
-#                         workday_hours += 8
-
-#                         # If the worked hours exceed 8 hours, calculate overtime
-#                         if worked_duration > 8:
-#                             overtime = worked_duration - 8
-
-#                 # Calculate leave taken based on leaves table
-#                 leave_taken_records = conn.execute('''
-#                     SELECT * FROM leaves WHERE employee_id = ? AND strftime('%Y-%m-%d', start_date) = date('now')
-#                 ''', (employee['id'],)).fetchall()
-
-#                 leave_taken = sum(
-#                     (datetime.strptime(leave['end_date'], "%Y-%m-%d") -
-#                      datetime.strptime(leave['start_date'], "%Y-%m-%d")).days + 1
-#                     for leave in leave_taken_records
-#                 )
-
-#                 return render_template('worktime/worked_time.html',
-#                                        employee=employee,
-#                                        worked_duration=worked_duration,
-#                                        workday_hours=workday_hours,
-#                                        overtime=overtime,
-#                                        leave_taken=leave_taken)
-#             return render_template('worktime/worked_time.html', employee=employee, worked_duration=None)
-#         return "Employee not found."
-
-
 @app.route('/worked_time/<int:user_id>')
 def worked_time(user_id):
     with get_db_connection() as conn:
@@ -1113,7 +1098,7 @@ def worked_time(user_id):
         if employee:
             # Fetch attendance records for the employee for the current month
             attendance = conn.execute('''
-                SELECT * FROM Attendance WHERE employee_name = ? 
+                SELECT * FROM Attendance WHERE employee_name = ?
                 AND strftime('%Y-%m-%d', checkin_time) BETWEEN date('now', '-30 days') AND date('now')
                 ORDER BY checkin_time DESC
             ''', (employee['UserName'],)).fetchall()
@@ -1150,7 +1135,7 @@ def worked_time(user_id):
 
             # Calculate leave taken for each day
             leave_taken_records = conn.execute('''
-                SELECT * FROM leaves WHERE employee_id = ? 
+                SELECT * FROM leaves WHERE employee_id = ?
                 AND strftime('%Y-%m-%d', start_date) BETWEEN date('now', '-30 days') AND date('now')
             ''', (employee['id'],)).fetchall()
 
@@ -1600,8 +1585,6 @@ def list_attendance():
         ]
     return render_template('attendance/attendance.html', records=records, notifications_attendance=notifications_attendance)
 
-# 📌 Search Attendance
-
 
 @app.route('/attendance/search', methods=['GET'])
 @login_required
@@ -1653,8 +1636,6 @@ def delete_attendance(id):
         conn.execute("DELETE FROM attendance WHERE id = ?", (id,))
         conn.commit()
     return redirect(url_for('list_attendance'))
-
-# 📌 View Attendance Record
 
 
 @app.route('/attendance/<int:id>')
@@ -1783,8 +1764,6 @@ def load_user(user_id):
 def unauthorized():
     return render_template('unauthorized.html'), 401
 
-# Example uploaded_file route for displaying the uploaded image
-
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -1908,11 +1887,12 @@ def uploaded_file(filename):
 def index():
     return render_template('login.html')
 
-
 # Function to get geolocation based on IP address (optional)
+
+
 def get_geolocation(ip):
     # Replace with your geolocation API (e.g., ipstack, ipinfo.io, etc.)
-    api_url = f"http://ipinfo.io/{ip}/json"  # Example API (ipinfo.io)
+    api_url = f"http://ipinfo.io/{ip}/json"
     response = requests.get(api_url)
     data = response.json()
     city = data.get('city', 'Unknown')
@@ -1921,7 +1901,6 @@ def get_geolocation(ip):
 
 
 @app.route('/online_users', methods=['GET'])
-# @login_required
 def online_users():
     # Define the timeout threshold (e.g., 15 minutes)
     timeout_threshold = 15  # minutes
@@ -1959,9 +1938,9 @@ def login():
     with get_db_connection() as conn:
         conn.row_factory = sqlite3.Row  # Fetch rows as dictionaries
         user = conn.execute('''
-            SELECT ID, UserName, Password, Email, Branch, IsAdmin, 
-                   COALESCE(RoleDefault, 1) AS RoleDefault  
-            FROM users 
+            SELECT ID, UserName, Password, Email, Branch, IsAdmin,
+                   COALESCE(RoleDefault, 1) AS RoleDefault
+            FROM users
             WHERE UserName = ? AND Password = ?
         ''', (username, password)).fetchone()
 
@@ -2007,7 +1986,6 @@ def login():
 
 
 @app.route('/logout', methods=['POST'])
-# @login_required
 def logout():
     # Remove the user from the online_users table if logged in
     if current_user.is_authenticated:
@@ -2157,6 +2135,7 @@ def edit_user(id):
     with get_db_connection() as conn:
         user = conn.execute(
             "SELECT * FROM users WHERE ID = ?", (id,)).fetchone()
+        branches = conn.execute("SELECT * FROM branches").fetchall()
 
     if request.method == 'POST':
         username = request.form['username']
@@ -2167,17 +2146,18 @@ def edit_user(id):
         last_name_en = request.form['last_name_en']
         branch = request.form['branch']
         is_admin = request.form.get('is_admin', 0)
+        role_default = request.form.get('role_default', 0)
         mobile1 = request.form['mobile1']
 
         with get_db_connection() as conn:
             conn.execute("""
-                UPDATE users SET UserName = ?, Email = ?, FirstNameKh = ?, LastNameKh = ?, FirstNameEn = ?, LastNameEn = ?, Branch = ?, IsAdmin = ?, Mobile1 = ?, UpdatedAt = CURRENT_TIMESTAMP
+                UPDATE users SET UserName = ?, Email = ?, FirstNameKh = ?, LastNameKh = ?, FirstNameEn = ?, LastNameEn = ?, Branch = ?, IsAdmin = ?, RoleDefault = ?, Mobile1 = ?, UpdatedAt = CURRENT_TIMESTAMP
                 WHERE ID = ?""",
-                         (username, email, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, mobile1, id))
+                         (username, email, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, mobile1, id))
             conn.commit()
         return redirect(url_for('list_users'))
 
-    return render_template('/users/edit_user.html', user=user)
+    return render_template('/users/edit_user.html', user=user, branches=branches)
 
 
 @app.route('/users/delete/<int:id>', methods=['POST'])
@@ -2378,8 +2358,8 @@ def add_employee():
 
         with get_db_connection() as conn:
             conn.execute(
-                """INSERT INTO employees (name, age, department, salary, position_id, joining_date, status, 
-                                           branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone) 
+                """INSERT INTO employees (name, age, department, salary, position_id, joining_date, status,
+                                           branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (name, age, department, salary, position_id, joining_date, status, branch, user_id,
                  phone_number, email, address, emergency_contact_name, emergency_contact_phone)
@@ -2417,8 +2397,8 @@ def edit_employee(id):
 
         with get_db_connection() as conn:
             conn.execute(
-                """UPDATE employees SET name = ?, age = ?, department = ?, salary = ?, position_id = ?, joining_date = ?, 
-                   status = ?, branch = ?, phone_number = ?, email = ?, address = ?, emergency_contact_name = ?, emergency_contact_phone = ? 
+                """UPDATE employees SET name = ?, age = ?, department = ?, salary = ?, position_id = ?, joining_date = ?,
+                   status = ?, branch = ?, phone_number = ?, email = ?, address = ?, emergency_contact_name = ?, emergency_contact_phone = ?
                    WHERE id = ?""",
                 (name, age, department, salary, position_id, joining_date, status, branch,
                  phone_number, email, address, emergency_contact_name, emergency_contact_phone, id)
