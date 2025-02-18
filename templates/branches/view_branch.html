@@ -1,45 +1,49 @@
-{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block content %}
+{% extends 'base.html' %} {% block title %}View Branch{% endblock %} {% block
+content %}
 
 <body class="bg-gray-100">
-    <div class="container mx-auto mt-10">
-        <h1 class="text-3xl font-semibold mb-6">Branch Details</h1>
+  <div class="container mx-auto mt-10">
+    <h1 class="text-3xl font-semibold mb-6">Branch Details</h1>
 
-        {% if branch %}
-        <div class="bg-white shadow-lg rounded-lg p-6">
-            <div class="grid grid-cols-2 gap-4">
-                <div><strong>ID:</strong> {{ branch['ID'] }}</div>
-                <div><strong>Branch:</strong> {{ branch['Branch'] }}</div>
-                <div><strong>Status:</strong> {{ branch['status'] }}</div>
-                <div>
-                    <strong>Contact Number:</strong> {{ branch['ContactNumber'] }}
-                </div>
-                <div>
-                    <strong>Branch Manager Name:</strong> {{ branch['BranchManagerName']
-                    }}
-                </div>
-                <div><strong>Description:</strong> {{ branch['Description'] }}</div>
-                <div><strong>Address:</strong> {{ branch['Address'] }}</div>
-                <div><strong>Register Date:</strong> {{ branch['RegisterDate'] }}</div>
-                <div>
-                    <strong>Local Description:</strong> {{ branch['LocalDescription'] }}
-                </div>
-                <div>
-                    <strong>Local Branch Manager Name:</strong> {{
-                    branch['LocalBranchManagerName'] }}
-                </div>
-                <div><strong>Local Address:</strong> {{ branch['LocalAddress'] }}</div>
-            </div>
-            <div class="mt-4 text-center">
-                <button type="button" onclick="window.location.href='/branches'"
-                    class="bg-gray-700 hover:bg-gray-100 text-white hover:text-gray-500 font-semibold py-2 px-4 border border-gray-300 rounded-md shadow-sm">
-                    Back
-                </button>
-            </div>
+    {% if branch %}
+    <div class="bg-white shadow-lg rounded-lg p-6">
+      <div class="grid grid-cols-2 gap-4">
+        <div><strong>ID:</strong> {{ branch['ID'] }}</div>
+        <div><strong>Branch:</strong> {{ branch['Branch'] }}</div>
+        <div><strong>Status:</strong> {{ branch['status'] }}</div>
+        <div>
+          <strong>Contact Number:</strong> {{ branch['ContactNumber'] }}
         </div>
-        {% else %}
-        <p class="text-red-500">Branch not found.</p>
-        {% endif %}
+        <div>
+          <strong>Branch Manager Name:</strong> {{ branch['BranchManagerName']
+          }}
+        </div>
+        <div><strong>Description:</strong> {{ branch['Description'] }}</div>
+        <div><strong>Address:</strong> {{ branch['Address'] }}</div>
+        <div><strong>Register Date:</strong> {{ branch['RegisterDate'] }}</div>
+        <div>
+          <strong>Local Description:</strong> {{ branch['LocalDescription'] }}
+        </div>
+        <div>
+          <strong>Local Branch Manager Name:</strong> {{
+          branch['LocalBranchManagerName'] }}
+        </div>
+        <div><strong>Local Address:</strong> {{ branch['LocalAddress'] }}</div>
+      </div>
+      <div class="mt-4 text-center">
+        <button
+          type="button"
+          onclick="window.location.href='/branches'"
+          class="bg-gray-700 hover:bg-gray-100 text-white hover:text-gray-500 font-semibold py-2 px-4 border border-gray-300 rounded-md shadow-sm"
+        >
+          Back
+        </button>
+      </div>
     </div>
+    {% else %}
+    <p class="text-red-500">Branch not found.</p>
+    {% endif %}
+  </div>
 </body>
 
 {% endblock %}
