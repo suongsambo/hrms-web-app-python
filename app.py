@@ -1,6 +1,6 @@
 
 from flask_login import login_required, current_user
-from flask import Flask, render_template, flash, redirect, url_for
+from flask import Flask, Response, render_template, flash, redirect, url_for
 from flask import render_template
 from flask import request, jsonify
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
@@ -24,6 +24,18 @@ app = Flask(__name__)
 app.config.from_object(Config)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Ensure the upload folder exists
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 class User(UserMixin):
@@ -95,7 +107,9 @@ def init_db():
                 Note TEXT,
                 RequestRole TEXT,
                 RoleDefault INTEGER DEFAULT 0,
-                AcceptedTerms INTEGER DEFAULT 0
+                AcceptedTerms INTEGER DEFAULT 0,
+                ImageUrl TEXT,
+                Image BLOB
             )
         ''')
 
@@ -2071,6 +2085,62 @@ def users():
     return render_template('/users/users.html', users=users)
 
 
+# @app.route('/users/add', methods=['GET', 'POST'])
+# def add_user():
+#     if current_user.is_admin == 0:
+#         flash("You don't have permission to view this page.", "danger")
+#         return redirect(url_for('dashboard'))
+
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         mobile1 = request.form['mobile1']
+#         first_name_kh = request.form['first_name_kh']
+#         last_name_kh = request.form['last_name_kh']
+#         first_name_en = request.form['first_name_en']
+#         last_name_en = request.form['last_name_en']
+#         branch = request.form['branch']
+#         branch_id = request.form['branch']  # Get the branch ID from the form
+#         # Checkbox will return '1' if checked, else default to 0
+#         is_admin = request.form.get('is_admin', 0)
+#         role_default = request.form.get('role_default', 0)
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         # Insert user into 'users' table
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             # Check if username already exists
+#             cursor.execute(
+#                 'SELECT * FROM users WHERE UserName = ?', (username,))
+#             existing_user = cursor.fetchone()
+
+#             if existing_user:
+#                 flash('Username already exists. Please choose another one.', 'danger')
+#                 return redirect(url_for('add_user'))
+
+#             cursor.execute('''
+#                 INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default))
+#             user_id = cursor.lastrowid
+
+#             # Insert relationship into 'user_branches' table
+#             cursor.execute('''
+#                 INSERT INTO user_branches (user_id, branch_id)
+#                 VALUES (?, ?)
+#             ''', (user_id, branch_id))
+#             conn.commit()
+
+#         return redirect(url_for('list_users'))
+
+#     # Fetch all branches for selection
+#     with get_db_connection() as conn:
+#         branches = conn.execute('SELECT * FROM branches').fetchall()
+
+#     return render_template('/users/add_user.html', branches=branches)
+
+
 @app.route('/users/add', methods=['GET', 'POST'])
 def add_user():
     if current_user.is_admin == 0:
@@ -2088,15 +2158,21 @@ def add_user():
         last_name_en = request.form['last_name_en']
         branch = request.form['branch']
         branch_id = request.form['branch']  # Get the branch ID from the form
-        # Checkbox will return '1' if checked, else default to 0
         is_admin = request.form.get('is_admin', 0)
         role_default = request.form.get('role_default', 0)
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
+        # Handle image upload
+        image_data = None
+        if 'image' in request.files:
+            image = request.files['image']
+            # Ensure the image file is valid
+            if image and allowed_file(image.filename):
+                image_data = image.stream.read()  # Read the image data as binary
+
         # Insert user into 'users' table
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            # Check if username already exists
             cursor.execute(
                 'SELECT * FROM users WHERE UserName = ?', (username,))
             existing_user = cursor.fetchone()
@@ -2105,10 +2181,12 @@ def add_user():
                 flash('Username already exists. Please choose another one.', 'danger')
                 return redirect(url_for('add_user'))
 
+            # Insert user data into 'users' table with binary image data
             cursor.execute('''
-                INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default))
+                INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, image_data))
+
             user_id = cursor.lastrowid
 
             # Insert relationship into 'user_branches' table
@@ -2125,6 +2203,34 @@ def add_user():
         branches = conn.execute('SELECT * FROM branches').fetchall()
 
     return render_template('/users/add_user.html', branches=branches)
+
+
+@app.route('/user/<int:user_id>/image')
+def get_user_image(user_id):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT Image FROM users WHERE id = ?', (user_id,))
+        image_data = cursor.fetchone()[0]
+
+    if image_data:
+        # or another appropriate MIME type
+        return Response(image_data, mimetype='image/jpeg')
+    else:
+        return "Image not found", 404
+
+
+@app.route('/users/profile/<int:user_id>')
+@login_required
+def profile(user_id):
+    with get_db_connection() as conn:
+        user_data = conn.execute(
+            "SELECT * FROM users WHERE ID = ?", (user_id,)).fetchone()
+        branches = conn.execute("SELECT * FROM branches").fetchall()
+
+    if user_data:
+        return render_template('/users/profile.html', user=user_data, branches=branches)
+    else:
+        return "User not found", 404
 
 
 @app.route('/users/edit/<int:id>', methods=['GET', 'POST'])

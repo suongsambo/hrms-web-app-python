@@ -6,8 +6,13 @@
 <body class="container mx-auto bg-white py-8 px-3">
     <div class="max-w-4xl mx-auto mt-10 p-8 bg-white rounded-lg shadow-xl">
         <h2 class="text-3xl font-bold text-gray-800 mb-6">Add User</h2>
-        <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6" enctype="multipart/form-data">
             
+
+            <div>
+                <label for="image_data" class="block text-gray-700 font-semibold mb-2">Profile Image</label>
+                <input type="file" name="image">
+            </div>
             <!-- Username -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Username</label>
