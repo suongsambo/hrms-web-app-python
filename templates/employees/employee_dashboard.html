@@ -1,38 +1,172 @@
-{% extends 'base.html' %} {% block title %} Add Employee {% endblock %} {% block
-content %}
+{% extends 'base.html' %} {% block title %} Employee Dashboard {% endblock %} {%
+block content %}
+<body class="bg-gray-100 text-gray-900">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-semibold text-center text-indigo-600 mb-6">
+      Employee Dashboard
+    </h1>
 
-<!-- Main Content -->
-<main class="container mx-auto py-8 px-4">
-  <!-- Employee Info Section -->
-  <section class="bg-white shadow-lg rounded-lg overflow-hidden mb-8 p-6">
-    <h2 class="text-xl font-semibold mb-4">Employee Information</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div>
-        <p><strong>Name:</strong> {{ employee['Name'] }}</p>
-        <p><strong>Age:</strong> {{ employee['Age'] }}</p>
-        <p><strong>Branch:</strong> {{ employee['Branch'] }}</p>
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="mb-4">
+      <ul class="space-y-2">
+        {% for category, message in messages %}
+        <li class="bg-red-500 text-white p-3 rounded shadow-md">
+          {{ message }}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %} {% endwith %}
+
+    <!-- Date Range Form -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h3 class="text-xl font-semibold text-indigo-600 mb-4">
+        Filter Payroll by Date Range
+      </h3>
+      <form
+        method="get"
+        action="{{ url_for('render_dashboard_employees', employee_id=employee.ID) }}"
+      >
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="flex flex-col">
+            <label for="start_date" class="font-medium text-gray-700"
+              >Start Date:</label
+            >
+            <input
+              type="date"
+              id="start_date"
+              name="start_date"
+              value="{{ request.args.get('start_date') }}"
+              class="border border-gray-300 p-2 rounded-lg"
+            />
+          </div>
+          <div class="flex flex-col">
+            <label for="end_date" class="font-medium text-gray-700"
+              >End Date:</label
+            >
+            <input
+              type="date"
+              id="end_date"
+              name="end_date"
+              value="{{ request.args.get('end_date') }}"
+              class="border border-gray-300 p-2 rounded-lg"
+            />
+          </div>
+        </div>
+        <button
+          type="submit"
+          class="w-full py-2 px-4 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700"
+        >
+          Apply
+        </button>
+      </form>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Payroll Information -->
+      <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+        <h3 class="text-xl font-semibold text-indigo-600 mb-4">Total Salary</h3>
+        <p class="text-2xl font-semibold text-green-600">${{ total_salary }}</p>
       </div>
-      <div>
-        <p><strong>Position:</strong> {{ employee['Position'] }}</p>
-        <p><strong>Department:</strong> {{ employee['Department'] }}</p>
-        <p><strong>Salary:</strong> ${{ employee['Salary'] }}</p>
+
+      <!-- Bank Statement Information -->
+      <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+        <h3 class="text-xl font-semibold text-indigo-600 mb-4">
+          Bank Statement
+        </h3>
+        <p>${{ total_amount }}</p>
+      </div>
+
+      <!-- Attendance Information -->
+      <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+        <h3 class="text-xl font-semibold text-indigo-600 mb-4">Attendance</h3>
+        <p>{{ total_attendance }}</p>
       </div>
     </div>
-  </section>
 
-  <!-- Total Payroll Card Section -->
-  <section class="bg-white shadow-lg rounded-lg overflow-hidden p-6 mb-8">
-    <div class="flex justify-between items-center">
-      <h2 class="text-xl font-semibold">Total Payroll</h2>
+    <div class="bg-white p-6 mb-4 rounded-lg shadow-md">
+      <div class="flex items-center space-x-2 mb-2">
+        <!-- Icon for User Information -->
+        <i class="fas fa-info-circle w-5 h-5 text-blue-500"></i>
+        <h3 class="text-xl font-semibold text-gray-800">User Information</h3>
+      </div>
+      <ul class="list-disc list-inside space-y-2">
+        <li class="flex items-center space-x-2 text-gray-600">
+          <!-- Icon for Username -->
+          <i class="fas fa-user-circle w-5 h-5 text-blue-500"></i>
+          <span>Username: {{ current_user.username }}</span>
+        </li>
+        <li class="flex items-center space-x-2 text-gray-600">
+          <!-- Icon for Email -->
+          <i class="fas fa-envelope w-5 h-5 text-blue-500"></i>
+          <span>Email: {{ current_user.email }}</span>
+        </li>
+        <li class="flex items-center space-x-2 text-gray-600">
+          <!-- Icon for Branch -->
+          <i class="fas fa-building w-5 h-5 text-blue-500"></i>
+          <span>Branch: {{ current_user.branch }}</span>
+        </li>
+        <li class="flex items-center space-x-2 text-gray-600">
+          <!-- Icon for Role -->
+          <i class="fas fa-user-tag w-5 h-5 text-blue-500"></i>
+          <span
+            >Role: {% if current_user.role_default == 20 %}Employee{% else %}{{
+            current_user.role_default }}{% endif %}</span
+          >
+        </li>
+        <li class="flex items-center space-x-2 text-gray-600">
+          <!-- Icon for Admin -->
+          <i class="fas fa-user-shield w-5 h-5 text-blue-500"></i>
+          <span
+            >Admin: {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif
+            %}</span
+          >
+        </li>
+      </ul>
     </div>
-    <div class="mt-4 text-lg">
-      <p>The total payroll for employee {{ employee['Name'] }} is:</p>
-      <p class="font-bold text-3xl text-green-600">
-        ${{ total_salary | round(2) }}
+
+    <!-- Employee Information -->
+    <div class="bg-white shadow-md rounded-lg p-6 mb-6">
+      <h2 class="text-2xl font-semibold text-indigo-600 mb-4">
+        <i class="fas fa-user-tie mr-2"></i> Employee Information
+      </h2>
+      <p>
+        <i class="fas fa-id-card mr-2 text-blue-500"></i>
+        <strong class="font-medium">Employee ID:</strong> {{ employee.ID }}
       </p>
-      <!-- Display total payroll -->
+      <p>
+        <i class="fas fa-birthday-cake mr-2 text-blue-500"></i>
+        <strong class="font-medium">Age:</strong> {{ employee.Age }}
+      </p>
+      <p>
+        <i class="fas fa-dollar-sign mr-2 text-blue-500"></i>
+        <strong class="font-medium">Salary:</strong> ${{ employee.Salary }}
+      </p>
+      <p>
+        <i class="fas fa-building mr-2 text-blue-500"></i>
+        <strong class="font-medium">Branch:</strong> {{ employee.Branch }}
+      </p>
+      <p>
+        <i class="fas fa-user-tie mr-2 text-blue-500"></i>
+        <strong class="font-medium">Position:</strong> {{ employee.Position }}
+      </p>
+      <p>
+        <i class="fas fa-sitemap mr-2 text-blue-500"></i>
+        <strong class="font-medium">Department:</strong> {{ employee.Department
+        }}
+      </p>
     </div>
-  </section>
-</main>
 
+    <!-- Back to Dashboard Button -->
+    <div class="text-center">
+      <a
+        href="{{ url_for('dashboard') }}"
+        class="text-indigo-600 hover:text-indigo-800 font-semibold text-lg"
+        >Back to Dashboard</a
+      >
+    </div>
+  </div>
+</body>
 {% endblock %}

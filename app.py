@@ -2202,6 +2202,9 @@ def dashboard_with_id(id):
 @app.route('/dashboard/employee/<int:employee_id>')
 @login_required
 def render_dashboard_employees(employee_id):
+    start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
+
     with get_db_connection() as conn:
         # Fetch the specific employee's data
         employee = conn.execute(
@@ -2227,18 +2230,21 @@ def render_dashboard_employees(employee_id):
             'Department': employee['Department'] if employee['Department'] is not None else ''
         }
 
-        # Get Payroll by employee ID
-        total_salary = conn.execute(
-            "SELECT SUM(p.base_salary + p.bonus - p.deductions - p.tax) AS total_salary "
-            "FROM payroll p WHERE p.employee_id = ?",
-            (employee['ID'],)
-        ).fetchone()[0] or 0
+        # Get Payroll by employee ID and optional date range
+        payroll_query = "SELECT SUM(p.base_salary + p.bonus - p.deductions - p.tax) AS total_salary FROM payroll p WHERE p.employee_id = ?"
+        params = [employee['ID']]
 
-    return render_template(
-        'employees/employee_dashboard.html',
-        employee=employee_data,
-        total_salary=total_salary
-    )
+        if start_date and end_date:
+            payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
+            params.extend([start_date, end_date])
+
+        total_salary = conn.execute(payroll_query, params).fetchone()[0] or 0
+
+        return render_template(
+            'employees/employee_dashboard.html',
+            employee=employee_data,
+            total_salary=total_salary
+        )
 
 
 def render_dashboard(user_id):
