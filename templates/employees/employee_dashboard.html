@@ -6,20 +6,6 @@ block content %}
       Employee Dashboard
     </h1>
 
-    <!-- Flash Messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %} {% if
-    messages %}
-    <div class="mb-4">
-      <ul class="space-y-2">
-        {% for category, message in messages %}
-        <li class="bg-red-500 text-white p-3 rounded shadow-md">
-          {{ message }}
-        </li>
-        {% endfor %}
-      </ul>
-    </div>
-    {% endif %} {% endwith %}
-
     <!-- Date Range Form -->
     <div class="bg-white shadow-md rounded-lg p-6 mb-6">
       <h3 class="text-xl font-semibold text-indigo-600 mb-4">
