@@ -3,7 +3,29 @@ content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="container mx-auto py-8 px-3">
   <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
-  {% if current_user.is_admin == 1 %}
+
+  {% if current_user.role_default == 20 %}
+  <body>
+    <div class="container mt-5">
+      <h2 class="text-center">Employee Dashboard</h2>
+
+      {% if employee %}
+      <div class="card p-4 shadow mt-4">
+        <h4>{{ employee.Name }}</h4>
+        <p><strong>ID:</strong> {{ employee.ID }}</p>
+        <p><strong>Age:</strong> {{ employee.Age }}</p>
+        <p><strong>Salary:</strong> ${{ employee.Salary }}</p>
+        <p><strong>Branch:</strong> {{ employee.Branch }}</p>
+      </div>
+      {% else %}
+      <div class="alert alert-warning mt-4 text-center">
+        Employee not found.
+      </div>
+      {% endif %}
+    </div>
+  </body>
+
+  {% endif %} {% if current_user.is_admin == 1 %}
   <!-- Summary Cards -->
   <div class="grid grid-cols-5 gap-4 mb-6">
     <div class="bg-white rounded shadow p-4">
@@ -49,7 +71,7 @@ content %}
         </tr>
       </thead>
       <tbody>
-        {% for name in payroll_branch_names %}
+        {% for name in branch_names %}
         <tr class="hover:bg-gray-50 transition duration-300 ease-in-out">
           <td
             class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-r border-gray-300"
@@ -59,7 +81,8 @@ content %}
           <td
             class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-l border-gray-300"
           >
-            ${{ '%.2f'|format(payroll_branch_salaries[loop.index0]) }}
+            ${{ '%.2f'|format(branch_salaries[loop.index0] /
+            branch_counts[loop.index0]) }}
           </td>
         </tr>
         {% endfor %}
@@ -69,105 +92,7 @@ content %}
 
   <br />
 
-  {% endif %}
-
-  <!-- User Information -->
-  <div class="bg-white rounded shadow p-6 mb-6">
-    <h2 class="text-xl font-bold mb-4">User Information</h2>
-    <p><strong>Welcome, {{ current_user.username }}!</strong></p>
-    <p><strong>Username:</strong> {{ current_user.username }}</p>
-    <p><strong>Email:</strong> {{ current_user.email }}</p>
-    <p>
-      <strong>Is Admin:</strong>
-      {% if current_user.is_admin is not none and current_user.is_admin == 1 %}
-      <span class="text-green-600 font-bold">Yes</span>
-      {% else %}
-      <span class="text-red-600 font-bold">No</span>
-      {% endif %}
-    </p>
-    <p>
-      <strong>Branch:</strong> {{ current_user.branch|default('N/A', true) }}
-    </p>
-    <p>
-      <strong>Role Default:</strong>
-      {{ current_user.role_default }}
-    </p>
-  </div>
-
-  <!-- Online Users -->
-  <div class="bg-white rounded shadow p-6 mb-6">
-    <h2 class="text-xl font-bold mb-4">Online Users</h2>
-    <label
-      class="block text-gray-700 text-sm font-bold mb-2"
-      for="online-users"
-    >
-      Currently Online:
-    </label>
-
-    {% if online_users|length > 0 %}
-    <ul class="space-y-4" id="online-users">
-      {% for user in online_users %}
-      <li class="flex items-center space-x-3 text-gray-700">
-        <!-- User Icon -->
-        <i class="fas fa-user-circle text-2xl text-blue-600"></i>
-
-        <div>
-          <!-- User Name -->
-          <span class="font-semibold text-lg">{{ user['UserName'] }}</span>
-
-          <!-- User Email -->
-          <p class="text-sm text-gray-500">{{ user['Email'] }}</p>
-
-          <!-- Last Active Time -->
-          <p class="text-xs text-gray-400">
-            <span class="font-semibold">Last Active:</span> {{
-            user['last_active_time'] }}
-          </p>
-        </div>
-      </li>
-      {% endfor %}
-    </ul>
-    {% else %}
-    <p class="text-gray-600">No users are currently online.</p>
-    {% endif %}
-  </div>
-
-  <!-- Employees List 
-  <div class="bg-white rounded shadow p-6">
-    <h2 class="text-xl font-bold mb-4">Employees List</h2>
-    <table class="w-full border-collapse border border-gray-300">
-      <thead class="bg-gray-200">
-        <tr>
-          <th class="border border-gray-300 px-4 py-2">ID</th>
-          <th class="border border-gray-300 px-4 py-2">Name</th>
-          <th class="border border-gray-300 px-4 py-2">Age</th>
-          <th class="border border-gray-300 px-4 py-2">Position</th>
-          <th class="border border-gray-300 px-4 py-2">Salary</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for employee in employees %}
-        <tr class="hover:bg-gray-100">
-          <td class="border border-gray-300 px-4 py-2">{{ employee.id }}</td>
-          <td class="border border-gray-300 px-4 py-2">{{ employee.name }}</td>
-          <td class="border border-gray-300 px-4 py-2">
-            {{ "%.2f"|format(employee.age) }}
-          </td>
-          <td class="border border-gray-300 px-4 py-2">
-            {{ employee.position }}
-          </td>
-          <td class="border border-gray-300 px-4 py-2">
-            ${{ '%.2f'|format(employee.salary) }}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-
-  -->
-
-  {% if current_user.is_admin == 1 %}
+  {% endif %} {% if current_user.is_admin == 1 %}
   <!-- Employee Distribution Chart -->
   <div class="bg-gray-100 p-6 rounded-lg shadow-md">
     <h3 class="text-xl font-semibold text-gray-800 mb-2">

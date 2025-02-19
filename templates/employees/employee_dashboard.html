@@ -1,0 +1,38 @@
+{% extends 'base.html' %} {% block title %} Add Employee {% endblock %} {% block
+content %}
+
+<!-- Main Content -->
+<main class="container mx-auto py-8 px-4">
+  <!-- Employee Info Section -->
+  <section class="bg-white shadow-lg rounded-lg overflow-hidden mb-8 p-6">
+    <h2 class="text-xl font-semibold mb-4">Employee Information</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <p><strong>Name:</strong> {{ employee['Name'] }}</p>
+        <p><strong>Age:</strong> {{ employee['Age'] }}</p>
+        <p><strong>Branch:</strong> {{ employee['Branch'] }}</p>
+      </div>
+      <div>
+        <p><strong>Position:</strong> {{ employee['Position'] }}</p>
+        <p><strong>Department:</strong> {{ employee['Department'] }}</p>
+        <p><strong>Salary:</strong> ${{ employee['Salary'] }}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Total Payroll Card Section -->
+  <section class="bg-white shadow-lg rounded-lg overflow-hidden p-6 mb-8">
+    <div class="flex justify-between items-center">
+      <h2 class="text-xl font-semibold">Total Payroll</h2>
+    </div>
+    <div class="mt-4 text-lg">
+      <p>The total payroll for employee {{ employee['Name'] }} is:</p>
+      <p class="font-bold text-3xl text-green-600">
+        ${{ total_salary | round(2) }}
+      </p>
+      <!-- Display total payroll -->
+    </div>
+  </section>
+</main>
+
+{% endblock %}

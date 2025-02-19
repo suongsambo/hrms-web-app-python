@@ -1,4 +1,6 @@
 
+from flask_login import login_required, current_user
+from flask import Flask, render_template, flash, redirect, url_for
 from flask import render_template
 from flask import request, jsonify
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
@@ -1345,7 +1347,7 @@ def payroll_list():
 
     # If no records found, return a 404 response
     if not payroll_records:
-        return "No payroll records found", 404
+        return render_template('notfound.html')
 
     # Ensure all employees are fetched before rendering
     employees = get_all_employees()
@@ -1368,7 +1370,7 @@ def payroll_user_id(user_id):
     payroll_records = list_payroll_for_employee(user_id)
 
     if not payroll_records:
-        return "No payroll records found for this user.", 404
+        return render_template('notfound.html')
 
     employees = get_all_employees()
     # Render the payroll details for the user
@@ -2176,6 +2178,72 @@ def delete_user(id):
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    if not current_user.is_admin:
+        with get_db_connection() as conn:
+            employee = conn.execute(
+                "SELECT e.ID FROM employees e WHERE e.user_id = ?", (current_user.id,)).fetchone()
+            if employee:
+                return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+            flash("Employee not found!", "danger")
+            return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
+    return render_dashboard(current_user.id)
+
+
+@app.route('/dashboard/<int:id>')
+@login_required
+def dashboard_with_id(id):
+    if current_user.id != id and not current_user.is_admin:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    return render_dashboard_employees(id)
+
+
+@app.route('/dashboard/employee/<int:employee_id>')
+@login_required
+def render_dashboard_employees(employee_id):
+    with get_db_connection() as conn:
+        # Fetch the specific employee's data
+        employee = conn.execute(
+            "SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch, p.PositionName AS Position, d.Name AS Department "
+            "FROM employees e "
+            "LEFT JOIN positions p ON e.position_id = p.ID "
+            "LEFT JOIN departments d ON p.department_id = d.ID "
+            "WHERE e.ID = ?",
+            (employee_id,)
+        ).fetchone()
+
+        if not employee:
+            flash("Employee not found!", "danger")
+            return redirect(url_for('dashboard', id=current_user.id))
+
+        employee_data = {
+            'ID': employee['ID'] if employee['ID'] is not None else '',
+            'Name': employee['Name'] if employee['Name'] is not None else '',
+            'Age': employee['Age'] if employee['Age'] is not None else '',
+            'Salary': employee['Salary'] if employee['Salary'] is not None else '',
+            'Branch': employee['Branch'] if employee['Branch'] is not None else '',
+            'Position': employee['Position'] if employee['Position'] is not None else '',
+            'Department': employee['Department'] if employee['Department'] is not None else ''
+        }
+
+        # Get Payroll by employee name
+        total_salary = conn.execute(
+            "SELECT SUM(p.base_salary + p.bonus - p.deductions - p.tax) AS total_salary FROM payroll p "
+            "SELECT SUM(p.Salary) AS total_salary FROM payroll p "
+            "INNER JOIN employees e ON p.employee_id = e.ID "
+            "WHERE e.Name = ?",
+            (employee['Name'],)
+        ).fetchone()[0] or 0
+
+    return render_template(
+        'employees/employee_dashboard.html',
+        employee=employee_data,
+        total_salary=total_salary
+    )
+
+
+def render_dashboard(user_id):
     timeout_threshold = 15  # minutes
 
     with get_db_connection() as conn:
@@ -2183,9 +2251,9 @@ def dashboard():
         total_employees = conn.execute(
             "SELECT COUNT(*) FROM employees").fetchone()[0]
         average_age = conn.execute(
-            "SELECT AVG(Age) FROM employees").fetchone()[0]
+            "SELECT AVG(Age) FROM employees").fetchone()[0] or 0
         total_salary = conn.execute(
-            "SELECT SUM(Salary) FROM employees").fetchone()[0]
+            "SELECT SUM(Salary) FROM employees").fetchone()[0] or 0
 
         # Employee count and total salary by branch
         branch_data = conn.execute("""
@@ -2198,22 +2266,8 @@ def dashboard():
         branch_counts = [row['employee_count'] for row in branch_data]
         branch_salaries = [row['total_salary'] for row in branch_data]
 
-        # Fetch total number of branches
         total_branches = len(branch_names)
-
-        # Fetch total payroll (sum of all salaries)
         total_payroll = total_salary
-
-        # Fetch payroll by branch
-        payroll_by_branch = conn.execute("""
-            SELECT Branch, SUM(Salary) AS total_salary
-            FROM employees
-            GROUP BY Branch
-        """).fetchall()
-
-        payroll_branch_names = [row['Branch'] for row in payroll_by_branch]
-        payroll_branch_salaries = [row['total_salary']
-                                   for row in payroll_by_branch]
 
         # Fetch online users
         online_users = conn.execute('''
@@ -2229,14 +2283,11 @@ def dashboard():
         total_employees=total_employees,
         average_age=average_age,
         total_salary=total_salary,
-        total_branches=total_branches,  # Pass total number of branches
-        total_payroll=total_payroll,  # Pass total payroll (total salary)
-        branch_names=branch_names,  # Pass the branch names
-        branch_counts=branch_counts,  # Pass the employee counts per branch
-        branch_salaries=branch_salaries,  # Pass the total salaries per branch
-        payroll_branch_names=payroll_branch_names,  # Pass the branch names
-        # Pass the total salaries per branch
-        payroll_branch_salaries=payroll_branch_salaries,
+        total_branches=total_branches,
+        total_payroll=total_payroll,
+        branch_names=branch_names,
+        branch_counts=branch_counts,
+        branch_salaries=branch_salaries,
         online_users=online_users
     )
 
@@ -2311,6 +2362,36 @@ def list_employees():
 
     return render_template('/employees/employees.html', employees=employees, notifications_employees=notifications_employees,
                            positions=positions, departments=departments)
+
+
+@app.route('/employees/<string:username>')
+@login_required
+def view_employee_details(username):
+    # Check if the current user has the correct role (admin)
+    if current_user.is_admin == 0 or current_user.role_default != 20:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        # Fetch the employee by username
+        employee = conn.execute(
+            "SELECT * FROM employees WHERE username = ?", (username,)).fetchone()
+
+        if employee is None:
+            # If no employee is found, return a 404 error
+            abort(404, description="Employee not found")
+
+        # Fetch related data (position, department)
+        position = conn.execute(
+            "SELECT * FROM positions WHERE id = ?", (employee['position_id'],)).fetchone()
+        department = conn.execute(
+            "SELECT * FROM departments WHERE id = ?", (employee['department_id'],)).fetchone()
+
+    # Render employee details dashboard page
+    return render_template('/employees/employees.html',
+                           employee=employee,
+                           position=position,
+                           department=department)
 
 
 @app.route('/employees/search', methods=['GET'])
