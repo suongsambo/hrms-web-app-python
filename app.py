@@ -2227,13 +2227,11 @@ def render_dashboard_employees(employee_id):
             'Department': employee['Department'] if employee['Department'] is not None else ''
         }
 
-        # Get Payroll by employee name
+        # Get Payroll by employee ID
         total_salary = conn.execute(
-            "SELECT SUM(p.base_salary + p.bonus - p.deductions - p.tax) AS total_salary FROM payroll p "
-            "SELECT SUM(p.Salary) AS total_salary FROM payroll p "
-            "INNER JOIN employees e ON p.employee_id = e.ID "
-            "WHERE e.Name = ?",
-            (employee['Name'],)
+            "SELECT SUM(p.base_salary + p.bonus - p.deductions - p.tax) AS total_salary "
+            "FROM payroll p WHERE p.employee_id = ?",
+            (employee['ID'],)
         ).fetchone()[0] or 0
 
     return render_template(
