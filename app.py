@@ -442,7 +442,7 @@ def handle_leave_room(data):
 @socketio.on("chat_message")
 def handle_chat_message(data):
     room = data["room"]
-    username = data["username"]
+    username = current_user.username
     message = data["message"]
     emit("chat_message", {
         "username": username,
