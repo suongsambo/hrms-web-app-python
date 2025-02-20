@@ -7,7 +7,6 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import hashlib
 import os
-from flask_sqlalchemy import SQLAlchemy
 import pyotp
 import requests
 import glob
@@ -15,7 +14,7 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.utils import secure_filename
 from config import Config
 # from models.models import User
-from flask_socketio import SocketIO, send
+from flask_socketio import SocketIO, emit, join_room, leave_room, send
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from typing import Optional
@@ -344,7 +343,112 @@ def init_db():
             )
         ''')
 
+        # Create Message table
+        conn.execute('''
+          CREATE TABLE IF NOT EXISTS Message (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT NOT NULL,
+                message TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         conn.commit()
+
+
+@app.route("/chat", methods=["GET", "POST"])
+def chat():
+    # Assuming the user is already logged in
+    return render_template("chat.html", username=session.get("username", "Guest"))
+
+
+# Route to fetch chat history
+@app.route("/chat/history")
+def chat_history():
+    """Fetch last 50 messages from the chat room"""
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT username, timestamp FROM Message WHERE message IS NOT NULL ORDER BY timestamp DESC LIMIT 50'
+        )
+        messages = cursor.fetchall()
+
+    # Send the messages to the frontend as JSON
+    return jsonify([{
+        "message": None,  # Indicate message is null
+        "username": row[0],
+        "timestamp": row[1].isoformat()  # Use ISO format
+    } for row in messages[::-1]])  # Reverse to get chronological order
+
+
+@socketio.on("connect")
+def connect():
+    print("Client connected")
+
+
+@socketio.on("private_message")
+def handle_private_message(data):
+    sender = session.get("username", "Unknown")
+    recipient = data.get("recipient")
+    message = data.get("message")
+
+    if recipient and message:
+        # Emit private message to recipient
+        emit("private_message", {
+            "sender": sender,
+            "message": message,
+            "timestamp": datetime.utcnow().strftime("%H:%M:%S")
+        }, room=recipient)
+    else:
+        print("Error: Recipient or message is missing.")
+        # Emit private message to recipient
+
+# Handle chat room join
+
+
+@socketio.on("join_room")
+def handle_join_room(data):
+    room = data["room"]
+    username = current_user.username
+    join_room(room)
+    emit("room_message", {
+        "message": f"{username} has joined the room {room}"
+    }, room=room)
+
+    # Connect to the database and log the join event
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            'INSERT INTO Message (username, message) VALUES (?, ?)',
+            (username, f"joined the room {room}")
+        )
+        conn.commit()
+
+# Handle chat room leave
+
+
+@socketio.on("leave_room")
+def handle_leave_room(data):
+    room = data["room"]
+    username = session.get("username", "Guest")
+    leave_room(room)
+    emit("room_message", {
+        "message": f"{username} has left the room {room}"
+    }, room=room)
+
+# Handle chat message
+
+
+@socketio.on("chat_message")
+def handle_chat_message(data):
+    room = data["room"]
+    username = data["username"]
+    message = data["message"]
+    emit("chat_message", {
+        "username": username,
+        "message": message,
+        "timestamp": data["timestamp"]
+    }, room=room)
 
 
 @app.route('/list-accepted-terms')
@@ -2756,6 +2860,6 @@ def search_branches():
     return render_template('/branches/branches.html', branches=branches)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     init_db()
-    app.run(debug=True)
+    socketio.run(app, debug=True)

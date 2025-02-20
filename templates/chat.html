@@ -1,51 +1,226 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Flask Chat</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.4/socket.io.js"></script>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-      }
-      #chat-box {
-        width: 50%;
+{% extends 'base.html' %} {% block title %}Users{% endblock %} {% block content
+%}
+
+<body class="bg-gray-100 font-sans text-gray-900">
+  <div class="container mx-auto p-4">
+    <h1 class="text-4xl font-bold mb-4 text-center">
+      Welcome to the Chat Room
+    </h1>
+    <h2 id="username">{{ current_user.username }}</h2>
+
+    <!-- Private Message Section -->
+    <div class="mb-6">
+      <h3 class="text-xl font-semibold">Send Private Message</h3>
+      <div class="flex space-x-4">
+        <input
+          type="text"
+          id="recipient"
+          placeholder="Recipient's Username"
+          class="p-2 border border-gray-300 rounded w-1/3"
+        />
+        <input
+          type="text"
+          id="privateMessageInput"
+          placeholder="Type your private message..."
+          class="p-2 border border-gray-300 rounded w-2/3"
+        />
+      </div>
+      <button
+        id="sendPrivateMessageButton"
+        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Send Private Message
+      </button>
+    </div>
+
+    <!-- Room Join/Leave Section -->
+    <div class="mb-6">
+      <input
+        type="text"
+        id="roomInput"
+        placeholder="Enter room name"
+        value="bo"
+        class="p-2 border border-gray-300 rounded w-1/3"
+      />
+      <div class="space-x-4 mt-4">
+        <button
+          id="joinRoomButton"
+          class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Join Room
+        </button>
+        <button
+          id="leaveRoomButton"
+          class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          style="display: none"
+        >
+          Leave Room
+        </button>
+      </div>
+    </div>
+
+    <!-- Chat Messages Section -->
+    <div
+      id="chatbox"
+      style="
         height: 300px;
-        border: 1px solid #ccc;
-        overflow-y: scroll;
-        margin: auto;
+        overflow-y: auto;
+        background: white;
         padding: 10px;
-      }
-      #msg-input {
-        width: 40%;
-        padding: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <h2>Flask WebSocket Chat</h2>
-    <div id="chat-box"></div>
-    <input type="text" id="msg-input" placeholder="Type a message..." />
-    <button onclick="sendMessage()">Send</button>
+        color: black;
+      "
+    >
+      {% for message in messages %}
+      <p>{{ message }}</p>
+      {% endfor %}
+    </div>
 
-    <script>
-      var socket = io.connect(
-        "http://" + document.domain + ":" + location.port
-      );
+    <!-- Message Input Section -->
+    <div class="flex space-x-4">
+      <input
+        type="text"
+        id="messageInput"
+        placeholder="Type your message..."
+        class="p-2 border border-gray-300 rounded w-4/5"
+      />
+      <button
+        id="sendButton"
+        class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Send
+      </button>
+    </div>
+  </div>
 
-      socket.on("message", function (msg) {
-        var chatBox = document.getElementById("chat-box");
-        chatBox.innerHTML += "<p>" + msg + "</p>";
-        chatBox.scrollTop = chatBox.scrollHeight;
+  <script>
+    const socket = io(); // Connect to the server
+
+    // Display the logged-in username
+    document.getElementById("username").textContent = "User: {{ username }}"; // Dynamically set by Flask
+
+    // Handle sending a private message
+    document
+      .getElementById("sendPrivateMessageButton")
+      .addEventListener("click", function () {
+        const recipient = document.getElementById("recipient").value;
+        const privateMessage = document.getElementById(
+          "privateMessageInput"
+        ).value;
+
+        if (recipient && privateMessage) {
+          const sender = "{{ username }}"; // Dynamically get the username from Flask
+          const timestamp = new Date().toISOString();
+
+          console.log("Sending private message to:", recipient);
+          console.log("Message:", privateMessage);
+
+          // Emit private message to the server
+          socket.emit("private_message", {
+            recipient: recipient,
+            message: privateMessage,
+            timestamp: timestamp,
+            sender: sender, // Add sender to data
+          });
+          document.getElementById("privateMessageInput").value = ""; // Clear input field
+        } else {
+          alert("Recipient and message cannot be empty.");
+        }
       });
 
-      function sendMessage() {
-        var message = document.getElementById("msg-input").value;
-        socket.send(message);
-        document.getElementById("msg-input").value = "";
-      }
-    </script>
-  </body>
-</html>
+    // Handle incoming private messages
+    socket.on("private_message", function (data) {
+      const chatbox = document.getElementById("chatbox");
+      const newMessage = document.createElement("div");
+      newMessage.textContent = `[Private from ${data.sender}] [${data.timestamp}] ${data.message}`;
+      chatbox.appendChild(newMessage);
+      chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
+    });
+
+    // Handle Join Room
+    document
+      .getElementById("joinRoomButton")
+      .addEventListener("click", function () {
+        const room = document.getElementById("roomInput").value;
+        if (room) {
+          console.log("Joining room:", room);
+          socket.emit("join_room", { room: room });
+          document.getElementById("leaveRoomButton").style.display = "inline"; // Show Leave button
+          document.getElementById("joinRoomButton").style.display = "none"; // Hide Join button
+        } else {
+          alert("Please enter a room name.");
+        }
+      });
+
+    // Handle Leave Room
+    document
+      .getElementById("leaveRoomButton")
+      .addEventListener("click", function () {
+        const room = document.getElementById("roomInput").value;
+        if (room) {
+          console.log("Leaving room:", room);
+          socket.emit("leave_room", { room: room });
+          document.getElementById("leaveRoomButton").style.display = "none"; // Hide Leave button
+          document.getElementById("joinRoomButton").style.display = "inline"; // Show Join button
+        }
+      });
+
+    // Handle sending a chat message to the room
+    document
+      .getElementById("sendButton")
+      .addEventListener("click", function () {
+        const message = document.getElementById("messageInput").value;
+        const room = document.getElementById("roomInput").value;
+        const username = "{{ username }}"; // Dynamically get the username from Flask
+        const timestamp = new Date().toISOString();
+
+        if (message && room) {
+          console.log("Sending message:", message, "to room:", room);
+          socket.emit("chat_message", {
+            room: room,
+            username: username,
+            message: message,
+            timestamp: timestamp,
+          });
+          document.getElementById("messageInput").value = ""; // Clear the input field
+        } else {
+          alert("Please enter a message and room name.");
+        }
+      });
+
+    // Handle incoming room messages (user joins/leaves)
+    socket.on("room_message", function (data) {
+      const chatbox = document.getElementById("chatbox");
+      const newMessage = document.createElement("div");
+      newMessage.textContent = data.message;
+      chatbox.appendChild(newMessage);
+      chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
+    });
+
+    // Handle incoming chat messages from the room
+    socket.on("chat_message", function (data) {
+      const chatbox = document.getElementById("chatbox");
+      const newMessage = document.createElement("div");
+      newMessage.textContent = `[${data.timestamp}] ${data.username}: ${data.message}`;
+      chatbox.appendChild(newMessage);
+      chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
+    });
+
+    // Fetch the last 50 messages from the chat room when the page loads
+    fetch("/chat/history")
+      .then((response) => response.json())
+      .then((messages) => {
+        const chatbox = document.getElementById("chatbox");
+        messages.forEach((message) => {
+          const newMessage = document.createElement("div");
+          newMessage.textContent = `[${message.timestamp}] ${message.username}: ${message.message}`;
+          newMessage.className = "text-black"; // Add text color
+          chatbox.appendChild(newMessage);
+        });
+        chatbox.scrollTop = chatbox.scrollHeight; // Scroll to the bottom
+      })
+      .catch((error) => {
+        console.error("Error fetching chat history:", error);
+      });
+  </script>
+</body>
+{% endblock %}
