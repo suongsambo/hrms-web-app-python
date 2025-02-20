@@ -41,7 +41,7 @@ def allowed_file(filename):
 class User(UserMixin):
     def __init__(self, id: int, username: str, password: str, email: str,
                  branch: Optional[str] = None, is_admin: bool = False,
-                 role_default: Optional[int] = 0):
+                 role_default: Optional[int] = 0, image_data: Optional[bytes] = None):
         self.id = id
         self.username = username
         self.password = password
@@ -49,6 +49,7 @@ class User(UserMixin):
         self.branch = branch
         self.is_admin = is_admin
         self.role_default = role_default
+        self.image_data = image_data
 
     def get_id(self):
         """Override get_id method to work with Flask-Login."""
@@ -61,6 +62,25 @@ class User(UserMixin):
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    with get_db_connection() as conn:
+        user_data = conn.execute(
+            'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
+        if user_data:
+            return User(
+                id=user_data['ID'],
+                username=user_data['UserName'],
+                password=user_data['Password'],
+                email=user_data['Email'],
+                branch=user_data['Branch'],
+                is_admin=user_data['IsAdmin'],
+                role_default=user_data['RoleDefault'],
+                image_data=user_data['Image']
+            )
+        return None
 
 
 @socketio.on("message")
@@ -1766,16 +1786,6 @@ def test_telegram():
         return f"Failed to send test message: {e}"
 
 
-@login_manager.user_loader
-def load_user(user_id):
-    with get_db_connection() as conn:
-        user_data = conn.execute(
-            'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
-        if user_data:
-            return User(id=user_data['ID'], username=user_data['UserName'], password=user_data['Password'], email=user_data['Email'], branch=user_data['Branch'], is_admin=user_data['IsAdmin'], role_default=user_data['RoleDefault'])
-        return None
-
-
 @login_manager.unauthorized_handler
 def unauthorized():
     return render_template('unauthorized.html'), 401
@@ -1986,7 +1996,8 @@ def login():
             email=user['Email'],
             branch=user['Branch'],
             is_admin=user['IsAdmin'],
-            role_default=user['RoleDefault']  # Ensure correct retrieval
+            role_default=user['RoleDefault'],  # Ensure correct retrieval
+            image_data=user.get('Image', None)
         )
 
         print("Logged in user:", user_obj)  # Debugging print

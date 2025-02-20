@@ -82,13 +82,29 @@
 
   <header class="bg-gray-800 text-white p-1">
     <div class="container mx-auto flex justify-between items-center">
-      <a href="/" class="flex items-center gap-x-2">
-        <img
-          src="/static/images/logo.png"
-          alt="Company Logo"
-          class="h-8 w-auto"
-        />
-        <span class="text-2xl font-semibold">Company</span>
+      <a
+        href="{{ url_for('profile', user_id=current_user.id) }}"
+        class="flex items-center gap-x-2"
+      >
+        <div class="flex justify-center">
+          {% if current_user.image_data %}
+          <img
+            src="{{ url_for('get_user_image', user_id=current_user.id) }}"
+            alt="User Profile Image"
+            class="w-10 h-10 rounded-full object-cover shadow-md"
+          />
+          {% else %}
+          <i
+            class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"
+          ></i>
+
+          {% endif %}
+        </div>
+        <span
+          class="text-lg font-bold text-transparent bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text"
+        >
+          {{ current_user.username | upper }}
+        </span>
       </a>
 
       <div class="flex space-x-4 items-center">
