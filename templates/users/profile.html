@@ -21,11 +21,11 @@ content %}
         </p>
         <p>
           <strong class="text-indigo-500">Full Name:</strong>
-          {{ user.first_name_en }} {{ user.last_name_en }}
+          {{ user['FirstNameEn'] }} {{ user['LastNameEn'] }}
         </p>
         <p>
           <strong class="text-indigo-500">Full Name (Khmer):</strong>
-          {{ user.first_name_kh }} {{ user.last_name_kh }}
+          {{ user['FirstNameKh'] }} {{ user['LastNameKh'] }}
         </p>
         <p>
           <strong class="text-indigo-500">Branch:</strong> {{ user.branch }}
