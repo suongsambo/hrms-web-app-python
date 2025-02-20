@@ -30,11 +30,9 @@ content %}
         <p>
           <strong class="text-indigo-500">Branch:</strong> {{ user.branch }}
         </p>
-        <p><strong class="text-indigo-500">Role:</strong> {{ user.role }}</p>
       </div>
     </div>
 
-    <!-- Profile Image -->
     <div class="bg-white p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-bold text-indigo-600 mb-4">Profile Image</h2>
       <div class="flex justify-center">
@@ -49,6 +47,15 @@ content %}
         {% endif %}
       </div>
     </div>
+
+    <!-- Button to upload a new image -->
+    <a
+      href="{{ url_for('upload_user_image', user_id=user['id']) }}"
+      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-2"
+    >
+      <i class="fas fa-camera"></i>
+      <button>Change Profile Image</button>
+    </a>
   </div>
 </body>
 {% endblock %}

@@ -2230,6 +2230,33 @@ def get_user_image(user_id):
         return "Image not found", 404
 
 
+@app.route('/users/<int:user_id>/image/upload', methods=['GET', 'POST'])
+@login_required
+def upload_user_image(user_id):
+    if request.method != 'POST':
+        # If GET request, show the upload form
+        return render_template('/users/upload_image.html', user_id=user_id)
+    # Get the uploaded file
+    image_file = request.files.get('image')
+
+    if not image_file:
+        return "No image uploaded", 400
+
+    # Read the image file as binary data
+    image_data = image_file.read()
+
+    # Update the image data in the database
+    with get_db_connection() as conn:
+        conn.execute(
+            'UPDATE users SET Image = ? WHERE id = ?',
+            (image_data, user_id)
+        )
+        conn.commit()
+
+    # Redirect to profile page after upload
+    return redirect(url_for('profile', user_id=user_id))
+
+
 @app.route('/users/profile/<int:user_id>')
 @login_required
 def profile(user_id):
