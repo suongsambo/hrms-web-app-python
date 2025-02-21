@@ -354,7 +354,7 @@ def init_db():
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
-        # Create confirm table
+
         conn.execute('''
             CREATE TABLE IF NOT EXISTS confirm (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -364,11 +364,19 @@ def init_db():
                 conform_by TEXT,
                 conform_date DATETIME,
                 crd_id INTEGER,
-                ccc_id INTEGER,
-                opd_id INTEGER,
-                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE,
-                FOREIGN KEY (ccc_id) REFERENCES ccc (id) ON DELETE CASCADE,
-                FOREIGN KEY (opd_id) REFERENCES opd (id) ON DELETE CASCADE
+                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create location table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS location (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                street TEXT,
+                city TEXT,
+                province TEXT,
+                country TEXT,
+                postal_code TEXT
             )
         ''')
 
@@ -383,9 +391,7 @@ def init_db():
                 approve_date DATETIME,
                 approve_amount DECIMAL(15,2),
                 crd_id INTEGER,
-                opd_id INTEGER,
-                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE,
-                FOREIGN KEY (opd_id) REFERENCES opd (id) ON DELETE CASCADE
+                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE
             )
         ''')
 
@@ -399,13 +405,11 @@ def init_db():
                 view_by TEXT,
                 view_date DATETIME,
                 crd_id INTEGER,
-                opd_id INTEGER,
-                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE,
-                FOREIGN KEY (opd_id) REFERENCES opd (id) ON DELETE CASCADE
+                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE
             )
         ''')
 
-        # Create request table
+        # Create request table (without teller, opd, and ccc references)
         conn.execute('''
             CREATE TABLE IF NOT EXISTS request (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -440,27 +444,14 @@ def init_db():
                 conform_id INTEGER,
                 approve_id INTEGER,
                 view_id INTEGER,
-                teller_id INTEGER,
+                crd_id INTEGER,
                 FOREIGN KEY (conform_id) REFERENCES confirm(id),
                 FOREIGN KEY (approve_id) REFERENCES approve(id),
                 FOREIGN KEY (view_id) REFERENCES view_table(id),
-                FOREIGN KEY (teller_id) REFERENCES teller(id)
+                FOREIGN KEY (crd_id) REFERENCES crd (id)
             )
         ''')
 
-        # Create location table
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS location (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                street TEXT,
-                city TEXT,
-                province TEXT,
-                country TEXT,
-                postal_code TEXT
-            )
-        ''')
-
-        # Create personal_info table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS personal_info (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -481,7 +472,7 @@ def init_db():
                 date_of_birth DATE,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(ID)
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
             )
         ''')
 
@@ -504,65 +495,6 @@ def init_db():
                 branch TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
-                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
-                FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
-            )
-        ''')
-
-        # Create opd table
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS opd (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                user_id INTEGER NOT NULL,
-                personal_info_id INTEGER NOT NULL,
-                location_id INTEGER NOT NULL,
-                department TEXT,
-                doctor_assigned TEXT,
-                appointment_date DATETIME,
-                status TEXT CHECK (status IN ('Scheduled', 'Completed', 'Cancelled')) DEFAULT 'Scheduled',
-                notes TEXT,
-                FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
-                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
-                FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
-            )
-        ''')
-
-        # Create ccc table
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS ccc (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                user_id INTEGER NOT NULL,
-                personal_info_id INTEGER NOT NULL,
-                location_id INTEGER NOT NULL,
-                active BOOLEAN DEFAULT FALSE,
-                language TEXT,
-                status TEXT,
-                currency TEXT,
-                branch TEXT,
-                FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
-                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
-                FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
-            )
-        ''')
-
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS teller (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                user_id INTEGER NOT NULL,
-                personal_info_id INTEGER NOT NULL,
-                location_id INTEGER NOT NULL,
-                active BOOLEAN DEFAULT FALSE,
-                language TEXT,
-                status TEXT,
-                currency TEXT,
-                branch TEXT,
                 FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
                 FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
                 FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
@@ -756,6 +688,14 @@ def add_crd():
         flash("You don't have permission to view this page.", "danger")
         return redirect(url_for('dashboard'))
 
+    with get_db_connection() as conn:
+        users = conn.execute("SELECT * FROM users").fetchall()
+        branches = conn.execute("SELECT Branch FROM branches").fetchall()
+        personal_info = conn.execute(
+            "SELECT * FROM personal_info").fetchall()
+        locations = conn.execute(
+            "SELECT * FROM location").fetchall()
+
     if request.method == 'POST':
         personal_info_id = request.form['personal_info_id']
         location_id = request.form['location_id']
@@ -780,7 +720,7 @@ def add_crd():
 
         return redirect(url_for('list_crd'))
 
-    return render_template('/crd/add_crd.html')
+    return render_template('/crd/add_crd.html', branches=branches, locations=locations, personal_info=personal_info, users=users)
 
 
 @app.route('/crd', methods=['GET'])

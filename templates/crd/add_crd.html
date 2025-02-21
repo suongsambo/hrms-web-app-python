@@ -4,30 +4,131 @@ content %}
   <h2 class="text-2xl font-semibold mb-6">Add CRD</h2>
 
   <form method="POST" action="{{ url_for('add_crd') }}" class="space-y-4">
+    <!-- User ID Field -->
+    <div>
+      <label for="user_id" class="block text-sm font-medium text-gray-700"
+        >User ID:</label
+      >
+      <div class="mt-2 relative">
+        <select
+          id="user_id"
+          name="user_id"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="" disabled selected>Select a User</option>
+          {% for user in users %}
+          <option value="{{ user.id }}">
+            {{ user.id }} - {{ user.UserName }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <!-- Branch Field -->
+    <div>
+      <label for="branch" class="block text-sm font-medium text-gray-700"
+        >Branch:</label
+      >
+      <div class="mt-2 relative">
+        <select
+          id="branch"
+          name="branch"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="" disabled selected>Select a Branch</option>
+          {% for branch in branches %}
+          <option value="{{ branch['Branch'] }}">{{ branch['Branch'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
     <div>
       <label
         for="personal_info_id"
         class="block text-sm font-medium text-gray-700"
         >Personal Info ID</label
       >
-      <input
-        type="text"
-        name="personal_info_id"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      />
+      <div class="mt-2 relative">
+        <select
+          id="personal_info_id"
+          name="personal_info_id"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="" disabled selected>Select a Personal Info</option>
+          {% for info in personal_info %}
+          <option value="{{ info.id }}">
+            {{ info.id }} - {{ info.first_name_en }} {{ info.last_name_en }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
     </div>
     <div>
       <label for="location_id" class="block text-sm font-medium text-gray-700"
         >Location ID</label
       >
-      <input
-        type="text"
-        name="location_id"
+      <div class="mt-2 relative">
+        <select
+          id="location_id"
+          name="location_id"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="" disabled selected>Select a Location</option>
+          {% for location in locations %}
+          <option value="{{ location.id }}">
+            {{ location.id }} - {{ location.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label for="language" class="block text-sm font-medium text-gray-700"
+        >Language</label
+      >
+      <select
+        name="language"
         class="mt-1 block w-full px-4 py-2 border rounded-md"
         required
-      />
+      >
+        <option value="en">English</option>
+        <option value="km">Khmer</option>
+      </select>
     </div>
+    <div>
+      <label for="status" class="block text-sm font-medium text-gray-700"
+        >Status</label
+      >
+      <select
+        name="status"
+        class="mt-1 block w-full px-4 py-2 border rounded-md"
+        required
+      >
+        <option value="Active">Active</option>
+        <option value="Inactive">Inactive</option>
+      </select>
+    </div>
+    <div>
+      <label for="currency" class="block text-sm font-medium text-gray-700"
+        >Currency</label
+      >
+      <select
+        name="currency"
+        class="mt-1 block w-full px-4 py-2 border rounded-md"
+        required
+      >
+        <option value="USD">USD</option>
+        <option value="KHR">KHR</option>
+      </select>
+    </div>
+
     <div>
       <label for="credit_limit" class="block text-sm font-medium text-gray-700"
         >Credit Limit</label
@@ -37,7 +138,6 @@ content %}
         step="0.01"
         name="credit_limit"
         class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
       />
     </div>
     <div>
@@ -51,7 +151,6 @@ content %}
         step="0.01"
         name="credit_risk_rating"
         class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
       />
     </div>
     <div>
@@ -64,42 +163,9 @@ content %}
         type="text"
         name="risk_assessment"
         class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
       />
     </div>
-    <div>
-      <label for="language" class="block text-sm font-medium text-gray-700"
-        >Language</label
-      >
-      <input
-        type="text"
-        name="language"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      />
-    </div>
-    <div>
-      <label for="status" class="block text-sm font-medium text-gray-700"
-        >Status</label
-      >
-      <input
-        type="text"
-        name="status"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      />
-    </div>
-    <div>
-      <label for="currency" class="block text-sm font-medium text-gray-700"
-        >Currency</label
-      >
-      <input
-        type="text"
-        name="currency"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      />
-    </div>
+
     <div>
       <label
         for="documents_type"
@@ -110,7 +176,6 @@ content %}
         type="text"
         name="documents_type"
         class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
       />
     </div>
     <div>
@@ -123,18 +188,6 @@ content %}
         type="text"
         name="document_number"
         class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      />
-    </div>
-    <div>
-      <label for="branch" class="block text-sm font-medium text-gray-700"
-        >Branch</label
-      >
-      <input
-        type="text"
-        name="branch"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
       />
     </div>
 

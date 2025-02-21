@@ -702,6 +702,37 @@
 
       <div class="relative z-10">
         <button
+          @click="activeMenu = activeMenu === 'request' ? '' : 'request'"
+          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          <span class="material-symbols-outlined">request_quote</span>
+          <span class="ml-2">Request</span>
+          <span class="ml-2">&#9662;</span>
+        </button>
+        <div
+          x-show="activeMenu === 'request'"
+          @click.away="activeMenu = ''"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+        >
+          <a
+            href="/request/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">note_add</span>
+            <span>Add Request</span>
+          </a>
+          <a
+            href="/requests"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">view_list</span>
+            <span>Manage Requests</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="relative z-10">
+        <button
           @click="activeMenu = activeMenu === 'agreement' ? '' : 'agreement'"
           class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
         >
@@ -714,20 +745,6 @@
           @click.away="activeMenu = ''"
           class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
         >
-          <a
-            href="/agreements/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">add_circle</span>
-            <span>Add Agreement</span>
-          </a>
-          <a
-            href="/agreements"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">description</span>
-            <span>Manage Agreements</span>
-          </a>
           <a
             href="/crd/add"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"

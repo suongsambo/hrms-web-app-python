@@ -11,20 +11,55 @@ content %}
       <tr>
         <th class="px-4 py-2">Personal Info ID</th>
         <th class="px-4 py-2">Location ID</th>
-        <th class="px-4 py-2">Credit Limit</th>
-        <th class="px-4 py-2">Credit Risk Rating</th>
+        <th class="px-4 py-2">User ID</th>
         <th class="px-4 py-2">Status</th>
+        <th class="px-4 py-2">Branch</th>
+        <th class="px-4 py-2">Language</th>
+        <th class="px-4 py-2">Currency</th>
         <th class="px-4 py-2">Actions</th>
       </tr>
     </thead>
     <tbody>
       {% for crd in crds %}
       <tr class="border-b">
-        <td class="px-4 py-2">{{ crd.personal_info_id }}</td>
-        <td class="px-4 py-2">{{ crd.location_id }}</td>
-        <td class="px-4 py-2">{{ crd.credit_limit }}</td>
-        <td class="px-4 py-2">{{ crd.credit_risk_rating }}</td>
-        <td class="px-4 py-2">{{ crd.status }}</td>
+        <td class="px-4 py-2">
+          {% if crd.personal_info_id is none %}
+          <span class="text-red-500 italic">Missing</span>
+          {% else %} {{ crd.personal_info_id }} {% endif %}
+        </td>
+        <td class="px-4 py-2">
+          {% if crd.location_id is none %}
+          <span class="text-red-500 italic">Missing</span>
+          {% else %} {{ crd.location_id }} {% endif %}
+        </td>
+
+        <td class="px-4 py-2">
+          {% if crd.user_id is none %}
+          <span class="text-red-500 italic">Missing</span>
+          {% else %} {{ crd.user_id }} {% endif %}
+        </td>
+
+        <td class="px-4 py-2">
+          {% if crd.status is none %}
+          <span class="text-red-500 italic">Missing</span>
+          {% else %} {{ crd.status }} {% endif %}
+        </td>
+        <td class="px-4 py-2">
+          {% if crd.branch is none %}
+          <span class="text-red-500 italic">Missing</span>
+          {% else %} {{ crd.branch }} {% endif %}
+        </td>
+
+        <td class="px-4 py-2">
+          {% if crd.language is none %}
+          <span class="text-red-500 italic">Missing</span>
+          {% else %} {{ crd.language }} {% endif %}
+        </td>
+        <td class="px-4 py-2">
+          {% if crd.currency is none %}
+          <span class="text-red-500 italic">Missing</span>
+          {% else %} {{ crd.currency }} {% endif %}
+        </td>
         <td class="px-4 py-2">
           <a
             href="{{ url_for('edit_crd', id=crd.id) }}"
