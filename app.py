@@ -1,4 +1,5 @@
 
+import base64
 from flask_login import login_required, current_user
 from flask import Flask, Response, render_template, flash, redirect, url_for
 from flask import render_template
@@ -10,6 +11,7 @@ import os
 import pyotp
 import requests
 import glob
+import base64
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from config import Config
@@ -352,8 +354,560 @@ def init_db():
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+        # Create confirm table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS confirm (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                conform_status TEXT CHECK (conform_status IN ('Pending', 'Approved', 'Rejected')) NOT NULL,
+                conform_by TEXT,
+                conform_date DATETIME,
+                crd_id INTEGER,
+                ccc_id INTEGER,
+                opd_id INTEGER,
+                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE,
+                FOREIGN KEY (ccc_id) REFERENCES ccc (id) ON DELETE CASCADE,
+                FOREIGN KEY (opd_id) REFERENCES opd (id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create approve table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS approve (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                approval_status TEXT CHECK (approval_status IN ('Pending', 'Approved', 'Rejected')) NOT NULL,
+                approve_by TEXT,
+                approve_date DATETIME,
+                approve_amount DECIMAL(15,2),
+                crd_id INTEGER,
+                opd_id INTEGER,
+                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE,
+                FOREIGN KEY (opd_id) REFERENCES opd (id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create view_table table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS view_table (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                view_status TEXT CHECK (view_status IN ('Pending', 'Seen')) NOT NULL,
+                view_by TEXT,
+                view_date DATETIME,
+                crd_id INTEGER,
+                opd_id INTEGER,
+                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE,
+                FOREIGN KEY (opd_id) REFERENCES opd (id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create request table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS request (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                fund_request_amount DECIMAL(15,2),
+                fund_request_date DATETIME,
+                term INTEGER,
+                payment_mode TEXT,
+                conform_status TEXT CHECK (conform_status IN ('Pending', 'Approved', 'Rejected')),
+                conform_by TEXT,
+                conform_date DATETIME,
+                approval_status TEXT CHECK (approval_status IN ('Pending', 'Approved', 'Rejected')),
+                approve_by TEXT,
+                approve_date DATETIME,
+                approve_amount DECIMAL(15,2),
+                type TEXT,
+                description TEXT,
+                currency_rate DECIMAL(10,2),
+                currency_type TEXT,
+                branch TEXT,
+                note TEXT,
+                comment TEXT,
+                interest_rate DECIMAL(5,2),
+                charge DECIMAL(10,2),
+                fund_request_amount_name TEXT,
+                charge_in_letter TEXT,
+                review_status TEXT CHECK (review_status IN ('Pending', 'Approved', 'Rejected')),
+                reviewed_by TEXT,
+                review_date DATETIME,
+                review_comments TEXT,
+                conform_id INTEGER,
+                approve_id INTEGER,
+                view_id INTEGER,
+                teller_id INTEGER,
+                FOREIGN KEY (conform_id) REFERENCES confirm(id),
+                FOREIGN KEY (approve_id) REFERENCES approve(id),
+                FOREIGN KEY (view_id) REFERENCES view_table(id),
+                FOREIGN KEY (teller_id) REFERENCES teller(id)
+            )
+        ''')
+
+        # Create location table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS location (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                street TEXT,
+                city TEXT,
+                province TEXT,
+                country TEXT,
+                postal_code TEXT
+            )
+        ''')
+
+        # Create personal_info table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS personal_info (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                first_name_kh TEXT,
+                last_name_kh TEXT,
+                first_name_en TEXT,
+                last_name_en TEXT,
+                mobile TEXT,
+                mobile2 TEXT,
+                identity TEXT,
+                fingerprints TEXT,
+                passport TEXT,
+                signature TEXT,
+                age INTEGER CHECK (age >= 0),
+                gender TEXT CHECK (gender IN ('Male', 'Female', 'Other')),
+                place_of_birth TEXT,
+                date_of_birth DATE,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(ID)
+            )
+        ''')
+
+        # Create crd table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS crd (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                personal_info_id INTEGER NOT NULL,
+                location_id INTEGER NOT NULL,
+                credit_limit DECIMAL(15,2),
+                credit_risk_rating DECIMAL(5,3),
+                active BOOLEAN DEFAULT FALSE,
+                risk_assessment TEXT,
+                language TEXT,
+                status TEXT,
+                currency TEXT,
+                documents_type TEXT,
+                document_number TEXT,
+                branch TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
+                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
+                FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create opd table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS opd (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                user_id INTEGER NOT NULL,
+                personal_info_id INTEGER NOT NULL,
+                location_id INTEGER NOT NULL,
+                department TEXT,
+                doctor_assigned TEXT,
+                appointment_date DATETIME,
+                status TEXT CHECK (status IN ('Scheduled', 'Completed', 'Cancelled')) DEFAULT 'Scheduled',
+                notes TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
+                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
+                FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create ccc table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS ccc (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                user_id INTEGER NOT NULL,
+                personal_info_id INTEGER NOT NULL,
+                location_id INTEGER NOT NULL,
+                active BOOLEAN DEFAULT FALSE,
+                language TEXT,
+                status TEXT,
+                currency TEXT,
+                branch TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
+                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
+                FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
+            )
+        ''')
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS teller (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                user_id INTEGER NOT NULL,
+                personal_info_id INTEGER NOT NULL,
+                location_id INTEGER NOT NULL,
+                active BOOLEAN DEFAULT FALSE,
+                language TEXT,
+                status TEXT,
+                currency TEXT,
+                branch TEXT,
+                FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
+                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
+                FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
+            )
+        ''')
 
         conn.commit()
+
+
+@app.route('/personal_info/add', methods=['GET', 'POST'])
+@login_required
+def add_personal_info():
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        first_name_kh = request.form['first_name_kh']
+        last_name_kh = request.form['last_name_kh']
+        first_name_en = request.form['first_name_en']
+        last_name_en = request.form['last_name_en']
+        mobile = request.form['mobile']
+        mobile2 = request.form['mobile2']
+        identity = request.form['identity']
+        passport = request.form['passport']
+        age = request.form['age']
+        gender = request.form['gender']
+        place_of_birth = request.form['place_of_birth']
+        date_of_birth = request.form['date_of_birth']
+
+        # Handle image upload
+        fingerprints_data = None
+        if 'fingerprints' in request.files:
+            fingerprints = request.files['fingerprints']
+            # Ensure the image file is valid
+            if fingerprints and allowed_file(fingerprints.filename):
+                fingerprints_data = fingerprints.stream.read()  # Read the image data as binary
+
+        signature_data = None
+        if 'signature' in request.files:
+            signature = request.files['signature']
+            # Ensure the image file is valid
+            if signature and allowed_file(signature.filename):
+                signature_data = signature.stream.read()  # Read the image data as binary
+
+            with get_db_connection() as conn:
+                conn.execute('''
+                    INSERT INTO personal_info (user_id, first_name_kh, last_name_kh, first_name_en, last_name_en,
+                        mobile, mobile2, identity, fingerprints, passport, signature, age, gender, place_of_birth,
+                        date_of_birth)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (current_user.id, first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2,
+                      identity, fingerprints_data, passport, signature_data, age, gender, place_of_birth, date_of_birth))
+                conn.commit()
+
+            return redirect(url_for('list_personal_info'))
+
+    return render_template('/personal_info/add_personal_info.html')
+
+
+@app.route('/personal_info', methods=['GET'])
+@login_required
+def list_personal_info():
+    with get_db_connection() as conn:
+        # Fetch the binary fingerprint data
+        personal_info = conn.execute(
+            "SELECT *, HEX(fingerprints) AS fingerprints_hex, HEX(signature) AS signature_hex FROM personal_info WHERE user_id = ?", (current_user.id,)
+        ).fetchall()
+
+    # Create a new list to hold the modified data
+    personal_info_list = []
+
+    # Convert the binary data to base64 for embedding in the HTML
+    for info in personal_info:
+        # Convert sqlite3.Row to a regular dictionary
+        personal_info_dict = dict(info)
+
+        # Convert the hex string to binary data
+        fingerprints_binary = None
+        if personal_info_dict.get('fingerprints_hex'):
+            fingerprints_binary = bytes.fromhex(
+                personal_info_dict['fingerprints_hex'])
+        signature_binary = None
+        if personal_info_dict.get('signature_hex'):
+            signature_binary = bytes.fromhex(
+                personal_info_dict['signature_hex'])
+
+        # Encode the binary data to base64
+        personal_info_dict['fingerprints_base64'] = None
+        if fingerprints_binary:
+            personal_info_dict['fingerprints_base64'] = base64.b64encode(
+                fingerprints_binary).decode('utf-8')
+        personal_info_dict['signature_base64'] = None
+        if signature_binary:
+            personal_info_dict['signature_base64'] = base64.b64encode(
+                signature_binary).decode('utf-8')
+
+            # Add the modified dictionary to the new list
+        personal_info_list.append(personal_info_dict)
+
+    # Return the rendered template with the encoded fingerprints
+    return render_template('/personal_info/list_personal_info.html', personal_info=personal_info_list)
+
+
+@app.route('/personal_info/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_personal_info(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        info = conn.execute(
+            "SELECT * FROM personal_info WHERE id = ?", (id,)).fetchone()
+
+    if request.method == 'POST':
+        first_name_kh = request.form['first_name_kh']
+        last_name_kh = request.form['last_name_kh']
+        first_name_en = request.form['first_name_en']
+        last_name_en = request.form['last_name_en']
+        mobile = request.form['mobile']
+        mobile2 = request.form['mobile2']
+        identity = request.form['identity']
+        fingerprints = request.form['fingerprints']
+        passport = request.form['passport']
+        signature = request.form['signature']
+        age = request.form['age']
+        gender = request.form['gender']
+        place_of_birth = request.form['place_of_birth']
+        date_of_birth = request.form['date_of_birth']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE personal_info SET first_name_kh = ?, last_name_kh = ?, first_name_en = ?, last_name_en = ?,
+                    mobile = ?, mobile2 = ?, identity = ?, fingerprints = ?, passport = ?, signature = ?, age = ?,
+                    gender = ?, place_of_birth = ?, date_of_birth = ?
+                WHERE id = ?
+            ''', (first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2, identity, fingerprints,
+                  passport, signature, age, gender, place_of_birth, date_of_birth, id))
+            conn.commit()
+
+        return redirect(url_for('list_personal_info'))
+
+    return render_template('/personal_info/edit_personal_info.html', info=info)
+
+
+@app.route('/personal_info/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_personal_info(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        conn.execute("DELETE FROM personal_info WHERE id = ?", (id,))
+        conn.commit()
+
+    return redirect(url_for('list_personal_info'))
+
+
+@app.route('/locations/add', methods=['GET', 'POST'])
+@login_required
+def add_location():
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        street = request.form['street']
+        city = request.form['city']
+        province = request.form['province']
+        country = request.form['country']
+        postal_code = request.form['postal_code']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO location (street, city, province, country, postal_code)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (street, city, province, country, postal_code))
+            conn.commit()
+
+        return redirect(url_for('list_locations'))
+
+    return render_template('/locations/add_location.html')
+
+
+@app.route('/crd/add', methods=['GET', 'POST'])
+@login_required
+def add_crd():
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        personal_info_id = request.form['personal_info_id']
+        location_id = request.form['location_id']
+        credit_limit = request.form['credit_limit']
+        credit_risk_rating = request.form['credit_risk_rating']
+        risk_assessment = request.form['risk_assessment']
+        language = request.form['language']
+        status = request.form['status']
+        currency = request.form['currency']
+        documents_type = request.form['documents_type']
+        document_number = request.form['document_number']
+        branch = request.form['branch']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO crd (user_id, personal_info_id, location_id, credit_limit, credit_risk_rating, active,
+                    risk_assessment, language, status, currency, documents_type, document_number, branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (current_user.id, personal_info_id, location_id, credit_limit, credit_risk_rating, False, risk_assessment,
+                  language, status, currency, documents_type, document_number, branch))
+            conn.commit()
+
+        return redirect(url_for('list_crd'))
+
+    return render_template('/crd/add_crd.html')
+
+
+@app.route('/crd', methods=['GET'])
+@login_required
+def list_crd():
+    with get_db_connection() as conn:
+        crds = conn.execute(
+            "SELECT * FROM crd WHERE user_id = ?", (current_user.id,)).fetchall()
+    return render_template('/crd/list_crd.html', crds=crds)
+
+
+@app.route('/crd/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_crd(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        crd = conn.execute("SELECT * FROM crd WHERE id = ?", (id,)).fetchone()
+
+    if request.method == 'POST':
+        personal_info_id = request.form['personal_info_id']
+        location_id = request.form['location_id']
+        credit_limit = request.form['credit_limit']
+        credit_risk_rating = request.form['credit_risk_rating']
+        risk_assessment = request.form['risk_assessment']
+        language = request.form['language']
+        status = request.form['status']
+        currency = request.form['currency']
+        documents_type = request.form['documents_type']
+        document_number = request.form['document_number']
+        branch = request.form['branch']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE crd SET personal_info_id = ?, location_id = ?, credit_limit = ?, credit_risk_rating = ?,
+                    risk_assessment = ?, language = ?, status = ?, currency = ?, documents_type = ?, document_number = ?,
+                    branch = ?
+                WHERE id = ?
+            ''', (personal_info_id, location_id, credit_limit, credit_risk_rating, risk_assessment, language, status,
+                  currency, documents_type, document_number, branch, id))
+            conn.commit()
+
+        return redirect(url_for('list_crd'))
+
+    return render_template('/crd/edit_crd.html', crd=crd)
+
+
+@app.route('/crd/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_crd(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        conn.execute("DELETE FROM crd WHERE id = ?", (id,))
+        conn.commit()
+
+    return redirect(url_for('list_crd'))
+
+
+@app.route('/locations', methods=['GET'])
+@login_required
+def list_locations():
+    with get_db_connection() as conn:
+        locations = conn.execute("SELECT * FROM location").fetchall()
+    return render_template('/locations/list_locations.html', locations=locations)
+
+
+@app.route('/locations/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_location(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        location = conn.execute(
+            "SELECT * FROM location WHERE id = ?", (id,)).fetchone()
+
+    if request.method == 'POST':
+        street = request.form['street']
+        city = request.form['city']
+        province = request.form['province']
+        country = request.form['country']
+        postal_code = request.form['postal_code']
+
+        with get_db_connection() as conn:
+            conn.execute("""
+                UPDATE location
+                SET street = ?, city = ?, province = ?, country = ?, postal_code = ?
+                WHERE id = ?
+            """, (street, city, province, country, postal_code, id))
+            conn.commit()
+
+        return redirect(url_for('list_locations'))
+
+    return render_template('/locations/edit_location.html', location=location)
+
+
+@app.route('/locations/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_location(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        conn.execute("DELETE FROM location WHERE id = ?", (id,))
+        conn.commit()
+
+    return redirect(url_for('list_locations'))
+
+
+@app.route('/locations/<int:id>', methods=['GET'])
+@login_required
+def view_location(id):
+    with get_db_connection() as conn:
+        location = conn.execute(
+            "SELECT * FROM location WHERE id = ?", (id,)).fetchone()
+
+    if location:
+        return render_template('/locations/view_location.html', location=location)
+    else:
+        return "Location not found", 404
 
 
 @app.route("/chat", methods=["GET", "POST"])
@@ -2198,62 +2752,6 @@ def users():
     with get_db_connection() as conn:
         users = conn.execute("SELECT * FROM users").fetchall()
     return render_template('/users/users.html', users=users)
-
-
-# @app.route('/users/add', methods=['GET', 'POST'])
-# def add_user():
-#     if current_user.is_admin == 0:
-#         flash("You don't have permission to view this page.", "danger")
-#         return redirect(url_for('dashboard'))
-
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         email = request.form['email']
-#         mobile1 = request.form['mobile1']
-#         first_name_kh = request.form['first_name_kh']
-#         last_name_kh = request.form['last_name_kh']
-#         first_name_en = request.form['first_name_en']
-#         last_name_en = request.form['last_name_en']
-#         branch = request.form['branch']
-#         branch_id = request.form['branch']  # Get the branch ID from the form
-#         # Checkbox will return '1' if checked, else default to 0
-#         is_admin = request.form.get('is_admin', 0)
-#         role_default = request.form.get('role_default', 0)
-#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
-#         # Insert user into 'users' table
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             # Check if username already exists
-#             cursor.execute(
-#                 'SELECT * FROM users WHERE UserName = ?', (username,))
-#             existing_user = cursor.fetchone()
-
-#             if existing_user:
-#                 flash('Username already exists. Please choose another one.', 'danger')
-#                 return redirect(url_for('add_user'))
-
-#             cursor.execute('''
-#                 INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault)
-#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#             ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default))
-#             user_id = cursor.lastrowid
-
-#             # Insert relationship into 'user_branches' table
-#             cursor.execute('''
-#                 INSERT INTO user_branches (user_id, branch_id)
-#                 VALUES (?, ?)
-#             ''', (user_id, branch_id))
-#             conn.commit()
-
-#         return redirect(url_for('list_users'))
-
-#     # Fetch all branches for selection
-#     with get_db_connection() as conn:
-#         branches = conn.execute('SELECT * FROM branches').fetchall()
-
-#     return render_template('/users/add_user.html', branches=branches)
 
 
 @app.route('/users/add', methods=['GET', 'POST'])

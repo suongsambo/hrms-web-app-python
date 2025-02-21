@@ -1,0 +1,87 @@
+{% extends 'base.html' %} {% block title %} Add User {% endblock %} {% block
+content %}
+<div class="max-w-md mx-auto p-6 bg-white rounded-xl shadow-lg">
+  <h2 class="text-2xl font-semibold text-gray-800 mb-6 text-center">
+    Add Location
+  </h2>
+  <form method="POST" action="{{ url_for('add_location') }}" class="space-y-6">
+    <div>
+      <label for="street" class="block text-gray-700 font-medium">Street</label>
+      <input
+        type="text"
+        name="street"
+        required
+        class="w-full px-4 py-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+        placeholder="Enter street name"
+      />
+    </div>
+
+    <div>
+      <label for="city" class="block text-gray-700 font-medium">City</label>
+      <input
+        type="text"
+        name="city"
+        required
+        class="w-full px-4 py-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+        placeholder="Enter city name"
+      />
+    </div>
+
+    <div>
+      <label for="province" class="block text-gray-700 font-medium"
+        >Province</label
+      >
+      <input
+        type="text"
+        name="province"
+        required
+        class="w-full px-4 py-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+        placeholder="Enter province"
+      />
+    </div>
+
+    <div>
+      <label for="country" class="block text-gray-700 font-medium"
+        >Country</label
+      >
+      <input
+        type="text"
+        name="country"
+        required
+        class="w-full px-4 py-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+        placeholder="Enter country"
+      />
+    </div>
+
+    <div>
+      <label for="postal_code" class="block text-gray-700 font-medium"
+        >Postal Code</label
+      >
+      <input
+        type="text"
+        name="postal_code"
+        required
+        class="w-full px-4 py-3 mt-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300"
+        placeholder="Enter postal code"
+      />
+    </div>
+
+    <div class="grid grid-cols-2 gap-4 mt-4">
+      <button
+        type="submit"
+        class="w-full px-4 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition duration-300 flex items-center space-x-2"
+      >
+        <i class="fas fa-plus"></i>
+        <span>Add Location</span>
+      </button>
+      <a
+        href="{{ url_for('list_locations') }}"
+        class="w-full px-4 py-3 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition duration-300 flex items-center space-x-2 text-center"
+      >
+        <i class="fas fa-arrow-left"></i>
+        <span>Back to Locations</span>
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}
