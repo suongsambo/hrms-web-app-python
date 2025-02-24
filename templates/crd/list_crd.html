@@ -9,6 +9,7 @@ content %}
   >
     <thead class="bg-gray-100 text-gray-700">
       <tr>
+        <th class="px-4 py-2">ID</th>
         <th class="px-4 py-2">Personal Info ID</th>
         <th class="px-4 py-2">Location ID</th>
         <th class="px-4 py-2">User ID</th>
@@ -22,6 +23,7 @@ content %}
     <tbody>
       {% for crd in crds %}
       <tr class="border-b">
+        <td class="px-4 py-2">{{ crd.id }}</td>
         <td class="px-4 py-2">
           {% if crd.personal_info_id is none %}
           <span class="text-red-500 italic">Missing</span>

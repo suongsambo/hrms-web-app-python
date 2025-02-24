@@ -355,19 +355,6 @@ def init_db():
             )
         ''')
 
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS confirm (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                conform_status TEXT CHECK (conform_status IN ('Pending', 'Approved', 'Rejected')) NOT NULL,
-                conform_by TEXT,
-                conform_date DATETIME,
-                crd_id INTEGER,
-                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE
-            )
-        ''')
-
         # Create location table
         conn.execute('''
             CREATE TABLE IF NOT EXISTS location (
@@ -380,78 +367,7 @@ def init_db():
             )
         ''')
 
-        # Create approve table
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS approve (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                approval_status TEXT CHECK (approval_status IN ('Pending', 'Approved', 'Rejected')) NOT NULL,
-                approve_by TEXT,
-                approve_date DATETIME,
-                approve_amount DECIMAL(15,2),
-                crd_id INTEGER,
-                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE
-            )
-        ''')
-
-        # Create view_table table
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS view_table (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                view_status TEXT CHECK (view_status IN ('Pending', 'Seen')) NOT NULL,
-                view_by TEXT,
-                view_date DATETIME,
-                crd_id INTEGER,
-                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE
-            )
-        ''')
-
-        # Create request table (without teller, opd, and ccc references)
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS request (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                fund_request_amount DECIMAL(15,2),
-                fund_request_date DATETIME,
-                term INTEGER,
-                payment_mode TEXT,
-                conform_status TEXT CHECK (conform_status IN ('Pending', 'Approved', 'Rejected')),
-                conform_by TEXT,
-                conform_date DATETIME,
-                approval_status TEXT CHECK (approval_status IN ('Pending', 'Approved', 'Rejected')),
-                approve_by TEXT,
-                approve_date DATETIME,
-                approve_amount DECIMAL(15,2),
-                type TEXT,
-                description TEXT,
-                currency_rate DECIMAL(10,2),
-                currency_type TEXT,
-                branch TEXT,
-                note TEXT,
-                comment TEXT,
-                interest_rate DECIMAL(5,2),
-                charge DECIMAL(10,2),
-                fund_request_amount_name TEXT,
-                charge_in_letter TEXT,
-                review_status TEXT CHECK (review_status IN ('Pending', 'Approved', 'Rejected')),
-                reviewed_by TEXT,
-                review_date DATETIME,
-                review_comments TEXT,
-                conform_id INTEGER,
-                approve_id INTEGER,
-                view_id INTEGER,
-                crd_id INTEGER,
-                FOREIGN KEY (conform_id) REFERENCES confirm(id),
-                FOREIGN KEY (approve_id) REFERENCES approve(id),
-                FOREIGN KEY (view_id) REFERENCES view_table(id),
-                FOREIGN KEY (crd_id) REFERENCES crd (id)
-            )
-        ''')
-
+        # Linking personal_info for View
         conn.execute('''
             CREATE TABLE IF NOT EXISTS personal_info (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -473,6 +389,61 @@ def init_db():
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )
+        ''')
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS confirm (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                conform_status TEXT CHECK (conform_status IN ('Pending', 'Approved', 'Rejected')) NOT NULL,
+                conform_by TEXT,
+                conform_date DATETIME,
+                crd_id INTEGER,
+                request_id INTEGER,
+                FOREIGN KEY (crd_id) REFERENCES crd (id) ON DELETE CASCADE,
+                FOREIGN KEY (request_id) REFERENCES request (id) ON DELETE CASCADE
+            )
+        ''')
+
+        # Create request table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS request (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                fund_request_amount DECIMAL(15,2),
+                fund_request_date DATETIME,
+                term INTEGER,
+                payment_mode TEXT,
+                type TEXT,
+                description TEXT,
+                currency_rate DECIMAL(10,2),
+                currency_type TEXT,
+                branch TEXT,
+                note TEXT,
+                comment TEXT,
+                interest_rate DECIMAL(5,2),
+                charge DECIMAL(10,2),
+                fund_request_amount_name TEXT,
+                charge_in_letter TEXT,
+                review_status TEXT CHECK (review_status IN ('Pending', 'Approved', 'Rejected')),
+                reviewed_by TEXT,
+                review_date DATETIME,
+                review_comments TEXT,
+                crd_id INTEGER,
+                FOREIGN KEY (crd_id) REFERENCES crd (id)
+            )
+        ''')
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS crd_on_request (
+                request_id INTEGER NOT NULL,
+                crd_id INTEGER NOT NULL,
+                PRIMARY KEY (request_id, crd_id),
+                FOREIGN KEY (request_id) REFERENCES request(id) ON DELETE CASCADE,
+                FOREIGN KEY (crd_id) REFERENCES crd(id) ON DELETE CASCADE
             )
         ''')
 
@@ -502,6 +473,289 @@ def init_db():
         ''')
 
         conn.commit()
+
+
+# LIST: Show all confirmations
+@app.route('/confirms')
+@login_required
+def list_confirms():
+    with get_db_connection() as conn:
+        confirms = conn.execute('''
+            SELECT confirm.id, confirm.conform_status, confirm.conform_by, confirm.conform_date, confirm.crd_id, confirm.request_id, crd.id AS crd_id, crd.credit_limit, crd.credit_risk_rating, users.username,
+            personal_info.first_name_kh, personal_info.last_name_kh, personal_info.first_name_en, personal_info.last_name_en,
+            request.fund_request_amount, request.fund_request_date, request.term, request.payment_mode, request.type
+            FROM confirm
+            LEFT JOIN crd ON confirm.crd_id = crd.id
+            LEFT JOIN users ON crd.user_id = users.id
+            LEFT JOIN personal_info ON users.id = personal_info.user_id
+            LEFT JOIN request ON confirm.request_id = request.id
+        ''').fetchall()
+        crds = conn.execute("SELECT * FROM crd").fetchall()
+    return render_template('/confirms/list_confirms.html', confirms=confirms, crds=crds)
+
+
+@app.route('/confirm/add', methods=['GET', 'POST'])
+@login_required
+def add_confirm():
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        conform_status = request.form['conform_status']
+        conform_by = request.form['conform_by']
+        conform_date = request.form['conform_date']
+        crd_id = request.form['crd_id']
+        request_id = request.form['request_id']
+
+        with get_db_connection() as conn:
+            crd_exists = conn.execute(
+                "SELECT id FROM crd WHERE id = ?", (crd_id,)).fetchone()
+            if not crd_exists:
+                flash("CRD ID does not exist.", "danger")
+                return redirect(url_for('add_confirm'))
+
+            conn.execute('''
+                INSERT INTO confirm (conform_status, conform_by, conform_date, crd_id, request_id)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (conform_status, conform_by, conform_date, crd_id, request_id))
+            conn.commit()
+
+        flash("Confirmation added successfully!", "success")
+        return redirect(url_for('list_confirms'))
+
+    with get_db_connection() as conn:
+        crds = conn.execute("SELECT * FROM crd").fetchall()
+        requests = conn.execute("SELECT * FROM request").fetchall()
+
+    return render_template('/confirms/add_confirm.html', crds=crds, requests=requests)
+
+# UPDATE: Edit an existing confirmation
+
+
+@app.route('/confirm/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_confirm(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        confirm_info = conn.execute(
+            "SELECT * FROM confirm WHERE id = ?", (id,)).fetchone()
+
+    if request.method == 'POST':
+        conform_status = request.form['conform_status']
+        conform_by = request.form['conform_by']
+        conform_date = request.form['conform_date']
+        crd_id = request.form['crd_id']
+        request_id = request.form['request_id']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE confirm SET
+                    conform_status = ?, conform_by = ?, conform_date = ?, crd_id = ?, request_id = ?
+                WHERE id = ?
+            ''', (conform_status, conform_by, conform_date, crd_id, request_id, id))
+            conn.commit()
+
+        flash("Confirmation updated successfully!", "success")
+        return redirect(url_for('list_confirms'))
+
+    return render_template('/confirms/edit_confirm.html', confirm_info=confirm_info)
+
+# DELETE: Remove a confirmation
+
+
+@app.route('/confirm/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_confirm(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        conn.execute("DELETE FROM confirm WHERE id = ?", (id,))
+        conn.commit()
+
+    flash("Confirmation deleted successfully!", "success")
+    return redirect(url_for('list_confirms'))
+
+
+# Display the request with its associated confirm data
+@app.route('/request/<int:request_id>')
+def view_request(request_id):
+    try:
+        # Query to fetch the request and its associated confirmation data
+        with get_db_connection() as conn:
+            # Fetch the request details
+            request_query = conn.execute('''
+                SELECT * FROM request WHERE id = ?
+            ''', (request_id,))
+            request = request_query.fetchone()
+
+            if not request:
+                flash("Request not found.", "danger")
+                return redirect(url_for('list_requests'))
+
+            # Fetch the confirmation details related to the request
+            confirm_query = conn.execute('''
+                SELECT confirm.*
+                FROM confirm
+                INNER JOIN request_confirm ON confirm.id = request_confirm.confirm_id
+                WHERE request_confirm.request_id = ?
+            ''', (request_id,))
+            confirms = confirm_query.fetchall()
+
+            # Fetch the crd details related to the request
+            crd_query = conn.execute('''
+                SELECT crd.*
+                FROM crd
+                INNER JOIN request ON crd.id = request.crd_id
+                WHERE request.id = ?
+            ''', (request_id,))
+            crd = crd_query.fetchone()
+
+        if not confirms:
+            flash("No confirmations found for this request.", "info")
+
+        return render_template('view_request.html', request=request, confirms=confirms, crd=crd)
+
+    except Exception as e:
+        flash(str(e), "danger")
+        return redirect(url_for('list_requests'))
+
+
+@app.route('/request/add', methods=['GET', 'POST'])
+@login_required
+def add_request():
+    # Check if the user is an admin
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        # Getting form data
+        fund_request_amount = request.form['fund_request_amount']
+        fund_request_date = request.form['fund_request_date']
+        term = request.form['term']
+        payment_mode = request.form['payment_mode']
+        request_type = request.form['type']
+        description = request.form['description']
+        currency_rate = request.form['currency_rate']
+        currency_type = request.form['currency_type']
+        branch = request.form['branch']
+        note = request.form['note']
+        comment = request.form['comment']
+        interest_rate = request.form['interest_rate']
+        charge = request.form['charge']
+        fund_request_amount_name = request.form['fund_request_amount_name']
+        charge_in_letter = request.form['charge_in_letter']
+        review_status = request.form['review_status']
+        reviewed_by = request.form['reviewed_by']
+        review_date = request.form['review_date']
+        review_comments = request.form['review_comments']
+        crd_id = request.form['crd_id']
+
+        # Insert data into the database
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO request (
+                    fund_request_amount, fund_request_date, term, payment_mode, type,
+                    description, currency_rate, currency_type, branch, note, comment,
+                    interest_rate, charge, fund_request_amount_name, charge_in_letter,
+                    review_status, reviewed_by, review_date, review_comments, crd_id
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (fund_request_amount, fund_request_date, term, payment_mode, request_type,
+                  description, currency_rate, currency_type, branch, note, comment,
+                  interest_rate, charge, fund_request_amount_name, charge_in_letter,
+                  review_status, reviewed_by, review_date, review_comments, crd_id))
+            conn.commit()
+
+        flash("Request added successfully!", "success")
+        return redirect(url_for('list_requests'))
+
+    return render_template('/requests/add_request.html')
+
+
+@app.route('/requests', methods=['GET'])
+@login_required
+def list_requests():
+    with get_db_connection() as conn:
+        requests = conn.execute(
+            "SELECT * FROM request WHERE crd_id = ?", (current_user.id,)
+        ).fetchall()
+
+    # Optionally, process any binary data here like converting to base64, if needed
+    return render_template('/requests/list_requests.html', requests=requests)
+
+
+@app.route('/request/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_request(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        request_info = conn.execute(
+            "SELECT * FROM request WHERE id = ?", (id,)).fetchone()
+
+    if request.method == 'POST':
+        fund_request_amount = request.form['fund_request_amount']
+        fund_request_date = request.form['fund_request_date']
+        term = request.form['term']
+        payment_mode = request.form['payment_mode']
+        request_type = request.form['type']
+        description = request.form['description']
+        currency_rate = request.form['currency_rate']
+        currency_type = request.form['currency_type']
+        branch = request.form['branch']
+        note = request.form['note']
+        comment = request.form['comment']
+        interest_rate = request.form['interest_rate']
+        charge = request.form['charge']
+        fund_request_amount_name = request.form['fund_request_amount_name']
+        charge_in_letter = request.form['charge_in_letter']
+        review_status = request.form['review_status']
+        reviewed_by = request.form['reviewed_by']
+        review_date = request.form['review_date']
+        review_comments = request.form['review_comments']
+        crd_id = request.form['crd_id']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE request SET
+                    fund_request_amount = ?, fund_request_date = ?, term = ?, payment_mode = ?, 
+                    type = ?, description = ?, currency_rate = ?, currency_type = ?, 
+                    branch = ?, note = ?, comment = ?, interest_rate = ?, charge = ?, 
+                    fund_request_amount_name = ?, charge_in_letter = ?, review_status = ?, 
+                    reviewed_by = ?, review_date = ?, review_comments = ?, crd_id = ?
+                WHERE id = ?
+            ''', (fund_request_amount, fund_request_date, term, payment_mode, request_type,
+                  description, currency_rate, currency_type, branch, note, comment,
+                  interest_rate, charge, fund_request_amount_name, charge_in_letter,
+                  review_status, reviewed_by, review_date, review_comments, crd_id, id))
+            conn.commit()
+
+        return redirect(url_for('list_requests'))
+
+    return render_template('/requests/edit_request.html', request_info=request_info)
+
+
+@app.route('/request/delete/<int:id>', methods=['POST'])
+@login_required
+def delete_request(id):
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        conn.execute("DELETE FROM request WHERE id = ?", (id,))
+        conn.commit()
+
+    return redirect(url_for('list_requests'))
 
 
 @app.route('/personal_info/add', methods=['GET', 'POST'])
@@ -655,32 +909,6 @@ def delete_personal_info(id):
     return redirect(url_for('list_personal_info'))
 
 
-@app.route('/locations/add', methods=['GET', 'POST'])
-@login_required
-def add_location():
-    if current_user.is_admin == 0:
-        flash("You don't have permission to view this page.", "danger")
-        return redirect(url_for('dashboard'))
-
-    if request.method == 'POST':
-        street = request.form['street']
-        city = request.form['city']
-        province = request.form['province']
-        country = request.form['country']
-        postal_code = request.form['postal_code']
-
-        with get_db_connection() as conn:
-            conn.execute('''
-                INSERT INTO location (street, city, province, country, postal_code)
-                VALUES (?, ?, ?, ?, ?)
-            ''', (street, city, province, country, postal_code))
-            conn.commit()
-
-        return redirect(url_for('list_locations'))
-
-    return render_template('/locations/add_location.html')
-
-
 @app.route('/crd/add', methods=['GET', 'POST'])
 @login_required
 def add_crd():
@@ -699,23 +927,19 @@ def add_crd():
     if request.method == 'POST':
         personal_info_id = request.form['personal_info_id']
         location_id = request.form['location_id']
-        credit_limit = request.form['credit_limit']
-        credit_risk_rating = request.form['credit_risk_rating']
-        risk_assessment = request.form['risk_assessment']
+
         language = request.form['language']
         status = request.form['status']
         currency = request.form['currency']
-        documents_type = request.form['documents_type']
-        document_number = request.form['document_number']
+
         branch = request.form['branch']
 
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO crd (user_id, personal_info_id, location_id, credit_limit, credit_risk_rating, active,
-                    risk_assessment, language, status, currency, documents_type, document_number, branch)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (current_user.id, personal_info_id, location_id, credit_limit, credit_risk_rating, False, risk_assessment,
-                  language, status, currency, documents_type, document_number, branch))
+                INSERT INTO crd (user_id, personal_info_id, location_id, language, status, currency, branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (current_user.id, personal_info_id, location_id,
+                  language, status, currency, branch))
             conn.commit()
 
         return redirect(url_for('list_crd'))
@@ -782,6 +1006,32 @@ def delete_crd(id):
         conn.commit()
 
     return redirect(url_for('list_crd'))
+
+
+@app.route('/locations/add', methods=['GET', 'POST'])
+@login_required
+def add_location():
+    if current_user.is_admin == 0:
+        flash("You don't have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    if request.method == 'POST':
+        street = request.form['street']
+        city = request.form['city']
+        province = request.form['province']
+        country = request.form['country']
+        postal_code = request.form['postal_code']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO location (street, city, province, country, postal_code)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (street, city, province, country, postal_code))
+            conn.commit()
+
+        return redirect(url_for('list_locations'))
+
+    return render_template('/locations/add_location.html')
 
 
 @app.route('/locations', methods=['GET'])

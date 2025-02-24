@@ -1,0 +1,107 @@
+{% extends 'base.html' %} {% block title %} Add Confirmation {% endblock %} {%
+block content %}
+<body class="bg-gray-100 font-sans">
+  <div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">Add Confirmation</h2>
+
+    <form method="POST" action="{{ url_for('add_confirm') }}">
+      <!-- Confirmation Status -->
+      <div class="mb-4">
+        <label
+          for="conform_status"
+          class="block text-sm font-medium text-gray-700"
+          >Confirmation Status</label
+        >
+        <select
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          id="conform_status"
+          name="conform_status"
+          required
+        >
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+
+      <!-- Confirmed By -->
+      <div class="mb-4">
+        <label for="conform_by" class="block text-sm font-medium text-gray-700"
+          >Confirmed By</label
+        >
+        <input
+          type="text"
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          id="conform_by"
+          name="conform_by"
+          required
+        />
+
+      <!-- Confirmation Date -->
+      <div class="mb-4">
+        <label
+          for="conform_date"
+          class="block text-sm font-medium text-gray-700"
+          >Confirmation Date</label
+        >
+        <input
+          type="date"
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          id="conform_date"
+          name="conform_date"
+          required
+        />
+      </div>
+
+      <!-- CRD ID -->
+      <div class="mb-4">
+        <label for="crd_id" class="block text-sm font-medium text-gray-700"
+          >CRD ID</label
+        >
+        <input
+          type="number"
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          id="crd_id"
+          name="crd_id"
+          value="{{ crd_id }}"
+          required
+        />
+      </div>
+
+      <!-- Request ID -->
+      <div class="mb-4">
+        <label for="request_id" class="block text-sm font-medium text-gray-700"
+          >Request ID</label
+        >
+        <select
+          class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          id="request_id"
+          name="request_id"
+          required
+        >
+          <option value="" disabled selected>Select a Request ID</option>
+          {% for request in requests %}
+          <option value="{{ request.id }}">{{ request.id }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Submit and Cancel Buttons -->
+      <div class="mt-6 flex justify-between items-center">
+        <button
+          type="submit"
+          class="px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        >
+          Submit
+        </button>
+        <a
+          href="{{ url_for('list_confirms') }}"
+          class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+        >
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</body>
+{% endblock %}

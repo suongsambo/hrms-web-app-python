@@ -289,40 +289,6 @@
       -->
 
       {% if current_user.is_admin == 1 %}
-      <!-- Menu BankStatements -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'bankstatements' ? '' : 'bankstatements'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">attach_money</span>
-          <span class="ml-2">BankStatements</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'bankstatements'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[300px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/bankstatement/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">attach_money</span>
-            <span>Add BankStatement</span>
-          </a>
-
-          <a
-            href="/bankstatements"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">attach_money</span>
-            <span>Manage BankStatements</span>
-          </a>
-        </div>
-      </div>
-
-      {% endif %} {% if current_user.is_admin == 1 %}
       <!-- Menu Departments -->
       <div class="relative z-10">
         <button
@@ -430,6 +396,22 @@
           >
             <span class="material-symbols-outlined">people</span>
             <span>Manage Employees</span>
+          </a>
+
+          <a
+            href="/bankstatement/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">attach_money</span>
+            <span>Add BankStatement</span>
+          </a>
+
+          <a
+            href="/bankstatements"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">attach_money</span>
+            <span>Manage BankStatements</span>
           </a>
         </div>
       </div>
@@ -664,6 +646,38 @@
           >
             <span class="material-symbols-outlined">image</span>
             <span>Manage Media</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Confirmation and Approval -->
+      <div class="relative z-10">
+        <button
+          @click="activeMenu = activeMenu === 'confirm' ? '' : 'confirm'"
+          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          <span class="material-symbols-outlined">confirmation_number</span>
+          <span class="ml-2">Confirmation</span>
+          <span class="ml-2">&#9662;</span>
+        </button>
+        <div
+          x-show="activeMenu === 'confirm'"
+          @click.away="activeMenu = ''"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+        >
+          <a
+            href="/confirm/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">pending_actions</span>
+            <span>Add Confirm</span>
+          </a>
+          <a
+            href="/confirms"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+          >
+            <span class="material-symbols-outlined">pending_actions</span>
+            <span>Manage Confirmation</span>
           </a>
         </div>
       </div>

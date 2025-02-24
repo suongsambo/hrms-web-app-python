@@ -1,0 +1,251 @@
+{% extends 'base.html' %} {% block title %}Add CRD{% endblock %} {% block
+content %}
+<div class="max-w-4xl mx-auto p-6">
+  <h2 class="text-3xl font-semibold mb-6 text-center">Add Request</h2>
+
+  <form method="POST" enctype="multipart/form-data" class="space-y-6">
+    <!-- Fund Request Amount -->
+    <div class="flex flex-col">
+      <label for="fund_request_amount" class="mb-1 font-medium"
+        >Fund Request Amount</label
+      >
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="fund_request_amount"
+        name="fund_request_amount"
+      />
+    </div>
+
+    <!-- Fund Request Date -->
+    <div class="flex flex-col">
+      <label for="fund_request_date" class="mb-1 font-medium"
+        >Fund Request Date</label
+      >
+      <input
+        type="date"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="fund_request_date"
+        name="fund_request_date"
+      />
+    </div>
+
+    <!-- Term (in months) -->
+    <div class="flex flex-col">
+      <label for="term" class="mb-1 font-medium">Term (in months)</label>
+      <input
+        type="number"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="term"
+        name="term"
+      />
+    </div>
+
+    <!-- Payment Mode -->
+    <div class="flex flex-col">
+      <label for="payment_mode" class="mb-1 font-medium">Payment Mode</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="payment_mode"
+        name="payment_mode"
+      />
+    </div>
+
+    <!-- Request Type -->
+    <div class="flex flex-col">
+      <label for="type" class="mb-1 font-medium">Request Type</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="type"
+        name="type"
+      />
+    </div>
+
+    <!-- Description -->
+    <div class="flex flex-col">
+      <label for="description" class="mb-1 font-medium">Description</label>
+      <textarea
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="description"
+        name="description"
+      ></textarea>
+    </div>
+
+    <!-- Currency Rate -->
+    <div class="flex flex-col">
+      <label for="currency_rate" class="mb-1 font-medium">Currency Rate</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="currency_rate"
+        name="currency_rate"
+      />
+    </div>
+
+    <!-- Currency Type -->
+    <div class="flex flex-col">
+      <label for="currency_type" class="mb-1 font-medium">Currency Type</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="currency_type"
+        name="currency_type"
+      />
+    </div>
+
+    <!-- Branch -->
+    <div class="flex flex-col">
+      <label for="branch" class="mb-1 font-medium">Branch</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="branch"
+        name="branch"
+      />
+    </div>
+
+    <!-- Note -->
+    <div class="flex flex-col">
+      <label for="note" class="mb-1 font-medium">Note</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="note"
+        name="note"
+      />
+    </div>
+
+    <!-- Comment -->
+    <div class="flex flex-col">
+      <label for="comment" class="mb-1 font-medium">Comment</label>
+      <textarea
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="comment"
+        name="comment"
+      ></textarea>
+    </div>
+
+    <!-- Interest Rate -->
+    <div class="flex flex-col">
+      <label for="interest_rate" class="mb-1 font-medium">Interest Rate</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="interest_rate"
+        name="interest_rate"
+      />
+    </div>
+
+    <!-- Charge -->
+    <div class="flex flex-col">
+      <label for="charge" class="mb-1 font-medium">Charge</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="charge"
+        name="charge"
+      />
+    </div>
+
+    <!-- Fund Request Amount (Name) -->
+    <div class="flex flex-col">
+      <label for="fund_request_amount_name" class="mb-1 font-medium"
+        >Fund Request Amount (Name)</label
+      >
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="fund_request_amount_name"
+        name="fund_request_amount_name"
+      />
+    </div>
+
+    <!-- Charge in Letter -->
+    <div class="flex flex-col">
+      <label for="charge_in_letter" class="mb-1 font-medium"
+        >Charge in Letter</label
+      >
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="charge_in_letter"
+        name="charge_in_letter"
+      />
+    </div>
+
+    <!-- Review Status -->
+    <div class="flex flex-col">
+      <label for="review_status" class="mb-1 font-medium">Review Status</label>
+      <select
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="review_status"
+        name="review_status"
+      >
+        <option value="Pending">Pending</option>
+        <option value="Approved">Approved</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+
+    <!-- Reviewed By -->
+    <div class="flex flex-col">
+      <label for="reviewed_by" class="mb-1 font-medium">Reviewed By</label>
+      <input
+        type="text"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="reviewed_by"
+        name="reviewed_by"
+      />
+    </div>
+
+    <!-- Review Date -->
+    <div class="flex flex-col">
+      <label for="review_date" class="mb-1 font-medium">Review Date</label>
+      <input
+        type="date"
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="review_date"
+        name="review_date"
+      />
+    </div>
+
+    <!-- Review Comments -->
+    <div class="flex flex-col">
+      <label for="review_comments" class="mb-1 font-medium"
+        >Review Comments</label
+      >
+      <textarea
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="review_comments"
+        name="review_comments"
+      ></textarea>
+    </div>
+
+    <!-- CRD ID -->
+    <div class="flex flex-col">
+      <label for="crd_id" class="mb-1 font-medium">CRD ID</label>
+      <select
+        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        id="crd_id"
+        name="crd_id"
+      >
+        <option value="{{ current_user.id }}" selected>
+          {{ current_user.id }}
+        </option>
+      </select>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="text-center">
+      <button
+        type="submit"
+        class="px-6 py-3 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        Submit Request
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends 'base.html' %} {% block title %}Add CRD{% endblock %} {% block
+content %}
+<body>
+  <h1>Request Details</h1>
+
+  <p><strong>Fund Request Amount:</strong> {{ request.fund_request_amount }}</p>
+  <p><strong>Fund Request Date:</strong> {{ request.fund_request_date }}</p>
+  <p><strong>Status:</strong> {{ request.approval_status }}</p>
+
+  <!-- Display other request details here -->
+
+  <a href="{{ url_for('list_requests') }}">Back to List</a>
+</body>
+{% endblock %}
