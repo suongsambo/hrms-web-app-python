@@ -34,6 +34,7 @@ block content %}
           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           id="conform_by"
           name="conform_by"
+          value="{{ current_user.username }}"
           required
         />
 
@@ -58,14 +59,17 @@ block content %}
         <label for="crd_id" class="block text-sm font-medium text-gray-700"
           >CRD ID</label
         >
-        <input
-          type="number"
+        <select
           class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
           id="crd_id"
           name="crd_id"
-          value="{{ crd_id }}"
           required
-        />
+        >
+          <option value="" disabled selected>Select a CRD ID</option>
+          {% for crd in crds %}
+          <option value="{{ crd.id }}">{{ crd.id }}</option>
+          {% endfor %}
+        </select>
       </div>
 
       <!-- Request ID -->

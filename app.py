@@ -634,6 +634,8 @@ def add_request():
         flash("You don't have permission to view this page.", "danger")
         return redirect(url_for('dashboard'))
 
+    crds = []  # Initialize crds as an empty list in case the database fetch fails
+
     if request.method == 'POST':
         # Getting form data
         fund_request_amount = request.form['fund_request_amount']
@@ -671,12 +673,17 @@ def add_request():
                   description, currency_rate, currency_type, branch, note, comment,
                   interest_rate, charge, fund_request_amount_name, charge_in_letter,
                   review_status, reviewed_by, review_date, review_comments, crd_id))
+
             conn.commit()
 
         flash("Request added successfully!", "success")
         return redirect(url_for('list_requests'))
 
-    return render_template('/requests/add_request.html')
+    # When it's a GET request, fetch 'crds' from the database
+    with get_db_connection() as conn:
+        crds = conn.execute("SELECT * FROM crd").fetchall()
+
+    return render_template('/requests/add_request.html', crds=crds)
 
 
 @app.route('/requests', methods=['GET'])

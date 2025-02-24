@@ -224,16 +224,20 @@ content %}
     </div>
 
     <!-- CRD ID -->
-    <div class="flex flex-col">
-      <label for="crd_id" class="mb-1 font-medium">CRD ID</label>
+    <div class="mb-4">
+      <label for="crd_id" class="block text-sm font-medium text-gray-700"
+        >CRD ID</label
+      >
       <select
-        class="p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+        class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
         id="crd_id"
         name="crd_id"
+        required
       >
-        <option value="{{ current_user.id }}" selected>
-          {{ current_user.id }}
-        </option>
+        <option value="" disabled selected>Select a CRD ID</option>
+        {% for crd in crds %}
+        <option value="{{ crd.id }}">{{ crd.id }} - {{ crd.name }}</option>
+        {% endfor %}
       </select>
     </div>
 
