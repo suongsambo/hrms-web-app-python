@@ -1,4 +1,6 @@
 
+# Make sure to import your DB connection function
+
 import base64
 from flask_login import login_required, current_user
 from flask import Flask, Response, render_template, flash, redirect, url_for
@@ -452,7 +454,6 @@ def init_db():
             CREATE TABLE IF NOT EXISTS crd (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER NOT NULL,
-                personal_info_id INTEGER NOT NULL,
                 location_id INTEGER NOT NULL,
                 credit_limit DECIMAL(15,2),
                 credit_risk_rating DECIMAL(5,3),
@@ -464,10 +465,23 @@ def init_db():
                 documents_type TEXT,
                 document_number TEXT,
                 branch TEXT,
+                first_name_kh TEXT,
+                last_name_kh TEXT,
+                first_name_en TEXT,
+                last_name_en TEXT,
+                mobile TEXT,
+                mobile2 TEXT,
+                identity TEXT,
+                fingerprints TEXT,
+                passport TEXT,
+                signature TEXT,
+                age INTEGER CHECK (age >= 0),
+                gender TEXT CHECK (gender IN ('Male', 'Female', 'Other')),
+                place_of_birth TEXT,
+                date_of_birth DATE,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(ID) ON DELETE CASCADE,
-                FOREIGN KEY (personal_info_id) REFERENCES personal_info(id) ON DELETE CASCADE,
                 FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
             )
         ''')
@@ -734,10 +748,10 @@ def edit_request(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE request SET
-                    fund_request_amount = ?, fund_request_date = ?, term = ?, payment_mode = ?, 
-                    type = ?, description = ?, currency_rate = ?, currency_type = ?, 
-                    branch = ?, note = ?, comment = ?, interest_rate = ?, charge = ?, 
-                    fund_request_amount_name = ?, charge_in_letter = ?, review_status = ?, 
+                    fund_request_amount = ?, fund_request_date = ?, term = ?, payment_mode = ?,
+                    type = ?, description = ?, currency_rate = ?, currency_type = ?,
+                    branch = ?, note = ?, comment = ?, interest_rate = ?, charge = ?,
+                    fund_request_amount_name = ?, charge_in_letter = ?, review_status = ?,
                     reviewed_by = ?, review_date = ?, review_comments = ?, crd_id = ?
                 WHERE id = ?
             ''', (fund_request_amount, fund_request_date, term, payment_mode, request_type,
@@ -926,41 +940,115 @@ def add_crd():
     with get_db_connection() as conn:
         users = conn.execute("SELECT * FROM users").fetchall()
         branches = conn.execute("SELECT Branch FROM branches").fetchall()
-        personal_info = conn.execute(
-            "SELECT * FROM personal_info").fetchall()
         locations = conn.execute(
             "SELECT * FROM location").fetchall()
 
     if request.method == 'POST':
-        personal_info_id = request.form['personal_info_id']
-        location_id = request.form['location_id']
-
+        first_name_kh = request.form['first_name_kh']
+        last_name_kh = request.form['last_name_kh']
+        first_name_en = request.form['first_name_en']
+        last_name_en = request.form['last_name_en']
+        mobile = request.form['mobile']
+        mobile2 = request.form['mobile2']
+        identity = request.form['identity']
+        passport = request.form['passport']
+        age = request.form['age']
+        gender = request.form['gender']
+        place_of_birth = request.form['place_of_birth']
+        date_of_birth = request.form['date_of_birth']
         language = request.form['language']
         status = request.form['status']
         currency = request.form['currency']
-
         branch = request.form['branch']
+        location_id = request.form['location_id']
+
+        # Handle image upload
+        fingerprints_data = None
+        if 'fingerprints' in request.files:
+            fingerprints = request.files['fingerprints']
+            # Ensure the image file is valid
+            if fingerprints and allowed_file(fingerprints.filename):
+                fingerprints_data = fingerprints.stream.read()
+
+        signature_data = None
+        if 'signature' in request.files:
+            signature = request.files['signature']
+            # Ensure the image file is valid
+            if signature and allowed_file(signature.filename):
+                signature_data = signature.stream.read()
 
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO crd (user_id, personal_info_id, location_id, language, status, currency, branch)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (current_user.id, personal_info_id, location_id,
-                  language, status, currency, branch))
+                    INSERT INTO crd (user_id, first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2,
+                        identity, passport, age, gender, place_of_birth, date_of_birth, fingerprints, signature, language,
+                        status, currency, branch, location_id, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (current_user.id, first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2,
+                      identity, passport, age, gender, place_of_birth, date_of_birth, fingerprints_data, signature_data,
+                      language, status, currency, branch, location_id, datetime.now(), datetime.now()))  # Assume datetime.now() for created_at and updated_at
             conn.commit()
 
         return redirect(url_for('list_crd'))
 
-    return render_template('/crd/add_crd.html', branches=branches, locations=locations, personal_info=personal_info, users=users)
+    return render_template('/crd/add_crd.html', branches=branches, locations=locations, users=users)
 
 
 @app.route('/crd', methods=['GET'])
 @login_required
 def list_crd():
+    # Fetch the CRD data (assuming 'crd' contains the user-specific info)
     with get_db_connection() as conn:
         crds = conn.execute(
-            "SELECT * FROM crd WHERE user_id = ?", (current_user.id,)).fetchall()
-    return render_template('/crd/list_crd.html', crds=crds)
+            "SELECT * FROM crd WHERE user_id = ?", (current_user.id,)
+        ).fetchall()
+
+    # Create a new list to hold the modified data
+    crd_list = []
+
+    for crd in crds:
+        crd_dict = dict(crd)
+
+        # Fetch the related personal information for the current CRD record
+        with get_db_connection() as conn:
+            personal_info = conn.execute(
+                "SELECT fingerprints, signature FROM crd WHERE user_id = ? AND id = ?",
+                (current_user.id, crd['id'])
+            ).fetchone()
+
+        # Process the binary data for fingerprints and signature if they exist
+        fingerprints_binary = None
+        if personal_info and personal_info['fingerprints']:
+            fingerprints_binary = personal_info['fingerprints']
+
+        signature_binary = None
+        if personal_info and personal_info['signature']:
+            signature_binary = personal_info['signature']
+
+        # Encode the binary data to base64 for embedding in the HTML
+        crd_dict['fingerprints_base64'] = None
+        if fingerprints_binary:
+            crd_dict['fingerprints_base64'] = base64.b64encode(
+                fingerprints_binary).decode('utf-8')
+
+        crd_dict['signature_base64'] = None
+        if signature_binary:
+            crd_dict['signature_base64'] = base64.b64encode(
+                signature_binary).decode('utf-8')
+
+        # Add the modified CRD dictionary to the list
+        crd_list.append(crd_dict)
+
+    # Return the rendered template with the encoded fingerprints and signature
+    return render_template('crd/list_crd.html', crds=crd_list)
+
+
+# @app.route('/crd', methods=['GET'])
+# @login_required
+# def list_crd():
+#     with get_db_connection() as conn:
+#         crds = conn.execute(
+#             "SELECT * FROM crd WHERE user_id = ?", (current_user.id,)).fetchall()
+#     return render_template('/crd/list_crd.html', crds=crds)
 
 
 @app.route('/crd/edit/<int:id>', methods=['GET', 'POST'])

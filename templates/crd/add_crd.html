@@ -1,140 +1,302 @@
 {% extends 'base.html' %} {% block title %}Add CRD{% endblock %} {% block
 content %}
-<div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
-  <h2 class="text-2xl font-semibold mb-6">Add CRD</h2>
+<body class="bg-gray-100">
+  <!-- Navbar or Header -->
+  <nav class="bg-blue-500 p-4 text-white">
+    <div class="max-w-7xl mx-auto">
+      <h1 class="text-xl font-semibold">CRD Management</h1>
+    </div>
+  </nav>
 
-  <form method="POST" action="{{ url_for('add_crd') }}" class="space-y-4">
-    <!-- User ID Field -->
-    <div>
-      <label for="user_id" class="block text-sm font-medium text-gray-700"
-        >User ID:</label
-      >
-      <div class="mt-2 relative">
-        <select
-          id="user_id"
-          name="user_id"
-          required
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="" disabled selected>Select a User</option>
-          {% for user in users %}
-          <option value="{{ user.id }}">
-            {{ user.id }} - {{ user.UserName }}
-          </option>
-          {% endfor %}
-        </select>
+  <!-- Main Content -->
+  <div class="max-w-7xl mx-auto p-6">
+    <div class="bg-white p-8 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-bold text-center mb-6">Add New CRD</h2>
+
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <div class="mb-4">
+        {% for category, message in messages %}
+        <div class="text-center p-4 mb-4 text-white bg-red-500 rounded">
+          {{ message }}
+        </div>
+        {% endfor %}
       </div>
-    </div>
+      {% endif %} {% endwith %}
 
-    <!-- Branch Field -->
-    <div>
-      <label for="branch" class="block text-sm font-medium text-gray-700"
-        >Branch:</label
+      <!-- CRD Form -->
+      <form
+        action="{{ url_for('add_crd') }}"
+        method="POST"
+        enctype="multipart/form-data"
       >
-      <div class="mt-2 relative">
-        <select
-          id="branch"
-          name="branch"
-          required
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="" disabled selected>Select a Branch</option>
-          {% for branch in branches %}
-          <option value="{{ branch['Branch'] }}">{{ branch['Branch'] }}</option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-4">
+          <div>
+            <label for="location_id" class="block font-medium text-gray-700"
+              >Location ID</label
+            >
+            <select
+              id="location_id"
+              name="location_id"
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="" disabled selected>Select a Location</option>
+              {% for location in locations %}
+              <option value="{{ location.id }}">
+                {{ location.id }} - {{ location.name }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div>
+            <label for="first_name_kh" class="block font-medium text-gray-700"
+              >First Name (Khmer)</label
+            >
+            <input
+              type="text"
+              id="first_name_kh"
+              name="first_name_kh"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
 
-    <div>
-      <label
-        for="personal_info_id"
-        class="block text-sm font-medium text-gray-700"
-        >Personal Info ID</label
-      >
-      <div class="mt-2 relative">
-        <select
-          id="personal_info_id"
-          name="personal_info_id"
-          required
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="" disabled selected>Select a Personal Info</option>
-          {% for info in personal_info %}
-          <option value="{{ info.id }}">
-            {{ info.id }} - {{ info.first_name_en }} {{ info.last_name_en }}
-          </option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
-    <div>
-      <label for="location_id" class="block text-sm font-medium text-gray-700"
-        >Location ID</label
-      >
-      <div class="mt-2 relative">
-        <select
-          id="location_id"
-          name="location_id"
-          required
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="" disabled selected>Select a Location</option>
-          {% for location in locations %}
-          <option value="{{ location.id }}">
-            {{ location.id }} - {{ location.name }}
-          </option>
-          {% endfor %}
-        </select>
-      </div>
-    </div>
+          <div>
+            <label for="last_name_kh" class="block font-medium text-gray-700"
+              >Last Name (Khmer)</label
+            >
+            <input
+              type="text"
+              id="last_name_kh"
+              name="last_name_kh"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
 
-    <div>
-      <label for="language" class="block text-sm font-medium text-gray-700"
-        >Language</label
-      >
-      <select
-        name="language"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      >
-        <option value="en">English</option>
-        <option value="km">Khmer</option>
-      </select>
-    </div>
-    <div>
-      <label for="status" class="block text-sm font-medium text-gray-700"
-        >Status</label
-      >
-      <select
-        name="status"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      >
-        <option value="Active">Active</option>
-        <option value="Inactive">Inactive</option>
-      </select>
-    </div>
-    <div>
-      <label for="currency" class="block text-sm font-medium text-gray-700"
-        >Currency</label
-      >
-      <select
-        name="currency"
-        class="mt-1 block w-full px-4 py-2 border rounded-md"
-        required
-      >
-        <option value="USD">USD</option>
-        <option value="KHR">KHR</option>
-      </select>
-    </div>
+          <div>
+            <label for="first_name_en" class="block font-medium text-gray-700"
+              >First Name (English)</label
+            >
+            <input
+              type="text"
+              id="first_name_en"
+              name="first_name_en"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
 
-    <button
-      type="submit"
-      class="mt-6 w-full bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600"
-    >
-      Add CRD
-    </button>
-  </form>
-</div>
+          <div>
+            <label for="last_name_en" class="block font-medium text-gray-700"
+              >Last Name (English)</label
+            >
+            <input
+              type="text"
+              id="last_name_en"
+              name="last_name_en"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="mobile" class="block font-medium text-gray-700"
+              >Mobile</label
+            >
+            <input
+              type="text"
+              id="mobile"
+              name="mobile"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="mobile2" class="block font-medium text-gray-700"
+              >Secondary Mobile</label
+            >
+            <input
+              type="text"
+              id="mobile2"
+              name="mobile2"
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="identity" class="block font-medium text-gray-700"
+              >Identity Number</label
+            >
+            <input
+              type="text"
+              id="identity"
+              name="identity"
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="passport" class="block font-medium text-gray-700"
+              >Passport Number</label
+            >
+            <input
+              type="text"
+              id="passport"
+              name="passport"
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="age" class="block font-medium text-gray-700">Age</label>
+            <input
+              type="text"
+              id="age"
+              name="age"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="gender" class="block font-medium text-gray-700"
+              >Gender</label
+            >
+            <select
+              id="gender"
+              name="gender"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="place_of_birth" class="block font-medium text-gray-700"
+              >Place of Birth</label
+            >
+            <input
+              type="text"
+              id="place_of_birth"
+              name="place_of_birth"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="date_of_birth" class="block font-medium text-gray-700"
+              >Date of Birth</label
+            >
+            <input
+              type="date"
+              id="date_of_birth"
+              name="date_of_birth"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="language" class="block font-medium text-gray-700"
+              >Language</label
+            >
+            <input
+              type="text"
+              id="language"
+              name="language"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="status" class="block font-medium text-gray-700"
+              >Status</label
+            >
+            <input
+              type="text"
+              id="status"
+              name="status"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="currency" class="block font-medium text-gray-700"
+              >Currency</label
+            >
+            <input
+              type="text"
+              id="currency"
+              name="currency"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label for="branch" class="block font-medium text-gray-700"
+              >Branch</label
+            >
+            <select
+              id="branch"
+              name="branch"
+              required
+              class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              {% for branch in branches %}
+              <option value="{{ branch['Branch'] }}">
+                {{ branch['Branch'] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <!-- Image Uploads -->
+        <div class="mb-6">
+          <label for="fingerprints" class="block font-medium text-gray-700"
+            >Fingerprints</label
+          >
+          <input
+            type="file"
+            id="fingerprints"
+            name="fingerprints"
+            accept="image/*"
+            class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <div class="mb-6">
+          <label for="signature" class="block font-medium text-gray-700"
+            >Signature</label
+          >
+          <input
+            type="file"
+            id="signature"
+            name="signature"
+            accept="image/*"
+            class="mt-2 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+          />
+        </div>
+
+        <!-- Submit Button -->
+        <div class="text-center">
+          <button
+            type="submit"
+            class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-md hover:bg-blue-700 focus:outline-none"
+          >
+            Submit
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</body>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'base.html' %} {% block title %}List CRD{% endblock %} {% block
 content %}
-<div class="max-w-6xl mx-auto p-6 bg-white rounded-lg shadow-md">
+<div class="max-w-9xl mx-auto p-6 bg-white rounded-lg shadow-md">
   <h2 class="text-2xl font-semibold mb-6">CRD Records</h2>
 
   <table
@@ -10,13 +10,25 @@ content %}
     <thead class="bg-gray-100 text-gray-700">
       <tr>
         <th class="px-4 py-2">ID</th>
-        <th class="px-4 py-2">Personal Info ID</th>
-        <th class="px-4 py-2">Location ID</th>
-        <th class="px-4 py-2">User ID</th>
-        <th class="px-4 py-2">Status</th>
-        <th class="px-4 py-2">Branch</th>
+        <th class="px-4 py-2">First Name (Khmer)</th>
+        <th class="px-4 py-2">Last Name (Khmer)</th>
+        <th class="px-4 py-2">First Name (English)</th>
+        <th class="px-4 py-2">Last Name (English)</th>
+        <th class="px-4 py-2">Mobile</th>
+        <th class="px-4 py-2">Mobile 2</th>
+        <th class="px-4 py-2">Identity</th>
+        <th class="px-4 py-2">Passport</th>
+        <th class="px-4 py-2">Age</th>
+        <th class="px-4 py-2">Gender</th>
+        <th class="px-4 py-2">Place of Birth</th>
+        <th class="px-4 py-2">Date of Birth</th>
         <th class="px-4 py-2">Language</th>
+        <th class="px-4 py-2">Status</th>
         <th class="px-4 py-2">Currency</th>
+        <th class="px-4 py-2">Branch</th>
+        <th class="px-4 py-2">Location ID</th>
+        <th class="px-4 py-2">Fingerprints</th>
+        <th class="px-4 py-2">Signature</th>
         <th class="px-4 py-2">Actions</th>
       </tr>
     </thead>
@@ -24,43 +36,44 @@ content %}
       {% for crd in crds %}
       <tr class="border-b">
         <td class="px-4 py-2">{{ crd.id }}</td>
+        <td class="px-4 py-2">{{ crd.first_name_kh }}</td>
+        <td class="px-4 py-2">{{ crd.last_name_kh }}</td>
+        <td class="px-4 py-2">{{ crd.first_name_en }}</td>
+        <td class="px-4 py-2">{{ crd.last_name_en }}</td>
+        <td class="px-4 py-2">{{ crd.mobile }}</td>
+        <td class="px-4 py-2">{{ crd.mobile2 }}</td>
+        <td class="px-4 py-2">{{ crd.identity }}</td>
+        <td class="px-4 py-2">{{ crd.passport }}</td>
+        <td class="px-4 py-2">{{ crd.age }}</td>
+        <td class="px-4 py-2">{{ crd.gender }}</td>
+        <td class="px-4 py-2">{{ crd.place_of_birth }}</td>
+        <td class="px-4 py-2">{{ crd.date_of_birth }}</td>
+        <td class="px-4 py-2">{{ crd.language }}</td>
+        <td class="px-4 py-2">{{ crd.status }}</td>
+        <td class="px-4 py-2">{{ crd.currency }}</td>
+        <td class="px-4 py-2">{{ crd.branch }}</td>
+        <td class="px-4 py-2">{{ crd.location_id }}</td>
         <td class="px-4 py-2">
-          {% if crd.personal_info_id is none %}
-          <span class="text-red-500 italic">Missing</span>
-          {% else %} {{ crd.personal_info_id }} {% endif %}
+          {% if crd.fingerprints_base64 %}
+          <img
+            src="data:image/jpeg;base64,{{ crd.fingerprints_base64 }}"
+            alt="Fingerprint Image"
+            class="w-20 h-20 object-cover"
+          />
+          {% else %}
+          <p><strong>No fingerprint data available</strong></p>
+          {% endif %}
         </td>
         <td class="px-4 py-2">
-          {% if crd.location_id is none %}
-          <span class="text-red-500 italic">Missing</span>
-          {% else %} {{ crd.location_id }} {% endif %}
-        </td>
-
-        <td class="px-4 py-2">
-          {% if crd.user_id is none %}
-          <span class="text-red-500 italic">Missing</span>
-          {% else %} {{ crd.user_id }} {% endif %}
-        </td>
-
-        <td class="px-4 py-2">
-          {% if crd.status is none %}
-          <span class="text-red-500 italic">Missing</span>
-          {% else %} {{ crd.status }} {% endif %}
-        </td>
-        <td class="px-4 py-2">
-          {% if crd.branch is none %}
-          <span class="text-red-500 italic">Missing</span>
-          {% else %} {{ crd.branch }} {% endif %}
-        </td>
-
-        <td class="px-4 py-2">
-          {% if crd.language is none %}
-          <span class="text-red-500 italic">Missing</span>
-          {% else %} {{ crd.language }} {% endif %}
-        </td>
-        <td class="px-4 py-2">
-          {% if crd.currency is none %}
-          <span class="text-red-500 italic">Missing</span>
-          {% else %} {{ crd.currency }} {% endif %}
+          {% if crd.signature_base64 %}
+          <img
+            src="data:image/jpeg;base64,{{ crd.signature_base64 }}"
+            alt="Signature Image"
+            class="w-20 h-20 object-cover"
+          />
+          {% else %}
+          <p><strong>No signature data available</strong></p>
+          {% endif %}
         </td>
         <td class="px-4 py-2">
           <a

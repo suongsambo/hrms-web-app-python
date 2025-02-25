@@ -67,7 +67,9 @@ block content %}
         >
           <option value="" disabled selected>Select a CRD ID</option>
           {% for crd in crds %}
-          <option value="{{ crd.id }}">{{ crd.id }}</option>
+          <option value="{{ crd.id }}">
+            {{ crd.id }} - {{ crd.first_name_en }} {{ crd.last_name_en }}
+          </option>
           {% endfor %}
         </select>
       </div>
