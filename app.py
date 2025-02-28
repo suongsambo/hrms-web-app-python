@@ -154,6 +154,52 @@ def init_db():
                 address TEXT,  -- Employee address
                 emergency_contact_name TEXT,
                 emergency_contact_phone TEXT,
+                employees_height DECIMAL(5, 2) NULL,  -- Optional field
+                ethnicity TEXT NULL,                   -- Optional field
+                nationality TEXT NULL,                 -- Optional field
+                religion TEXT NULL,                    -- Optional field
+                family_status TEXT CHECK(family_status IN ('single', 'married', 'other')) NULL, -- Optional field
+                place_of_birth TEXT NULL,              -- Optional field
+                permanent_address TEXT NULL,           -- Optional field
+                village TEXT NULL,                     -- Optional field
+                commune TEXT NULL,                     -- Optional field
+                district TEXT NULL,                    -- Optional field
+                province TEXT NULL,                    -- Optional field
+                home_number TEXT NULL,                 -- Optional field
+                street_number TEXT NULL,               -- Optional field
+                group_name TEXT NULL,                  -- Optional field
+                personal_phone_number TEXT NULL,       -- Optional field
+                level_of_culture TEXT CHECK(level_of_culture IN ('diploma_degree', 'bachelor_degree', 'master_degree', 'doctor')) NULL,  -- Optional field
+                skill TEXT NULL,                       -- Optional field
+                name_of_educational_institution TEXT NULL, -- Optional field
+                knowledge_of_foreign_languages TEXT NULL, -- Optional field
+                current_function TEXT NULL,            -- Optional field
+                id_card_number TEXT NULL,              -- Optional field
+                work_at TEXT NULL,                     -- Optional field
+                employment_id TEXT NULL,               -- Optional field
+                employment_date TEXT NULL,             -- Optional field
+                khmer_nationality_identity_card TEXT NULL, -- Optional field
+                passing_test_date TEXT NULL,           -- Optional field
+                residence_book_or_family_book TEXT NULL, -- Optional field
+                made_on TEXT NULL,                     -- Optional field
+                have_a_number_of_children INTEGER NULL,  -- Optional field
+                father_name TEXT NULL,                 -- Optional field
+                mother_name TEXT NULL,                 -- Optional field
+                father_status TEXT CHECK(father_status IN ('dead', 'alive')) NULL,  -- Optional field
+                father_occupation TEXT NULL,           -- Optional field
+                mother_occupation TEXT NULL,           -- Optional field
+                mother_status TEXT CHECK(mother_status IN ('dead', 'alive')) NULL, -- Optional field
+                father_permanent_address TEXT NULL,    -- Optional field
+                mother_permanent_address TEXT NULL,    -- Optional field
+                parents_village TEXT NULL,             -- Optional field
+                parents_commune TEXT NULL,             -- Optional field
+                parents_district TEXT NULL,            -- Optional field
+                parents_province TEXT NULL,            -- Optional field
+                parents_home_number TEXT NULL,         -- Optional field
+                parents_street_number TEXT NULL,       -- Optional field
+                parents_group TEXT NULL,               -- Optional field
+                parents_phone TEXT NULL,               -- Optional field
+                photo BLOB NULL,                       -- Optional field
                 FOREIGN KEY (user_id) REFERENCES users(ID),
                 FOREIGN KEY (position_id) REFERENCES positions(ID)
             )
@@ -485,6 +531,60 @@ def init_db():
                 FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
             )
         ''')
+        # Check if the user 'bo' exists
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'bo'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'bo' (e.g., '1111')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin)
+                VALUES (?, ?, ?, ?, ?)
+            ''', ('bo', hashed_password, 'bo@example.com', '1234567890', 1))
+
+     # Check if the 'HR' department already exists
+        department_exists = conn.execute(
+            "SELECT 1 FROM departments WHERE Name = 'HR'").fetchone()
+
+        # If the 'HR' department doesn't exist, insert it
+        if not department_exists:
+            conn.execute('''
+                INSERT INTO departments (Name, Description)
+                VALUES (?, ?)
+            ''', ('HR', 'Human Resources Department'))
+
+        # Check if the 'HR Manager' position already exists
+        position_exists = conn.execute(
+            "SELECT 1 FROM positions WHERE PositionName = 'HR Manager'").fetchone()
+
+        # If the 'HR Manager' position doesn't exist, insert it
+        if not position_exists:
+            # Fetch the department ID for 'HR'
+            department_id = conn.execute(
+                "SELECT ID FROM departments WHERE Name = 'HR'").fetchone()[0]
+
+            conn.execute('''
+                INSERT INTO positions (PositionName, Description, department_id)
+                VALUES (?, ?, ?)
+            ''', ('HR Manager', 'Responsible for managing human resources', department_id))
+
+            # Check if the 'SYS' branch already exists
+        branch_exists = conn.execute(
+            "SELECT 1 FROM branches WHERE Branch = 'SYS'").fetchone()
+
+        # If the 'SYS' branch doesn't exist, insert it
+        if not branch_exists:
+            conn.execute('''
+                INSERT INTO branches (Branch, Status, CreateDate, StartDate, Description, BranchManagerName, ContactNumber,
+                                      Address, DistrictProvince, RegisterDate, LocalDescription, LocalAddress,
+                                      LocalBranchManagerName, BranchProjectId, CapitalInjectionId, GroupID, MemberID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SYS', 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
+                  '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
+                  'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
 
         conn.commit()
 
@@ -3450,6 +3550,7 @@ def add_employee():
     users = []
     positions = []
 
+    # Get branches, users, and positions from the database
     with get_db_connection() as conn:
         branches = conn.execute("SELECT * FROM branches").fetchall()
         users = conn.execute(
@@ -3457,6 +3558,7 @@ def add_employee():
         positions = conn.execute("SELECT * FROM positions").fetchall()
 
     if request.method == 'POST':
+        # Collect all form data
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
@@ -3471,20 +3573,47 @@ def add_employee():
         address = request.form['address']
         emergency_contact_name = request.form['emergency_contact_name']
         emergency_contact_phone = request.form['emergency_contact_phone']
+        employees_height = request.form.get('employees_height')
+        ethnicity = request.form.get('ethnicity')
+        nationality = request.form.get('nationality')
+        religion = request.form.get('religion')
+        family_status = request.form.get('family_status')
+        place_of_birth = request.form.get('place_of_birth')
+        permanent_address = request.form.get('permanent_address')
+        village = request.form.get('village')
+        commune = request.form.get('commune')
+        district = request.form.get('district')
+        province = request.form.get('province')
+        home_number = request.form.get('home_number')
+        street_number = request.form.get('street_number')
+        group_name = request.form.get('group_name')
 
+        # Ensure that mandatory fields are provided (simple validation)
+        if not name or not age or not department:
+            flash('Name, Age, and Department are required fields!', 'error')
+            return redirect(url_for('add_employee'))
+
+        # Insert the new employee into the database
         with get_db_connection() as conn:
             conn.execute(
-                """INSERT INTO employees (name, age, department, salary, position_id, joining_date, status,
-                                           branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                """INSERT INTO employees (
+                    name, age, department, salary, position_id, joining_date, status,
+                    branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+                    employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
+                    commune, district, province, home_number, street_number, group_name)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (name, age, department, salary, position_id, joining_date, status, branch, user_id,
-                 phone_number, email, address, emergency_contact_name, emergency_contact_phone)
+                 phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+                 employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
+                 commune, district, province, home_number, street_number, group_name)
             )
             conn.commit()
+
+        # Redirect to employee list after successful insertion
         return redirect(url_for('list_employees'))
 
-    # Pass users and branches to template
-    return render_template('/employees/add_employee.html', branches=branches, users=users, positions=positions)
+    # Render the form to add a new employee with necessary context
+    return render_template('employees/add_employee.html', branches=branches, users=users, positions=positions)
 
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
