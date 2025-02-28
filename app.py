@@ -200,6 +200,8 @@ def init_db():
                 parents_group TEXT NULL,               -- Optional field
                 parents_phone TEXT NULL,               -- Optional field
                 photo BLOB NULL,                       -- Optional field
+                fingerprints BLOB NULL,
+                signature BLOB NULL,
                 FOREIGN KEY (user_id) REFERENCES users(ID),
                 FOREIGN KEY (position_id) REFERENCES positions(ID)
             )
@@ -3543,6 +3545,101 @@ def search_employees():
     return render_template('/employees/employees.html', employees=employees)
 
 
+# @app.route('/employees/add', methods=['GET', 'POST'])
+# @login_required
+# def add_employee():
+#     branches = []
+#     users = []
+#     positions = []
+
+#     # Get branches, users, and positions from the database
+#     with get_db_connection() as conn:
+#         branches = conn.execute("SELECT * FROM branches").fetchall()
+#         users = conn.execute(
+#             "SELECT id, UserName FROM users").fetchall()  # Fetch users
+#         positions = conn.execute("SELECT * FROM positions").fetchall()
+
+#     if request.method == 'POST':
+#         # Collect all form data
+#         name = request.form['name']
+#         age = request.form['age']
+#         department = request.form['department']
+#         salary = request.form['salary']
+#         position_id = request.form['position_id']
+#         joining_date = request.form['joining_date']
+#         status = request.form['status']
+#         branch = request.form['branch']
+#         user_id = request.form['user_id']
+#         phone_number = request.form['phone_number']
+#         email = request.form['email']
+#         address = request.form['address']
+#         emergency_contact_name = request.form['emergency_contact_name']
+#         emergency_contact_phone = request.form['emergency_contact_phone']
+#         employees_height = request.form.get('employees_height')
+#         ethnicity = request.form.get('ethnicity')
+#         nationality = request.form.get('nationality')
+#         religion = request.form.get('religion')
+#         family_status = request.form.get('family_status')
+#         place_of_birth = request.form.get('place_of_birth')
+#         permanent_address = request.form.get('permanent_address')
+#         village = request.form.get('village')
+#         commune = request.form.get('commune')
+#         district = request.form.get('district')
+#         province = request.form.get('province')
+#         home_number = request.form.get('home_number')
+#         street_number = request.form.get('street_number')
+#         group_name = request.form.get('group_name')
+
+#         # New fields to be added
+#         personal_phone_number = request.form.get('personal_phone_number')
+#         level_of_culture = request.form.get('level_of_culture')
+#         skill = request.form.get('skill')
+#         name_of_educational_institution = request.form.get(
+#             'name_of_educational_institution')
+#         knowledge_of_foreign_languages = request.form.get(
+#             'knowledge_of_foreign_languages')
+#         current_function = request.form.get('current_function')
+#         id_card_number = request.form.get('id_card_number')
+#         work_at = request.form.get('work_at')
+#         employment_id = request.form.get('employment_id')
+#         employment_date = request.form.get('employment_date')
+#         khmer_nationality_identity_card = request.form.get(
+#             'khmer_nationality_identity_card')
+
+#         # Ensure that mandatory fields are provided (simple validation)
+#         if not name or not age or not department:
+#             flash('Name, Age, and Department are required fields!', 'error')
+#             return redirect(url_for('add_employee'))
+
+#         # Insert the new employee into the database
+#         with get_db_connection() as conn:
+#             conn.execute(
+#                 """INSERT INTO employees (
+#                     name, age, department, salary, position_id, joining_date, status,
+#                     branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+#                     employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
+#                     commune, district, province, home_number, street_number, group_name,
+#                     personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+#                     knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
+#                     khmer_nationality_identity_card)
+#                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?)""",
+#                 (name, age, department, salary, position_id, joining_date, status, branch, user_id,
+#                  phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+#                  employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
+#                  commune, district, province, home_number, street_number, group_name,
+#                  personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+#                  knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
+#                  khmer_nationality_identity_card)
+#             )
+#             conn.commit()
+
+#         # Redirect to employee list after successful insertion
+#         return redirect(url_for('list_employees'))
+
+#     # Render the form to add a new employee with necessary context
+#     return render_template('employees/add_employee.html', branches=branches, users=users, positions=positions)
+
+
 @app.route('/employees/add', methods=['GET', 'POST'])
 @login_required
 def add_employee():
@@ -3588,6 +3685,45 @@ def add_employee():
         street_number = request.form.get('street_number')
         group_name = request.form.get('group_name')
 
+        # New fields to be added
+        personal_phone_number = request.form.get('personal_phone_number')
+        level_of_culture = request.form.get('level_of_culture')
+        skill = request.form.get('skill')
+        name_of_educational_institution = request.form.get(
+            'name_of_educational_institution')
+        knowledge_of_foreign_languages = request.form.get(
+            'knowledge_of_foreign_languages')
+        current_function = request.form.get('current_function')
+        id_card_number = request.form.get('id_card_number')
+        work_at = request.form.get('work_at')
+        employment_id = request.form.get('employment_id')
+        employment_date = request.form.get('employment_date')
+        khmer_nationality_identity_card = request.form.get(
+            'khmer_nationality_identity_card')
+
+        # Handle photo, fingerprints, and signature upload
+        photo = request.files.get('photo')
+        fingerprints = request.files.get('fingerprints')
+        signature = request.files.get('signature')
+
+        # Function to check if file is allowed
+        def allowed_file(filename):
+            ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'bmp'}
+            return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+        # Convert files to binary data if valid
+        photo_data = None
+        if photo and allowed_file(photo.filename):
+            photo_data = photo.read()
+
+        fingerprints_data = None
+        if fingerprints and allowed_file(fingerprints.filename):
+            fingerprints_data = fingerprints.read()
+
+        signature_data = None
+        if signature and allowed_file(signature.filename):
+            signature_data = signature.read()
+
         # Ensure that mandatory fields are provided (simple validation)
         if not name or not age or not department:
             flash('Name, Age, and Department are required fields!', 'error')
@@ -3600,12 +3736,18 @@ def add_employee():
                     name, age, department, salary, position_id, joining_date, status,
                     branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone,
                     employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
-                    commune, district, province, home_number, street_number, group_name)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                    commune, district, province, home_number, street_number, group_name,
+                    personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+                    knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
+                    khmer_nationality_identity_card, photo, fingerprints, signature)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?)""",
                 (name, age, department, salary, position_id, joining_date, status, branch, user_id,
                  phone_number, email, address, emergency_contact_name, emergency_contact_phone,
                  employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
-                 commune, district, province, home_number, street_number, group_name)
+                 commune, district, province, home_number, street_number, group_name,
+                 personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+                 knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
+                 khmer_nationality_identity_card, photo_data, fingerprints_data, signature_data)
             )
             conn.commit()
 

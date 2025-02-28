@@ -6,7 +6,12 @@ content %}
     Add New Employee
   </h2>
 
-  <form action="{{ url_for('add_employee') }}" method="POST" class="space-y-6">
+  <form
+    action="{{ url_for('add_employee') }}"
+    method="POST"
+    enctype="multipart/form-data"
+    class="space-y-6"
+  >
     <!-- Employee Information Section -->
     <div class="border-b pb-4 mb-6">
       <h3 class="text-xl font-semibold text-gray-800 mb-4">
@@ -517,6 +522,250 @@ content %}
             />
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Personal Phone Number Field -->
+    <div>
+      <label
+        for="personal_phone_number"
+        class="block text-sm font-medium text-gray-700"
+        >Personal Phone Number:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="personal_phone_number"
+          name="personal_phone_number"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Level of Culture Field -->
+    <div>
+      <label
+        for="level_of_culture"
+        class="block text-sm font-medium text-gray-700"
+        >Level of Culture:</label
+      >
+      <div class="mt-2 relative">
+        <select
+          id="level_of_culture"
+          name="level_of_culture"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">-- Select One --</option>
+          <option value="diploma_degree">Diploma Degree</option>
+          <option value="bachelor_degree">Bachelor Degree</option>
+          <option value="master_degree">Master Degree</option>
+          <option value="doctor">Doctor</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Skill Field -->
+    <div>
+      <label for="skill" class="block text-sm font-medium text-gray-700"
+        >Skill:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="skill"
+          name="skill"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Name of Educational Institution Field -->
+    <div>
+      <label
+        for="name_of_educational_institution"
+        class="block text-sm font-medium text-gray-700"
+        >Name of Educational Institution:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="name_of_educational_institution"
+          name="name_of_educational_institution"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Knowledge of Foreign Languages Field -->
+    <div>
+      <label
+        for="knowledge_of_foreign_languages"
+        class="block text-sm font-medium text-gray-700"
+        >Knowledge of Foreign Languages:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="knowledge_of_foreign_languages"
+          name="knowledge_of_foreign_languages"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Current Function Field -->
+    <div>
+      <label
+        for="current_function"
+        class="block text-sm font-medium text-gray-700"
+        >Current Function:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="current_function"
+          name="current_function"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- ID Card Number Field -->
+    <div>
+      <label
+        for="id_card_number"
+        class="block text-sm font-medium text-gray-700"
+        >ID Card Number:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="id_card_number"
+          name="id_card_number"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Work At Field -->
+    <div>
+      <label for="work_at" class="block text-sm font-medium text-gray-700"
+        >Work At:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="work_at"
+          name="work_at"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Employment ID Field -->
+    <div>
+      <label for="employment_id" class="block text-sm font-medium text-gray-700"
+        >Employment ID:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="employment_id"
+          name="employment_id"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Employment Date Field -->
+    <div>
+      <label
+        for="employment_date"
+        class="block text-sm font-medium text-gray-700"
+        >Employment Date:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="employment_date"
+          name="employment_date"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <!-- Khmer Nationality Identity Card Field -->
+    <div>
+      <label
+        for="khmer_nationality_identity_card"
+        class="block text-sm font-medium text-gray-700"
+        >Khmer Nationality Identity Card:</label
+      >
+      <div class="mt-2 relative">
+        <input
+          type="text"
+          id="khmer_nationality_identity_card"
+          name="khmer_nationality_identity_card"
+          required
+          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <!-- Photo Field -->
+      <div>
+        <label for="photo" class="block text-sm font-medium text-gray-700"
+          >Upload Photo</label
+        >
+        <input
+          type="file"
+          name="photo"
+          id="photo"
+          required
+          class="mt-1 block w-full px-4 py-2 border rounded-md"
+          accept="image/*"
+        />
+      </div>
+
+      <!-- Fingerprints Field -->
+      <div>
+        <label
+          for="fingerprints"
+          class="block text-sm font-medium text-gray-700"
+          >Upload Fingerprints Image</label
+        >
+        <input
+          type="file"
+          name="fingerprints"
+          id="fingerprints"
+          required
+          class="mt-1 block w-full px-4 py-2 border rounded-md"
+          accept="image/*"
+        />
+      </div>
+
+      <!-- Signature Field -->
+      <div>
+        <label for="signature" class="block text-sm font-medium text-gray-700"
+          >Upload Signature Image</label
+        >
+        <input
+          type="file"
+          name="signature"
+          id="signature"
+          required
+          class="mt-1 block w-full px-4 py-2 border rounded-md"
+          accept="image/*"
+        />
       </div>
     </div>
 
