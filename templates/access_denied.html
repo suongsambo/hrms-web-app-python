@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Access Denied</title>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .container {
+        margin-top: 100px;
+        text-align: center;
+      }
+      .alert {
+        padding: 20px;
+        font-size: 1.5rem;
+      }
+      .btn {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="alert alert-danger" role="alert">
+        <strong>Access Denied!</strong> {{ message }}
+      </div>
+      <a href="{{ url_for('index') }}" class="btn btn-primary"
+        >Go to Homepage</a
+      >
+    </div>
+  </body>
+</html>

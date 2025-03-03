@@ -1,0 +1,100 @@
+{% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
+content %}
+<body class="bg-gray-100 text-gray-800">
+  <!-- Navbar -->
+  <nav class="bg-indigo-600 text-white p-4">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="/" class="text-lg font-bold">Dashboard</a>
+      <div>
+        <a
+          href="{{ url_for('get_all_leave_dates') }}"
+          class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md"
+          >View Leaves</a
+        >
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container mx-auto mt-8 px-4">
+    <!-- Branch Filter Form -->
+    <div class="mb-4">
+      <h2 class="text-2xl font-semibold">Filter Leaves by Branch</h2>
+    </div>
+
+    <!-- Leaves Table -->
+    <div class="overflow-x-auto bg-white shadow-lg rounded-md">
+      <table id="leaveTable" class="min-w-full text-sm text-left">
+        <thead class="bg-gray-200 text-gray-700">
+          <tr>
+            <th class="px-6 py-3">Employee Name</th>
+            <th class="px-6 py-3">Branch</th>
+            <th class="px-6 py-3">Leave Type</th>
+            <th class="px-6 py-3">Start Date</th>
+            <th class="px-6 py-3">End Date</th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Reason
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th class="px-6 py-3">Action</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-600">
+          {% for leave in leaves %}
+          <tr class="border-t">
+            <td class="px-6 py-3">{{ leave.employee_name }}</td>
+            <td class="px-6 py-3">{{ leave.branch_name }}</td>
+            <td class="px-6 py-3">{{ leave.leave_type }}</td>
+            <td class="px-6 py-3">{{ leave.start_date }}</td>
+            <td class="px-6 py-3">{{ leave.end_date }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <b>{{ leave.reason }}</b>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+              <span
+                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
+              >
+                <b>{{ leave.status }}</b>
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+              <a
+                href="{{ url_for('edit_leave', id=leave['id']) }}"
+                class="text-blue-600 hover:text-blue-900"
+                >Edit</a
+              >
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="8" class="px-6 py-3 text-center text-gray-500">
+              No leaves found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Initialize DataTable -->
+  <script>
+    $(document).ready(function () {
+      $("#leaveTable").DataTable({
+        paging: true, // Enables pagination
+        searching: true, // Enables the search box
+        ordering: true, // Enables sorting
+        responsive: true, // Makes the table responsive for smaller screens
+        order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
+      });
+    });
+  </script>
+</body>
+
+{% endblock %}

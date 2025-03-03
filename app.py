@@ -588,7 +588,41 @@ def init_db():
                   '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
                   'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
 
-        conn.commit()
+        try:
+            with sqlite3.connect('your_database.db') as conn:
+                conn.execute('''
+                    INSERT INTO employees (
+                        name, age, department, salary, position_id, branch, user_id, phone_number, email,
+                        joining_date, status
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    'John Doe',
+                    30,
+                    'HR',
+                    1000,
+                    1,
+                    'SYS',
+                    1,
+                    '1234567890',
+                    'bo@example.com',
+                    '2025-02-28',
+                    'Active'
+                ))
+        except sqlite3.IntegrityError as e:
+            # Catch duplicate email error
+            if str(e) == 'UNIQUE constraint failed: employees.email':
+                print('Email already exists in the database.')
+            else:
+                # Re-raise the exception if it's not a duplicate email error
+                raise
+        except sqlite3.Error as e:
+            # Catch any other SQLite error
+            print(f"SQLite error: {e}")
+    conn.commit()
+
+
+# Example usage
 
 
 # LIST: Show all confirmations
@@ -601,10 +635,10 @@ def list_confirms():
             personal_info.first_name_kh, personal_info.last_name_kh, personal_info.first_name_en, personal_info.last_name_en,
             request.fund_request_amount, request.fund_request_date, request.term, request.payment_mode, request.type
             FROM confirm
-            LEFT JOIN crd ON confirm.crd_id = crd.id
-            LEFT JOIN users ON crd.user_id = users.id
-            LEFT JOIN personal_info ON users.id = personal_info.user_id
-            LEFT JOIN request ON confirm.request_id = request.id
+            LEFT JOIN crd ON confirm.crd_id=crd.id
+            LEFT JOIN users ON crd.user_id=users.id
+            LEFT JOIN personal_info ON users.id=personal_info.user_id
+            LEFT JOIN request ON confirm.request_id=request.id
         ''').fetchall()
         crds = conn.execute("SELECT * FROM crd").fetchall()
     return render_template('/confirms/list_confirms.html', confirms=confirms, crds=crds)
@@ -632,8 +666,8 @@ def add_confirm():
                 return redirect(url_for('add_confirm'))
 
             conn.execute('''
-                INSERT INTO confirm (conform_status, conform_by, conform_date, crd_id, request_id)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO confirm(conform_status, conform_by, conform_date, crd_id, request_id)
+                VALUES(?, ?, ?, ?, ?)
             ''', (conform_status, conform_by, conform_date, crd_id, request_id))
             conn.commit()
 
@@ -670,8 +704,8 @@ def edit_confirm(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE confirm SET
-                    conform_status = ?, conform_by = ?, conform_date = ?, crd_id = ?, request_id = ?
-                WHERE id = ?
+                    conform_status= ?, conform_by= ?, conform_date= ?, crd_id= ?, request_id= ?
+                WHERE id= ?
             ''', (conform_status, conform_by, conform_date, crd_id, request_id, id))
             conn.commit()
 
@@ -706,7 +740,7 @@ def view_request(request_id):
         with get_db_connection() as conn:
             # Fetch the request details
             request_query = conn.execute('''
-                SELECT * FROM request WHERE id = ?
+                SELECT * FROM request WHERE id= ?
             ''', (request_id,))
             request = request_query.fetchone()
 
@@ -718,8 +752,8 @@ def view_request(request_id):
             confirm_query = conn.execute('''
                 SELECT confirm.*
                 FROM confirm
-                INNER JOIN request_confirm ON confirm.id = request_confirm.confirm_id
-                WHERE request_confirm.request_id = ?
+                INNER JOIN request_confirm ON confirm.id=request_confirm.confirm_id
+                WHERE request_confirm.request_id= ?
             ''', (request_id,))
             confirms = confirm_query.fetchall()
 
@@ -727,8 +761,8 @@ def view_request(request_id):
             crd_query = conn.execute('''
                 SELECT crd.*
                 FROM crd
-                INNER JOIN request ON crd.id = request.crd_id
-                WHERE request.id = ?
+                INNER JOIN request ON crd.id=request.crd_id
+                WHERE request.id= ?
             ''', (request_id,))
             crd = crd_query.fetchone()
 
@@ -778,13 +812,13 @@ def add_request():
         # Insert data into the database
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO request (
+                INSERT INTO request(
                     fund_request_amount, fund_request_date, term, payment_mode, type,
                     description, currency_rate, currency_type, branch, note, comment,
                     interest_rate, charge, fund_request_amount_name, charge_in_letter,
                     review_status, reviewed_by, review_date, review_comments, crd_id
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (fund_request_amount, fund_request_date, term, payment_mode, request_type,
                   description, currency_rate, currency_type, branch, note, comment,
                   interest_rate, charge, fund_request_amount_name, charge_in_letter,
@@ -850,12 +884,12 @@ def edit_request(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE request SET
-                    fund_request_amount = ?, fund_request_date = ?, term = ?, payment_mode = ?,
-                    type = ?, description = ?, currency_rate = ?, currency_type = ?,
-                    branch = ?, note = ?, comment = ?, interest_rate = ?, charge = ?,
-                    fund_request_amount_name = ?, charge_in_letter = ?, review_status = ?,
-                    reviewed_by = ?, review_date = ?, review_comments = ?, crd_id = ?
-                WHERE id = ?
+                    fund_request_amount= ?, fund_request_date= ?, term= ?, payment_mode= ?,
+                    type= ?, description= ?, currency_rate= ?, currency_type= ?,
+                    branch= ?, note= ?, comment= ?, interest_rate= ?, charge= ?,
+                    fund_request_amount_name= ?, charge_in_letter= ?, review_status= ?,
+                    reviewed_by= ?, review_date= ?, review_comments= ?, crd_id= ?
+                WHERE id= ?
             ''', (fund_request_amount, fund_request_date, term, payment_mode, request_type,
                   description, currency_rate, currency_type, branch, note, comment,
                   interest_rate, charge, fund_request_amount_name, charge_in_letter,
@@ -919,10 +953,10 @@ def add_personal_info():
 
             with get_db_connection() as conn:
                 conn.execute('''
-                    INSERT INTO personal_info (user_id, first_name_kh, last_name_kh, first_name_en, last_name_en,
+                    INSERT INTO personal_info(user_id, first_name_kh, last_name_kh, first_name_en, last_name_en,
                         mobile, mobile2, identity, fingerprints, passport, signature, age, gender, place_of_birth,
                         date_of_birth)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (current_user.id, first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2,
                       identity, fingerprints_data, passport, signature_data, age, gender, place_of_birth, date_of_birth))
                 conn.commit()
@@ -1005,10 +1039,10 @@ def edit_personal_info(id):
 
         with get_db_connection() as conn:
             conn.execute('''
-                UPDATE personal_info SET first_name_kh = ?, last_name_kh = ?, first_name_en = ?, last_name_en = ?,
-                    mobile = ?, mobile2 = ?, identity = ?, fingerprints = ?, passport = ?, signature = ?, age = ?,
-                    gender = ?, place_of_birth = ?, date_of_birth = ?
-                WHERE id = ?
+                UPDATE personal_info SET first_name_kh= ?, last_name_kh= ?, first_name_en= ?, last_name_en= ?,
+                    mobile= ?, mobile2= ?, identity= ?, fingerprints= ?, passport= ?, signature= ?, age= ?,
+                    gender= ?, place_of_birth= ?, date_of_birth= ?
+                WHERE id= ?
             ''', (first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2, identity, fingerprints,
                   passport, signature, age, gender, place_of_birth, date_of_birth, id))
             conn.commit()
@@ -1081,10 +1115,10 @@ def add_crd():
 
         with get_db_connection() as conn:
             conn.execute('''
-                    INSERT INTO crd (user_id, first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2,
+                    INSERT INTO crd(user_id, first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2,
                         identity, passport, age, gender, place_of_birth, date_of_birth, fingerprints, signature, language,
                         status, currency, branch, location_id, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (current_user.id, first_name_kh, last_name_kh, first_name_en, last_name_en, mobile, mobile2,
                       identity, passport, age, gender, place_of_birth, date_of_birth, fingerprints_data, signature_data,
                       language, status, currency, branch, location_id, datetime.now(), datetime.now()))  # Assume datetime.now() for created_at and updated_at
@@ -1178,10 +1212,10 @@ def edit_crd(id):
 
         with get_db_connection() as conn:
             conn.execute('''
-                UPDATE crd SET personal_info_id = ?, location_id = ?, credit_limit = ?, credit_risk_rating = ?,
-                    risk_assessment = ?, language = ?, status = ?, currency = ?, documents_type = ?, document_number = ?,
-                    branch = ?
-                WHERE id = ?
+                UPDATE crd SET personal_info_id= ?, location_id= ?, credit_limit= ?, credit_risk_rating= ?,
+                    risk_assessment= ?, language= ?, status= ?, currency= ?, documents_type= ?, document_number= ?,
+                    branch= ?
+                WHERE id= ?
             ''', (personal_info_id, location_id, credit_limit, credit_risk_rating, risk_assessment, language, status,
                   currency, documents_type, document_number, branch, id))
             conn.commit()
@@ -1221,8 +1255,8 @@ def add_location():
 
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO location (street, city, province, country, postal_code)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO location(street, city, province, country, postal_code)
+                VALUES(?, ?, ?, ?, ?)
             ''', (street, city, province, country, postal_code))
             conn.commit()
 
@@ -1489,8 +1523,8 @@ def create_bankstatement():
     # Insert data into database
     with get_db_connection() as conn:
         conn.execute('''
-            INSERT INTO bankstatement (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO bankstatement(employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
         ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type))
         conn.commit()
 
@@ -1540,8 +1574,8 @@ def update_bankstatement(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE bankstatement
-                SET employee_id = ?, employee_name = ?, account_name = ?, account_number = ?, bank_name = ?, salary = ?, transaction_date = ?, transaction_type = ?
-                WHERE id = ?
+                SET employee_id= ?, employee_name= ?, account_name= ?, account_number= ?, bank_name= ?, salary= ?, transaction_date= ?, transaction_type= ?
+                WHERE id= ?
             ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type, id))
             conn.commit()
 
@@ -1581,8 +1615,8 @@ def create_department():
     # Insert the data into the database
     with get_db_connection() as conn:
         conn.execute('''
-                INSERT INTO departments (Name, Description)
-                VALUES (?, ?)
+                INSERT INTO departments(Name, Description)
+                VALUES(?, ?)
             ''', (name, description))
         conn.commit()
 
@@ -1624,8 +1658,8 @@ def update_department(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE departments
-                SET Name = ?, Description = ?
-                WHERE id = ?
+                SET Name= ?, Description= ?
+                WHERE id= ?
             ''', (name, description, id))
             conn.commit()
 
@@ -1667,8 +1701,8 @@ def create_position():
         # Insert the new position into the database
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO positions (PositionName, Description, department_id)
-                VALUES (?, ?, ?)
+                INSERT INTO positions(PositionName, Description, department_id)
+                VALUES(?, ?, ?)
             ''', (position_name, description, department_id))
             conn.commit()
 
@@ -1697,8 +1731,8 @@ def view_position(id):
         employees = conn.execute('''
             SELECT e.id, e.name, e.branch
             FROM employees e
-            JOIN positions p ON p.ID = e.position_id
-            WHERE p.ID = ?
+            JOIN positions p ON p.ID=e.position_id
+            WHERE p.ID= ?
         ''', (id,)).fetchall()
     return render_template('/positions/view_position.html', position=position, employees=employees)
 
@@ -1725,8 +1759,8 @@ def update_position(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE positions
-                SET PositionName = ?, Description = ?, department_id = ?
-                WHERE ID = ?
+                SET PositionName= ?, Description= ?, department_id= ?
+                WHERE ID= ?
             ''', (position_name, description, department_id, id))
             conn.commit()
 
@@ -1757,17 +1791,140 @@ def static_files(filename):
 # Route to view all leaves
 
 
+# @app.route('/leaves')
+# def view_leaves():
+#     if current_user.is_authenticated and current_user.role_default == 40:
+#         return redirect(url_for('filter_leaves_by_branch_name'))
+#     if current_user.is_authenticated and current_user.role_default == 20:
+#         return redirect(url_for('filter_leaves_by_employee_id'))
+#     if current_user.is_authenticated and current_user.is_admin:
+#         return redirect(url_for('view_leaves'))
+
+#     if current_user.is_authenticated:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(
+#                 'SELECT * FROM leaves WHERE employee_id = ?', (current_user.id,)).fetchall()
+#     else:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute('SELECT * FROM leaves').fetchall()
+#         return render_template('/leaves/view_leaves.html', leaves=leaves)
+
+
 @app.route('/leaves')
 def view_leaves():
-    if current_user.is_authenticated and not current_user.is_admin:
+    if current_user.is_authenticated:
+        # Admin users will not be redirected to the same view, just display their leaves
+        if current_user.is_admin == 1:
+            # You may want to show some specific view for admins, or just let them view leaves
+            # Here, we just render the same page, without a redirect
+            with get_db_connection() as conn:
+                leaves = conn.execute('SELECT * FROM leaves').fetchall()
+            return render_template('/leaves/view_leaves.html', leaves=leaves)
+
+        # Role 40 (e.g., branch-level users) will be redirected to filter by branch name
+        if current_user.role_default == 40:
+            return redirect(url_for('filter_leaves_by_branch_name'))
+
+        # Role 20 (e.g., employee-level users) will be redirected to filter by employee ID
+        if current_user.role_default == 20:
+            return redirect(url_for('filter_leaves_by_employee_id'))
+
+        # If the user doesn't match the above roles, show only their own leaves
         with get_db_connection() as conn:
             leaves = conn.execute(
                 'SELECT * FROM leaves WHERE employee_id = ?', (current_user.id,)).fetchall()
+
+        return render_template('/leaves/view_leaves.html', leaves=leaves)
+
     else:
+        # If the user is not authenticated, show all leaves
         with get_db_connection() as conn:
             leaves = conn.execute('SELECT * FROM leaves').fetchall()
 
-    return render_template('/leaves/view_leaves.html', leaves=leaves)
+        return render_template('/leaves/view_leaves.html', leaves=leaves)
+
+
+@app.route('/leaves/employee', methods=['GET'])
+def filter_leaves_by_employee_id():
+    # Check if the user is authenticated and has role_default 20
+    if not current_user.is_authenticated or current_user.role_default != 20:
+        return redirect(url_for('access_denied'))
+
+    # Get the employee_id parameter from the request
+    employee_id = request.args.get('employee_id')
+
+    # Define SQL queries
+    if employee_id:
+        # Query with employee_id filter
+        query = '''
+            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+            FROM leaves l
+            INNER JOIN employees e ON l.employee_id=e.id
+            WHERE l.employee_id= ?
+        '''
+        params = (employee_id,)
+    else:
+        # Default query without any employee_id filter
+        query = '''
+            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id=e.id
+        '''
+        params = ()  # No filtering by employee_id
+
+    # Execute the query with the database connection
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    # Render the template with the query results
+    return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id)
+
+
+def access_denied():
+    # Option 1: Return a custom error page (you can create a template for this)
+    return render_template('access_denied.html'), 403
+
+
+@app.route('/leaves/branch', methods=['GET'])
+def filter_leaves_by_branch_name():
+    # Check if the user is authenticated and has role_default 40
+    if not current_user.is_authenticated or current_user.role_default != 40:
+        return redirect(url_for('access_denied'))
+
+    # Get the optional branch_name parameter from the request
+    branch_name = request.args.get('branch_name')
+
+    # Define SQL queries
+    if branch_name:
+        # Query with branch_name filter
+        query = '''
+            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+            FROM leaves l
+            INNER JOIN employees e ON l.employee_id=e.id
+            WHERE e.branch= ?
+        '''
+        params = (branch_name,)
+    else:
+        # Default query without any branch filter
+        query = '''
+            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id=e.id
+        '''
+        params = ()  # No filtering by branch name
+
+    # Execute the query with the database connection
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    # Render the template with the query results
+    return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
 
 
 @app.route('/leave/add', methods=['GET', 'POST'])
@@ -1793,8 +1950,8 @@ def add_leave():
         # Insert the leave record into the database
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, service_count)
+                VALUES(?, ?, ?, ?, ?, ?)
             ''', (employee_id, leave_type, start_date, end_date, reason, service_count))
 
         # Redirect to view leaves page after insertion
@@ -1819,7 +1976,7 @@ def get_all_leave_dates():
     query = '''
         SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
         FROM leaves l
-        LEFT JOIN employees e ON l.employee_id = e.id
+        LEFT JOIN employees e ON l.employee_id=e.id
     '''
 
     # Add conditions to the query if date filters are provided
@@ -1911,8 +2068,8 @@ def leaves_user_id(user_id):
     query = '''
         SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
         FROM leaves l
-        LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE l.employee_id = ?
+        LEFT JOIN employees e ON l.employee_id=e.id
+        WHERE l.employee_id= ?
     '''
 
     # Add conditions to the query if date filters are provided
@@ -2009,8 +2166,8 @@ def edit_leave(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type = ?, start_date = ?, end_date = ?, reason = ?, status = ?, service_count = ?
-                WHERE id = ?
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?
+                WHERE id= ?
             ''', (leave_type, start_date, end_date, reason, status, service_count, id))
 
         return redirect(url_for('view_leaves'))
@@ -2043,8 +2200,8 @@ def checkin(user_id):
                 # Process the check-in form submission
                 checkin_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 conn.execute('''
-                    INSERT INTO Attendance (employee_name, status, checkin_time)
-                    VALUES (?, ?, ?)
+                    INSERT INTO Attendance(employee_name, status, checkin_time)
+                    VALUES(?, ?, ?)
                 ''', (user_dict['UserName'], 'Checked In', checkin_time))
                 conn.commit()
 
@@ -2096,7 +2253,7 @@ def list_checkin_by_user_id(user_id):
             checkins = conn.execute(
                 '''
                 SELECT * FROM Attendance
-                WHERE employee_name = (SELECT UserName FROM users WHERE id = ?)
+                WHERE employee_name=(SELECT UserName FROM users WHERE id= ?)
                 ''', (user_id,)
             ).fetchall()
 
@@ -2150,8 +2307,8 @@ def checkout(user_id):
                 # Update the attendance record with the checkout time and status
                 conn.execute('''
                     UPDATE Attendance
-                    SET status = ?, checkout_time = ?
-                    WHERE employee_name = ? AND status = 'Checked In'
+                    SET status= ?, checkout_time= ?
+                    WHERE employee_name= ? AND status='Checked In'
                 ''', ('Checked Out', checkout_time, user_dict['UserName']))
                 conn.commit()
 
@@ -2172,14 +2329,14 @@ def worked_time(user_id):
         employee = conn.execute('''
             SELECT u.id, u.UserName, e.name, e.department
             FROM users u
-            INNER JOIN employees e ON u.id = e.user_id
-            WHERE u.id = ?
+            INNER JOIN employees e ON u.id=e.user_id
+            WHERE u.id= ?
         ''', (user_id,)).fetchone()
 
         if employee:
             # Fetch attendance records for the employee for the current month
             attendance = conn.execute('''
-                SELECT * FROM Attendance WHERE employee_name = ?
+                SELECT * FROM Attendance WHERE employee_name= ?
                 AND strftime('%Y-%m-%d', checkin_time) BETWEEN date('now', '-30 days') AND date('now')
                 ORDER BY checkin_time DESC
             ''', (employee['UserName'],)).fetchall()
@@ -2216,7 +2373,7 @@ def worked_time(user_id):
 
             # Calculate leave taken for each day
             leave_taken_records = conn.execute('''
-                SELECT * FROM leaves WHERE employee_id = ?
+                SELECT * FROM leaves WHERE employee_id= ?
                 AND strftime('%Y-%m-%d', start_date) BETWEEN date('now', '-30 days') AND date('now')
             ''', (employee['id'],)).fetchall()
 
@@ -2248,8 +2405,8 @@ def create_payroll(employee_id, period_start_date, period_end_date, base_salary,
         float(deductions) - float(tax)
     with get_db_connection() as conn:
         conn.execute('''
-            INSERT INTO payroll (employee_id, period_start_date, period_end_date, base_salary, bonus, deductions, tax, total_salary)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO payroll(employee_id, period_start_date, period_end_date, base_salary, bonus, deductions, tax, total_salary)
+            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
         ''', (employee_id, period_start_date, period_end_date, base_salary, bonus, deductions, tax, total_salary))
         conn.commit()
 
@@ -2259,7 +2416,7 @@ def get_payroll_by_employee_and_period(employee_id, period_start_date, period_en
     with get_db_connection() as conn:
         cursor = conn.execute('''
             SELECT * FROM payroll
-            WHERE employee_id = ? AND period_start_date = ? AND period_end_date = ?
+            WHERE employee_id= ? AND period_start_date= ? AND period_end_date= ?
         ''', (employee_id, period_start_date, period_end_date))
         payroll = cursor.fetchone()
         return payroll
@@ -2269,7 +2426,7 @@ def list_payroll_for_employee(employee_id):
     """Retrieve all payroll records for a specific employee."""
     with get_db_connection() as conn:
         cursor = conn.execute('''
-            SELECT * FROM payroll WHERE employee_id = ?
+            SELECT * FROM payroll WHERE employee_id= ?
         ''', (employee_id,))
         payroll_records = cursor.fetchall()
         return payroll_records
@@ -2280,8 +2437,8 @@ def list_payroll_for_employee_name(employee_name):
     with get_db_connection() as conn:
         cursor = conn.execute('''
             SELECT p.* FROM payroll p
-            INNER JOIN employees e ON p.employee_id = e.id
-            WHERE e.name = ?
+            INNER JOIN employees e ON p.employee_id=e.id
+            WHERE e.name= ?
         ''', (employee_name,))
         payroll_records = cursor.fetchall()
         return payroll_records
@@ -2600,8 +2757,8 @@ def create_role():
 
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO roles (UserID, Status, Description)
-                VALUES (?, ?, ?)
+                INSERT INTO roles(UserID, Status, Description)
+                VALUES(?, ?, ?)
             ''', (user_id, status, description))
             conn.commit()
 
@@ -2631,8 +2788,8 @@ def update_role(role_id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE roles
-                SET UserID = ?, Status = ?, Description = ?
-                WHERE ID = ?
+                SET UserID= ?, Status= ?, Description= ?
+                WHERE ID= ?
             ''', (user_id, status, description, role_id))
             conn.commit()
 
@@ -2739,8 +2896,8 @@ def update_last_active_time():
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE online_users
-                SET last_active_time = CURRENT_TIMESTAMP
-                WHERE user_id = ?
+                SET last_active_time=CURRENT_TIMESTAMP
+                WHERE user_id= ?
             ''', (current_user.id,))
             conn.commit()
 
@@ -2780,8 +2937,8 @@ def register():
         with get_db_connection() as conn:
             try:
                 conn.execute('''
-                    INSERT INTO users (UserName, Password, Email, Mobile1)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO users(UserName, Password, Email, Mobile1)
+                    VALUES(?, ?, ?, ?)
                 ''', (username, hashed_password, email, mobile1))
                 conn.commit()
 
@@ -2980,7 +3137,7 @@ def online_users():
         online_users = conn.execute('''
             SELECT u.UserName, u.Email, ou.last_active_time
             FROM online_users ou
-            JOIN users u ON ou.user_id = u.ID
+            JOIN users u ON ou.user_id=u.ID
             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
         ''', (timeout_threshold,)).fetchall()
 
@@ -3012,7 +3169,7 @@ def login():
             SELECT ID, UserName, Password, Email, Branch, IsAdmin,
                    COALESCE(RoleDefault, 1) AS RoleDefault
             FROM users
-            WHERE UserName = ? AND Password = ?
+            WHERE UserName= ? AND Password= ?
         ''', (username, password)).fetchone()
 
     if user:
@@ -3022,14 +3179,14 @@ def login():
         # Log the login event (store user location and device info)
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO login_logs (user_id, ip_address, city, region, country, user_agent)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT INTO login_logs(user_id, ip_address, city, region, country, user_agent)
+                VALUES(?, ?, ?, ?, ?, ?)
             ''', (user['ID'], ip_address, city, region, country, user_agent))
 
             # Add user to online_users table or update if already exists
             conn.execute('''
-                INSERT OR REPLACE INTO online_users (user_id, login_time, last_active_time)
-                VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+                INSERT OR REPLACE INTO online_users(user_id, login_time, last_active_time)
+                VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
             ''', (user['ID'],))
             conn.commit()
 
@@ -3063,7 +3220,7 @@ def logout():
     if current_user.is_authenticated:
         with get_db_connection() as conn:
             conn.execute('''
-                DELETE FROM online_users WHERE user_id = ?
+                DELETE FROM online_users WHERE user_id= ?
             ''', (current_user.id,))
             conn.commit()
         # Remove the user from the online_users table
@@ -3089,7 +3246,7 @@ def change_password():
 
     with get_db_connection() as conn:
         user = conn.execute('''
-                SELECT * FROM users WHERE ID = ?
+                SELECT * FROM users WHERE ID= ?
             ''', (current_user.id,)).fetchone()
 
         if not user or user['Password'] != old_password_hashed:
@@ -3106,8 +3263,8 @@ def change_password():
             new_password.encode()).hexdigest()
         conn.execute('''
                 UPDATE users
-                SET Password = ?
-                WHERE ID = ?
+                SET Password= ?
+                WHERE ID= ?
             ''', (new_password_hashed, current_user.id))
         conn.commit()
 
@@ -3124,7 +3281,7 @@ def validate_old_password():
     # Check if the old password matches the stored password in the database
     with get_db_connection() as conn:
         user = conn.execute('''
-            SELECT * FROM users WHERE ID = ?
+            SELECT * FROM users WHERE ID= ?
         ''', (current_user.id,)).fetchone()
 
         if user and user['Password'] == old_password_hashed:
@@ -3183,16 +3340,16 @@ def add_user():
 
             # Insert user data into 'users' table with binary image data
             cursor.execute('''
-                INSERT INTO users (UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO users(UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, image_data))
 
             user_id = cursor.lastrowid
 
             # Insert relationship into 'user_branches' table
             cursor.execute('''
-                INSERT INTO user_branches (user_id, branch_id)
-                VALUES (?, ?)
+                INSERT INTO user_branches(user_id, branch_id)
+                VALUES(?, ?)
             ''', (user_id, branch_id))
             conn.commit()
 
@@ -3452,7 +3609,7 @@ def render_dashboard(user_id):
         online_users = conn.execute('''
             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
             FROM online_users ou
-            JOIN users u ON ou.user_id = u.ID
+            JOIN users u ON ou.user_id=u.ID
             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
         ''', (timeout_threshold,)).fetchall()
 
@@ -3883,9 +4040,9 @@ def add_branch():
         local_branch_manager = request.form['local_branch_manager']
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO branches (Description, Branch, BranchManagerName, ContactNumber, Address,
+                INSERT INTO branches(Description, Branch, BranchManagerName, ContactNumber, Address,
                                       RegisterDate, LocalDescription, LocalAddress, LocalBranchManagerName)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                          (description, branch, branch_manager, contact_number, address,
                           register_date, local_description, local_address, local_branch_manager,
                           ))
@@ -3911,8 +4068,8 @@ def edit_branch(id):
         contact_number = request.form['contact_number']
         conn.execute('''
             UPDATE branches
-            SET Status = ?, BranchManagerName = ?, Address = ?, Description = ?, Branch = ?, ContactNumber = ?, UpdatedAt = CURRENT_TIMESTAMP
-            WHERE ID = ?''',
+            SET Status= ?, BranchManagerName= ?, Address= ?, Description= ?, Branch= ?, ContactNumber= ?, UpdatedAt=CURRENT_TIMESTAMP
+            WHERE ID= ?''',
                      (status, branch_manager, address, description, branch_name, contact_number, id))
         conn.commit()
         conn.close()
