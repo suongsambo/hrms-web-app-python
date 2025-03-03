@@ -533,7 +533,9 @@ def init_db():
                 FOREIGN KEY (location_id) REFERENCES location(id) ON DELETE CASCADE
             )
         ''')
+
         # Check if the user 'bo' exists
+
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'bo'").fetchone()
 
@@ -546,6 +548,34 @@ def init_db():
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin)
                 VALUES (?, ?, ?, ?, ?)
             ''', ('bo', hashed_password, 'bo@example.com', '1234567890', 1))
+
+        # Create John Doe user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'john_doe'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'john_doe' (e.g., '1234')
+            hashed_password = hashlib.sha256('1234'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', ('john_doe', hashed_password, 'john_doe@example.com', '010655037', 0, 20))
+
+   # Create John Doe user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'bm'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'bm' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('bm', hashed_password, 'bm@example.com', '010655037', 0, 40, 'SYS'))
 
      # Check if the 'HR' department already exists
         department_exists = conn.execute(
@@ -588,37 +618,30 @@ def init_db():
                   '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
                   'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
 
-        try:
-            with sqlite3.connect('your_database.db') as conn:
-                conn.execute('''
-                    INSERT INTO employees (
-                        name, age, department, salary, position_id, branch, user_id, phone_number, email,
-                        joining_date, status
-                    )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ''', (
-                    'John Doe',
-                    30,
-                    'HR',
-                    1000,
-                    1,
-                    'SYS',
-                    1,
-                    '1234567890',
-                    'bo@example.com',
-                    '2025-02-28',
-                    'Active'
-                ))
-        except sqlite3.IntegrityError as e:
-            # Catch duplicate email error
-            if str(e) == 'UNIQUE constraint failed: employees.email':
-                print('Email already exists in the database.')
-            else:
-                # Re-raise the exception if it's not a duplicate email error
-                raise
-        except sqlite3.Error as e:
-            # Catch any other SQLite error
-            print(f"SQLite error: {e}")
+        employee_exists = conn.execute(
+            "SELECT 1 FROM employees WHERE email = 'john@example.com'").fetchone()
+
+        if not employee_exists:
+            conn.execute('''
+                INSERT INTO employees (
+                    name, age, department, salary, position_id, branch, user_id, phone_number, email,
+                    joining_date, status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                'John Doe',
+                30,
+                'HR',
+                1000,
+                1,
+                'SYS',
+                2,
+                '010655037',
+                'john@example.com',
+                '2025-02-28',
+                'Active'
+            ))
+
     conn.commit()
 
 
