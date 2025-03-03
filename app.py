@@ -556,7 +556,7 @@ def init_db():
         # If the user does not exist, create the default user
         if not user_exists:
             # Hash the password for 'john_doe' (e.g., '1234')
-            hashed_password = hashlib.sha256('1234'.encode()).hexdigest()
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
             # Insert the default user into the table
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault)
@@ -1911,6 +1911,46 @@ def access_denied():
     return render_template('access_denied.html'), 403
 
 
+# @app.route('/leaves/branch', methods=['GET'])
+# def filter_leaves_by_branch_name():
+#     # Check if the user is authenticated and has role_default 40
+#     if not current_user.is_authenticated or current_user.role_default != 40:
+#         return redirect(url_for('access_denied'))
+
+#     # Get the optional branch_name parameter from the request
+#     branch_name = request.args.get('branch_name')
+
+#     # Define SQL queries
+#     if branch_name:
+#         # Query with branch_name filter
+#         query = '''
+#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+#             FROM leaves l
+#             INNER JOIN employees e ON l.employee_id=e.id
+#             WHERE e.branch= ?
+#         '''
+#         params = (branch_name,)
+#     else:
+#         # Default query without any branch filter
+#         query = '''
+#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id=e.id
+#         '''
+#         params = ()  # No filtering by branch name
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
 @app.route('/leaves/branch', methods=['GET'])
 def filter_leaves_by_branch_name():
     # Check if the user is authenticated and has role_default 40
@@ -1924,18 +1964,34 @@ def filter_leaves_by_branch_name():
     if branch_name:
         # Query with branch_name filter
         query = '''
-            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+            SELECT 
+                l.id, 
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type, 
+                l.start_date, 
+                l.end_date, 
+                l.reason, 
+                l.status
             FROM leaves l
-            INNER JOIN employees e ON l.employee_id=e.id
-            WHERE e.branch= ?
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE e.branch = ?
         '''
         params = (branch_name,)
     else:
         # Default query without any branch filter
         query = '''
-            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
+            SELECT 
+                l.id, 
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type, 
+                l.start_date, 
+                l.end_date, 
+                l.reason, 
+                l.status
             FROM leaves l
-            LEFT JOIN employees e ON l.employee_id=e.id
+            LEFT JOIN employees e ON l.employee_id = e.id
         '''
         params = ()  # No filtering by branch name
 
@@ -1943,6 +1999,7 @@ def filter_leaves_by_branch_name():
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query, params).fetchall()
+
     except sqlite3.DatabaseError as e:
         return f"Database error: {e}", 500
 
