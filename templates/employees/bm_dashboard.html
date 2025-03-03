@@ -23,7 +23,6 @@
     </div>
   </div>
 
-
   <div class="grid grid-cols-2 gap-6">
     <div class="bg-white p-6 rounded-lg shadow-md">
       <div class="flex items-center space-x-2 mb-2">
@@ -50,30 +49,42 @@
         <li class="flex items-center space-x-2 text-gray-600">
           <!-- Icon for Role -->
           <i class="fas fa-user-tag w-5 h-5 text-blue-500"></i>
-          <span>Role: {% if current_user.role_default == 20 %}Employee{% else %}{{
-            current_user.role_default }}{% endif %}</span>
+          <span
+            >Role: {% if current_user.role_default == 20 %}Employee{% else %}{{
+            current_user.role_default }}{% endif %}</span
+          >
         </li>
         <li class="flex items-center space-x-2 text-gray-600">
           <!-- Icon for Admin -->
           <i class="fas fa-user-shield w-5 h-5 text-blue-500"></i>
-          <span>Admin: {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif
-            %}</span>
+          <span
+            >Admin: {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif
+            %}</span
+          >
         </li>
       </ul>
     </div>
     <table class="table-auto w-full">
       <thead>
         <tr class="bg-gray-200">
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
+          <th
+            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
+          >
             ID
           </th>
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
+          <th
+            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
+          >
             Username
           </th>
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
+          <th
+            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
+          >
             Email
           </th>
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
+          <th
+            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
+          >
             Profile Image
           </th>
         </tr>
@@ -92,10 +103,15 @@
           </td>
           <td class="px-4 py-2 border-b border-gray-300 text-sm">
             {% if user[3] %}
-            <img src="{{ url_for('get_user_image', user_id=user[0]) }}" alt="User Profile Image"
-              class="w-10 h-10 rounded-full object-cover shadow-md" />
+            <img
+              src="{{ url_for('get_user_image', user_id=user[0]) }}"
+              alt="User Profile Image"
+              class="w-10 h-10 rounded-full object-cover shadow-md"
+            />
             {% else %}
-            <i class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"></i>
+            <i
+              class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"
+            ></i>
             {% endif %}
           </td>
         </tr>
