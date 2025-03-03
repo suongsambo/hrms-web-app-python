@@ -32,6 +32,7 @@ content %}
             <th class="px-6 py-3">Leave Type</th>
             <th class="px-6 py-3">Start Date</th>
             <th class="px-6 py-3">End Date</th>
+            <th class="px-6 py-3">Leave Hours</th>
             <th
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
@@ -50,8 +51,25 @@ content %}
             <td class="px-6 py-3">{{ leave.employee_name }}</td>
             <td class="px-6 py-3">{{ leave.branch_name }}</td>
             <td class="px-6 py-3">{{ leave.leave_type }}</td>
-            <td class="px-6 py-3">{{ leave.start_date }}</td>
-            <td class="px-6 py-3">{{ leave.end_date }}</td>
+            <td
+              class="px-6 py-3 leave-start-date"
+              data-start="{{ leave.start_date }}"
+            >
+              <!-- Formatted Start Date will be inserted here -->
+            </td>
+            <td
+              class="px-6 py-3 leave-end-date"
+              data-end="{{ leave.end_date }}"
+            >
+              <!-- Formatted End Date will be inserted here -->
+            </td>
+            <td
+              class="px-6 py-3 leave-hours"
+              data-start="{{ leave.start_date }}"
+              data-end="{{ leave.end_date }}"
+            >
+              <!-- Leave Hours will be calculated here dynamically -->
+            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <b>{{ leave.reason }}</b>
             </td>
@@ -78,6 +96,7 @@ content %}
   <!-- Initialize DataTable -->
   <script>
     $(document).ready(function () {
+      // Initialize DataTable
       $("#leaveTable").DataTable({
         paging: true,
         searching: true,
@@ -85,8 +104,47 @@ content %}
         order: [[3, "asc"]], // default sort by Start Date (3rd column)
         responsive: true,
       });
+
+      // Iterate over all leave rows and calculate the leave hours
+      $(".leave-hours").each(function () {
+        var startDate = $(this).data("start");
+        var endDate = $(this).data("end");
+
+        // Convert to moment objects
+        var startTime = moment(startDate);
+        var endTime = moment(endDate);
+
+        // Ensure that the dates are valid
+        if (startTime.isValid() && endTime.isValid()) {
+          // Calculate the difference in milliseconds
+          var duration = moment.duration(endTime.diff(startTime));
+
+          // Convert the duration to hours (including fractional hours)
+          var totalHours = duration.asHours();
+
+          // Update the Leave Hours cell with the calculated hours
+          $(this).text(totalHours.toFixed(2) + " hours");
+        } else {
+          // If the dates are invalid, set an error message
+          $(this).text("Invalid dates");
+        }
+      });
+
+      // Format the Start and End Dates
+      $(".leave-start-date").each(function () {
+        var startDate = $(this).data("start");
+        var formattedStartDate = moment(startDate).format(
+          "MMMM DD, YYYY hh:mm A"
+        );
+        $(this).text(formattedStartDate);
+      });
+
+      $(".leave-end-date").each(function () {
+        var endDate = $(this).data("end");
+        var formattedEndDate = moment(endDate).format("MMMM DD, YYYY hh:mm A");
+        $(this).text(formattedEndDate);
+      });
     });
   </script>
 </body>
-
 {% endblock %}

@@ -10,6 +10,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import hashlib
 import os
+import math
 import pyotp
 import requests
 import glob
@@ -372,6 +373,7 @@ def init_db():
                 start_date_obj DATE,
                 end_date_obj DATE,
                 service_count INTEGER,
+                leave_hours REAL,
                 status TEXT DEFAULT 'Pending',
                 FOREIGN KEY (employee_id) REFERENCES employees(ID) ON DELETE CASCADE
             )
@@ -2005,6 +2007,46 @@ def filter_leaves_by_branch_name():
 
     # Render the template with the query results
     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leave_hours/add', methods=['GET', 'POST'])
+def add_leave_hours():
+    employees = []
+
+    # Fetch employee list from the database
+    with get_db_connection() as conn:
+        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+
+    if request.method == 'POST':
+        employee_id = request.form['employee_id']
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Convert start and end dates to datetime objects
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%dT%H:%M")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%dT%H:%M")
+
+        # Calculate the total difference in hours
+        total_seconds = (end_date_obj - start_date_obj).total_seconds()
+        total_hours = total_seconds / 3600
+
+        # Convert hours to "leave_hours" where 8 hours = 1 day (round up to nearest full day)
+        leave_hours = math.ceil(total_hours / 8)  # Treat 8 hours as 1 full day
+
+        # Insert the leave record into the database
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours)
+                VALUES(?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours))
+
+        # Redirect to view leaves page after insertion
+        return redirect(url_for('view_leaves'))
+
+    # Render the form page with employees list
+    return render_template('/leaves/add_leave_hours.html', employees=employees)
 
 
 @app.route('/leave/add', methods=['GET', 'POST'])

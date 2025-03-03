@@ -1,0 +1,104 @@
+{% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
+content %}
+<body class="bg-gray-100 py-8">
+  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h2 class="text-2xl font-semibold text-gray-700 mb-6">Add Leave Hours</h2>
+
+    <form
+      method="POST"
+      action="{{ url_for('add_leave_hours') }}"
+      class="space-y-6"
+    >
+      <!-- Employee selection -->
+      <div>
+        <label for="employee_id" class="block text-sm font-medium text-gray-700"
+          >Employee</label
+        >
+        <select
+          id="employee_id"
+          name="employee_id"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        >
+          <option value="">Select an Employee</option>
+          {% for employee in employees %}
+          <option value="{{ employee.id }}">{{ employee.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Leave Type selection -->
+      <div>
+        <label for="leave_type" class="block text-sm font-medium text-gray-700"
+          >Leave Type</label
+        >
+        <select
+          id="leave_type"
+          name="leave_type"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        >
+          <option value="">Select Leave Type</option>
+          <option value="Sick">Sick</option>
+          <option value="Vacation">Vacation</option>
+          <option value="Maternity">Maternity</option>
+          <option value="Paternity">Paternity</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <!-- Start Date -->
+      <div>
+        <label for="start_date" class="block text-sm font-medium text-gray-700"
+          >Start Date</label
+        >
+        <input
+          type="datetime-local"
+          id="start_date"
+          name="start_date"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      </div>
+
+      <!-- End Date -->
+      <div>
+        <label for="end_date" class="block text-sm font-medium text-gray-700"
+          >End Date</label
+        >
+        <input
+          type="datetime-local"
+          id="end_date"
+          name="end_date"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      </div>
+
+      <!-- Reason -->
+      <div>
+        <label for="reason" class="block text-sm font-medium text-gray-700"
+          >Reason for Leave</label
+        >
+        <textarea
+          id="reason"
+          name="reason"
+          rows="4"
+          required
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        ></textarea>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="flex justify-end">
+        <button
+          type="submit"
+          class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+        >
+          Submit
+        </button>
+      </div>
+    </form>
+  </div>
+</body>
+{% endblock %}
