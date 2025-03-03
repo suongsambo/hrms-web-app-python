@@ -528,30 +528,6 @@
 
       {% endif %} {% if current_user.role_default == 20 %}
 
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'payroll' ? '' : 'payroll'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">money</span>
-          <span class="ml-2">Payroll</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'payroll'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="{{ url_for('payroll_list', user_id=current_user.id) }}"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Manage Payroll</span>
-          </a>
-        </div>
-      </div>
-
       <!-- Attendance -->
       <div class="relative z-10">
         <button
@@ -568,29 +544,43 @@
           class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
         >
           <a
-            href="{{ url_for('checkin', user_id=current_user.id) }}"
+            href="/leave/add"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
           >
-            <span class="material-symbols-outlined">check_circle</span>
-            <span>Check In</span>
+            <span class="material-symbols-outlined">event</span>
+            <span>Add Leave</span>
           </a>
 
           <a
-            href="{{ url_for('checkout', user_id=current_user.id) }}"
+            href="/leaves"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
           >
-            <span class="material-symbols-outlined">check_circle</span>
-            <span>Check Out</span>
+            <span class="material-symbols-outlined">event</span>
+            <span>Leave Manage</span>
           </a>
+        </div>
+      </div>
 
-          <a
-            href="{{ url_for('worked_time', user_id=current_user.id) }}"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">timer</span>
-            <span>Work Time</span>
-          </a>
+      {% endif %}
 
+      <!-- Menu Branch Manager -->
+      {% if current_user.role_default == 40 %}
+
+      <!-- Attendance -->
+      <div class="relative z-10">
+        <button
+          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
+        >
+          <span class="material-symbols-outlined">event</span>
+          <span class="ml-2">Attendance</span>
+          <span class="ml-2">&#9662;</span>
+        </button>
+        <div
+          x-show="activeMenu === 'attendance'"
+          @click.away="activeMenu = ''"
+          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
+        >
           <a
             href="/leave/add"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"

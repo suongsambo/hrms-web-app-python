@@ -3311,25 +3311,67 @@ def delete_user(id):
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    if not current_user.is_admin:
+    if current_user.is_admin:
+        return render_dashboard(current_user.id)
+
+    if current_user.role_default == 20:
+        # Check if employee exists in the database
         with get_db_connection() as conn:
             employee = conn.execute(
                 "SELECT e.ID FROM employees e WHERE e.user_id = ?", (current_user.id,)).fetchone()
-            if employee:
-                return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+
+        if employee:
+            return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+        else:
             flash("Employee not found!", "danger")
             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
+
+    if current_user.role_default == 40:
+        # Redirect to employer dashboard
+        return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
+
+    flash("Dashboard not found!", "danger")
     return render_dashboard(current_user.id)
 
 
-@app.route('/dashboard/<int:id>')
+@app.route('/dashboard/branch_manager/<string:branch_name>')
 @login_required
-def dashboard_with_id(id):
-    if current_user.id != id and not current_user.is_admin:
-        flash("You don't have permission to view this page.", "danger")
-        return redirect(url_for('dashboard'))
+def render_dashboard_branch_manager(branch_name):
 
-    return render_dashboard_employees(id)
+    with get_db_connection() as conn:
+        # Fetch all employees data based on branch_name
+        employees = conn.execute(
+            "SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch, p.PositionName AS Position, d.Name AS Department "
+            "FROM employees e "
+            "LEFT JOIN positions p ON e.position_id = p.ID "
+            "LEFT JOIN departments d ON p.department_id = d.ID "
+            "WHERE e.Branch = ?",  # Fetch all employees in the given branch
+            (branch_name,)
+        ).fetchall()  # Fetch all employees in the branch
+
+        if not employees:
+            flash("No employees found in this branch!", "danger")
+            # Redirect to the main dashboard if no employees are found
+            return redirect(url_for('dashboard'))
+
+        # Prepare employee data for rendering in the template
+        employee_data = [
+            {
+                'ID': employee['ID'] if employee['ID'] is not None else '',
+                'Name': employee['Name'] if employee['Name'] is not None else '',
+                'Age': employee['Age'] if employee['Age'] is not None else '',
+                'Salary': employee['Salary'] if employee['Salary'] is not None else '',
+                'Branch': employee['Branch'] if employee['Branch'] is not None else '',
+                'Position': employee['Position'] if employee['Position'] is not None else '',
+                'Department': employee['Department'] if employee['Department'] is not None else ''
+            }
+            for employee in employees
+        ]
+
+        return render_template(
+            'employees/bm_dashboard.html',
+            employees=employee_data
+        )
 
 
 @app.route('/dashboard/employee/<int:employee_id>')

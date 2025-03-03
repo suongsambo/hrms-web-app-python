@@ -1,0 +1,73 @@
+{% extends 'base.html' %} {% block content %}
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-3xl font-semibold mb-6">
+    Branch Manager Dashboard - {{ branch_name }}
+  </h1>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+    <!-- Total Employees Card -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h3 class="text-xl font-semibold text-gray-800">Total Employees</h3>
+      <p class="text-3xl font-bold text-blue-500">{{ employees|length }}</p>
+    </div>
+
+    <!-- Total Employees on Leave Card -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h3 class="text-xl font-semibold text-gray-800">Employees on Leave</h3>
+      <p class="text-3xl font-bold text-orange-500"></p>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h3 class="text-xl font-semibold text-gray-800">Total Payroll</h3>
+      <p class="text-3xl font-bold text-orange-500"></p>
+    </div>
+  </div>
+
+  {% if employees %}
+  <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+    <table class="min-w-full table-auto">
+      <thead class="bg-gray-100 border-b">
+        <tr>
+          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
+            ID
+          </th>
+          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
+            Name
+          </th>
+          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
+            Age
+          </th>
+          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
+            Salary
+          </th>
+          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
+            Position
+          </th>
+          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
+            Department
+          </th>
+        </tr>
+      </thead>
+      <tbody class="text-gray-600">
+        {% for employee in employees %}
+        <tr class="border-b hover:bg-gray-50">
+          <td class="py-4 px-6 text-sm">{{ employee.ID }}</td>
+          <td class="py-4 px-6 text-sm">{{ employee.Name }}</td>
+          <td class="py-4 px-6 text-sm">{{ employee.Age }}</td>
+          <td class="py-4 px-6 text-sm">
+            {{ employee.Salary | float | round(2) }}
+          </td>
+          <td class="py-4 px-6 text-sm">{{ employee.Position }}</td>
+          <td class="py-4 px-6 text-sm">{{ employee.Department }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="bg-red-100 text-red-600 px-4 py-3 rounded-md">
+    <p>No employees found in this branch.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
