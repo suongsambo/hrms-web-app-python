@@ -1847,6 +1847,7 @@ def view_leaves():
             # Here, we just render the same page, without a redirect
             with get_db_connection() as conn:
                 leaves = conn.execute('SELECT * FROM leaves').fetchall()
+
             return render_template('/leaves/view_leaves.html', leaves=leaves)
 
         # Role 40 (e.g., branch-level users) will be redirected to filter by branch name
@@ -1855,7 +1856,11 @@ def view_leaves():
 
         # Role 20 (e.g., employee-level users) will be redirected to filter by employee ID
         if current_user.role_default == 20:
-            return redirect(url_for('filter_leaves_by_employee_id'))
+            with get_db_connection() as conn:
+                employee = conn.execute(
+                    "SELECT id FROM employees WHERE user_id = ?", (current_user.id,)).fetchone()
+                if employee:
+                    return redirect(url_for('filter_leaves_by_employee_id', employee_id=employee[0]))
 
         # If the user doesn't match the above roles, show only their own leaves
         with get_db_connection() as conn:
@@ -1872,33 +1877,61 @@ def view_leaves():
         return render_template('/leaves/view_leaves.html', leaves=leaves)
 
 
-@app.route('/leaves/employee', methods=['GET'])
-def filter_leaves_by_employee_id():
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id():
+#     # Check if the user is authenticated and has role_default 20
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     # Get the employee_id parameter from the request
+#     employee_id = request.args.get('employee_id')
+
+#     # Define SQL queries
+#     if employee_id:
+#         # Query with employee_id filter
+#         query = '''
+#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by, l.employee_id
+#             FROM leaves l
+#             INNER JOIN employees e ON l.employee_id=e.id
+#             WHERE l.employee_id= ?
+#         '''
+#         params = (employee_id,)
+#     else:
+#         # Default query without any employee_id filter
+#         query = '''
+#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by, l.employee_id
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id=e.id
+#         '''
+#         params = ()  # No filtering by employee_id
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id)
+
+
+@app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+def filter_leaves_by_employee_id(employee_id):
     # Check if the user is authenticated and has role_default 20
     if not current_user.is_authenticated or current_user.role_default != 20:
         return redirect(url_for('access_denied'))
 
-    # Get the employee_id parameter from the request
-    employee_id = request.args.get('employee_id')
-
-    # Define SQL queries
-    if employee_id:
-        # Query with employee_id filter
-        query = '''
-            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by
-            FROM leaves l
-            INNER JOIN employees e ON l.employee_id=e.id
-            WHERE l.employee_id= ?
-        '''
-        params = (employee_id,)
-    else:
-        # Default query without any employee_id filter
-        query = '''
-            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id=e.id
-        '''
-        params = ()  # No filtering by employee_id
+    # Define SQL query
+    query = '''
+        SELECT l.id, e.name AS employee_name, e.branch AS branch_name, 
+               l.leave_type, l.start_date, l.end_date, l.reason, l.status, 
+               l.service_count, l.verified_by, l.approved_by, l.employee_id
+        FROM leaves l
+        INNER JOIN employees e ON l.employee_id = e.id
+        WHERE l.employee_id = ?
+    '''
+    params = (employee_id,)
 
     # Execute the query with the database connection
     try:
