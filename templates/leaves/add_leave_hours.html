@@ -27,6 +27,23 @@ content %}
         </select>
       </div>
 
+      <!-- Requested By -->
+      <div>
+        <label
+          for="requested_by"
+          class="block text-sm font-medium text-gray-700"
+          >Requested By</label
+        >
+        <input
+          type="text"
+          id="requested_by"
+          name="requested_by"
+          hidden
+          value="{{ current_user.username }}"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        />
+      </div>
+
       <!-- Leave Type selection -->
       <div>
         <label for="leave_type" class="block text-sm font-medium text-gray-700"
@@ -47,32 +64,48 @@ content %}
         </select>
       </div>
 
-      <!-- Start Date -->
-      <div>
+      <!-- Start Date with Icon -->
+      <div class="relative">
         <label for="start_date" class="block text-sm font-medium text-gray-700"
           >Start Date</label
         >
-        <input
-          type="datetime-local"
-          id="start_date"
-          name="start_date"
-          required
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
+        <div class="relative">
+          <input
+            type="text"
+            id="start_date"
+            name="start_date"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+          <!-- Calendar Icon -->
+          <span
+            class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+          >
+            <i class="fas fa-calendar-alt"></i>
+          </span>
+        </div>
       </div>
 
-      <!-- End Date -->
-      <div>
+      <!-- End Date with Icon -->
+      <div class="relative">
         <label for="end_date" class="block text-sm font-medium text-gray-700"
           >End Date</label
         >
-        <input
-          type="datetime-local"
-          id="end_date"
-          name="end_date"
-          required
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
+        <div class="relative">
+          <input
+            type="text"
+            id="end_date"
+            name="end_date"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+          <!-- Calendar Icon -->
+          <span
+            class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+          >
+            <i class="fas fa-calendar-alt"></i>
+          </span>
+        </div>
       </div>
 
       <!-- Reason -->
@@ -100,5 +133,20 @@ content %}
       </div>
     </form>
   </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      flatpickr("#start_date", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today",
+      });
+      flatpickr("#end_date", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today",
+      });
+    });
+  </script>
 </body>
 {% endblock %}

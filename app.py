@@ -374,6 +374,9 @@ def init_db():
                 end_date_obj DATE,
                 service_count INTEGER,
                 leave_hours REAL,
+                requested_by TEXT,
+                verified_by TEXT,
+                approved_by TEXT,
                 status TEXT DEFAULT 'Pending',
                 FOREIGN KEY (employee_id) REFERENCES employees(ID) ON DELETE CASCADE
             )
@@ -1882,7 +1885,7 @@ def filter_leaves_by_employee_id():
     if employee_id:
         # Query with employee_id filter
         query = '''
-            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count
+            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by
             FROM leaves l
             INNER JOIN employees e ON l.employee_id=e.id
             WHERE l.employee_id= ?
@@ -1891,7 +1894,7 @@ def filter_leaves_by_employee_id():
     else:
         # Default query without any employee_id filter
         query = '''
-            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count
+            SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id=e.id
         '''
@@ -2023,10 +2026,11 @@ def add_leave_hours():
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
+        requested_by = request.form['requested_by']
 
         # Convert start and end dates to datetime objects
-        start_date_obj = datetime.strptime(start_date, "%Y-%m-%dT%H:%M")
-        end_date_obj = datetime.strptime(end_date, "%Y-%m-%dT%H:%M")
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
 
         # Calculate the total difference in hours
         total_seconds = (end_date_obj - start_date_obj).total_seconds()
@@ -2038,9 +2042,9 @@ def add_leave_hours():
         # Insert the leave record into the database
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours)
-                VALUES(?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours))
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by)
+                VALUES(?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by))
 
         # Redirect to view leaves page after insertion
         return redirect(url_for('view_leaves'))
@@ -2279,18 +2283,20 @@ def edit_leave(id):
         end_date = request.form['end_date']
         reason = request.form['reason']
         status = request.form['status']
+        verified_by = request.form['verified_by']
+        approved_by = request.form['approved_by']
 
         # Calculate service count (difference between start_date and end_date)
-        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
         service_count = (end_date_obj - start_date_obj).days + 1
 
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, verified_by= ?, approved_by= ?
                 WHERE id= ?
-            ''', (leave_type, start_date, end_date, reason, status, service_count, id))
+            ''', (leave_type, start_date, end_date, reason, status, service_count, verified_by, approved_by, id))
 
         return redirect(url_for('view_leaves'))
 
@@ -3772,7 +3778,7 @@ def render_dashboard_employees(employee_id):
         leaves_query = """
             SELECT 
                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
-                COALESCE(SUM(l.leave_hours), 0) AS total_leaves_hours
+                COALESCE(SUM(l.leave_hours * 4), 0) AS total_leaves_hours
             FROM leaves l 
             WHERE l.employee_id = ?
         """
@@ -3785,7 +3791,8 @@ def render_dashboard_employees(employee_id):
 
         # Ensure we handle cases where the query returns None
         total_leaves_days = leaves["total_leaves_days"] if leaves else 0
-        total_leaves_hours = leaves["total_leaves_hours"] if leaves else 0
+        total_leaves_hours = "{:.0f} hours".format(
+            leaves["total_leaves_hours"]) if leaves else "0 hours"
 
         return render_template(
             'employees/employee_dashboard.html',

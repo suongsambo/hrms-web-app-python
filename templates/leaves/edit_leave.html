@@ -9,6 +9,42 @@
         <h1 class="text-3xl font-bold text-gray-900 mb-4">Edit Leave Request</h1>
 
         <form action="{{ url_for('edit_leave', id=leave['id']) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
+        
+            <div class="mb-4">
+                <label
+                  for="verified_by"
+                  class="block text-gray-700 text-sm font-medium"
+                >
+                  Verified By:
+                </label>
+                <input
+                  type="text"
+                  id="verified_by"
+                  name="verified_by"
+                  value="{{ current_user.username }}"
+                  class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+            </div>
+
+            <div class="mb-4">
+                <label
+                  for="approved_by"
+                  class="block text-gray-700 text-sm font-medium"
+                >
+                  Approved By:
+                </label>
+                <input
+                  type="text"
+                  id="approved_by"
+                  name="approved_by"
+                  value="{{ leave['approved_by'] if leave else '' }}"
+                  class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+            </div>
+
+
             <div class="mb-4">
                 <label
                   for="leave_type"
@@ -29,12 +65,12 @@
               </div>
             <div class="mb-4">
                 <label for="start_date" class="block text-gray-700 text-sm font-medium">Start Date</label>
-                <input type="date" name="start_date" id="start_date" value="{{ leave['start_date'] }}" required class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
+                <input type="datetime-local" name="start_date" id="start_date" value="{{ leave['start_date'] }}"  class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
             </div>
 
             <div class="mb-4">
                 <label for="end_date" class="block text-gray-700 text-sm font-medium">End Date</label>
-                <input type="date" name="end_date" id="end_date" value="{{ leave['end_date'] }}" required class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
+                <input type="datetime-local" name="end_date" id="end_date" value="{{ leave['end_date'] }}"  class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
             </div>
 
             <div class="mb-4">
