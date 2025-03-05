@@ -157,15 +157,13 @@ content %}
       // Format the Start and End Dates
       $(".leave-start-date").each(function () {
         var startDate = $(this).data("start");
-        var formattedStartDate = moment(startDate).format(
-          "MMMM DD, YYYY hh:mm A"
-        );
+        var formattedStartDate = moment(startDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedStartDate);
       });
 
       $(".leave-end-date").each(function () {
         var endDate = $(this).data("end");
-        var formattedEndDate = moment(endDate).format("MMMM DD, YYYY hh:mm A");
+        var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedEndDate);
       });
     });

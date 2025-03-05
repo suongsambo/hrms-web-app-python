@@ -2069,6 +2069,7 @@ def filter_leaves_by_branch_name():
 
     # Define SQL queries
     if branch_name:
+
         # Query with branch_name filter
         query = '''
             SELECT 
@@ -2080,7 +2081,12 @@ def filter_leaves_by_branch_name():
                 l.end_date, 
                 l.reason, 
                 l.status,
-                l.type_of_leave
+                l.type_of_leave, 
+                l.verified_by, 
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
             WHERE e.branch = ?
@@ -2098,7 +2104,12 @@ def filter_leaves_by_branch_name():
                 l.end_date, 
                 l.reason, 
                 l.status,
-                l.type_of_leave
+                l.type_of_leave, 
+                l.verified_by, 
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
         '''
