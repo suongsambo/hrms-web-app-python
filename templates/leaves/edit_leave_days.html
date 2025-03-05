@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Leave{% endblock %}
+
+{% block content %}
+<body class="bg-gray-100">
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">Edit Leave Request Day</h1>
+        
+        <form action="{{ url_for('edit_leave_days', id=leave['id']) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
+        
+            <div class="mb-4">
+                <label
+                  for="verified_by"
+                  class="block text-gray-700 text-sm font-medium"
+                >
+                  Verified By:
+                </label>
+                <input
+                  type="text"
+                  id="verified_by"
+                  name="verified_by"
+                  value="{{ current_user.username }}"
+                  class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+            </div>
+
+            <div class="mb-4">
+                <label
+                  for="approved_by"
+                  class="block text-gray-700 text-sm font-medium"
+                >
+                  Approved By:
+                </label>
+                <input
+                  type="text"
+                  id="approved_by"
+                  name="approved_by"
+                  value="{{ leave['approved_by'] if leave else '' }}"
+                  class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+            </div>
+
+
+            <div class="mb-4">
+                <label
+                  for="leave_type"
+                  class="block text-gray-700 text-sm font-medium"
+                >
+                  Select Leave Type:
+                </label>
+                <select
+                  id="leave_type"
+                  name="leave_type"
+                 class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="annualLeave">Annual Leave</option>
+                  <option value="sickLeave">Sick Leave</option>
+                  <option value="maternityLeave">Maternity Leave</option>
+                  <option value="specialLeave"> Special Leave</option>
+                </select>
+              </div>
+            <div class="mb-4">
+                <label for="start_date" class="block text-gray-700 text-sm font-medium">Start Date</label>
+                <input type="date" name="start_date" id="start_date" value="{{ leave['start_date'] }}" class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
+            </div>
+
+            <div class="mb-4">
+                <label for="end_date" class="block text-gray-700 text-sm font-medium">End Date</label>
+                <input type="date" name="end_date" id="end_date" value="{{ leave['end_date'] }}" class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
+            </div>
+
+            <div class="mb-4">
+                <label for="reason" class="block text-gray-700 text-sm font-medium">Reason</label>
+                <textarea name="reason" id="reason" rows="4" required class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">{{ leave['reason'] }}</textarea>
+            </div>
+
+            <div class="mb-4">
+                <label for="status" class="block text-gray-700 text-sm font-medium">Status</label>
+                <select name="status" id="status" required class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
+                    <option value="Pending" {% if leave['status'] == 'Pending' %}selected{% endif %}>Pending</option>
+                    <option value="Approved" {% if leave['status'] == 'Approved' %}selected{% endif %}>Approved</option>
+                    <option value="Rejected" {% if leave['status'] == 'Rejected' %}selected{% endif %}>Rejected</option>
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2">
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center justify-center"><i class="fas fa-save mr-2"></i> Update Leave</button>
+                <a href="{{ url_for('view_leaves') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center"><i class="fas fa-arrow-left mr-2"></i> Back</a>
+            </div>
+        </form>
+    </div>
+
+</body>
+{% endblock %}

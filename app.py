@@ -384,6 +384,7 @@ def init_db():
                 requested_by TEXT,
                 verified_by TEXT,
                 approved_by TEXT,
+                type_of_leave TEXT,
                 status TEXT DEFAULT 'Pending',
                 FOREIGN KEY (employee_id) REFERENCES employees(ID) ON DELETE CASCADE
             )
@@ -563,7 +564,7 @@ def init_db():
 
         # Create John Doe user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'john_doe'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'doe'").fetchone()
 
         # If the user does not exist, create the default user
         if not user_exists:
@@ -573,7 +574,20 @@ def init_db():
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault)
                 VALUES (?, ?, ?, ?, ?, ?)
-            ''', ('john_doe', hashed_password, 'john_doe@example.com', '010655037', 0, 20))
+            ''', ('doe', hashed_password, 'john_doe@example.com', '010655037', 0, 20))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'son'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'son' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault)
+                VALUES (?, ?, ?, ?, ?, ?)
+            ''', ('son', hashed_password, 'son@example.com', '010655037', 0, 20))
 
    # Create John Doe user
         user_exists = conn.execute(
@@ -650,6 +664,54 @@ def init_db():
                 2,
                 '010655037',
                 'john@example.com',
+                '2025-02-28',
+                'Active'
+            ))
+
+        employee_exists = conn.execute(
+            "SELECT 1 FROM employees WHERE email = 'john@example.com'").fetchone()
+
+        if not employee_exists:
+            conn.execute('''
+                INSERT INTO employees (
+                    name, age, department, salary, position_id, branch, user_id, phone_number, email,
+                    joining_date, status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                'John Doe',
+                30,
+                'HR',
+                1000,
+                1,
+                'SYS',
+                2,
+                '010655037',
+                'john@example.com',
+                '2025-02-28',
+                'Active'
+            ))
+
+        employee_exists = conn.execute(
+            "SELECT 1 FROM employees WHERE email = 'kimminson@example.com'").fetchone()
+
+        if not employee_exists:
+            conn.execute('''
+                INSERT INTO employees (
+                    name, age, department, salary, position_id, branch, user_id, phone_number, email,
+                    joining_date, status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                'Kimmin Son',
+                30,
+                'HR',
+                1000,
+                1,
+                'SYS',
+                3,
+                '010655037',
+                'kimminson@example.com',
                 '2025-02-28',
                 'Active'
             ))
@@ -2017,7 +2079,8 @@ def filter_leaves_by_branch_name():
                 l.start_date, 
                 l.end_date, 
                 l.reason, 
-                l.status
+                l.status,
+                l.type_of_leave
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
             WHERE e.branch = ?
@@ -2034,7 +2097,8 @@ def filter_leaves_by_branch_name():
                 l.start_date, 
                 l.end_date, 
                 l.reason, 
-                l.status
+                l.status,
+                l.type_of_leave
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
         '''
@@ -2067,6 +2131,8 @@ def add_leave_hours():
         end_date = request.form['end_date']
         reason = request.form['reason']
         requested_by = request.form['requested_by']
+        type_of_leave = request.form.get(
+            'type_of_leave', 'T')  # Set default value to 'D'
 
         # Convert start and end dates to datetime objects
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
@@ -2082,9 +2148,9 @@ def add_leave_hours():
         # Insert the leave record into the database
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by)
-                VALUES(?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by))
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave))
 
         # Redirect to view leaves page after insertion
         return redirect(url_for('view_leaves'))
@@ -2107,6 +2173,8 @@ def add_leave():
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
+        type_of_leave = request.form.get(
+            'type_of_leave', 'D')  # Set default value to 'D'
 
         # Calculate service count (difference between start_date and end_date)
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
@@ -2116,9 +2184,9 @@ def add_leave():
         # Insert the leave record into the database
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, service_count)
-                VALUES(?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, service_count))
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave)
+                VALUES(?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave))
 
         # Redirect to view leaves page after insertion
         return redirect(url_for('view_leaves'))
@@ -2341,6 +2409,38 @@ def edit_leave(id):
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_leave.html', leave=leave)
+
+
+@app.route('/leave_days/edit/<int:id>', methods=['GET', 'POST'])
+def edit_leave_days(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        status = request.form['status']
+        verified_by = request.form['verified_by']
+        approved_by = request.form['approved_by']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, verified_by= ?, approved_by= ?
+                WHERE id= ?
+            ''', (leave_type, start_date, end_date, reason, status, service_count, verified_by, approved_by, id))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_leave_days.html', leave=leave)
 
 
 @app.route('/leave/delete/<int:id>')
