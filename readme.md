@@ -27,3 +27,6 @@ python3 install flask werkzeug
 pip install -r requirements.txt
 pip install -r requirements.txt
 pip freeze > requirements.txt
+
+pip install --upgrade eventlet
+pip install gevent
