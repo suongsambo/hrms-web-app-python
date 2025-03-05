@@ -11,9 +11,7 @@ content %}
     >
       <!-- Employee selection -->
       <div>
-        <label for="employee_id" class="block text-sm font-medium text-gray-700"
-          >Employee</label
-        >
+        <label for="employee_id" class="hidden">Employee</label>
         <input
           type="text"
           id="employee_id"
@@ -26,11 +24,7 @@ content %}
 
       <!-- Requested By -->
       <div>
-        <label
-          for="requested_by"
-          class="block text-sm font-medium text-gray-700"
-          >Requested By</label
-        >
+        <label for="requested_by" class="hidden">Requested By</label>
         <input
           type="text"
           id="requested_by"
@@ -42,22 +36,19 @@ content %}
       </div>
 
       <!-- Leave Type selection -->
-      <div>
-        <label for="leave_type" class="block text-sm font-medium text-gray-700"
-          >Leave Type</label
-        >
+      <div class="mb-4">
+        <label for="leave_type" class="block text-gray-700 text-sm font-medium">
+          Select Leave Type:
+        </label>
         <select
           id="leave_type"
           name="leave_type"
-          required
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="">Select Leave Type</option>
-          <option value="Sick">Sick</option>
-          <option value="Vacation">Vacation</option>
-          <option value="Maternity">Maternity</option>
-          <option value="Paternity">Paternity</option>
-          <option value="Other">Other</option>
+          <option value="annualLeave">Annual Leave</option>
+          <option value="sickLeave">Sick Leave</option>
+          <option value="maternityLeave">Maternity Leave</option>
+          <option value="specialLeave">Special Leave</option>
         </select>
       </div>
 
@@ -123,9 +114,10 @@ content %}
       <div class="flex justify-end">
         <button
           type="submit"
-          class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
+          class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center space-x-2"
         >
-          Submit
+          <i class="fas fa-paper-plane"></i>
+          <span>Submit</span>
         </button>
       </div>
     </form>
