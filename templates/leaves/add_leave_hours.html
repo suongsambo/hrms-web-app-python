@@ -14,17 +14,14 @@ content %}
         <label for="employee_id" class="block text-sm font-medium text-gray-700"
           >Employee</label
         >
-        <select
+        <input
+          type="text"
           id="employee_id"
           name="employee_id"
-          required
+          value="{{ current_user.employee_id }}"
+          hidden
           class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        >
-          <option value="">Select an Employee</option>
-          {% for employee in employees %}
-          <option value="{{ employee.id }}">{{ employee.name }}</option>
-          {% endfor %}
-        </select>
+        />
       </div>
 
       <!-- Requested By -->

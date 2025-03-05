@@ -44,13 +44,14 @@ def allowed_file(filename):
 
 class User(UserMixin):
     def __init__(self, id: int, username: str, password: str, email: str,
-                 branch: Optional[str] = None, is_admin: bool = False,
+                 branch: Optional[str] = None, employee_id: Optional[int] = None, is_admin: bool = False,
                  role_default: Optional[int] = 0, image_data: Optional[bytes] = None):
         self.id = id
         self.username = username
         self.password = password
         self.email = email
         self.branch = branch
+        self.employee_id = employee_id
         self.is_admin = is_admin
         self.role_default = role_default
         self.image_data = image_data
@@ -74,6 +75,11 @@ def load_user(user_id):
         user_data = conn.execute(
             'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
         if user_data:
+            # Fetch the employee ID associated with the user
+            employee = conn.execute(
+                'SELECT id FROM employees WHERE user_id = ?', (user_id,)).fetchone()
+            employee_id = employee['id'] if employee else None
+
             return User(
                 id=user_data['ID'],
                 username=user_data['UserName'],
@@ -82,7 +88,8 @@ def load_user(user_id):
                 branch=user_data['Branch'],
                 is_admin=user_data['IsAdmin'],
                 role_default=user_data['RoleDefault'],
-                image_data=user_data['Image']
+                image_data=user_data['Image'],
+                employee_id=employee_id
             )
         return None
 
@@ -3337,6 +3344,14 @@ def login():
         user = dict(user)  # Convert row to dictionary for easy access
         print("Fetched User Data:", user)  # Debugging print statement
 
+        # Find employee ID associated with the user
+        with get_db_connection() as conn:
+            employee = conn.execute('''
+                SELECT id FROM employees
+                WHERE user_id= ?
+            ''', (user['ID'],)).fetchone()
+            employee_id = employee['id'] if employee else None
+
         # Log the login event (store user location and device info)
         with get_db_connection() as conn:
             conn.execute('''
@@ -3360,7 +3375,8 @@ def login():
             branch=user['Branch'],
             is_admin=user['IsAdmin'],
             role_default=user['RoleDefault'],  # Ensure correct retrieval
-            image_data=user.get('Image', None)
+            image_data=user.get('Image', None),
+            employee_id=employee_id
         )
 
         print("Logged in user:", user_obj)  # Debugging print
