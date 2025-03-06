@@ -1,16 +1,14 @@
 {% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
 content %}
+
 <body class="bg-gray-100 text-gray-800">
   <!-- Navbar -->
   <nav class="bg-indigo-600 text-white p-4">
     <div class="container mx-auto flex justify-between items-center">
       <a href="/" class="text-lg font-bold">Dashboard</a>
       <div>
-        <a
-          href="{{ url_for('get_all_leave_dates') }}"
-          class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md"
-          >View All Leaves</a
-        >
+        <a href="{{ url_for('get_all_leave_dates') }}"
+          class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md">View All Leaves</a>
       </div>
     </div>
   </nav>
@@ -22,22 +20,31 @@ content %}
       <h2 class="text-2xl font-semibold">Filter Leaves by Employee</h2>
     </div>
 
+    <!-- Print Button -->
+    <div class="mb-4">
+      <button id="printSelected" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 text-white rounded-md">
+        <i class="fas fa-print mr-2"></i> Print
+      </button>
+    </div>
+
+
     <!-- Leaves Table -->
     <div class="overflow-x-auto bg-white shadow-lg rounded-md">
       <table id="leaveTable" class="min-w-full text-sm text-left">
         <thead class="bg-gray-200 text-gray-700">
           <tr>
+
+            <th class="px-6 py-3">ID</th>
             <th class="px-6 py-3">EmployeeName</th>
             <th class="px-6 py-3">Branch</th>
+
             <th class="px-6 py-3">LeaveType</th>
             <th class="px-6 py-3">StartDate</th>
             <th class="px-6 py-3">EndDate</th>
 
             <th class="px-6 py-3">LeaveHours</th>
             <th class="px-6 py-3">LeaveDay</th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Reason
             </th>
             <th class="px-6 py-3">RequestedBy</th>
@@ -47,9 +54,7 @@ content %}
             <th class="px-6 py-3">DDStatus</th>
             <th class="px-6 py-3">ManagerStatus</th>
 
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
             <th class="px-6 py-3">Action</th>
@@ -58,28 +63,19 @@ content %}
         <tbody class="text-gray-600">
           {% if leaves %} {% for leave in leaves %}
           <tr class="border-t">
+            <td class="px-6 py-3">
+              <input type="checkbox" class="select-row-checkbox" data-leave="{{ leave.id }}">
+            </td>
             <td class="px-6 py-3">{{ leave.employee_name }}</td>
             <td class="px-6 py-3">{{ leave.branch_name }}</td>
             <td class="px-6 py-3">{{ leave.leave_type }}</td>
-            <td
-              class="px-6 py-3 leave-start-date"
-              data-start="{{ leave.start_date }}"
-              style="min-width: 180px"
-            >
+            <td class="px-6 py-3 leave-start-date" data-start="{{ leave.start_date }}" style="min-width: 180px">
               <!-- Formatted Start Date will be inserted here -->
             </td>
-            <td
-              class="px-6 py-3 leave-end-date"
-              data-end="{{ leave.end_date }}"
-              style="min-width: 180px"
-            >
+            <td class="px-6 py-3 leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px">
               <!-- Formatted End Date will be inserted here -->
             </td>
-            <td
-              class="px-6 py-3 leave-hours"
-              data-start="{{ leave.start_date }}"
-              data-end="{{ leave.end_date }}"
-            >
+            <td class="px-6 py-3 leave-hours" data-start="{{ leave.start_date }}" data-end="{{ leave.end_date }}">
               <!-- Leave Hours will be calculated here dynamically -->
             </td>
 
@@ -91,25 +87,21 @@ content %}
             <td class="px-6 py-3">{{ leave.verified_by }}</td>
             <td class="px-6 py-3">{{ leave.approved_by }}</td>
             <td
-              class="px-6 py-3 {% if leave.spm_status == 'Approved' %}text-green-500{% elif leave.spm_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
-            >
+              class="px-6 py-3 {% if leave.spm_status == 'Approved' %}text-green-500{% elif leave.spm_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
               {{ leave.spm_status }}
             </td>
             <td
-              class="px-6 py-3 {% if leave.dd_status == 'Approved' %}text-green-500{% elif leave.dd_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
-            >
+              class="px-6 py-3 {% if leave.dd_status == 'Approved' %}text-green-500{% elif leave.dd_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
               {{ leave.dd_status }}
             </td>
             <td
-              class="px-6 py-3 {% if leave.manager_status == 'Approved' %}text-green-500{% elif leave.manager_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
-            >
+              class="px-6 py-3 {% if leave.manager_status == 'Approved' %}text-green-500{% elif leave.manager_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
               {{ leave.manager_status }}
             </td>
 
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span
-                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
-              >
+                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
                 <b>{{ leave.status }}</b>
               </span>
             </td>
@@ -118,11 +110,9 @@ content %}
               <div class="flex justify-center gap-x-3">
                 {% if leave.status not in ['Approved', 'Rejected'] %}
 
-                <a
-                  href="{{ url_for('delete_leave', id=leave.id) }}"
+                <a href="{{ url_for('delete_leave', id=leave.id) }}"
                   class="text-red-500 hover:text-red-700 font-medium transition-colors duration-300"
-                  onclick="return confirm('Are you sure you want to delete this leave?')"
-                >
+                  onclick="return confirm('Are you sure you want to delete this leave?')">
                   <span class="material-symbols-outlined">delete</span>
                 </a>
                 {% endif %}
@@ -191,6 +181,116 @@ content %}
         var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedEndDate);
       });
+
+      // Add event listener to checkbox
+      $(".select-row-checkbox").on("change", function () {
+        var row = $(this).closest("tr");
+        if ($(this).is(":checked")) {
+          var rowData = row.find("td").map(function () {
+            return $(this).text().trim();
+          }).get().join(", ");
+          console.log("Selected Row Data: ", rowData);
+        }
+      });
+
+      // Print Selected Leaves Data
+      $("#printSelected").on("click", function () {
+        var selectedData = [];
+
+        // Iterate over all checkboxes to get selected rows
+        $(".select-row-checkbox:checked").each(function () {
+          var row = $(this).closest("tr");
+          var rowData = row.find("td").map(function () {
+            return $(this).text().trim();
+          }).get().join(", ");
+          selectedData.push(rowData);
+        });
+
+        // Print the selected data in a new window
+        if (selectedData.length > 0) {
+          var printWindow = window.open("", "_blank");
+
+          // Add custom styles for the printout
+          printWindow.document.write(`
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          margin: 20px;
+          color: #333;
+        }
+        h1 {
+          text-align: center;
+          color: #0073e6;
+        }
+        h3 {
+          color: #555;
+          font-size: 18px;
+        }
+        p {
+          font-size: 16px;
+          margin: 5px 0;
+        }
+        .footer {
+          position: fixed;
+          bottom: 20px;
+          width: 100%;
+          text-align: center;
+          font-size: 14px;
+          color: #888;
+        }
+        .content-section {
+          margin-bottom: 20px;
+        }
+        hr {
+          border: 0;
+          border-top: 1px solid #ccc;
+          margin: 20px 0;
+        }
+      </style>
+    `);
+          // Write header for the printout
+          printWindow.document.write("<h1>APPLICATION FORM FOR LEAVE</h1>");
+          printWindow.document.write("<hr>");
+          // Employee Information Section
+          printWindow.document.write("<div class='content-section'><h3>Employee Information:</h3>");
+          printWindow.document.write("<p><b>Employee Name:</b> " + selectedData[0].split(", ")[1] + "</p>");
+          printWindow.document.write("<p><b>Branch:</b> " + selectedData[0].split(", ")[2] + "</p>");
+          printWindow.document.write("<p><b>Leave Type:</b> " + selectedData[0].split(", ")[3] + "</p>");
+
+          printWindow.document.write("<p><b>Reason:</b> " + selectedData[0].split(", ")[8] + "</p>");
+          printWindow.document.write("</div>");
+          printWindow.document.write("<hr>");
+
+          // Leave Time Section
+          printWindow.document.write("<div class='content-section'><h3>Leave Time:</h3>");
+          printWindow.document.write("<p><b>Start Date:</b> " + selectedData[0].split(", ")[4] + "</p>");
+          printWindow.document.write("<p><b>End Date:</b> " + selectedData[0].split(", ")[5] + "</p>");
+          printWindow.document.write("<p><b>Leave Hours:</b> " + selectedData[0].split(", ")[6] + "</p>");
+          printWindow.document.write("<p><b>Leave Days:</b> " + selectedData[0].split(", ")[7] + "</p>");
+          printWindow.document.write("</div>");
+          printWindow.document.write("<hr>");
+
+          // Approver Information Section
+          printWindow.document.write("<div class='content-section'><h3>Approver Information:</h3>");
+          printWindow.document.write("<p><b>Requested By:</b> " + selectedData[0].split(", ")[9] + "</p>");
+          printWindow.document.write("<p><b>Verified By:</b> <span style='color: blue'>" + selectedData[0].split(", ")[10] + "</span> <b>Status:</b> <span style='color: blue'>" + selectedData[0].split(", ")[15] + "</span></p>");
+          printWindow.document.write("<p><b>Approved By:</b> " + selectedData[0].split(", ")[11] + "</p>");
+          printWindow.document.write("</div>");
+          printWindow.document.write("<hr>");
+
+          // Add footer
+          printWindow.document.write("<div class='footer'>");
+          printWindow.document.write("<p>Leave Request Form - Printed on " + new Date().toLocaleDateString() + "</p>");
+          printWindow.document.write("</div>");
+
+          printWindow.document.close();
+          printWindow.print();
+        } else {
+          alert("No rows selected for printing.");
+        }
+      });
+
+
     });
   </script>
 </body>
