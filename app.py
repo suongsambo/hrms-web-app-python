@@ -2,11 +2,7 @@
 # Make sure to import your DB connection function
 
 import base64
-from flask_login import login_required, current_user
-from flask import Flask, Response, render_template, flash, redirect, url_for
-from flask import render_template
-from flask import request, jsonify
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask import Flask, Response, render_template, flash, redirect, url_for, request, session, send_from_directory, jsonify
 import sqlite3
 import hashlib
 import os
@@ -14,15 +10,14 @@ import math
 import pyotp
 import requests
 import glob
-import base64
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from config import Config
-# from models.models import User
 from flask_socketio import SocketIO, emit, join_room, leave_room, send
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from typing import Optional
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -386,6 +381,11 @@ def init_db():
                 approved_by TEXT,
                 type_of_leave TEXT,
                 status TEXT DEFAULT 'Pending',
+                spm_status TEXT DEFAULT 'Pending',
+                dd_status TEXT DEFAULT 'Pending',
+                manager_status TEXT DEFAULT 'Pending',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (employee_id) REFERENCES employees(ID) ON DELETE CASCADE
             )
         ''')
@@ -1275,15 +1275,6 @@ def list_crd():
     return render_template('crd/list_crd.html', crds=crd_list)
 
 
-# @app.route('/crd', methods=['GET'])
-# @login_required
-# def list_crd():
-#     with get_db_connection() as conn:
-#         crds = conn.execute(
-#             "SELECT * FROM crd WHERE user_id = ?", (current_user.id,)).fetchall()
-#     return render_template('/crd/list_crd.html', crds=crds)
-
-
 @app.route('/crd/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_crd(id):
@@ -1946,45 +1937,6 @@ def view_leaves():
         return render_template('/leaves/view_leaves.html', leaves=leaves)
 
 
-# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
-# def filter_leaves_by_employee_id():
-#     # Check if the user is authenticated and has role_default 20
-#     if not current_user.is_authenticated or current_user.role_default != 20:
-#         return redirect(url_for('access_denied'))
-
-#     # Get the employee_id parameter from the request
-#     employee_id = request.args.get('employee_id')
-
-#     # Define SQL queries
-#     if employee_id:
-#         # Query with employee_id filter
-#         query = '''
-#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by, l.employee_id
-#             FROM leaves l
-#             INNER JOIN employees e ON l.employee_id=e.id
-#             WHERE l.employee_id= ?
-#         '''
-#         params = (employee_id,)
-#     else:
-#         # Default query without any employee_id filter
-#         query = '''
-#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status, l.service_count, l.verified_by, l.approved_by, l.employee_id
-#             FROM leaves l
-#             LEFT JOIN employees e ON l.employee_id=e.id
-#         '''
-#         params = ()  # No filtering by employee_id
-
-#     # Execute the query with the database connection
-#     try:
-#         with get_db_connection() as conn:
-#             leaves = conn.execute(query, params).fetchall()
-#     except sqlite3.DatabaseError as e:
-#         return f"Database error: {e}", 500
-
-#     # Render the template with the query results
-#     return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id)
-
-
 @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
 def filter_leaves_by_employee_id(employee_id):
     # Check if the user is authenticated and has role_default 20
@@ -1995,7 +1947,8 @@ def filter_leaves_by_employee_id(employee_id):
     query = '''
         SELECT l.id, e.name AS employee_name, e.branch AS branch_name, 
                l.leave_type, l.start_date, l.end_date, l.reason, l.status, 
-               l.service_count, l.verified_by, l.approved_by, l.employee_id
+               l.service_count, l.verified_by, l.approved_by, l.employee_id,
+               l.spm_status, l.dd_status, l.manager_status, l.requested_by
         FROM leaves l
         INNER JOIN employees e ON l.employee_id = e.id
         WHERE l.employee_id = ?
@@ -2006,56 +1959,17 @@ def filter_leaves_by_employee_id(employee_id):
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query, params).fetchall()
+            users = conn.execute("SELECT * FROM users").fetchall()
     except sqlite3.DatabaseError as e:
         return f"Database error: {e}", 500
 
     # Render the template with the query results
-    return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id)
+    return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
 
 
 def access_denied():
     # Option 1: Return a custom error page (you can create a template for this)
     return render_template('access_denied.html'), 403
-
-
-# @app.route('/leaves/branch', methods=['GET'])
-# def filter_leaves_by_branch_name():
-#     # Check if the user is authenticated and has role_default 40
-#     if not current_user.is_authenticated or current_user.role_default != 40:
-#         return redirect(url_for('access_denied'))
-
-#     # Get the optional branch_name parameter from the request
-#     branch_name = request.args.get('branch_name')
-
-#     # Define SQL queries
-#     if branch_name:
-#         # Query with branch_name filter
-#         query = '''
-#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
-#             FROM leaves l
-#             INNER JOIN employees e ON l.employee_id=e.id
-#             WHERE e.branch= ?
-#         '''
-#         params = (branch_name,)
-#     else:
-#         # Default query without any branch filter
-#         query = '''
-#             SELECT l.id, e.name AS employee_name, e.branch AS branch_name, l.leave_type, l.start_date, l.end_date, l.reason, l.status
-#             FROM leaves l
-#             LEFT JOIN employees e ON l.employee_id=e.id
-#         '''
-#         params = ()  # No filtering by branch name
-
-#     # Execute the query with the database connection
-#     try:
-#         with get_db_connection() as conn:
-#             leaves = conn.execute(query, params).fetchall()
-
-#     except sqlite3.DatabaseError as e:
-#         return f"Database error: {e}", 500
-
-#     # Render the template with the query results
-#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
 
 
 @app.route('/leaves/branch', methods=['GET'])
@@ -2127,6 +2041,75 @@ def filter_leaves_by_branch_name():
     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
 
 
+@app.route('/leaves/spm', methods=['GET'])
+def leaves_by_spm():
+    # Check if the user is authenticated and has role_default 40
+    if not current_user.is_authenticated or current_user.role_default != 40:
+        return redirect(url_for('access_denied'))
+
+    # Get the optional branch_name parameter from the request
+    branch_name = request.args.get('branch_name')
+
+    # Define SQL queries
+    if branch_name:
+
+        # Query with branch_name filter
+        query = '''
+            SELECT 
+                l.id, 
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type, 
+                l.start_date, 
+                l.end_date, 
+                l.reason, 
+                l.status,
+                l.type_of_leave, 
+                l.verified_by, 
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE e.branch = ?
+        '''
+        params = (branch_name,)
+    else:
+        # Default query without any branch filter
+        query = '''
+            SELECT 
+                l.id, 
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type, 
+                l.start_date, 
+                l.end_date, 
+                l.reason, 
+                l.status,
+                l.type_of_leave, 
+                l.verified_by, 
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+        '''
+        params = ()  # No filtering by branch name
+
+    # Execute the query with the database connection
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    # Render the template with the query results
+    return render_template('leaves/leaves_spm.html', leaves=leaves, branch_name=branch_name)
+
+
 @app.route('/leave_hours/add', methods=['GET', 'POST'])
 def add_leave_hours():
     employees = []
@@ -2177,6 +2160,7 @@ def add_leave():
     # Fetch employee list from the database
     with get_db_connection() as conn:
         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        users = conn.execute('SELECT id, username FROM users').fetchall()
 
     if request.method == 'POST':
         employee_id = request.form['employee_id']
@@ -2184,6 +2168,7 @@ def add_leave():
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
+        requested_by = request.form['requested_by']
         type_of_leave = request.form.get(
             'type_of_leave', 'D')  # Set default value to 'D'
 
@@ -2195,15 +2180,15 @@ def add_leave():
         # Insert the leave record into the database
         with get_db_connection() as conn:
             conn.execute('''
-                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave)
-                VALUES(?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave))
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by))
 
         # Redirect to view leaves page after insertion
         return redirect(url_for('view_leaves'))
 
     # Render the form page with employees list
-    return render_template('/leaves/add_leave.html', employees=employees)
+    return render_template('/leaves/add_leave.html', employees=employees, users=users)
 
 
 @app.route('/leaves/all', methods=['GET'])
@@ -4069,101 +4054,6 @@ def search_employees():
         ).fetchall()
 
     return render_template('/employees/employees.html', employees=employees)
-
-
-# @app.route('/employees/add', methods=['GET', 'POST'])
-# @login_required
-# def add_employee():
-#     branches = []
-#     users = []
-#     positions = []
-
-#     # Get branches, users, and positions from the database
-#     with get_db_connection() as conn:
-#         branches = conn.execute("SELECT * FROM branches").fetchall()
-#         users = conn.execute(
-#             "SELECT id, UserName FROM users").fetchall()  # Fetch users
-#         positions = conn.execute("SELECT * FROM positions").fetchall()
-
-#     if request.method == 'POST':
-#         # Collect all form data
-#         name = request.form['name']
-#         age = request.form['age']
-#         department = request.form['department']
-#         salary = request.form['salary']
-#         position_id = request.form['position_id']
-#         joining_date = request.form['joining_date']
-#         status = request.form['status']
-#         branch = request.form['branch']
-#         user_id = request.form['user_id']
-#         phone_number = request.form['phone_number']
-#         email = request.form['email']
-#         address = request.form['address']
-#         emergency_contact_name = request.form['emergency_contact_name']
-#         emergency_contact_phone = request.form['emergency_contact_phone']
-#         employees_height = request.form.get('employees_height')
-#         ethnicity = request.form.get('ethnicity')
-#         nationality = request.form.get('nationality')
-#         religion = request.form.get('religion')
-#         family_status = request.form.get('family_status')
-#         place_of_birth = request.form.get('place_of_birth')
-#         permanent_address = request.form.get('permanent_address')
-#         village = request.form.get('village')
-#         commune = request.form.get('commune')
-#         district = request.form.get('district')
-#         province = request.form.get('province')
-#         home_number = request.form.get('home_number')
-#         street_number = request.form.get('street_number')
-#         group_name = request.form.get('group_name')
-
-#         # New fields to be added
-#         personal_phone_number = request.form.get('personal_phone_number')
-#         level_of_culture = request.form.get('level_of_culture')
-#         skill = request.form.get('skill')
-#         name_of_educational_institution = request.form.get(
-#             'name_of_educational_institution')
-#         knowledge_of_foreign_languages = request.form.get(
-#             'knowledge_of_foreign_languages')
-#         current_function = request.form.get('current_function')
-#         id_card_number = request.form.get('id_card_number')
-#         work_at = request.form.get('work_at')
-#         employment_id = request.form.get('employment_id')
-#         employment_date = request.form.get('employment_date')
-#         khmer_nationality_identity_card = request.form.get(
-#             'khmer_nationality_identity_card')
-
-#         # Ensure that mandatory fields are provided (simple validation)
-#         if not name or not age or not department:
-#             flash('Name, Age, and Department are required fields!', 'error')
-#             return redirect(url_for('add_employee'))
-
-#         # Insert the new employee into the database
-#         with get_db_connection() as conn:
-#             conn.execute(
-#                 """INSERT INTO employees (
-#                     name, age, department, salary, position_id, joining_date, status,
-#                     branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone,
-#                     employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
-#                     commune, district, province, home_number, street_number, group_name,
-#                     personal_phone_number, level_of_culture, skill, name_of_educational_institution,
-#                     knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
-#                     khmer_nationality_identity_card)
-#                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? ,?)""",
-#                 (name, age, department, salary, position_id, joining_date, status, branch, user_id,
-#                  phone_number, email, address, emergency_contact_name, emergency_contact_phone,
-#                  employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
-#                  commune, district, province, home_number, street_number, group_name,
-#                  personal_phone_number, level_of_culture, skill, name_of_educational_institution,
-#                  knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
-#                  khmer_nationality_identity_card)
-#             )
-#             conn.commit()
-
-#         # Redirect to employee list after successful insertion
-#         return redirect(url_for('list_employees'))
-
-#     # Render the form to add a new employee with necessary context
-#     return render_template('employees/add_employee.html', branches=branches, users=users, positions=positions)
 
 
 @app.route('/employees/add', methods=['GET', 'POST'])

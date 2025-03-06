@@ -32,16 +32,21 @@ content %}
             <th class="px-6 py-3">LeaveType</th>
             <th class="px-6 py-3">StartDate</th>
             <th class="px-6 py-3">EndDate</th>
-            <th class="px-6 py-3">LeaveHours</th>
-            <th class="px-6 py-3">ServiceCount</th>
-            <th class="px-6 py-3">VerifiedBy</th>
-            <th class="px-6 py-3">ApprovedBy</th>
 
+            <th class="px-6 py-3">LeaveHours</th>
+            <th class="px-6 py-3">LeaveDay</th>
             <th
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
               Reason
             </th>
+            <th class="px-6 py-3">RequestedBy</th>
+            <th class="px-6 py-3">VerifiedBy</th>
+            <th class="px-6 py-3">ApprovedBy</th>
+            <th class="px-6 py-3">SPMStatus</th>
+            <th class="px-6 py-3">DDStatus</th>
+            <th class="px-6 py-3">ManagerStatus</th>
+
             <th
               class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
             >
@@ -77,12 +82,30 @@ content %}
             >
               <!-- Leave Hours will be calculated here dynamically -->
             </td>
+
             <td class="px-6 py-3">{{ leave.service_count }}</td>
-            <td class="px-6 py-3">{{ leave.verified_by }}</td>
-            <td class="px-6 py-3">{{ leave.approved_by }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <b>{{ leave.reason }}</b>
             </td>
+            <td class="px-6 py-3">{{ leave.requested_by }}</td>
+            <td class="px-6 py-3">{{ leave.verified_by }}</td>
+            <td class="px-6 py-3">{{ leave.approved_by }}</td>
+            <td
+              class="px-6 py-3 {% if leave.spm_status == 'Approved' %}text-green-500{% elif leave.spm_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
+            >
+              {{ leave.spm_status }}
+            </td>
+            <td
+              class="px-6 py-3 {% if leave.dd_status == 'Approved' %}text-green-500{% elif leave.dd_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
+            >
+              {{ leave.dd_status }}
+            </td>
+            <td
+              class="px-6 py-3 {% if leave.manager_status == 'Approved' %}text-green-500{% elif leave.manager_status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
+            >
+              {{ leave.manager_status }}
+            </td>
+
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span
                 class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
