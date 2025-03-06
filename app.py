@@ -616,7 +616,7 @@ def init_db():
 
         # Create SQM user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'sqm'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'spm'").fetchone()
 
         # If the user does not exist, create the default user
         if not user_exists:
@@ -626,7 +626,7 @@ def init_db():
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('sqm', hashed_password, 'sqm@example.com', '010655037', 0, 45, 'SYS'))
+            ''', ('spm', hashed_password, 'spm@example.com', '010655037', 0, 45, 'SYS'))
 
       # Create DC user
         user_exists = conn.execute(
@@ -2020,15 +2020,11 @@ def filter_leaves_by_employee_id(employee_id):
     return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
 
 
-def access_denied():
-    # Option 1: Return a custom error page (you can create a template for this)
-    return render_template('access_denied.html'), 403
-
-
 @app.route('/leaves/branch', methods=['GET'])
 def filter_leaves_by_branch_name():
-    # Check if the user is authenticated and has role_default 40
-    if not current_user.is_authenticated or current_user.role_default != 40:
+    if current_user.role_default in [45, 40, 60, 65]:
+        pass
+    elif not current_user.is_authenticated or current_user.role_default != 40:
         return redirect(url_for('access_denied'))
 
     # Get the optional branch_name parameter from the request
@@ -2092,75 +2088,6 @@ def filter_leaves_by_branch_name():
 
     # Render the template with the query results
     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
-
-
-@app.route('/leaves/spm', methods=['GET'])
-def leaves_by_spm():
-    # Check if the user is authenticated and has role_default 40
-    if not current_user.is_authenticated or current_user.role_default != 40:
-        return redirect(url_for('access_denied'))
-
-    # Get the optional branch_name parameter from the request
-    branch_name = request.args.get('branch_name')
-
-    # Define SQL queries
-    if branch_name:
-
-        # Query with branch_name filter
-        query = '''
-            SELECT 
-                l.id, 
-                e.name AS employee_name,
-                e.branch AS branch_name,
-                l.leave_type, 
-                l.start_date, 
-                l.end_date, 
-                l.reason, 
-                l.status,
-                l.type_of_leave, 
-                l.verified_by, 
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE e.branch = ?
-        '''
-        params = (branch_name,)
-    else:
-        # Default query without any branch filter
-        query = '''
-            SELECT 
-                l.id, 
-                e.name AS employee_name,
-                e.branch AS branch_name,
-                l.leave_type, 
-                l.start_date, 
-                l.end_date, 
-                l.reason, 
-                l.status,
-                l.type_of_leave, 
-                l.verified_by, 
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-        '''
-        params = ()  # No filtering by branch name
-
-    # Execute the query with the database connection
-    try:
-        with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
-
-    except sqlite3.DatabaseError as e:
-        return f"Database error: {e}", 500
-
-    # Render the template with the query results
-    return render_template('leaves/leaves_spm.html', leaves=leaves, branch_name=branch_name)
 
 
 @app.route('/leave_hours/add', methods=['GET', 'POST'])
@@ -3836,17 +3763,56 @@ def delete_user(id):
     return redirect(url_for('list_users'))
 
 
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     if current_user.is_admin:
+#         return render_dashboard(current_user.id)
+
+#     if current_user.role_default == 20:
+#         # Check if employee exists in the database
+#         with get_db_connection() as conn:
+#             employee = conn.execute(
+#                 "SELECT e.ID FROM employees e WHERE e.user_id = ?", (current_user.id,)).fetchone()
+
+#         if employee:
+#             return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+#         else:
+#             flash("Employee not found!", "danger")
+#             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
+
+#     if current_user.role_default == 40:
+#         # Redirect to employer dashboard
+#         if not current_user.branch:
+#             flash("Branch information is missing.", "danger")
+#             return render_template('access_denied.html')
+#         return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
+
+
+#     flash("Dashboard not found!", "danger")
+#     return render_dashboard(current_user.id)
+
+
+@app.route('/access_denied')
+def access_denied():
+    flash("Access denied!", "danger")
+    return render_template('access_denied.html')
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    # Admin users are directed to the admin dashboard
     if current_user.is_admin:
         return render_dashboard(current_user.id)
 
+    # Employees (role_default == 20) are directed to the employee dashboard
     if current_user.role_default == 20:
-        # Check if employee exists in the database
         with get_db_connection() as conn:
             employee = conn.execute(
-                "SELECT e.ID FROM employees e WHERE e.user_id = ?", (current_user.id,)).fetchone()
+                "SELECT e.ID FROM employees e WHERE e.user_id = ?", (
+                    current_user.id,)
+            ).fetchone()
 
         if employee:
             return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
@@ -3854,12 +3820,18 @@ def dashboard():
             flash("Employee not found!", "danger")
             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
 
-    if current_user.role_default == 40:
-        # Redirect to employer dashboard
-        return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
+    # Users with roles 40, 45, 60, or 65 are directed to the branch manager dashboard
+    if current_user.role_default in [45, 40, 60, 65]:
+        if current_user.branch:
+            return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
+        elif not current_user.branch:
+            flash("Branch information is missing.", "danger")
+            return render_template('access_denied.html')
 
-    flash("Dashboard not found!", "danger")
-    return render_dashboard(current_user.id)
+    # If no conditions are met, deny access
+    flash("Access denied: You do not have permission to view this page.", "danger")
+
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/dashboard/branch_manager/<string:branch_name>')
