@@ -2107,7 +2107,7 @@ def filter_leaves_by_employee_id(employee_id):
 
 @app.route('/leaves/branch', methods=['GET'])
 def filter_leaves_by_branch_name():
-    if current_user.role_default in [45, 40, 60, 65]:
+    if current_user.role_default in [45, 40, 60, 65, 35, 180]:
         pass
     elif not current_user.is_authenticated or current_user.role_default != 40:
         return redirect(url_for('access_denied'))
@@ -3960,7 +3960,7 @@ def dashboard():
             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
 
     # Users with roles 40, 45, 60, or 65 are directed to the branch manager dashboard
-    if current_user.role_default in [45, 40, 60, 65]:
+    if current_user.role_default in [45, 40, 60, 65, 35, 180]:
         if current_user.branch:
             return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
         elif not current_user.branch:
