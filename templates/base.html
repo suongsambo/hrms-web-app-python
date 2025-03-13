@@ -1,274 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{% block title %}Dashboard{% endblock %}</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css') }}"
-    />
-    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      href="{{ url_for('static', filename='favicon.ico') }}"
-    />
-    <script src="https://unpkg.com/alpinejs" defer></script>
-    <script src="{{ url_for('static', filename='app.js') }}" defer></script>
-    <!-- DataTables CSS (Add to the <head> section) -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css"
-    />
-    <!-- DataTables JS (Add before closing </body> tag) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
-    <link
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-      rel="stylesheet"
-    />
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-    <!-- Include Google Charts Library -->
-    <script
-      type="text/javascript"
-      src="https://www.gstatic.com/charts/loader.js"
-    ></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap" />
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.ico') }}" />
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+  <!-- DataTables CSS (Add to the <head> section) -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css" />
+  <!-- DataTables JS (Add before closing </body> tag) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
 
-    <!-- Flatpickr CSS & JS -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+  <!-- Include Google Charts Library -->
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
-    <!-- Heroicons (For Tailwind Users) -->
-    <script src="https://unpkg.com/@heroicons/react/outline"></script>
+  <!-- Flatpickr CSS & JS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
-    <!-- Font Awesome (Optional) -->
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
-    <script type="text/javascript">
-      google.charts.load("current", { packages: ["corechart"] });
-      google.charts.setOnLoadCallback(drawChart);
+  <!-- Heroicons (For Tailwind Users) -->
+  <script src="https://unpkg.com/@heroicons/react/outline"></script>
 
-      function drawChart() {
-        var data = google.visualization.arrayToDataTable({{ branch_chart_data| safe }});
+  <!-- Font Awesome (Optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <script type="text/javascript">
+    google.charts.load("current", { packages: ["corechart"] });
+    google.charts.setOnLoadCallback(drawChart);
 
-      var options = {
-        title: "Employee Distribution by Branch",
-        pieHole: 0.4,
-        chartArea: { width: "80%", height: "70%" },
-      };
+    function drawChart() {
+      var data = google.visualization.arrayToDataTable({{ branch_chart_data| safe }});
 
-      var chart = new google.visualization.PieChart(document.getElementById("branchChart"));
-      chart.draw(data, options);
+    var options = {
+      title: "Employee Distribution by Branch",
+      pieHole: 0.4,
+      chartArea: { width: "80%", height: "70%" },
+    };
+
+    var chart = new google.visualization.PieChart(document.getElementById("branchChart"));
+    chart.draw(data, options);
         }
-    </script>
+  </script>
 
-    <style>
-      #user-table {
-        position: relative;
-      }
+  <style>
+    #user-table {
+      position: relative;
+    }
 
-      /* Freeze the last column */
-      #user-table th:last-child,
-      #user-table td:last-child {
-        color: black;
-        position: sticky;
-        right: 0;
-        background-color: #fff;
-        z-index: 1;
-      }
+    /* Freeze the last column */
+    #user-table th:last-child,
+    #user-table td:last-child {
+      color: black;
+      position: sticky;
+      right: 0;
+      background-color: #fff;
+      z-index: 1;
+    }
 
-      /* Optional: Add a box-shadow for better visual effect */
-      #user-table th:last-child,
-      #user-table td:last-child {
-        box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-      }
-    </style>
-  </head>
+    /* Optional: Add a box-shadow for better visual effect */
+    #user-table th:last-child,
+    #user-table td:last-child {
+      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
 
-  <header class="bg-gray-800 text-white p-1">
-    <div class="container mx-auto flex justify-between items-center">
-      <a
-        href="{{ url_for('profile', user_id=current_user.id) }}"
-        class="flex items-center gap-x-2"
-      >
-        <div class="flex justify-center">
-          {% if current_user.image_data %}
-          <img
-            src="{{ url_for('get_user_image', user_id=current_user.id) }}"
-            alt="User Profile Image"
-            class="w-10 h-10 rounded-full object-cover shadow-md"
-          />
-          {% else %}
-          <i
-            class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"
-          ></i>
+<header class="bg-gray-800 text-white p-1">
+  <div class="container mx-auto flex justify-between items-center">
+    <a href="{{ url_for('profile', user_id=current_user.id) }}" class="flex items-center gap-x-2">
+      <div class="flex justify-center">
+        {% if current_user.image_data %}
+        <img src="{{ url_for('get_user_image', user_id=current_user.id) }}" alt="User Profile Image"
+          class="w-10 h-10 rounded-full object-cover shadow-md" />
+        {% else %}
+        <i class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"></i>
 
-          {% endif %}
-        </div>
-        <span
-          class="text-lg font-bold text-transparent bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text"
-        >
-          {{ current_user.username | upper }}
-        </span>
-      </a>
+        {% endif %}
+      </div>
+      <span class="text-lg font-bold text-transparent bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text">
+        {{ current_user.username | upper }}
+      </span>
+    </a>
 
-      <div class="flex space-x-4 items-center">
-        <!-- Branch Name Section -->
-        <div class="text-white text-sm flex items-center gap-x-2">
-          <i class="fas fa-building mr-1"></i>
-          <span class="font-semibold">Branch:</span> {{ current_user.branch }}
-        </div>
+    <div class="flex space-x-4 items-center">
+      <!-- Branch Name Section -->
+      <div class="text-white text-sm flex items-center gap-x-2">
+        <i class="fas fa-building mr-1"></i>
+        <span class="font-semibold">Branch:</span> {{ current_user.branch }}
+      </div>
 
-        <!-- System Date Section -->
+      <!-- System Date Section -->
+      <div id="system-date" class="text-white text-sm flex items-center gap-x-2">
+        <i class="fa-solid fa-calendar-day mr-1"></i>
+        <!-- Date will be inserted here by JavaScript -->
+      </div>
+
+      <!-- Notifications Section -->
+      <div class="relative top-1">
+        <button
+          class="text-white flex items-center gap-x-2 notification-button hover:bg-gray-700 bg-gray-600 rounded-full p-2">
+          <span class="material-symbols-outlined">notifications_active</span>
+          <span
+            class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {{ notifications_employees|length + notifications|length }}
+          </span>
+          <!-- Notification count -->
+        </button>
+        <!-- Dropdown for Notifications -->
         <div
-          id="system-date"
-          class="text-white text-sm flex items-center gap-x-2"
-        >
-          <i class="fa-solid fa-calendar-day mr-1"></i>
-          <!-- Date will be inserted here by JavaScript -->
-        </div>
-
-        <!-- Notifications Section -->
-        <div class="relative top-1">
-          <button
-            class="text-white flex items-center gap-x-2 notification-button hover:bg-gray-700 bg-gray-600 rounded-full p-2"
-          >
-            <span class="material-symbols-outlined">notifications_active</span>
-            <span
-              class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center"
-            >
-              {{ notifications_employees|length + notifications|length }}
-            </span>
-            <!-- Notification count -->
-          </button>
-          <!-- Dropdown for Notifications -->
-          <div
-            class="absolute right-0 mt-2 w-64 bg-white text-black rounded-lg shadow-lg hidden notification-dropdown max-h-64 overflow-y-auto"
-          >
-            <div class="bg-gray-200 p-2 border-b">
-              <p class="text-sm text-gray-500">Notifications</p>
-            </div>
-            <ul>
-              {% for notification in notifications %}
-              <li class="p-2 border-b hover:bg-gray-100">
-                <span class="font-semibold">{{ notification.title }}</span>
-                <p class="text-sm text-gray-500">{{ notification.message }}</p>
-              </li>
-              {% else %}
-              <li class="p-2">
-                <p class="text-sm text-gray-500">No notifications available.</p>
-              </li>
-              {% endfor %}
-            </ul>
-
-            <ul>
-              {% for notifications_employee in notifications_employees %}
-              <li class="p-2 border-b hover:bg-gray-100">
-                <span class="font-semibold"
-                  >{{ notifications_employee.title }}</span
-                >
-                <p class="text-sm text-gray-500">
-                  {{ notifications_employee.message }}
-                </p>
-              </li>
-              {% else %}
-              <li class="p-2">
-                <p class="text-sm text-gray-500">No notifications available.</p>
-              </li>
-              {% endfor %}
-            </ul>
+          class="absolute right-0 mt-2 w-64 bg-white text-black rounded-lg shadow-lg hidden notification-dropdown max-h-64 overflow-y-auto">
+          <div class="bg-gray-200 p-2 border-b">
+            <p class="text-sm text-gray-500">Notifications</p>
           </div>
-        </div>
+          <ul>
+            {% for notification in notifications %}
+            <li class="p-2 border-b hover:bg-gray-100">
+              <span class="font-semibold">{{ notification.title }}</span>
+              <p class="text-sm text-gray-500">{{ notification.message }}</p>
+            </li>
+            {% else %}
+            <li class="p-2">
+              <p class="text-sm text-gray-500">No notifications available.</p>
+            </li>
+            {% endfor %}
+          </ul>
 
-        <!-- Logout Form -->
-        <form
-          action="{{ url_for('logout') }}"
-          method="post"
-          class="block py-2 px-4 text-sm text-gray-white flex items-center gap-x-2"
-        >
-          <!-- Custom logout button with Tailwind CSS and icon -->
-          <button
-            type="submit"
-            class="flex items-center justify-between w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none transition duration-300 ease-in-out"
-            id="logoutButton"
-          >
-            <span class="material-symbols-outlined text-lg">logout</span>
-            <span class="ml-2 font-semibold">Logout</span>
-          </button>
-        </form>
+          <ul>
+            {% for notifications_employee in notifications_employees %}
+            <li class="p-2 border-b hover:bg-gray-100">
+              <span class="font-semibold">{{ notifications_employee.title }}</span>
+              <p class="text-sm text-gray-500">
+                {{ notifications_employee.message }}
+              </p>
+            </li>
+            {% else %}
+            <li class="p-2">
+              <p class="text-sm text-gray-500">No notifications available.</p>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Logout Form -->
+      <form action="{{ url_for('logout') }}" method="post"
+        class="block py-2 px-4 text-sm text-gray-white flex items-center gap-x-2">
+        <!-- Custom logout button with Tailwind CSS and icon -->
+        <button type="submit"
+          class="flex items-center justify-between w-full px-4 py-2 bg-blue-600 text-white rounded-lg shadow-lg hover:bg-blue-700 focus:outline-none transition duration-300 ease-in-out"
+          id="logoutButton">
+          <span class="material-symbols-outlined text-lg">logout</span>
+          <span class="ml-2 font-semibold">Logout</span>
+        </button>
+      </form>
+    </div>
+  </div>
+</header>
+
+<div x-data="{ activeMenu: '' }">
+  <!-- Navigation Menu -->
+  <nav class="flex space-x-6 text-white bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 p-1 shadow-lg">
+    <a href="/dashboard"
+      class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+      <span class="material-symbols-outlined">home</span>
+      <span class="ml-2">Home</span>
+    </a>
+
+    <!-- Users -->
+    {% if current_user.is_admin == 1 %}
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'users' ? '' : 'users'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">groups</span>
+        <span class="ml-2">Users</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'users'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/users/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">person_add</span>
+          <span>Add User</span>
+        </a>
+
+        <a href="/users/roles"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">admin_panel_settings</span>
+          <span>Roles</span>
+        </a>
+        <a href="/users"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">people</span>
+          <span>Manage Users</span>
+        </a>
       </div>
     </div>
-  </header>
+    {% endif %}
 
-  <div x-data="{ activeMenu: '' }">
-    <!-- Navigation Menu -->
-    <nav
-      class="flex space-x-6 text-white bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 p-1 shadow-lg"
-    >
-      <a
-        href="/dashboard"
-        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-      >
-        <span class="material-symbols-outlined">home</span>
-        <span class="ml-2">Home</span>
-      </a>
-
-      <!-- Users -->
-      {% if current_user.is_admin == 1 %}
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'users' ? '' : 'users'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">groups</span>
-          <span class="ml-2">Users</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'users'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/users/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">person_add</span>
-            <span>Add User</span>
-          </a>
-
-          <a
-            href="/users/roles"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">admin_panel_settings</span>
-            <span>Roles</span>
-          </a>
-          <a
-            href="/users"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">people</span>
-            <span>Manage Users</span>
-          </a>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- Roles Menu (Only visible to Admins) 
+    <!-- Roles Menu (Only visible to Admins) 
       {% if current_user.is_admin == 1 %}
       <div class="relative z-10">
         <button
@@ -304,137 +242,102 @@
       {% endif %}
       -->
 
-      {% if current_user.is_admin == 1 %}
-      <!-- Menu Departments -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'departments' ? '' : 'departments'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">apartment</span>
-          <span class="ml-2">Departments</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'departments'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/positions/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">add_business</span>
-            <span>Add Position</span>
-          </a>
-          <a
-            href="/positions"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">business</span>
-            <span>Manage Positions</span>
-          </a>
-          <a
-            href="/departments/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">add_business</span>
-            <span>Add Department</span>
-          </a>
-          <a
-            href="/departments"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">business</span>
-            <span>Manage Departments</span>
-          </a>
-        </div>
+    {% if current_user.is_admin == 1 %}
+    <!-- Menu Departments -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'departments' ? '' : 'departments'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">apartment</span>
+        <span class="ml-2">Departments</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'departments'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/positions/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">add_business</span>
+          <span>Add Position</span>
+        </a>
+        <a href="/positions"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">business</span>
+          <span>Manage Positions</span>
+        </a>
+        <a href="/departments/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">add_business</span>
+          <span>Add Department</span>
+        </a>
+        <a href="/departments"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">business</span>
+          <span>Manage Departments</span>
+        </a>
       </div>
-      {% endif %} {% if current_user.is_admin == 1 %}
-      <!-- Menu Branch -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'branch' ? '' : 'branch'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">store</span>
-          <span class="ml-2">Branch</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'branch'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/branches/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">add_business</span>
-            <span>Add Branch</span>
-          </a>
-          <a
-            href="/branches"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">business</span>
-            <span>Manage Branches</span>
-          </a>
-        </div>
+    </div>
+    {% endif %} {% if current_user.is_admin == 1 %}
+    <!-- Menu Branch -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'branch' ? '' : 'branch'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">store</span>
+        <span class="ml-2">Branch</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'branch'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/branches/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">add_business</span>
+          <span>Add Branch</span>
+        </a>
+        <a href="/branches"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">business</span>
+          <span>Manage Branches</span>
+        </a>
       </div>
-      {% endif %}
-      <!-- Employees -->
-      {% if current_user.is_admin == 1 %}
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'employees' ? '' : 'employees'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">person</span>
-          <span class="ml-2">Employees</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'employees'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/employees/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">person_add</span>
-            <span>Add Employee</span>
-          </a>
-          <a
-            href="/employees"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">people</span>
-            <span>Manage Employees</span>
-          </a>
+    </div>
+    {% endif %}
+    <!-- Employees -->
+    {% if current_user.is_admin == 1 %}
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'employees' ? '' : 'employees'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">person</span>
+        <span class="ml-2">Employees</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'employees'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/employees/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">person_add</span>
+          <span>Add Employee</span>
+        </a>
+        <a href="/employees"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">people</span>
+          <span>Manage Employees</span>
+        </a>
 
-          <a
-            href="/bankstatement/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">attach_money</span>
-            <span>Add BankStatement</span>
-          </a>
+        <a href="/bankstatement/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">attach_money</span>
+          <span>Add BankStatement</span>
+        </a>
 
-          <a
-            href="/bankstatements"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">attach_money</span>
-            <span>Manage BankStatements</span>
-          </a>
-        </div>
+        <a href="/bankstatements"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">attach_money</span>
+          <span>Manage BankStatements</span>
+        </a>
       </div>
-      {% endif %}
+    </div>
+    {% endif %}
 
-      <!-- Payroll -->
-      <!-- 
+    <!-- Payroll -->
+    <!-- 
     {% if current_user.is_admin == 1 %}
     <div class="relative z-10">
       <button @click="activeMenu = activeMenu === 'payroll' ? '' : 'payroll'"
@@ -459,23 +362,18 @@
     </div>
     {% endif %}  -->
 
-      {% if current_user.is_admin == 1 %}
-      <!-- Attendance -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">event</span>
-          <span class="ml-2">Attendance</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'attendance'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <!-- <a href="{{ url_for('checkin', user_id=current_user.id) }}"
+    {% if current_user.is_admin == 1 %}
+    <!-- Attendance -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">Attendance</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <!-- <a href="{{ url_for('checkin', user_id=current_user.id) }}"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">check_circle</span>
           <span>Check In</span>
@@ -493,23 +391,19 @@
           <span>Work Time</span>
         </a> -->
 
-          <a
-            href="/leave/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Leave</span>
-          </a>
+        <a href="/leave/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Add Leave</span>
+        </a>
 
-          <a
-            href="/leaves"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Leave Manage</span>
-          </a>
+        <a href="/leaves"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Leave Manage</span>
+        </a>
 
-          <!-- 
+        <!-- 
           <a
             href="/attendance/add"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -526,243 +420,188 @@
             <span>Manage Attendance</span>
           </a>
           -->
-        </div>
       </div>
+    </div>
 
-      {% endif %} {% if current_user.role_default == 20 %}
+    {% endif %} {% if current_user.role_default == 20 %}
 
-      <!-- Attendance -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
+    <!-- Attendance -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">Attendance</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/leave_hours/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
-          <span class="ml-2">Attendance</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'attendance'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/leave_hours/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Leave Hour</span>
-          </a>
+          <span>Add Leave Hour</span>
+        </a>
 
-          <a
+        <!-- <a
             href="/leave/add"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
           >
             <span class="material-symbols-outlined">event</span>
             <span>Add Leave Day</span>
-          </a>
+          </a> -->
 
-          <a
-            href="/leave_many/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Leave Many</span>
-          </a>
-
-          <a
-            href="/leaves"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Leave Manage</span>
-          </a>
-        </div>
-      </div>
-
-      {% endif %}
-
-      <!-- Menu Branch Manager -->
-      {% if current_user.role_default == 40 %}
-
-      <!-- Attendance -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
+        <a href="/leave_many/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
-          <span class="ml-2">Attendance</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'attendance'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/leave/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Leave</span>
-          </a>
+          <span>Add Leave Many</span>
+        </a>
 
-          <a
-            href="/leaves"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Leave Manage</span>
-          </a>
-          <a
-            href="/leaves/branch"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">filter_alt</span>
-            <span>Leave Approval</span>
-          </a>
-        </div>
-      </div>
-
-      {% endif %}
-
-      <!-- Menu Branch Manager -->
-      {% if current_user.role_default == 45 %}
-
-      <!-- Attendance -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
+        <a href="/leaves"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
-          <span class="ml-2">Attendance</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'attendance'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/leave/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Leave</span>
-          </a>
-
-          <a
-            href="/leaves"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Leave Manage</span>
-          </a>
-          <a
-            href="/leaves/branch"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">filter_alt</span>
-            <span>Leave Approval</span>
-          </a>
-        </div>
+          <span>Leave Manage</span>
+        </a>
       </div>
+    </div>
 
-      {% endif %}
+    {% endif %}
 
-      <!-- Menu Branch Manager -->
-      {% if current_user.role_default == 60 %}
+    <!-- Menu Branch Manager -->
+    {% if current_user.role_default == 40 %}
 
-      <!-- Attendance -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
+    <!-- Attendance -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">Attendance</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/leave/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
-          <span class="ml-2">Attendance</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'attendance'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/leave/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Leave</span>
-          </a>
+          <span>Add Leave</span>
+        </a>
 
-          <a
-            href="/leaves"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Leave Manage</span>
-          </a>
-          <a
-            href="/leaves/branch"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">filter_alt</span>
-            <span>Leave Approval</span>
-          </a>
-        </div>
-      </div>
-
-      {% endif %}
-
-      <!-- Menu Branch Manager -->
-      {% if current_user.role_default == 65 %}
-
-      <!-- Attendance -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
+        <a href="/leaves"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
-          <span class="ml-2">Attendance</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'attendance'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="/leave/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Add Leave</span>
-          </a>
-
-          <a
-            href="/leaves"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">event</span>
-            <span>Leave Manage</span>
-          </a>
-          <a
-            href="/leaves/branch"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">filter_alt</span>
-            <span>Leave Approval</span>
-          </a>
-        </div>
+          <span>Leave Manage</span>
+        </a>
+        <a href="/leaves/branch"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">filter_alt</span>
+          <span>Leave Approval</span>
+        </a>
       </div>
+    </div>
 
-      {% endif %}
+    {% endif %}
 
-      <!-- {% if current_user.is_admin == 1 %}
+    <!-- Menu Branch Manager -->
+    {% if current_user.role_default == 45 %}
+
+    <!-- Attendance -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">Attendance</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/leave/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Add Leave</span>
+        </a>
+
+        <a href="/leaves"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Leave Manage</span>
+        </a>
+        <a href="/leaves/branch"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">filter_alt</span>
+          <span>Leave Approval</span>
+        </a>
+      </div>
+    </div>
+
+    {% endif %}
+
+    <!-- Menu Branch Manager -->
+    {% if current_user.role_default == 60 %}
+
+    <!-- Attendance -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">Attendance</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/leave/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Add Leave</span>
+        </a>
+
+        <a href="/leaves"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Leave Manage</span>
+        </a>
+        <a href="/leaves/branch"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">filter_alt</span>
+          <span>Leave Approval</span>
+        </a>
+      </div>
+    </div>
+
+    {% endif %}
+
+    <!-- Menu Branch Manager -->
+    {% if current_user.role_default == 65 %}
+
+    <!-- Attendance -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">Attendance</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/leave/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Add Leave</span>
+        </a>
+
+        <a href="/leaves"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Leave Manage</span>
+        </a>
+        <a href="/leaves/branch"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">filter_alt</span>
+          <span>Leave Approval</span>
+        </a>
+      </div>
+    </div>
+
+    {% endif %}
+
+    <!-- {% if current_user.is_admin == 1 %}
  
     <div class="relative z-10">
       <button @click="activeMenu = activeMenu === 'media' ? '' : 'media'"
@@ -894,40 +733,31 @@
 
     {% endif %} -->
 
-      <!-- Settings -->
-      <div class="relative z-10">
-        <button
-          @click="activeMenu = activeMenu === 'settings' ? '' : 'settings'"
-          class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-        >
-          <span class="material-symbols-outlined">settings</span>
-          <span class="ml-2">Settings</span>
-          <span class="ml-2">&#9662;</span>
-        </button>
-        <div
-          x-show="activeMenu === 'settings'"
-          @click.away="activeMenu = ''"
-          class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300"
-        >
-          <a
-            href="{{ url_for('profile', user_id=current_user.id) }}"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">person</span>
-            <span>Profile</span>
-          </a>
+    <!-- Settings -->
+    <div class="relative z-10">
+      <button @click="activeMenu = activeMenu === 'settings' ? '' : 'settings'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="ml-2">Settings</span>
+        <span class="ml-2">&#9662;</span>
+      </button>
+      <div x-show="activeMenu === 'settings'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="{{ url_for('profile', user_id=current_user.id) }}"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">person</span>
+          <span>Profile</span>
+        </a>
 
-          <a
-            href="/change_password"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105"
-          >
-            <span class="material-symbols-outlined">lock</span>
-            <span>Security</span>
-          </a>
-        </div>
+        <a href="/change_password"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">lock</span>
+          <span>Security</span>
+        </a>
       </div>
+    </div>
 
-      <!-- Chat Room 
+    <!-- Chat Room 
       <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'chat_room' ? '' : 'chat_room'"
@@ -953,7 +783,7 @@
       </div>
 
       -->
-      <!--
+    <!--
       {% if current_user.is_admin == 1 %}
       <div class="relative z-10">
         <button
@@ -982,7 +812,7 @@
 
        -->
 
-      <!-- Contact Us 
+    <!-- Contact Us 
       <div class="relative z-10">
         <button
           @click="activeMenu = activeMenu === 'contact' ? '' : 'contact'"
@@ -1007,95 +837,88 @@
         </div>
       </div>
 -->
-    </nav>
+  </nav>
+</div>
+
+<script>
+  // Get elements for notification button and dropdown
+  const notificationButton = document.querySelector(".notification-button");
+  const notificationDropdown = document.querySelector(
+    ".notification-dropdown"
+  );
+
+  // Toggle notification dropdown visibility when clicked
+  notificationButton.addEventListener("click", () => {
+    notificationDropdown.classList.toggle("hidden");
+  });
+
+  // Optionally, you can close the notification dropdown if clicking outside
+  document.addEventListener("click", (event) => {
+    if (
+      !notificationButton.contains(event.target) &&
+      !notificationDropdown.contains(event.target)
+    ) {
+      notificationDropdown.classList.add("hidden");
+    }
+  });
+
+  $(document).ready(function () {
+    $("#logoutButton").click(function (event) {
+      event.preventDefault(); // Prevent the form from submitting immediately
+      // Custom confirmation message
+      var userConfirmed = confirm(
+        "Are you sure you want to logout?\nYou will be redirected to the login page."
+      );
+      if (userConfirmed) {
+        // Submit the form if user confirms
+        $(this).closest("form").submit();
+      }
+    });
+  });
+</script>
+
+<body class="flex flex-col h-[calc(100vh-300px)]">
+  <div class="flex-1 flex">
+    <!-- Main Content -->
+    <div class="flex-1 p-0 h-[calc(100vh-148px)] overflow-x-auto overflow-y-scroll">
+      <main>{% block content %}{% endblock %}</main>
+    </div>
   </div>
 
   <script>
-    // Get elements for notification button and dropdown
-    const notificationButton = document.querySelector(".notification-button");
-    const notificationDropdown = document.querySelector(
-      ".notification-dropdown"
-    );
+    function toggleMenu(id) {
+      document.getElementById(id).classList.toggle("hidden");
+    }
 
-    // Toggle notification dropdown visibility when clicked
-    notificationButton.addEventListener("click", () => {
-      notificationDropdown.classList.toggle("hidden");
-    });
+    if (localStorage.getItem("lang") === "km") {
+      document.querySelector("[x-data]")._x_data.lang = "km";
+    }
 
-    // Optionally, you can close the notification dropdown if clicking outside
-    document.addEventListener("click", (event) => {
-      if (
-        !notificationButton.contains(event.target) &&
-        !notificationDropdown.contains(event.target)
-      ) {
-        notificationDropdown.classList.add("hidden");
-      }
-    });
-
-    $(document).ready(function () {
-      $("#logoutButton").click(function (event) {
-        event.preventDefault(); // Prevent the form from submitting immediately
-        // Custom confirmation message
-        var userConfirmed = confirm(
-          "Are you sure you want to logout?\nYou will be redirected to the login page."
-        );
-        if (userConfirmed) {
-          // Submit the form if user confirms
-          $(this).closest("form").submit();
-        }
-      });
-    });
+    // Set the system date to be in yyyy-mm-dd format
+    const systemDate = new Date();
+    const formattedDate = systemDate.toISOString().split("T")[0]; // Format as yyyy-mm-dd
+    document.getElementById(
+      "system-date"
+    ).textContent = `Date: ${formattedDate}`;
   </script>
+  {% block scripts %}
 
-  <body class="flex flex-col h-[calc(100vh-300px)]">
-    <div class="flex-1 flex">
-      <!-- Main Content -->
-      <div
-        class="flex-1 p-0 h-[calc(100vh-148px)] overflow-x-auto overflow-y-scroll"
-      >
-        <main>{% block content %}{% endblock %}</main>
-      </div>
-    </div>
-
-    <script>
-      function toggleMenu(id) {
-        document.getElementById(id).classList.toggle("hidden");
-      }
-
-      if (localStorage.getItem("lang") === "km") {
-        document.querySelector("[x-data]")._x_data.lang = "km";
-      }
-
-      // Set the system date to be in yyyy-mm-dd format
-      const systemDate = new Date();
-      const formattedDate = systemDate.toISOString().split("T")[0]; // Format as yyyy-mm-dd
-      document.getElementById(
-        "system-date"
-      ).textContent = `Date: ${formattedDate}`;
-    </script>
-    {% block scripts %}
-
-    <footer class="bg-gradient-to-r from-gray-800 to-gray-600 text-white py-2">
-      <div class="container mx-auto text-center">
-        <div class="flex flex-col sm:flex-row justify-between items-center">
-          <div class="mb-4 sm:mb-0">
-            <p>&copy; 2025 {{ config.APP_NAME }} All rights reserved.</p>
-          </div>
-          <div class="flex space-x-4">
-            <a href="/privacy-policy" class="text-gray-400 hover:text-white"
-              >Privacy Policy</a
-            >
-            <a href="/accept-terms" class="text-gray-400 hover:text-white"
-              >Terms of Service</a
-            >
-            <a href="/contact" class="text-gray-400 hover:text-white"
-              >Contact Us</a
-            >
-          </div>
+  <footer class="bg-gradient-to-r from-gray-800 to-gray-600 text-white py-2">
+    <div class="container mx-auto text-center">
+      <div class="flex flex-col sm:flex-row justify-between items-center">
+        <div class="mb-4 sm:mb-0">
+          <p>&copy; 2025 {{ config.APP_NAME }} All rights reserved.</p>
+        </div>
+        <div class="flex space-x-4">
+          <a href="/privacy-policy" class="text-gray-400 hover:text-white">Privacy Policy</a>
+          <a href="/accept-terms" class="text-gray-400 hover:text-white">Terms of Service</a>
+          <a href="/contact" class="text-gray-400 hover:text-white">Contact Us</a>
         </div>
       </div>
-    </footer>
+    </div>
+  </footer>
 
-    {% endblock %}
-  </body>
+  {% endblock %}
+</body>
+
 </html>

@@ -1,0 +1,73 @@
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+  <!-- Main Layout -->
+  <div class="flex justify-center items-center w-full h-screen">
+    <!-- Page Content Here -->
+    <div class="w-full max-w-4xl">
+      <h1 class="text-4xl text-center font-semibold">Your Page Content</h1>
+      <!-- Button to open the modal -->
+      <button
+        onclick="openModal('<p>This is some custom content inside the modal.</p>')"
+        class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
+        Open Modal
+      </button>
+    </div>
+  </div>
+
+  <!-- Base Modal -->
+  <div
+    id="baseModal"
+    class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50 hidden"
+  >
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Modal Title</h2>
+        <button
+          type="button"
+          onclick="closeModal()"
+          class="text-gray-500 hover:text-gray-800"
+        >
+          &times;
+        </button>
+      </div>
+
+      <!-- Container for dynamic content -->
+      <div id="modalContainer">
+        <!-- Default content can go here or be injected dynamically -->
+        <p class="text-gray-700">This is the base modal content.</p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-4 flex justify-end gap-4">
+        <button
+          onclick="closeModal()"
+          class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600"
+        >
+          Close
+        </button>
+        <button
+          type="submit"
+          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+        >
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(content) {
+      // Display the modal
+      document.getElementById("baseModal").classList.remove("hidden");
+
+      // Optionally inject custom content into the modal container
+      document.getElementById("modalContainer").innerHTML = content;
+    }
+
+    function closeModal() {
+      // Hide the modal and reset its content
+      document.getElementById("baseModal").classList.add("hidden");
+      document.getElementById("modalContainer").innerHTML = ""; // Clear content if needed
+    }
+  </script>
+</body>

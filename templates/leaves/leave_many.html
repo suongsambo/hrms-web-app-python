@@ -1,133 +1,256 @@
 {% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
 content %}
+
+<head>
+  <link
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    rel="stylesheet"
+  />
+</head>
+
 <body class="bg-gray-100 flex justify-center items-center min-h-screen">
-  <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
-    <h2 class="text-2xl font-bold mb-4 text-center">Add Multiple Leaves</h2>
-    <form
-      method="POST"
-      action="{{ url_for('add_many_leave') }}"
-      class="space-y-4"
-    >
-      <div>
-        <label for="employee_id" class="hidden">Employee</label>
-        <input
-          type="text"
-          id="employee_id"
-          name="employee_id"
-          value="{{ current_user.employee_id }}"
-          hidden
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
-
-      <div>
-        <label for="requested_by" class="hidden">Requested By</label>
-        <input
-          type="text"
-          id="requested_by"
-          name="requested_by"
-          hidden
-          value="{{ current_user.username }}"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label for="leave_type" class="block text-gray-700 text-sm font-medium">
-          Select Leave Type:
-        </label>
-        <select
-          id="leave_type"
-          name="leave_type"
-          class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+  <!-- Modal -->
+  <div
+    id="leaveModal"
+    class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50"
+  >
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Add Leave</h2>
+        <button
+          type="button"
+          onclick="closeModal()"
+          class="text-gray-500 hover:text-gray-800"
         >
-          <option value="annualLeave">Annual Leave</option>
-          <option value="sickLeave">Sick Leave</option>
-          <option value="maternityLeave">Maternity Leave</option>
-          <option value="specialLeave">Special Leave</option>
-        </select>
+          &times;
+        </button>
       </div>
 
-      <div>
-        <label for="start_date" class="block font-medium">Start Date:</label>
-        <input
-          type="date"
-          name="start_date"
-          required
-          class="w-full p-2 border rounded-lg"
-        />
-      </div>
-
-      <div>
-        <label for="end_date" class="block font-medium">End Date:</label>
-        <input
-          type="date"
-          name="end_date"
-          required
-          class="w-full p-2 border rounded-lg"
-        />
-      </div>
-
-      <div>
-        <label for="reason" class="block font-medium">Reason:</label>
-        <textarea
-          name="reason"
-          required
-          class="w-full p-2 border rounded-lg"
-        ></textarea>
-      </div>
-
-      <div>
-        <label for="user_ids" class="block font-medium">Assign to Users:</label>
-        <!-- Buttons to select and deselect all options -->
-        <div class="mb-2">
-          <button required type="button" onclick="selectAll()">
-            Select All
-          </button>
-          <button type="button" onclick="deselectAll()">Deselect All</button>
-        </div>
-        <select
-          id="user_ids"
-          name="user_ids"
-          multiple
-          required
-          class="w-full p-2 border rounded-lg"
-        >
-          {% if users %}
-          <option value="" selected disabled hidden>Select All</option>
-          {% for user in users %}
-          <option value="{{ user.id }}">{{ user.username }}</option>
-          {% endfor %} {% else %}
-          <option value="" disabled>No Users Available</option>
-          {% endif %}
-        </select>
-      </div>
-
-      <button
-        type="submit"
-        class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
+      <form
+        method="POST"
+        action="{{ url_for('add_many_leave') }}"
+        class="space-y-4"
       >
-        Submit
-      </button>
-    </form>
+        <div>
+          <label for="employee_id" class="hidden">Employee</label>
+          <input
+            type="text"
+            id="employee_id"
+            name="employee_id"
+            value="{{ current_user.employee_id }}"
+            hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+
+        <div>
+          <label for="requested_by" class="hidden">Requested By</label>
+          <input
+            type="text"
+            id="requested_by"
+            name="requested_by"
+            hidden
+            value="{{ current_user.username }}"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+
+        <div class="mb-4">
+          <label
+            for="leave_type"
+            class="block text-gray-700 text-sm font-medium"
+          >
+            Select Leave Type:
+          </label>
+          <select
+            id="leave_type"
+            name="leave_type"
+            class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="annualLeave">Annual Leave</option>
+            <option value="sickLeave">Sick Leave</option>
+            <option value="maternityLeave">Maternity Leave</option>
+            <option value="specialLeave">Special Leave</option>
+          </select>
+        </div>
+
+        <!-- Start Date with Icon -->
+        <div class="relative">
+          <label
+            for="start_date"
+            class="block text-sm font-medium text-gray-700"
+            >Start Date</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="start_date"
+              name="start_date"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            <!-- Calendar Icon -->
+            <span
+              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+            >
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- End Date with Icon -->
+        <div class="relative">
+          <label for="end_date" class="block text-sm font-medium text-gray-700"
+            >End Date</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="end_date"
+              name="end_date"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            <!-- Calendar Icon -->
+            <span
+              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+            >
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <label for="reason" class="block text-gray-700 text-sm font-medium"
+            >Reason:</label
+          >
+          <textarea
+            name="reason"
+            required
+            placeholder="250 words"
+            class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 resize-none placeholder-gray-500"
+          ></textarea>
+        </div>
+        <div>
+          <label for="user_ids" class="block text-gray-700 text-sm font-medium"
+            >Assign to Users:</label
+          >
+
+          <!-- Buttons to select and deselect all options -->
+          <div class="mb-2">
+            <button
+              type="button"
+              onclick="selectAll()"
+              class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 text-sm"
+            >
+              <i class="fas fa-check-square mr-1"></i> Select All
+            </button>
+            <button
+              type="button"
+              onclick="deselectAll()"
+              class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 ml-2 text-sm"
+            >
+              <i class="fas fa-square mr-1"></i> Deselect All
+            </button>
+          </div>
+
+          <!-- Checkboxes for each user -->
+          <div class="space-y-2 flex flex-wrap">
+            {% for user in users %}
+            <div class="flex items-center mr-4 mb-2">
+              <input
+                type="checkbox"
+                id="user_{{ user.id }}"
+                name="user_ids"
+                value="{{ user.id }}"
+                class="form-checkbox h-5 w-5 text-blue-500 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
+                onclick="updateSelectAllButton()"
+              />
+              <label for="user_{{ user.id }}" class="ml-2 text-gray-800"
+                >{{ user.username }}</label
+              >
+            </div>
+            {% endfor %} {% if not users %}
+            <div class="text-gray-500">No Users Available</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="flex justify-between gap-4">
+          <button
+            type="submit"
+            class="w-1/2 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center"
+          >
+            <i class="fas fa-paper-plane mr-2"></i> Submit
+          </button>
+          <a
+            href="{{ url_for('view_leaves') }}"
+            class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center"
+          >
+            <i class="fas fa-arrow-left mr-2"></i> Back
+          </a>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script>
-    // Function to select all options
-    function selectAll() {
-      const selectBox = document.getElementById("user_ids");
-      for (let i = 0; i < selectBox.options.length; i++) {
-        selectBox.options[i].selected = true;
-      }
+    function closeModal() {
+      document.getElementById("leaveModal").classList.add("hidden");
+      window.location.href = "{{ url_for('view_leaves') }}"; // Redirect after closing the modal
     }
 
-    // Function to deselect all options
+    // Function to select all checkboxes
+    function selectAll() {
+      const checkboxes = document.querySelectorAll('input[name="user_ids"]');
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = true; // Set all checkboxes to checked
+      });
+      updateSelectAllButton(); // Update Select All button state
+    }
+
+    // Function to deselect all checkboxes
     function deselectAll() {
-      const selectBox = document.getElementById("user_ids");
-      for (let i = 0; i < selectBox.options.length; i++) {
-        selectBox.options[i].selected = false;
+      const checkboxes = document.querySelectorAll('input[name="user_ids"]');
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = false; // Set all checkboxes to unchecked
+      });
+      updateSelectAllButton(); // Update Select All button state
+    }
+
+    // Function to update the Select All button state based on checkboxes
+    function updateSelectAllButton() {
+      const checkboxes = document.querySelectorAll('input[name="user_ids"]');
+      const selectAllButton = document.querySelector(
+        'button[onclick="selectAll()"]'
+      );
+      const checkedCheckboxes = Array.from(checkboxes).filter(
+        (checkbox) => checkbox.checked
+      );
+
+      // If all checkboxes are checked, change Select All button to unselect all
+      if (checkedCheckboxes.length === checkboxes.length) {
+        selectAllButton.innerHTML =
+          '<i class="fas fa-check-square mr-2"></i> Deselect All';
+      } else {
+        selectAllButton.innerHTML =
+          '<i class="fas fa-check-square mr-2"></i> Select All';
       }
     }
+  </script>
+
+  <script>
+    flatpickr("#start_date", {
+      dateFormat: "Y-m-d",
+      minDate: "today", // Optional: Disable past dates
+      maxDate: new Date().fp_incr(365), // Optional: Enable a year range
+    });
+
+    flatpickr("#end_date", {
+      dateFormat: "Y-m-d",
+      minDate: "today", // Optional: Disable past dates
+      maxDate: new Date().fp_incr(365), // Optional: Enable a year range
+    });
   </script>
 </body>
 {% endblock %}

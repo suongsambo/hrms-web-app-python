@@ -384,6 +384,7 @@ def init_db():
                 spm_status TEXT DEFAULT 'Pending',
                 dd_status TEXT DEFAULT 'Pending',
                 manager_status TEXT DEFAULT 'Pending',
+                category TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (employee_id) REFERENCES employees(ID) ON DELETE CASCADE
@@ -641,6 +642,90 @@ def init_db():
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('dc', hashed_password, 'dc@example.com', '010655037', 0, 60, 'SYS'))
+
+        # Create CEO user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'ceo'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'dc' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('ceo', hashed_password, 'ceo@example.com', '010655037', 0, 180, 'SYS'))
+
+            # Create CCA user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'cca'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'dc' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('cca', hashed_password, 'cca@example.com', '010655037', 0, 35, 'SYS'))
+
+        # Create CS user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'cs'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'dc' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('cs', hashed_password, 'cs@example.com', '010655037', 0, 160, 'SYS'))
+
+        # Create Project Consultant user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'pc'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'dc' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('pc', hashed_password, 'pc@example.com', '010655037', 0, 155, 'SYS'))
+
+        # Create HRC user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'hrc'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'dc' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('hrc', hashed_password, 'hrc@example.com', '010655037', 0, 165, 'SYS'))
+
+        # Create CB user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'cb'").fetchone()
+
+        # If the user does not exist, create the default user
+        if not user_exists:
+            # Hash the password for 'dc' (e.g., '1234')
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('cb', hashed_password, 'cb@example.com', '010655037', 0, 150, 'SYS'))
 
             # Create Manager user
         user_exists = conn.execute(
@@ -2133,6 +2218,51 @@ def add_leave_hours():
     return render_template('/leaves/add_leave_hours.html', employees=employees)
 
 
+# @app.route('/leave_many/add', methods=['GET', 'POST'])
+# def add_many_leave():
+#     employees = []
+#     users = []
+
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+#         users = conn.execute(
+#             'SELECT id, username FROM users WHERE RoleDefault IN (40, 45, 60, 65)').fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by))
+#             leave_id = cursor.lastrowid
+
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('leaves/leave_many.html', employees=employees, users=users)
+
+
 @app.route('/leave_many/add', methods=['GET', 'POST'])
 def add_many_leave():
     employees = []
@@ -2141,7 +2271,7 @@ def add_many_leave():
     with get_db_connection() as conn:
         employees = conn.execute('SELECT id, name FROM employees').fetchall()
         users = conn.execute(
-            'SELECT id, username FROM users WHERE RoleDefault IN (40, 45, 60, 65)').fetchall()
+            'SELECT id, username FROM users WHERE RoleDefault IN (35,40,45,180)').fetchall()
 
     if request.method == 'POST':
         employee_id = request.form['employee_id']
@@ -2153,16 +2283,25 @@ def add_many_leave():
         type_of_leave = request.form.get('type_of_leave', 'D')
         user_ids = request.form.getlist('user_ids')
 
+        # Convert dates and calculate service_count (number of leave days)
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-        service_count = (end_date_obj - start_date_obj).days + 1
+        service_count = (end_date_obj - start_date_obj).days + \
+            1  # Include both start and end date
+        # Determine leave category
+        if service_count <= 2:
+            category = "S"
+        elif 3 <= service_count <= 5:
+            category = "M"
+        else:
+            category = "L"
 
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by))
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category))
             leave_id = cursor.lastrowid
 
             for user_id in user_ids:

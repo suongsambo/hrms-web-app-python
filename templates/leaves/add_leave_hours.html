@@ -1,129 +1,167 @@
 {% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
 content %}
-<body class="bg-gray-100 py-8">
-  <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-    <h2 class="text-2xl font-semibold text-gray-700 mb-6">Add Leave Hours</h2>
 
-    <form
-      method="POST"
-      action="{{ url_for('add_leave_hours') }}"
-      class="space-y-6"
-    >
-      <!-- Employee selection -->
-      <div>
-        <label for="employee_id" class="hidden">Employee</label>
-        <input
-          type="text"
-          id="employee_id"
-          name="employee_id"
-          value="{{ current_user.employee_id }}"
-          hidden
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
+<head>
+  <link
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    rel="stylesheet"
+  />
+</head>
 
-      <!-- Requested By -->
-      <div>
-        <label for="requested_by" class="hidden">Requested By</label>
-        <input
-          type="text"
-          id="requested_by"
-          name="requested_by"
-          hidden
-          value="{{ current_user.username }}"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
-      </div>
-
-      <!-- Leave Type selection -->
-      <div class="mb-4">
-        <label for="leave_type" class="block text-gray-700 text-sm font-medium">
-          Select Leave Type:
-        </label>
-        <select
-          id="leave_type"
-          name="leave_type"
-          class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="annualLeave">Annual Leave</option>
-          <option value="sickLeave">Sick Leave</option>
-          <option value="maternityLeave">Maternity Leave</option>
-          <option value="specialLeave">Special Leave</option>
-        </select>
-      </div>
-
-      <!-- Start Date with Icon -->
-      <div class="relative">
-        <label for="start_date" class="block text-sm font-medium text-gray-700"
-          >Start Date</label
-        >
-        <div class="relative">
-          <input
-            type="text"
-            id="start_date"
-            name="start_date"
-            required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-          <!-- Calendar Icon -->
-          <span
-            class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
-          >
-            <i class="fas fa-calendar-alt"></i>
-          </span>
-        </div>
-      </div>
-
-      <!-- End Date with Icon -->
-      <div class="relative">
-        <label for="end_date" class="block text-sm font-medium text-gray-700"
-          >End Date</label
-        >
-        <div class="relative">
-          <input
-            type="text"
-            id="end_date"
-            name="end_date"
-            required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
-          <!-- Calendar Icon -->
-          <span
-            class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
-          >
-            <i class="fas fa-calendar-alt"></i>
-          </span>
-        </div>
-      </div>
-
-      <!-- Reason -->
-      <div>
-        <label for="reason" class="block text-sm font-medium text-gray-700"
-          >Reason for Leave</label
-        >
-        <textarea
-          id="reason"
-          name="reason"
-          rows="4"
-          required
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        ></textarea>
-      </div>
-
-      <!-- Submit Button -->
-      <div class="flex justify-end">
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+  <!-- Modal -->
+  <div
+    id="leaveModal"
+    class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50"
+  >
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">Add Leave</h2>
         <button
-          type="submit"
-          class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center space-x-2"
+          type="button"
+          onclick="closeModal()"
+          class="text-gray-500 hover:text-gray-800"
         >
-          <i class="fas fa-paper-plane"></i>
-          <span>Submit</span>
+          &times;
         </button>
       </div>
-    </form>
+
+      <form
+        method="POST"
+        action="{{ url_for('add_leave_hours') }}"
+        class="space-y-6"
+      >
+        <!-- Employee selection -->
+        <div>
+          <label for="employee_id" class="hidden">Employee</label>
+          <input
+            type="text"
+            id="employee_id"
+            name="employee_id"
+            value="{{ current_user.employee_id }}"
+            hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+
+        <!-- Requested By -->
+        <div>
+          <label for="requested_by" class="hidden">Requested By</label>
+          <input
+            type="text"
+            id="requested_by"
+            name="requested_by"
+            hidden
+            value="{{ current_user.username }}"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+
+        <!-- Leave Type selection -->
+        <div class="mb-4">
+          <label
+            for="leave_type"
+            class="block text-gray-700 text-sm font-medium"
+          >
+            Select Leave Type:
+          </label>
+          <select
+            id="leave_type"
+            name="leave_type"
+            class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          >
+            <option value="annualLeave">Annual Leave</option>
+            <option value="sickLeave">Sick Leave</option>
+            <option value="maternityLeave">Maternity Leave</option>
+            <option value="specialLeave">Special Leave</option>
+          </select>
+        </div>
+
+        <!-- Start Date with Icon -->
+        <div class="relative">
+          <label
+            for="start_date"
+            class="block text-sm font-medium text-gray-700"
+            >Start Date</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="start_date"
+              name="start_date"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            <!-- Calendar Icon -->
+            <span
+              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+            >
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- End Date with Icon -->
+        <div class="relative">
+          <label for="end_date" class="block text-sm font-medium text-gray-700"
+            >End Date</label
+          >
+          <div class="relative">
+            <input
+              type="text"
+              id="end_date"
+              name="end_date"
+              required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            />
+            <!-- Calendar Icon -->
+            <span
+              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+            >
+              <i class="fas fa-calendar-alt"></i>
+            </span>
+          </div>
+        </div>
+
+        <!-- Reason -->
+        <div>
+          <label for="reason" class="block text-sm font-medium text-gray-700"
+            >Reason for Leave</label
+          >
+          <textarea
+            id="reason"
+            name="reason"
+            rows="4"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          ></textarea>
+        </div>
+
+        <div class="flex justify-between gap-2">
+          <button
+            type="submit"
+            class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center space-x-2"
+          >
+            <i class="fas fa-paper-plane"></i>
+            <span>Submit</span>
+          </button>
+          <a
+            href="{{ url_for('view_leaves') }}"
+            class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center"
+          >
+            <i class="fas fa-arrow-left mr-2"></i> Back
+          </a>
+        </div>
+      </form>
+    </div>
   </div>
 
   <script>
+    function closeModal() {
+      document.getElementById("leaveModal").classList.add("hidden");
+      window.location.href = "{{ url_for('view_leaves') }}"; // Redirect after closing the modal
+    }
+
     document.addEventListener("DOMContentLoaded", function () {
       flatpickr("#start_date", {
         enableTime: true,

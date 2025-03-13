@@ -3,23 +3,28 @@
 {% block title %}Add User{% endblock %}
 
 {% block content %}
+
 <body class="container mx-auto bg-white py-8 px-3">
     <div class="max-w-4xl mx-auto mt-10 p-8 bg-white rounded-lg shadow-xl">
         <h2 class="text-3xl font-bold text-gray-800 mb-6">Add User</h2>
-        <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6" enctype="multipart/form-data">
+        <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6"
+            enctype="multipart/form-data">
             <!-- Username -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Username</label>
-                <input type="text" name="username" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="username" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Branch -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Branch</label>
-                <select name="branch" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <select name="branch" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="">Select a Branch</option>
                     {% for branch in branches %}
-                    <option value="{{ branch['Branch'] }}" {% if selected_branch == branch['ID'] %}selected{% endif %}>{{ branch['Branch'] }}</option>
+                    <option value="{{ branch['Branch'] }}" {% if selected_branch==branch['ID'] %}selected{% endif %}>{{
+                        branch['Branch'] }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -27,25 +32,22 @@
             <!-- Role -->
             <div>
                 <label for="role_default" class="block text-gray-700 font-semibold mb-2">Select Role</label>
-                <select
-                    id="role_default"
-                    name="role_default"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
+                <select id="role_default" name="role_default"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="" disabled selected hidden>Select Role</option>
                     <option value="1">GUEST</option>
-                    <option value="10">CUSTOMER</option>
-                    <option value="15">NONE</option>
+                    <!-- <option value="10">CUSTOMER</option>  -->
+                    <!-- <option value="15">NONE</option> -->
                     <option value="20">Employee</option>
                     <option value="25">TELLER</option>
                     <option value="30">CC</option>
                     <option value="35">CCC</option>
                     <option value="40">BM</option>
                     <option value="45">SPM</option>
-                    <option value="50">PROJECT</option>
-                    <option value="55">SHAREHOLDER</option>
+                    <!-- <option value="50">PROJECT</option> -->
+                    <!-- <option value="55">SHAREHOLDER</option> -->
                     <option value="60">MANAGER</option>
-                    <option value="65">SUPERVISOR</option>
+                    <!-- <option value="65">SUPERVISOR</option>
                     <option value="70">SALE</option>
                     <option value="75">PURCHASE</option>
                     <option value="80">STOCK</option>
@@ -56,88 +58,111 @@
                     <option value="94">FINANCE</option>
                     <option value="96">HR</option>
                     <option value="98">IT</option>
-                    <option value="99">SUPPLIER</option>
+                    <option value="99">SUPPLIER</option> -->
                     <option value="100">ADMIN</option>
-                    <option value="100">OWNER</option>
+                    <!-- <option value="100">OWNER</option> -->
+                    <option value="140">CEO</option>
+                    <option value="145">DD</option>
+                    <option value="150">CB</option>
+                    <option value="155">PC</option>
+                    <option value="160">CS</option>
+                    <option value="165">HRC</option>
+                    <option value="170">HQS</option>
+                    <option value="175">CCA</option>
+                    <option value="180">PMS</option>
                 </select>
             </div>
 
             <!-- Password -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Password</label>
-                <input type="password" name="password" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="password" name="password" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Email -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Email</label>
-                <input type="email" name="email" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="email" name="email" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Mobile Number -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Mobile Number</label>
-                <input type="text" name="mobile1" required class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="mobile1" required
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Khmer First Name -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">First Name (Khmer)</label>
-                <input type="text" name="first_name_kh" class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="first_name_kh"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- Khmer Last Name -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Last Name (Khmer)</label>
-                <input type="text" name="last_name_kh" class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="last_name_kh"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- English First Name -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">First Name (English)</label>
-                <input type="text" name="first_name_en" class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="first_name_en"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <!-- English Last Name -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Last Name (English)</label>
-                <input type="text" name="last_name_en" class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <input type="text" name="last_name_en"
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
 
             <div class="col-span-full">
                 <label for="cover-photo" class="block text-sm/6 font-medium text-gray-900">Cover photo</label>
                 <div class="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                  <div class="text-center">
-                    <svg class="mx-auto size-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" data-slot="icon">
-                      <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z" clip-rule="evenodd" />
-                    </svg>
-                    <div class="mt-4 flex text-sm/6 text-gray-600">
-                      <label for="image_data" class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500">
-                        <span>Upload a file</span>
-                        <input type="file" name="image" id="image_data" class="sr-only">
-                      </label>
-                      <p class="pl-1">or drag and drop</p>
+                    <div class="text-center">
+                        <svg class="mx-auto size-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor"
+                            aria-hidden="true" data-slot="icon">
+                            <path fill-rule="evenodd"
+                                d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <div class="mt-4 flex text-sm/6 text-gray-600">
+                            <label for="image_data"
+                                class="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 focus-within:outline-hidden hover:text-indigo-500">
+                                <span>Upload a file</span>
+                                <input type="file" name="image" id="image_data" class="sr-only">
+                            </label>
+                            <p class="pl-1">or drag and drop</p>
+                        </div>
+                        <p class="text-xs/5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
                     </div>
-                    <p class="text-xs/5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
-                  </div>
                 </div>
-              </div>
-          
+            </div>
+
 
             <!-- Admin Checkbox -->
             <div>
-                <input type="checkbox" name="is_admin" value="1" class="h-5 w-5 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                <input type="checkbox" name="is_admin" value="1"
+                    class="h-5 w-5 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
                 <label class="text-gray-700">Is Admin</label>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-start mt-6 space-x-4">
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
                     <span class="material-symbols-outlined">send</span>
                     <span>Submit</span>
                 </button>
                 <a href="{{ url_for('list_users') }}" class="text-gray-500">
-                    <button type="button" class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
+                    <button type="button"
+                        class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
                         <span class="material-symbols-outlined">cancel</span>
                         <span>Cancel</span>
                     </button>
