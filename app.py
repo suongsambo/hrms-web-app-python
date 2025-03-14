@@ -560,15 +560,13 @@ def init_db():
         ''')
 
         # Check if the user 'bo' exists
-
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'bo'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'bo' (e.g., '1111')
+
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
+
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, Branch)
                 VALUES (?, ?, ?, ?, ?, ?)
@@ -577,12 +575,8 @@ def init_db():
         # Create John Doe user
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'doe'").fetchone()
-
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'john_doe' (e.g., '1234')
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -591,157 +585,139 @@ def init_db():
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'son'").fetchone()
 
-        # If the user does not exist, create the default user
+        # Create John Doe user
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'hqs'").fetchone()
         if not user_exists:
-            # Hash the password for 'son' (e.g., '1234')
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', ('hqs', hashed_password, 'hqs@example.com', '010655037', 0, 20, 'HQ'))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'son'").fetchone()
+
+        if not user_exists:
+
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('son', hashed_password, 'son@example.com', '010655037', 0, 20, 'SYS'))
 
-   # Create John Doe user
+        # Create John Doe user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'bm'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'pm'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'bm' (e.g., '1234')
+
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
+
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('bm', hashed_password, 'bm@example.com', '010655037', 0, 40, 'SYS'))
+            ''', ('pm', hashed_password, 'pm@example.com', '010655037', 0, 140, 'SYS'))
 
         # Create SQM user
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'spm'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'sqm' (e.g., '1234')
+
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
+
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('spm', hashed_password, 'spm@example.com', '010655037', 0, 45, 'SYS'))
+            ''', ('spm', hashed_password, 'spm@example.com', '010655037', 0, 145, 'SYS'))
 
       # Create DC user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'dc'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'dgm'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'dc' (e.g., '1234')
+
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
+
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('dc', hashed_password, 'dc@example.com', '010655037', 0, 60, 'SYS'))
+            ''', ('dgm', hashed_password, 'dgm@example.com', '010655037', 0, 175, 'SYS'))
 
-        # Create CEO user
+        # Create gm user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'ceo'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'gm'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'dc' (e.g., '1234')
+
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
+
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('ceo', hashed_password, 'ceo@example.com', '010655037', 0, 180, 'SYS'))
+            ''', ('gm', hashed_password, 'gm@example.com', '010655037', 0, 180, 'SYS'))
 
-            # Create CCA user
+        # Create CCA user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'cca'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'ccc'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'dc' (e.g., '1234')
+
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
+
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('cca', hashed_password, 'cca@example.com', '010655037', 0, 35, 'SYS'))
+            ''', ('ccc', hashed_password, 'ccc@example.com', '010655037', 0, 35, 'SYS'))
 
         # Create CS user
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'cs'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'dc' (e.g., '1234')
+
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('cs', hashed_password, 'cs@example.com', '010655037', 0, 160, 'SYS'))
+            ''', ('cs', hashed_password, 'cs@example.com', '010655037', 0, 165, 'SYS'))
 
         # Create Project Consultant user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'pc'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'hd'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'dc' (e.g., '1234')
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('pc', hashed_password, 'pc@example.com', '010655037', 0, 155, 'SYS'))
+            ''', ('hd', hashed_password, 'hd@example.com', '010655037', 0, 170, 'SYS'))
 
         # Create HRC user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'hrc'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'hrd'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'dc' (e.g., '1234')
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('hrc', hashed_password, 'hrc@example.com', '010655037', 0, 165, 'SYS'))
+            ''', ('hrd', hashed_password, 'hrd@example.com', '010655037', 0, 160, 'SYS'))
 
         # Create CB user
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'cb'").fetchone()
 
-        # If the user does not exist, create the default user
         if not user_exists:
-            # Hash the password for 'dc' (e.g., '1234')
             hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('cb', hashed_password, 'cb@example.com', '010655037', 0, 150, 'SYS'))
+            ''', ('cb', hashed_password, 'cb@example.com', '010655037', 0, 190, 'SYS'))
 
-            # Create Manager user
-        user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'manager'").fetchone()
-
-        # If the user does not exist, create the default user
-        if not user_exists:
-            # Hash the password for 'manager' (e.g., '1234')
-            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            # Insert the default user into the table
-            conn.execute('''
-                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('manager', hashed_password, 'manager@example.com', '010655037', 0, 65, 'SYS'))
-
-     # Check if the 'HR' department already exists
+        # Check if the 'HR' department already exists
         department_exists = conn.execute(
             "SELECT 1 FROM departments WHERE Name = 'HR'").fetchone()
 
@@ -756,9 +732,8 @@ def init_db():
         position_exists = conn.execute(
             "SELECT 1 FROM positions WHERE PositionName = 'HR Manager'").fetchone()
 
-        # If the 'HR Manager' position doesn't exist, insert it
         if not position_exists:
-            # Fetch the department ID for 'HR'
+
             department_id = conn.execute(
                 "SELECT ID FROM departments WHERE Name = 'HR'").fetchone()[0]
 
@@ -767,11 +742,8 @@ def init_db():
                 VALUES (?, ?, ?)
             ''', ('HR Manager', 'Responsible for managing human resources', department_id))
 
-            # Check if the 'SYS' branch already exists
         branch_exists = conn.execute(
             "SELECT 1 FROM branches WHERE Branch = 'SYS'").fetchone()
-
-        # If the 'SYS' branch doesn't exist, insert it
         if not branch_exists:
             conn.execute('''
                 INSERT INTO branches (Branch, Status, CreateDate, StartDate, Description, BranchManagerName, ContactNumber,
@@ -779,6 +751,18 @@ def init_db():
                                       LocalBranchManagerName, BranchProjectId, CapitalInjectionId, GroupID, MemberID)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', ('SYS', 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
+                  '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
+                  'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
+
+        branch_exists = conn.execute(
+            "SELECT 1 FROM branches WHERE Branch = 'HQ'").fetchone()
+        if not branch_exists:
+            conn.execute('''
+                INSERT INTO branches (Branch, Status, CreateDate, StartDate, Description, BranchManagerName, ContactNumber,
+                                      Address, DistrictProvince, RegisterDate, LocalDescription, LocalAddress,
+                                      LocalBranchManagerName, BranchProjectId, CapitalInjectionId, GroupID, MemberID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('HQ', 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
                   '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
                   'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
 
@@ -847,17 +831,38 @@ def init_db():
                 1000,
                 1,
                 'SYS',
-                3,
+                4,
                 '010655037',
                 'kimminson@example.com',
                 '2025-02-28',
                 'Active'
             ))
 
+        employee_exists = conn.execute(
+            "SELECT 1 FROM employees WHERE email = 'hqs@example.com'").fetchone()
+
+        if not employee_exists:
+            conn.execute('''
+                INSERT INTO employees (
+                    name, age, department, salary, position_id, branch, user_id, phone_number, email,
+                    joining_date, status
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                'HQ Staff',
+                30,
+                'HR',
+                1000,
+                1,
+                'HQ',
+                3,
+                '010655037',
+                'hqs@example.com',
+                '2025-02-28',
+                'Active'
+            ))
+
     conn.commit()
-
-
-# Example usage
 
 
 # LIST: Show all confirmations
@@ -948,8 +953,6 @@ def edit_confirm(id):
         return redirect(url_for('list_confirms'))
 
     return render_template('/confirms/edit_confirm.html', confirm_info=confirm_info)
-
-# DELETE: Remove a confirmation
 
 
 @app.route('/confirm/delete/<int:id>', methods=['POST'])
@@ -2049,7 +2052,7 @@ def view_leaves():
             return render_template('/leaves/view_leaves.html', leaves=leaves)
 
         # Role 40 (e.g., branch-level users) will be redirected to filter by branch name
-        if current_user.role_default == 40:
+        if current_user.role_default == 140:
             return redirect(url_for('filter_leaves_by_branch_name'))
 
         # Role 20 (e.g., employee-level users) will be redirected to filter by employee ID
@@ -2105,20 +2108,15 @@ def filter_leaves_by_employee_id(employee_id):
     return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
 
 
-@app.route('/leaves/branch', methods=['GET'])
-def filter_leaves_by_branch_name():
-    if current_user.role_default in [45, 40, 60, 65, 35, 180]:
+@app.route('/leaves/ccc', methods=['GET'])
+def leaves_by_branch_and_ccc_category():
+    if current_user.role_default in [35]:
         pass
-    elif not current_user.is_authenticated or current_user.role_default != 40:
+    elif not current_user.is_authenticated or current_user.role_default != 35:
         return redirect(url_for('access_denied'))
-
-    # Get the optional branch_name parameter from the request
     branch_name = request.args.get('branch_name')
 
-    # Define SQL queries
     if branch_name:
-
-        # Query with branch_name filter
         query = '''
             SELECT 
                 l.id, 
@@ -2137,11 +2135,10 @@ def filter_leaves_by_branch_name():
                 l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE e.branch = ?
+            WHERE e.branch = ? AND l.category = 'S' OR l.type_of_leave = 'T'
         '''
         params = (branch_name,)
     else:
-        # Default query without any branch filter
         query = '''
             SELECT 
                 l.id, 
@@ -2160,16 +2157,403 @@ def filter_leaves_by_branch_name():
                 l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE l.category = 'S'  OR l.type_of_leave = 'T'
         '''
-        params = ()  # No filtering by branch name
+        params = ()
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template('leaves/leaves_ccc_verify.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/spm', methods=['GET'])
+def leaves_by_branch_and_spm():
+    if current_user.role_default in [145]:
+        pass
+    elif not current_user.is_authenticated or current_user.role_default != 145:
+        return redirect(url_for('access_denied'))
+    branch_name = request.args.get('branch_name')
+
+    if branch_name:
+        query = '''
+            SELECT 
+                l.id, 
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type, 
+                l.start_date, 
+                l.end_date, 
+                l.reason, 
+                l.status,
+                l.type_of_leave, 
+                l.verified_by, 
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE e.branch = ? AND l.category = 'S' OR l.type_of_leave = 'T'
+        '''
+        params = (branch_name,)
+    else:
+        query = '''
+            SELECT 
+                l.id, 
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type, 
+                l.start_date, 
+                l.end_date, 
+                l.reason, 
+                l.status,
+                l.type_of_leave, 
+                l.verified_by, 
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE l.category = 'M'  OR l.type_of_leave = 'T'
+        '''
+        params = ()
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template('leaves/leaves_spm_approve.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/gm', methods=['GET'])
+def leaves_by_gm():
+    if current_user.role_default in [180]:
+        pass
+    elif not current_user.is_authenticated or current_user.role_default != 180:
+        return redirect(url_for('access_denied'))
+
+    # Simplified query without branch_name
+    query = '''
+        SELECT 
+            l.id, 
+            e.name AS employee_name,
+            e.branch AS branch_name,
+            l.leave_type, 
+            l.start_date, 
+            l.end_date, 
+            l.reason, 
+            l.status,
+            l.type_of_leave, 
+            l.verified_by, 
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE l.category = 'M' OR l.category = 'L'
+    '''
+    params = ()  # No branch_name parameter needed
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template('leaves/leaves_gm_approve.html', leaves=leaves)
+
+
+# @app.route('/leaves/branch', methods=['GET'])
+# def filter_leaves_by_branch_name():
+#     if current_user.role_default in [145, 140, 35, 180]:
+#         pass
+#     elif not current_user.is_authenticated or current_user.role_default != 140:
+#         return redirect(url_for('access_denied'))
+
+#     # Get the optional branch_name parameter from the request
+#     branch_name = request.args.get('branch_name')
+
+#     # Define SQL queries
+#     if branch_name:
+#         # Query with branch_name filter
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE e.branch = ?
+#         '''
+#         params = (branch_name,)
+#     else:
+#         # Default query without any branch filter
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#         '''
+#         params = ()  # No filtering by branch name
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leaves/branch<string:branch_name>', methods=['GET'])
+# def filter_leaves_by_branch_name():
+#     if current_user.role_default in [145, 140, 35, 180]:
+#         pass
+#     elif not current_user.is_authenticated or current_user.role_default != 140:
+#         return redirect(url_for('access_denied'))
+
+#     # Get the optional branch_name parameter from the request
+#     branch_name = request.args.get('branch_name')
+
+#     # Log to verify branch_name is being passed
+#     if branch_name:
+#         app.logger.debug(f"Filtering by branch: {branch_name}")
+#     else:
+#         app.logger.debug("No branch filter applied.")
+
+#     # Define SQL queries
+#     if branch_name:
+#         # Query with branch_name filter
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
+#         '''
+#         params = (branch_name,)  # Filter by branch name
+#     else:
+#         # Default query without any branch filter
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE (l.category = 'S' OR l.category = 'M')
+#         '''
+#         params = ()  # No filtering by branch name
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return f"Database error: {e}", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
+# def filter_leaves_by_branch_name(branch_name):
+#     if current_user.role_default in [145, 140, 35, 180]:
+#         pass
+#     elif not current_user.is_authenticated or current_user.role_default != 140:
+#         return redirect(url_for('access_denied'))
+
+#     # Log to verify branch_name is being passed
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     # Define SQL query with branch filter
+#     query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             e.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
+#     '''
+#     params = (branch_name,)
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
+# @login_required
+# def filter_leaves_by_branch_name(branch_name):
+#     # First check: if the user is role 140 and has a branch assigned, redirect to the dashboard
+#     if current_user.role_default == 140 and current_user.branch:
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif not current_user.is_authenticated or current_user.role_default != 140:
+#         # Redirect if user is not authenticated or role doesn't match
+#         return redirect(url_for('access_denied'))
+
+#     # Log to verify branch_name is being passed
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     # Define SQL query with branch filter
+#     query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             e.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
+#     '''
+#     params = (branch_name,)
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
+@login_required
+def filter_leaves_by_branch_name(branch_name):
+    # Check if the user is role 140 and has a branch assigned
+    if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
+        # Only redirect if the user's branch is different from the one in the URL
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+    elif not current_user.is_authenticated or current_user.role_default != 140:
+        # Redirect if user is not authenticated or role doesn't match
+        return redirect(url_for('access_denied'))
+
+    # Log to verify branch_name is being passed
+    app.logger.debug(f"Filtering by branch: {branch_name}")
+
+    # Define SQL query with branch filter
+    query = '''
+        SELECT 
+            l.id, 
+            e.name AS employee_name,
+            e.branch AS branch_name,
+            l.leave_type, 
+            l.start_date, 
+            l.end_date, 
+            l.reason, 
+            l.status,
+            l.type_of_leave, 
+            l.verified_by, 
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
+    '''
+    params = (branch_name,)
 
     # Execute the query with the database connection
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query, params).fetchall()
-
     except sqlite3.DatabaseError as e:
-        return f"Database error: {e}", 500
+        app.logger.error(f"Database error: {e}")
+        return "An error occurred while retrieving data. Please try again later.", 500
 
     # Render the template with the query results
     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
@@ -2271,7 +2655,7 @@ def add_many_leave():
     with get_db_connection() as conn:
         employees = conn.execute('SELECT id, name FROM employees').fetchall()
         users = conn.execute(
-            'SELECT id, username FROM users WHERE RoleDefault IN (35,40,45,180)').fetchall()
+            'SELECT id, username FROM users WHERE RoleDefault IN (35,140,145,180)').fetchall()
 
     if request.method == 'POST':
         employee_id = request.form['employee_id']
@@ -2539,6 +2923,68 @@ def leaves_user_id(user_id):
                            end_date=end_date_filter)
 
 
+@app.route('/leave/edit_ccc_verify/<int:id>', methods=['GET', 'POST'])
+def edit_leave_ccc_verify(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        status = request.form['status']
+        verified_by = request.form['verified_by']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, start_date, end_date, reason, status, service_count, verified_by,  id))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_ccc_leave.html', leave=leave)
+
+
+@app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
+def edit_leave_spm_approve(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        status = request.form['status']
+        approved_by = request.form['approved_by']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, approved_by= ?
+                WHERE id= ?
+            ''', (leave_type, start_date, end_date, reason, status, service_count, approved_by,  id))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
 @app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])
 def edit_leave(id):
     with get_db_connection() as conn:
@@ -2551,9 +2997,39 @@ def edit_leave(id):
         end_date = request.form['end_date']
         reason = request.form['reason']
         status = request.form['status']
-        verified_by = request.form['verified_by']
+        # verified_by = request.form['verified_by']
         approved_by = request.form['approved_by']
 
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, approved_by= ?
+                WHERE id= ?
+            ''', (leave_type, start_date, end_date, reason, status, service_count, approved_by, id))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_leave.html', leave=leave)
+
+
+@app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])
+def edit_leave_spm(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        status = request.form['status']
+        approved_by = request.form['approved_by']
         # Calculate service count (difference between start_date and end_date)
         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
@@ -2568,7 +3044,7 @@ def edit_leave(id):
 
         return redirect(url_for('view_leaves'))
 
-    return render_template('/leaves/edit_leave.html', leave=leave)
+    return render_template('/leaves/edit_leave_spm.html', leave=leave)
 
 
 @app.route('/leave_days/edit/<int:id>', methods=['GET', 'POST'])
@@ -2583,7 +3059,6 @@ def edit_leave_days(id):
         end_date = request.form['end_date']
         reason = request.form['reason']
         status = request.form['status']
-        verified_by = request.form['verified_by']
         approved_by = request.form['approved_by']
 
         # Calculate service count (difference between start_date and end_date)
@@ -2594,9 +3069,9 @@ def edit_leave_days(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, verified_by= ?, approved_by= ?
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, approved_by= ?
                 WHERE id= ?
-            ''', (leave_type, start_date, end_date, reason, status, service_count, verified_by, approved_by, id))
+            ''', (leave_type, start_date, end_date, reason, status, service_count, approved_by, id))
 
         return redirect(url_for('view_leaves'))
 
@@ -3612,7 +4087,6 @@ def login():
             ''', (user['ID'],)).fetchone()
             employee_id = employee['id'] if employee else None
 
-        # Log the login event (store user location and device info)
         with get_db_connection() as conn:
             conn.execute('''
                 INSERT INTO login_logs(user_id, ip_address, city, region, country, user_agent)
@@ -3960,7 +4434,7 @@ def dashboard():
             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
 
     # Users with roles 40, 45, 60, or 65 are directed to the branch manager dashboard
-    if current_user.role_default in [45, 40, 60, 65, 35, 180]:
+    if current_user.role_default in [145, 140, 35, 180]:
         if current_user.branch:
             return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
         elif not current_user.branch:
