@@ -7,7 +7,7 @@ content %}
       <a href="/" class="text-lg font-bold">Dashboard</a>
       <div>
         <a
-          href="{{ url_for('leaves_by_branch_and_ccc_category') }}"
+          href="{{ url_for('leaves_by_branch_and_ccc_category', branch_name=current_user.branch) }}"
           class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md"
         >
           View Leaves

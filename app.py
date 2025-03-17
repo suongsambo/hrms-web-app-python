@@ -2039,23 +2039,68 @@ def static_files(filename):
 #         return render_template('/leaves/view_leaves.html', leaves=leaves)
 
 
+# @app.route('/leaves')
+# def view_leaves():
+#     if current_user.is_authenticated:
+#         if current_user.is_admin == 1:
+#             with get_db_connection() as conn:
+#                 leaves = conn.execute('SELECT * FROM leaves').fetchall()
+
+#             return render_template('/leaves/view_leaves.html', leaves=leaves)
+
+#         if current_user.role_default == 140:
+#             return redirect(url_for('filter_leaves_by_branch_name' (branch_name=current_user.branch)))
+
+#         if current_user.role_default == 145:
+#             return redirect(url_for('leaves_by_branch_and_spm'))
+
+#         if current_user.role_default == 35:
+#             return redirect(url_for('leaves_by_branch_and_ccc_category'))
+
+#         if current_user.role_default == 180:
+#             return redirect(url_for('leaves_by_gm'))
+
+#         if current_user.role_default == 20:
+#             with get_db_connection() as conn:
+#                 employee = conn.execute(
+#                     "SELECT id FROM employees WHERE user_id = ?", (current_user.id,)).fetchone()
+#                 if employee:
+#                     return redirect(url_for('filter_leaves_by_employee_id', employee_id=employee[0]))
+
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(
+#                 'SELECT * FROM leaves WHERE employee_id = ?', (current_user.id,)).fetchall()
+#         return render_template('/leaves/view_leaves.html', leaves=leaves)
+
+#     else:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute('SELECT * FROM leaves').fetchall()
+
+#         return render_template('/leaves/view_leaves.html', leaves=leaves)
+
+
 @app.route('/leaves')
 def view_leaves():
     if current_user.is_authenticated:
-        # Admin users will not be redirected to the same view, just display their leaves
         if current_user.is_admin == 1:
-            # You may want to show some specific view for admins, or just let them view leaves
-            # Here, we just render the same page, without a redirect
             with get_db_connection() as conn:
                 leaves = conn.execute('SELECT * FROM leaves').fetchall()
 
             return render_template('/leaves/view_leaves.html', leaves=leaves)
 
-        # Role 40 (e.g., branch-level users) will be redirected to filter by branch name
         if current_user.role_default == 140:
-            return redirect(url_for('filter_leaves_by_branch_name'))
+            # Fixed the syntax error here
+            return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
 
-        # Role 20 (e.g., employee-level users) will be redirected to filter by employee ID
+        if current_user.role_default == 145:
+            return redirect(url_for('leaves_by_branch_and_spm'))
+
+        if current_user.role_default == 35:
+            return redirect(url_for('leaves_by_branch_and_ccc_category', branch_name=current_user.branch))
+
+        if current_user.role_default == 180:
+            return redirect(url_for('leaves_by_gm'))
+
         if current_user.role_default == 20:
             with get_db_connection() as conn:
                 employee = conn.execute(
@@ -2063,15 +2108,14 @@ def view_leaves():
                 if employee:
                     return redirect(url_for('filter_leaves_by_employee_id', employee_id=employee[0]))
 
-        # If the user doesn't match the above roles, show only their own leaves
+        # This block will run if none of the role conditions match
         with get_db_connection() as conn:
             leaves = conn.execute(
                 'SELECT * FROM leaves WHERE employee_id = ?', (current_user.id,)).fetchall()
-
         return render_template('/leaves/view_leaves.html', leaves=leaves)
 
     else:
-        # If the user is not authenticated, show all leaves
+        # If the user is not authenticated, fetch all leaves (public access)
         with get_db_connection() as conn:
             leaves = conn.execute('SELECT * FROM leaves').fetchall()
 
@@ -2108,17 +2152,75 @@ def filter_leaves_by_employee_id(employee_id):
     return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
 
 
-@app.route('/leaves/ccc', methods=['GET'])
-def leaves_by_branch_and_ccc_category():
-    if current_user.role_default in [35]:
-        pass
-    elif not current_user.is_authenticated or current_user.role_default != 35:
+# @app.route('/leaves/ccc/<string:branch_name>', methods=['GET'])
+# def leaves_by_branch_and_ccc_category():
+#     if current_user.role_default in [35]:
+#         pass
+#     elif not current_user.is_authenticated or current_user.role_default != 35:
+#         return redirect(url_for('access_denied'))
+#     branch_name = request.args.get('branch_name')
+
+#     if branch_name:
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE e.branch = ? AND l.category = 'S' OR l.type_of_leave = 'T'
+#         '''
+#         params = (branch_name,)
+#     else:
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE l.category = 'S'  OR l.type_of_leave = 'T'
+#         '''
+#         params = ()
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template('leaves/leaves_ccc_verify.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/ccc/<string:branch_name>', methods=['GET'])
+def leaves_by_branch_and_ccc_category(branch_name):
+    if not current_user.is_authenticated or current_user.role_default != 35:
         return redirect(url_for('access_denied'))
-    branch_name = request.args.get('branch_name')
 
     if branch_name:
         query = '''
-            SELECT 
+            SELECT  
                 l.id, 
                 e.name AS employee_name,
                 e.branch AS branch_name,
@@ -2135,7 +2237,7 @@ def leaves_by_branch_and_ccc_category():
                 l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE e.branch = ? AND l.category = 'S' OR l.type_of_leave = 'T'
+            WHERE e.branch = ? AND (l.category = 'S' OR l.type_of_leave = 'T')
         '''
         params = (branch_name,)
     else:
@@ -2157,9 +2259,10 @@ def leaves_by_branch_and_ccc_category():
                 l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE l.category = 'S'  OR l.type_of_leave = 'T'
+            WHERE l.category = 'S' OR l.type_of_leave = 'T'
         '''
         params = ()
+
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query, params).fetchall()
@@ -2256,7 +2359,7 @@ def leaves_by_gm():
             l.requested_by
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE l.category = 'M' OR l.category = 'L'
+        WHERE l.category = 'L'
     '''
     params = ()  # No branch_name parameter needed
 
