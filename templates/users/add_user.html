@@ -32,9 +32,9 @@
             <!-- Zone -->
             <div>
                 <label class="block text-gray-700 font-semibold mb-2">Zone</label>
-                <select name="zone_id" required
+                <select name="zone_id"
                     class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">Select a Zone</option>
+                    <option value="">Select a Zone (optional)</option>
                     {% for zone in zones %}
                     <option value="{{ zone['ID'] }}">{{ zone['Name'] }}</option>
                     {% endfor %}
@@ -141,7 +141,6 @@
                     </div>
                 </div>
             </div>
-
 
             <!-- Admin Checkbox -->
             <div>

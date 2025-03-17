@@ -1,0 +1,46 @@
+{% extends 'base.html' %} {% block title %} SPM Dashboard {% endblock %} {%
+block content %}
+<body class="bg-gray-50">
+  <!-- Main Content -->
+  <div class="max-w-4xl mx-auto p-8 bg-white shadow-lg rounded-lg mt-10">
+    <h1 class="text-3xl font-semibold text-gray-800">{{ data.message }}</h1>
+
+    <!-- Zone Information -->
+    <div class="mt-8">
+      <h2 class="text-2xl font-semibold text-gray-700">Zone Information</h2>
+      <div class="space-y-2 mt-4">
+        <p>
+          <strong class="text-gray-800">Zone Name:</strong>
+          <span class="text-gray-600">{{ data.zone['name'] }}</span>
+        </p>
+        <p>
+          <strong class="text-gray-800">Zone Description:</strong>
+          <span class="text-gray-600">{{ data.zone['description'] }}</span>
+        </p>
+        <p>
+          <strong class="text-gray-800">Zone Location:</strong>
+          <span class="text-gray-600">{{ data.zone['location'] }}</span>
+        </p>
+      </div>
+    </div>
+
+    <!-- Branches in the Zone -->
+    <div class="mt-8">
+      <h2 class="text-2xl font-semibold text-gray-700">
+        Branches in this Zone
+      </h2>
+      {% if data.branches %}
+      <ul class="mt-4 space-y-4">
+        {% for branch in data.branches %}
+        <li class="p-4 border border-gray-200 rounded-lg shadow-md bg-gray-50">
+          <strong class="text-lg text-gray-800">{{ branch['Branch'] }}</strong>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="mt-4 text-gray-500">No branches found in this zone.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+{% endblock %}

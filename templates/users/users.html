@@ -136,6 +136,7 @@
             <th class="py-2 px-4 text-left">Note</th>
             <th class="py-2 px-4 text-left">RequestRole</th>
             <th class="py-2 px-4 text-left">RoleDefault</th>
+            <th class="py-2 px-4 text-left">ZoneID</th>
             <th class="py-2 px-4 text-center w-40">Actions</th>
           </tr>
         </thead>
@@ -161,6 +162,17 @@
             <td class="py-2 px-4">{{ user.note }}</td>
             <td class="py-2 px-4">{{ user.request_role }}</td>
             <td class="py-2 px-4">{{ user.role_default }}</td>
+            <td class="py-2 px-4">
+              {% if user.zone_id %}
+              <ul class="list-disc list-inside">
+                {% for zone in user.zone_id %}
+                <li>{{ zone }}</li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <span class="text-gray-500">None</span>
+              {% endif %}
+            </td>
             <td class="py-2 px-4 text-center w-40">
               <div class="flex justify-center gap-x-2">
                 <a href="{{ url_for('edit_user', id=user.id) }}" class="text-blue-500 hover:underline">Edit</a>

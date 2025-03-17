@@ -40,7 +40,8 @@ def allowed_file(filename):
 class User(UserMixin):
     def __init__(self, id: int, username: str, password: str, email: str,
                  branch: Optional[str] = None, employee_id: Optional[int] = None, is_admin: bool = False,
-                 role_default: Optional[int] = 0, image_data: Optional[bytes] = None):
+                 role_default: Optional[int] = 0, image_data: Optional[bytes] = None,
+                 zone_id: Optional[int] = None):
         self.id = id
         self.username = username
         self.password = password
@@ -50,6 +51,7 @@ class User(UserMixin):
         self.is_admin = is_admin
         self.role_default = role_default
         self.image_data = image_data
+        self.zone_id = zone_id
 
     def get_id(self):
         """Override get_id method to work with Flask-Login."""
@@ -84,7 +86,8 @@ def load_user(user_id):
                 is_admin=user_data['IsAdmin'],
                 role_default=user_data['RoleDefault'],
                 image_data=user_data['Image'],
-                employee_id=employee_id
+                employee_id=employee_id,
+                zone_id=user_data['ZoneID']
             )
         return None
 
@@ -4416,7 +4419,7 @@ def login():
         conn.row_factory = sqlite3.Row  # Fetch rows as dictionaries
         user = conn.execute('''
             SELECT ID, UserName, Password, Email, Branch, IsAdmin,
-                   COALESCE(RoleDefault, 1) AS RoleDefault
+                   COALESCE(RoleDefault, 1) AS RoleDefault, ZoneID
             FROM users
             WHERE UserName= ? AND Password= ?
         ''', (username, password)).fetchone()
@@ -4454,9 +4457,10 @@ def login():
             email=user['Email'],
             branch=user['Branch'],
             is_admin=user['IsAdmin'],
-            role_default=user['RoleDefault'],  # Ensure correct retrieval
+            role_default=user['RoleDefault'],
             image_data=user.get('Image', None),
-            employee_id=employee_id
+            employee_id=employee_id,
+            zone_id=user['ZoneID']
         )
 
         print("Logged in user:", user_obj)  # Debugging print
@@ -4759,6 +4763,41 @@ def access_denied():
     return render_template('access_denied.html')
 
 
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     # Admin users are directed to the admin dashboard
+#     if current_user.is_admin:
+#         return render_dashboard(current_user.id)
+
+#     # Employees (role_default == 20) are directed to the employee dashboard
+#     if current_user.role_default == 20:
+#         with get_db_connection() as conn:
+#             employee = conn.execute(
+#                 "SELECT e.ID FROM employees e WHERE e.user_id = ?", (
+#                     current_user.id,)
+#             ).fetchone()
+
+#         if employee:
+#             return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+#         else:
+#             flash("Employee not found!", "danger")
+#             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
+
+#     # Users with roles 40, 45, 60, or 65 are directed to the branch manager dashboard
+#     if current_user.role_default in [145, 140, 35, 180]:
+#         if current_user.branch:
+#             return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
+#         elif not current_user.branch:
+#             flash("Branch information is missing.", "danger")
+#             return render_template('access_denied.html')
+
+#     # If no conditions are met, deny access
+#     flash("Access denied: You do not have permission to view this page.", "danger")
+
+#     return redirect(url_for('dashboard'))
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
@@ -4780,8 +4819,12 @@ def dashboard():
             flash("Employee not found!", "danger")
             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
 
+    # Users with role_default == 145 are directed to the SPM dashboard
+    if current_user.role_default == 145:
+        return redirect(url_for('spm_dashboard'))
+
     # Users with roles 40, 45, 60, or 65 are directed to the branch manager dashboard
-    if current_user.role_default in [145, 140, 35, 180]:
+    if current_user.role_default in [140, 35, 180]:
         if current_user.branch:
             return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
         elif not current_user.branch:
@@ -4790,8 +4833,50 @@ def dashboard():
 
     # If no conditions are met, deny access
     flash("Access denied: You do not have permission to view this page.", "danger")
-
     return redirect(url_for('dashboard'))
+
+
+@app.route('/spm_dashboard')
+@login_required
+def spm_dashboard():
+    # Ensure that only users with role_default == 145 can access this page
+    if current_user.role_default != 145:
+        flash("You do not have permission to view this page.", "danger")
+        return redirect(url_for('dashboard'))
+
+    # Get the current user's zone_id
+    zone_id = current_user.zone_id
+
+    if zone_id is None:
+        flash("Zone ID not found for the current user!", "danger")
+        return redirect(url_for('dashboard'))
+
+    # Query the Zone and Branch based on the user's zone_id
+    with get_db_connection() as conn:
+        # Get the zone based on the user's zone_id
+        zone = conn.execute(
+            "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
+        if zone is None:
+            flash("Zone not found!", "danger")
+            return redirect(url_for('dashboard'))
+
+        # Find branches in the current zone
+        branches_in_zone = conn.execute(
+            "SELECT b.ID, b.Branch, b.ContactNumber FROM branches b JOIN zone_branch zb ON b.ID = zb.branch_id WHERE zb.zone_id = ?", (zone_id,)).fetchall()
+
+    # If no branches are found, we can handle that too
+    if not branches_in_zone:
+        flash("No branches found in this zone.", "warning")
+
+    # Prepare the data to send to the template
+    data = {
+        'message': "Welcome to the SPM Dashboard!",
+        'zone': zone,  # Zone information for the current user
+        'branches': branches_in_zone  # Branches in the user's zone
+    }
+
+    # Render the spm_dashboard template with data
+    return render_template('/dashboard/spm_dashboard.html', data=data)
 
 
 @app.route('/dashboard/branch_manager/<string:branch_name>')
