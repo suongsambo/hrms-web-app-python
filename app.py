@@ -135,7 +135,9 @@ def init_db():
                 RoleDefault INTEGER DEFAULT 0,
                 AcceptedTerms INTEGER DEFAULT 0,
                 ImageUrl TEXT,
-                Image BLOB
+                Image BLOB,
+                ZoneID INTEGER,
+                FOREIGN KEY (ZoneID) REFERENCES zones(ID) ON DELETE SET NULL
             )
         ''')
 
@@ -250,6 +252,26 @@ def init_db():
                 CapitalInjectionId TEXT,
                 GroupID TEXT,
                 MemberID TEXT
+            )
+        ''')
+
+        # Create zones table
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS zones (
+                ID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT NOT NULL,
+                Description TEXT
+            )
+        ''')
+
+        # Create zone_branch table (many-to-many relationship)
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS zone_branch (
+                zone_id INTEGER,
+                branch_id INTEGER,
+                PRIMARY KEY (zone_id, branch_id),
+                FOREIGN KEY (zone_id) REFERENCES zones(ID) ON DELETE CASCADE,
+                FOREIGN KEY (branch_id) REFERENCES branches(ID) ON DELETE CASCADE
             )
         ''')
 
@@ -559,6 +581,16 @@ def init_db():
             )
         ''')
 
+        # Check if zone 'All' exists
+        zone_exists = conn.execute(
+            "SELECT 1 FROM zones WHERE name = 'All'").fetchone()
+
+        if not zone_exists:
+            conn.execute('''
+                INSERT INTO zones (name)
+                VALUES ('All')
+            ''')
+
         # Check if the user 'bo' exists
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'bo'").fetchone()
@@ -865,7 +897,218 @@ def init_db():
     conn.commit()
 
 
-# LIST: Show all confirmations
+@app.route('/zones/add', methods=['GET', 'POST'])
+def add_zone():
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+
+        # Insert zone into the zones table
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO zones (Name, Description)
+                VALUES (?, ?)
+            ''', (name, description))
+            conn.commit()
+
+        flash('Zone added successfully!', 'success')
+        return redirect(url_for('list_zones'))
+
+    return render_template('/zones/add_zone.html')
+
+
+@app.route('/zone/create', methods=['GET', 'POST'])
+def create_zone():
+    with get_db_connection() as conn:
+        branches = conn.execute('SELECT * FROM branches').fetchall()
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        selected_branches = request.form.getlist(
+            'branches')  # Get multiple branch IDs
+
+        if not name:
+            flash('Zone name is required.', 'danger')
+            return render_template('zones/create_zone.html', branches=branches)
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                'INSERT INTO zones (Name, Description) VALUES (?, ?)',
+                (name, description)
+            )
+            zone_id = cursor.lastrowid  # Get the last inserted zone ID
+
+            # Assign selected branches to the zone
+            for branch_id in selected_branches:
+                cursor.execute(
+                    'INSERT INTO zone_branch (zone_id, branch_id) VALUES (?, ?)',
+                    (zone_id, branch_id)
+                )
+
+            conn.commit()
+
+        flash('Zone created and branches assigned successfully!', 'success')
+        # Redirect to the zones list page
+        return redirect(url_for('list_zones'))
+
+    return render_template('zones/create_zone.html', branches=branches)
+
+
+@app.route('/zones')
+def list_zones():
+    with get_db_connection() as conn:
+        zones = conn.execute('SELECT * FROM zones').fetchall()
+
+    return render_template('/zones/list_zones.html', zones=zones)
+
+
+@app.route('/zones/edit/<int:zone_id>', methods=['GET', 'POST'])
+def edit_zone(zone_id):
+    with get_db_connection() as conn:
+        zone = conn.execute(
+            'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
+
+    if request.method == 'POST':
+        name = request.form['name']
+        description = request.form['description']
+
+        # Update zone in the zones table
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE zones
+                SET Name = ?, Description = ?
+                WHERE ID = ?
+            ''', (name, description, zone_id))
+            conn.commit()
+
+        flash('Zone updated successfully!', 'success')
+        return redirect(url_for('list_zones'))
+
+    return render_template('/zones/edit_zone.html', zone=zone)
+
+
+@app.route('/zones/delete/<int:zone_id>', methods=['POST'])
+def delete_zone(zone_id):
+    with get_db_connection() as conn:
+        conn.execute('DELETE FROM zones WHERE ID = ?', (zone_id,))
+        conn.commit()
+
+    flash('Zone deleted successfully!', 'success')
+    return redirect(url_for('list_zones'))
+
+
+# @app.route('/zone/<int:zone_id>/assign_branch', methods=['GET', 'POST'])
+# def assign_branch_to_zone(zone_id):
+#     with get_db_connection() as conn:
+#         zone = conn.execute(
+#             'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
+#         branches = conn.execute('SELECT * FROM branches').fetchall()
+
+#     if request.method == 'POST':
+#         # Using get() in case it doesn't exist in the form
+#         branch_id = request.form.get('branch_id')
+
+#         if not branch_id:
+#             flash('Please select a branch to assign to this zone.', 'warning')
+#             return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
+
+#         # Check if the relationship already exists
+#         with get_db_connection() as conn:
+#             existing_assignment = conn.execute(
+#                 'SELECT * FROM zone_branch WHERE zone_id = ? AND branch_id = ?',
+#                 (zone_id, branch_id)
+#             ).fetchone()
+
+#             if existing_assignment:
+#                 flash('This branch is already assigned to the zone.', 'warning')
+#                 return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
+
+#             # Insert the relationship into zone_branch table
+#             conn.execute('''
+#                 INSERT INTO zone_branch (zone_id, branch_id)
+#                 VALUES (?, ?)
+#             ''', (zone_id, branch_id))
+#             conn.commit()
+
+#         flash('Branch assigned to zone successfully!', 'success')
+#         return redirect(url_for('list_zones'))
+
+#     return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
+
+
+@app.route('/zone/<int:zone_id>/assign_branch', methods=['GET', 'POST'])
+def assign_branch_to_zone(zone_id):
+    with get_db_connection() as conn:
+        zone = conn.execute(
+            'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
+        branches = conn.execute('SELECT * FROM branches').fetchall()
+
+    if request.method == 'POST':
+        branch_id = request.form['branch_id']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO zone_branch (zone_id, branch_id)
+                VALUES (?, ?)
+            ''', (zone_id, branch_id))
+            conn.commit()
+
+        flash('Branch assigned to zone successfully!', 'success')
+        return redirect(url_for('list_zones'))
+
+    return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
+
+
+# @app.route('/zone/assign_branch', methods=['GET', 'POST'])
+# def assign_branch_to_zone():
+#     zone_id = request.args.get('zone_id', type=int)
+
+#     if not zone_id:
+#         flash('Zone ID is required.', 'danger')
+#         return redirect(url_for('list_zones'))
+
+#     with get_db_connection() as conn:
+#         zone = conn.execute(
+#             'SELECT * FROM zones WHERE ID = ?', (zone_id,)
+#         ).fetchone()
+
+#         if not zone:
+#             flash('Zone not found.', 'danger')
+#             return redirect(url_for('list_zones'))
+
+#         branches = conn.execute('SELECT * FROM branches').fetchall()
+
+#     if request.method == 'POST':
+#         branch_id = request.form.get('branch_id')  # Safely get branch_id
+
+#         if not branch_id:
+#             flash('Please select a branch to assign to this zone.', 'warning')
+#             return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
+
+#         with get_db_connection() as conn:
+#             existing_assignment = conn.execute(
+#                 'SELECT * FROM zone_branch WHERE zone_id = ? AND branch_id = ?',
+#                 (zone_id, branch_id)
+#             ).fetchone()
+
+#             if existing_assignment:
+#                 flash('This branch is already assigned to the zone.', 'warning')
+#                 return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
+
+#             conn.execute(
+#                 'INSERT INTO zone_branch (zone_id, branch_id) VALUES (?, ?)',
+#                 (zone_id, branch_id)
+#             )
+#             conn.commit()
+
+#         flash('Branch assigned to zone successfully!', 'success')
+#         return redirect(url_for('list_zones'))
+
+#     return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
+
+
 @app.route('/confirms')
 @login_required
 def list_confirms():
@@ -4328,7 +4571,8 @@ def add_user():
         first_name_en = request.form['first_name_en']
         last_name_en = request.form['last_name_en']
         branch = request.form['branch']
-        branch_id = request.form['branch']  # Get the branch ID from the form
+        branch_id = request.form['branch']
+        zone_id = request.form['zone_id']  # Get the Zone ID from the form
         is_admin = request.form.get('is_admin', 0)
         role_default = request.form.get('role_default', 0)
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
@@ -4337,9 +4581,8 @@ def add_user():
         image_data = None
         if 'image' in request.files:
             image = request.files['image']
-            # Ensure the image file is valid
             if image and allowed_file(image.filename):
-                image_data = image.stream.read()  # Read the image data as binary
+                image_data = image.stream.read()
 
         # Insert user into 'users' table
         with get_db_connection() as conn:
@@ -4354,9 +4597,9 @@ def add_user():
 
             # Insert user data into 'users' table with binary image data
             cursor.execute('''
-                INSERT INTO users(UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, image_data))
+                INSERT INTO users(UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image, ZoneID)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, image_data, zone_id))
 
             user_id = cursor.lastrowid
 
@@ -4372,8 +4615,9 @@ def add_user():
     # Fetch all branches for selection
     with get_db_connection() as conn:
         branches = conn.execute('SELECT * FROM branches').fetchall()
+        zones = conn.execute('SELECT * FROM zones').fetchall()
 
-    return render_template('/users/add_user.html', branches=branches)
+    return render_template('/users/add_user.html', branches=branches, zones=zones)
 
 
 @app.route('/user/<int:user_id>/image')

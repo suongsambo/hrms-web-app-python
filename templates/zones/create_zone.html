@@ -1,0 +1,82 @@
+{% extends 'base.html' %} {% block title %}Add User{% endblock %} {% block
+content %}
+
+<body class="bg-gray-100">
+  <div class="container mx-auto p-6 bg-white shadow-md rounded-lg mt-10">
+    <h2 class="text-2xl font-semibold mb-5">Create a New Zone</h2>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %} {% for category, message in messages %}
+    <div class="bg-green-100 text-green-800 p-4 mb-4 rounded-md">
+      {{ message }}
+    </div>
+    {% endfor %} {% endif %} {% endwith %}
+
+    <form method="POST">
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium text-gray-700"
+          >Zone Name</label
+        >
+        <input
+          type="text"
+          name="name"
+          id="name"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          required
+        />
+      </div>
+
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium text-gray-700"
+          >Description</label
+        >
+        <textarea
+          name="description"
+          id="description"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        ></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-gray-700"
+          >Assign Branches</label
+        >
+        <div class="space-y-2">
+          {% for branch in branches %}
+          <div class="flex items-center">
+            <input
+              type="checkbox"
+              name="branches"
+              value="{{ branch.ID }}"
+              class="form-checkbox text-blue-500"
+              id="branch_{{ branch.ID }}"
+            />
+            <label
+              class="ml-2 text-sm text-gray-700"
+              for="branch_{{ branch.ID }}"
+            >
+              {{ branch.Branch }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="flex space-x-4">
+        <button
+          type="submit"
+          class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+        >
+          Create Zone
+        </button>
+        <a
+          href="{{ url_for('list_zones') }}"
+          class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50"
+          >Cancel</a
+        >
+      </div>
+    </form>
+  </div>
+</body>
+{% endblock %}
