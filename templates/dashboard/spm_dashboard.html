@@ -70,17 +70,22 @@ SPM Dashboard
 
     <!-- Zone Information -->
     <div class="mt-8 bg-gradient-to-r from-indigo-500 to-indigo-700 text-white p-6 rounded-lg">
-      <h2 class="text-2xl font-semibold">Zone Information</h2>
+      <h2 class="text-2xl font-semibold">
+        <i class="fas fa-map-marker-alt mr-2 text-lg"></i> Zone Information
+      </h2>
       <div class="space-y-2 mt-4">
         <p>
+          <i class="fas fa-user-circle mr-1"></i>
           <strong class="font-medium">Zone Name:</strong>
-          <span class="text-indigo-100">{{ data.zone['name'] }}</span>
+          <span class="text-indigo-100 text-2xl font-semibold capitalize text-yellow-500">{{ data.zone['name'] }}</span>
         </p>
         <p>
+          <i class="fas fa-file-alt mr-1"></i>
           <strong class="font-medium">Zone Description:</strong>
           <span class="text-indigo-100">{{ data.zone['description'] }}</span>
         </p>
         <p>
+          <i class="fas fa-map-pin mr-1"></i>
           <strong class="font-medium">Zone Location:</strong>
           <span class="text-indigo-100">{{ data.zone['location'] }}</span>
         </p>
@@ -90,6 +95,7 @@ SPM Dashboard
     <!-- Branches in the Zone -->
     <div class="mt-8">
       <h2 class="text-2xl font-semibold text-gray-700">
+        <i class="fas fa-building mr-2 text-lg text-indigo-600"></i>
         Branches in this Zone
       </h2>
 

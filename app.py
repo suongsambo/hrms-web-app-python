@@ -2965,7 +2965,7 @@ def leaves_by_branch_and_spm():
     return render_template(
         'leaves/leaves_spm_approve.html',
         leaves=leaves,
-        branch_name=branch_name,  # Display selected branch name or "All branches"
+        branch_name=branch_name,
         branches_in_zone=branches_in_zone,
         zone=zone
     )
