@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block title %}CCC Verify{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}SPM Approved{% endblock %} {% block
 content %}
 <div class="bg-gray-100 text-gray-800">
   <!-- Navbar -->
@@ -16,13 +16,26 @@ content %}
     </div>
   </nav>
 
+        
   <!-- Main Content -->
   <div class="container mx-auto mt-8 px-4">
-    <!-- Branch Filter Form -->
     <div class="mb-4">
-      <h2 class="text-2xl font-semibold">CCC Verify</h2>
+      <h2 class="text-2xl font-semibold">SPM Approved</h2>
     </div>
 
+     <!-- Branch Filter -->
+     <form method="GET" action="{{ url_for('leaves_by_branch_and_spm') }}" class="mb-3">
+      <label for="branch_name" class="block text-gray-700 font-medium mb-2">Filter by Branch:</label>
+      <select name="branch_name" id="branch_name" class="w-52 p-2 border border-gray-300 rounded-md" onchange="this.form.submit()">
+          <option value="">All Branches</option>
+          {% for branch in branches_in_zone %}
+              <option value="{{ branch.Branch }}" {% if branch_name == branch.Branch %}selected{% endif %}>{{ branch.Branch }}</option>
+          {% endfor %}
+      </select>
+  </form>
+
+  
+ 
     <!-- Leaves Table -->
     <div
       class="overflow-x-auto bg-white shadow-lg rounded-md border border-gray-300"
