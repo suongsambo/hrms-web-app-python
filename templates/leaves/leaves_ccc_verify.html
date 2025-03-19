@@ -1,21 +1,6 @@
 {% extends 'base.html' %} {% block title %}CCC Verify{% endblock %} {% block
 content %}
 <div class="bg-gray-100 text-gray-800">
-  <!-- Navbar -->
-  <nav class="bg-indigo-600 text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <a href="/" class="text-lg font-bold">Dashboard</a>
-      <div>
-        <a
-          href="{{ url_for('leaves_by_branch_and_ccc_category', branch_name=current_user.branch) }}"
-          class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md"
-        >
-          View Leaves
-        </a>
-      </div>
-    </div>
-  </nav>
-
   <!-- Main Content -->
   <div class="container mx-auto mt-8 px-4">
     <!-- Branch Filter Form -->
