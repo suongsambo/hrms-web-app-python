@@ -9,6 +9,7 @@ import os
 import math
 import pyotp
 import requests
+import shutil
 import glob
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
@@ -103,6 +104,19 @@ def get_db_connection():
     conn = sqlite3.connect(app.config['DATABASE'])
     conn.row_factory = sqlite3.Row
     return conn
+
+
+# Remove temp file
+def clear_pycache(directory='.'):
+    for root, dirs, files in os.walk(directory):
+        for dir_name in dirs:
+            if dir_name == '__pycache__':
+                dir_path = os.path.join(root, dir_name)
+                print(f"Removing {dir_path}")
+                shutil.rmtree(dir_path)
+
+
+clear_pycache()  # This will delete all __pycache__ directories in the current directory
 
 
 def init_db():

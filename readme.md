@@ -43,3 +43,5 @@ pip install flask-socketio eventlet gevent gevent-websocket
 pyinstaller --onefile --hidden-import flask_socketio --hidden-import eventlet --hidden-import gevent --hidden-import gevent-websocket --add-data "templates:templates" --add-data "static:static" app.py
 
 git rm -r --cached **pycache**
+find . -type d -name '**pycache**' -exec rm -r {} +
+git rm --cached .DS_Store

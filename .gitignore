@@ -10,7 +10,6 @@ core/actions/__pycache__/__init__.cpython-36.pyc
 core/actions/__pycache__/action.cpython-36.pyc
 database
 .DS_Store
-
 *.log
 *.pot
 *.pyc
