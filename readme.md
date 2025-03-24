@@ -30,3 +30,16 @@ pip freeze > requirements.txt
 
 pip install --upgrade eventlet
 pip install gevent
+
+pyinstaller --onefile app.py
+chmod +x ./dist/app
+
+pyinstaller --onefile --add-data "templates:templates" --add-data "static:static" --hidden-import flask app.py
+./dist/app
+
+pyinstaller --onefile --hidden-import flask_socketio --hidden-import eventlet --hidden-import gevent app.py
+pip install flask-socketio eventlet gevent gevent-websocket
+
+pyinstaller --onefile --hidden-import flask_socketio --hidden-import eventlet --hidden-import gevent --hidden-import gevent-websocket --add-data "templates:templates" --add-data "static:static" app.py
+
+git rm -r --cached **pycache**

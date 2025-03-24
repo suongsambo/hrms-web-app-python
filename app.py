@@ -17,12 +17,13 @@ from flask_socketio import SocketIO, emit, join_room, leave_room, send
 from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from typing import Optional
-
+import eventlet
+eventlet.monkey_patch()
 
 app = Flask(__name__)
 app.config.from_object(Config)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 
 
 UPLOAD_FOLDER = 'static/uploads'
@@ -752,16 +753,40 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('cb', hashed_password, 'cb@example.com', '010655037', 0, 190, 'SYS'))
 
-        # Check if the 'HR' department already exists
-        department_exists = conn.execute(
-            "SELECT 1 FROM departments WHERE Name = 'HR'").fetchone()
+        # # Check if the 'HR' department already exists
+        # department_exists = conn.execute(
+        #     "SELECT 1 FROM departments WHERE Name = 'HR'").fetchone()
 
-        # If the 'HR' department doesn't exist, insert it
-        if not department_exists:
-            conn.execute('''
-                INSERT INTO departments (Name, Description)
-                VALUES (?, ?)
-            ''', ('HR', 'Human Resources Department'))
+        # # If the 'HR' department doesn't exist, insert it
+        # if not department_exists:
+        #     conn.execute('''
+        #         INSERT INTO departments (Name, Description)
+        #         VALUES (?, ?)
+        #     ''', ('HR', 'Human Resources Department'))
+
+        # List of department names and descriptions
+        departments = [
+            ("HRD", "Human Resources Development Department"),
+            ("CRD", "Customer Relations Department"),
+            ("POD", "Product Operations Department"),
+            ("FND", "Finance Department"),
+            ("TRD", "Training Department"),
+            ("ITD", "Information Technology Department")
+        ]
+
+        # Loop through each department
+        for department_name, description in departments:
+            # Check if the department already exists
+            department_exists = conn.execute(
+                "SELECT 1 FROM departments WHERE Name = ?", (department_name,)).fetchone()
+
+            # If the department doesn't exist, insert it
+            if not department_exists:
+                conn.execute('''
+                    INSERT INTO departments (Name, Description)
+                    VALUES (?, ?)
+                ''', (department_name, description))
+                print(f'Department {department_name} added successfully!')
 
         # Check if the 'HR Manager' position already exists
         position_exists = conn.execute(
@@ -770,7 +795,7 @@ def init_db():
         if not position_exists:
 
             department_id = conn.execute(
-                "SELECT ID FROM departments WHERE Name = 'HR'").fetchone()[0]
+                "SELECT ID FROM departments WHERE Name = 'HRD'").fetchone()[0]
 
             conn.execute('''
                 INSERT INTO positions (PositionName, Description, department_id)
@@ -800,6 +825,33 @@ def init_db():
             ''', ('HQ', 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
                   '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
                   'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
+
+        # List of all branch values to insert
+        branches = [
+            "HQ", "AKC", "BSD", "BVL", "CHK", "CHP", "KPT", "KTR", "PKB", "PRN",
+            "SNG", "TTG", "TTY", "BTB", "CBA", "DKR", "PNH", "KKD", "KTL", "PMR",
+            "PPN", "PSC", "SAN", "KPS", "SAT", "SST", "SVR", "KPCA", "SUB", "SAB",
+            "BTI", "KMP", "KAD", "MCH"
+        ]
+
+        # Loop through each branch in the list
+        for branch in branches:
+            branch_exists = conn.execute(
+                "SELECT 1 FROM branches WHERE Branch = ?", (branch,)).fetchone()
+
+            # If the branch doesn't exist, insert it
+            if not branch_exists:
+                conn.execute('''
+                    INSERT INTO branches (Branch, Status, CreateDate, StartDate, Description, BranchManagerName, ContactNumber,
+                                        Address, DistrictProvince, RegisterDate, LocalDescription, LocalAddress,
+                                        LocalBranchManagerName, BranchProjectId, CapitalInjectionId, GroupID, MemberID)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    branch, 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
+                    '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
+                    'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'
+                ))
+                print(f'Branch {branch} added successfully!')
 
         employee_exists = conn.execute(
             "SELECT 1 FROM employees WHERE email = 'john@example.com'").fetchone()
@@ -3394,10 +3446,10 @@ def add_many_leave():
     users = []
 
     with get_db_connection() as conn:
-        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        employees = conn.execute(
+            'SELECT id, name, branch FROM employees').fetchall()
         users = conn.execute(
             'SELECT id, username FROM users WHERE RoleDefault IN (35,140,145,180)').fetchall()
-
     if request.method == 'POST':
         employee_id = request.form['employee_id']
         leave_type = request.form['leave_type']
@@ -3407,7 +3459,6 @@ def add_many_leave():
         requested_by = request.form['requested_by']
         type_of_leave = request.form.get('type_of_leave', 'D')
         user_ids = request.form.getlist('user_ids')
-
         # Convert dates and calculate service_count (number of leave days)
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
@@ -3436,9 +3487,7 @@ def add_many_leave():
                 ''', (user_id, leave_id))
 
             conn.commit()
-
         return redirect(url_for('view_leaves'))
-
     return render_template('leaves/leave_many.html', employees=employees, users=users)
 
 
