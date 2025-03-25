@@ -1,6 +1,10 @@
 
 # Make sure to import your DB connection function
 
+# Replace with actual database connection function
+
+from datetime import datetime
+from flask import Flask, request, render_template, redirect, url_for
 import base64
 from flask import Flask, Response, render_template, flash, redirect, url_for, request, session, send_from_directory, jsonify
 import sqlite3
@@ -3368,188 +3372,6 @@ def add_leave_hours():
 #     return render_template('leaves/leave_many.html', employees=employees, users=users)
 
 
-# @app.route('/leave_many/add', methods=['GET', 'POST'])
-# def add_many_leave():
-#     employees = []
-#     users = []
-
-#     with get_db_connection() as conn:
-#         employees = conn.execute(
-#             'SELECT id, name, branch FROM employees').fetchall()
-#         users = conn.execute(
-#             'SELECT id, username FROM users WHERE RoleDefault IN (35,140,145,180)').fetchall()
-#     if request.method == 'POST':
-#         employee_id = request.form['employee_id']
-#         leave_type = request.form['leave_type']
-#         start_date = request.form['start_date']
-#         end_date = request.form['end_date']
-#         reason = request.form['reason']
-#         requested_by = request.form['requested_by']
-#         type_of_leave = request.form.get('type_of_leave', 'D')
-#         user_ids = request.form.getlist('user_ids')
-#         # Convert dates and calculate service_count (number of leave days)
-#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-#         service_count = (end_date_obj - start_date_obj).days + \
-#             1  # Include both start and end date
-#         # Determine leave category
-#         if service_count <= 2:
-#             category = "S"
-#         elif 3 <= service_count <= 5:
-#             category = "M"
-#         else:
-#             category = "L"
-
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             cursor.execute('''
-#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category)
-#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category))
-#             leave_id = cursor.lastrowid
-
-#             for user_id in user_ids:
-#                 cursor.execute('''
-#                     INSERT INTO user_leave (user_id, leave_id)
-#                     VALUES (?, ?)
-#                 ''', (user_id, leave_id))
-
-#             conn.commit()
-#         return redirect(url_for('view_leaves'))
-#     return render_template('leaves/leave_many.html', employees=employees, users=users)
-
-
-# @app.route('/leave_many/add', methods=['GET', 'POST'])
-# def add_many_leave():
-#     employees = []
-#     users = []
-
-#     with get_db_connection() as conn:
-#         employees = conn.execute(
-#             'SELECT id, name, branch FROM employees').fetchall()
-#         users = conn.execute(
-#             'SELECT id, username FROM users WHERE RoleDefault IN (35,140,145,180)').fetchall()
-
-#     if request.method == 'POST':
-#         employee_id = request.form['employee_id']
-#         leave_type = request.form['leave_type']
-#         start_date = request.form['start_date']
-#         end_date = request.form['end_date']
-#         reason = request.form['reason']
-#         requested_by = request.form['requested_by']
-#         type_of_leave = request.form.get('type_of_leave', 'D')
-#         user_ids = request.form.getlist('user_ids')
-
-#         # Add branch information to the leave entry
-#         branch = request.form['branch']  # The branch chosen from the form
-
-#         # Convert dates and calculate service_count (number of leave days)
-#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-#         service_count = (end_date_obj - start_date_obj).days + \
-#             1  # Include both start and end date
-
-#         # Determine leave category
-#         if service_count <= 2:
-#             category = "S"
-#         elif 3 <= service_count <= 5:
-#             category = "M"
-#         else:
-#             category = "L"
-
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             cursor.execute('''
-#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch)
-#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch))
-#             leave_id = cursor.lastrowid
-
-#             for user_id in user_ids:
-#                 cursor.execute('''
-#                     INSERT INTO user_leave (user_id, leave_id)
-#                     VALUES (?, ?)
-#                 ''', (user_id, leave_id))
-
-#             conn.commit()
-
-#         return redirect(url_for('view_leaves'))
-
-#     return render_template('leaves/leave_many.html', employees=employees, users=users)
-
-
-# @app.route('/leave_many/add', methods=['GET', 'POST'])
-# def add_many_leave():
-#     employees = []
-#     users = []
-
-#     with get_db_connection() as conn:
-#         employees = conn.execute(
-#             'SELECT id, name, branch FROM employees').fetchall()
-
-#         # Initially, just get the users filtered by RoleDefault
-#         users = conn.execute(
-#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (35, 140, 180)').fetchall()
-
-#     if request.method == 'POST':
-#         employee_id = request.form['employee_id']
-#         leave_type = request.form['leave_type']
-#         start_date = request.form['start_date']
-#         end_date = request.form['end_date']
-#         reason = request.form['reason']
-#         requested_by = request.form['requested_by']
-#         type_of_leave = request.form.get('type_of_leave', 'D')
-#         user_ids = request.form.getlist('user_ids')
-
-#         # Add branch information to the leave entry
-#         branch = request.form['branch']  # The branch chosen from the form
-
-#         # Convert dates and calculate service_count (number of leave days)
-#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-#         service_count = (end_date_obj - start_date_obj).days + \
-#             1  # Include both start and end date
-
-#         # Determine leave category
-#         if service_count <= 2:
-#             category = "S"
-#         elif 3 <= service_count <= 5:
-#             category = "M"
-#         else:
-#             category = "L"
-
-#         # Filter users by the branch selected
-#         with get_db_connection() as conn:
-#             # Get users matching the branch and RoleDefault filter
-#             users = conn.execute(
-#                 '''
-#                 SELECT id, username
-#                 FROM users
-#                 WHERE branch = ? AND RoleDefault IN (35, 140, 180)
-#                 ''', (branch,)).fetchall()
-
-#             # Insert the leave entry into the database
-#             cursor = conn.cursor()
-#             cursor.execute('''
-#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch)
-#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch))
-#             leave_id = cursor.lastrowid
-
-#             # Insert user-leave associations into the user_leave table
-#             for user_id in user_ids:
-#                 cursor.execute('''
-#                     INSERT INTO user_leave (user_id, leave_id)
-#                     VALUES (?, ?)
-#                 ''', (user_id, leave_id))
-
-#             conn.commit()
-
-#         return redirect(url_for('view_leaves'))
-
-#     return render_template('leaves/leave_many.html', employees=employees, users=users)
-
-# Ensure user is logged in before accessing this route
 @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
 @login_required  # Ensure user is logged in
 def add_many_leave(branch):
@@ -3903,6 +3725,38 @@ def edit_leave_spm_approve(id):
     return render_template('/leaves/edit_spm_leave.html', leave=leave)
 
 
+# @app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])
+# def edit_leave(id):
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         status = request.form['status']
+#         # verified_by = request.form['verified_by']
+#         approved_by = request.form['approved_by']
+
+#         # Calculate service count (difference between start_date and end_date)
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, approved_by= ?
+#                 WHERE id= ?
+#             ''', (leave_type, start_date, end_date, reason, status, service_count, approved_by, id))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_leave.html', leave=leave)
+
+
 @app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])
 def edit_leave(id):
     with get_db_connection() as conn:
@@ -3914,25 +3768,147 @@ def edit_leave(id):
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
-        status = request.form['status']
-        # verified_by = request.form['verified_by']
-        approved_by = request.form['approved_by']
+
+        # Get values for approved_by and verified_by if they exist
+        approved_by = request.form.get('approved_by', None)
+        verified_by = request.form.get('verified_by', None)
 
         # Calculate service count (difference between start_date and end_date)
         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
         service_count = (end_date_obj - start_date_obj).days + 1
 
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            # Require verified_by for small leaves
+            verified_by = request.form['verified_by']
+            approved_by = None  # Clear approved_by for category "S"
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Verified"
+            # Require approved_by for medium leaves
+            approved_by = request.form['approved_by']
+            verified_by = None  # Clear verified_by for category "M"
+        else:
+            category = "L"
+            status = request.form['status']  # User-defined status
+            # Keep approved_by and verified_by unchanged
+
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, approved_by= ?
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, 
+                    service_count= ?, category= ?, approved_by= ?, verified_by= ?
                 WHERE id= ?
-            ''', (leave_type, start_date, end_date, reason, status, service_count, approved_by, id))
+            ''', (leave_type, start_date, end_date, reason, status, service_count, category,
+                  approved_by, verified_by, id))
 
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_leave.html', leave=leave)
+
+
+# @app.route('/leave_pm/edit/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_pm(id):
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+
+#         # Get values for approved_by and verified_by if they exist
+#         approved_by = request.form.get('approved_by', None)
+#         verified_by = request.form.get('verified_by', None)
+
+#         # Calculate service count (difference between start_date and end_date)
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         # Determine leave category and set the appropriate fields
+#         if service_count <= 2:
+#             category = "S"
+#             status = "Approved"
+#             # Require verified_by for small leaves
+#             verified_by = request.form['verified_by']
+#             approved_by = None  # Clear approved_by for category "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#             status = "Verified"
+#             # Require approved_by for medium leaves
+#             approved_by = request.form['approved_by']
+#             verified_by = None  # Clear verified_by for category "M"
+#         else:
+#             category = "L"
+#             status = request.form['status']  # User-defined status
+#             # Keep approved_by and verified_by unchanged
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?,
+#                     service_count= ?, category= ?, approved_by= ?, verified_by= ?
+#                 WHERE id= ?
+#             ''', (leave_type, start_date, end_date, reason, status, service_count, category,
+#                   approved_by, verified_by, id))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_leave_pm.html', leave=leave)
+
+
+@app.route('/leave_pm/edit/<int:id>', methods=['GET', 'POST'])
+def edit_leave_pm(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Verified"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, 
+                    service_count= ?, category= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, start_date, end_date, reason, status, service_count, category,
+                  approved_by, verified_by, id))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_leave_pm.html', leave=leave)
 
 
 @app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])
