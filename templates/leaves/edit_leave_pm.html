@@ -57,9 +57,8 @@
             <div>
                 <label class="block text-sm font-medium text-gray-700">Status</label>
                 <select name="status" class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="Approved" {% if leave['status'] == 'Approved' %}selected{% endif %}>Approved</option>
+                    <option value="Approved" {% if leave['status'] == 'Approved' or not leave['status'] %}selected{% endif %}>Approved</option>
                     <option value="Verified" {% if leave['status'] == 'Verified' %}selected{% endif %}>Verified</option>
-                    <option value="Pending" {% if leave['status'] == 'Pending' %}selected{% endif %}>Pending</option>
                 </select>
             </div>
 
