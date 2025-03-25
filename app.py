@@ -424,6 +424,7 @@ def init_db():
                 spm_status TEXT DEFAULT 'Pending',
                 dd_status TEXT DEFAULT 'Pending',
                 manager_status TEXT DEFAULT 'Pending',
+                branch TEXT,
                 category TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -1068,45 +1069,6 @@ def delete_zone(zone_id):
     return redirect(url_for('list_zones'))
 
 
-# @app.route('/zone/<int:zone_id>/assign_branch', methods=['GET', 'POST'])
-# def assign_branch_to_zone(zone_id):
-#     with get_db_connection() as conn:
-#         zone = conn.execute(
-#             'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
-#         branches = conn.execute('SELECT * FROM branches').fetchall()
-
-#     if request.method == 'POST':
-#         # Using get() in case it doesn't exist in the form
-#         branch_id = request.form.get('branch_id')
-
-#         if not branch_id:
-#             flash('Please select a branch to assign to this zone.', 'warning')
-#             return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
-
-#         # Check if the relationship already exists
-#         with get_db_connection() as conn:
-#             existing_assignment = conn.execute(
-#                 'SELECT * FROM zone_branch WHERE zone_id = ? AND branch_id = ?',
-#                 (zone_id, branch_id)
-#             ).fetchone()
-
-#             if existing_assignment:
-#                 flash('This branch is already assigned to the zone.', 'warning')
-#                 return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
-
-#             # Insert the relationship into zone_branch table
-#             conn.execute('''
-#                 INSERT INTO zone_branch (zone_id, branch_id)
-#                 VALUES (?, ?)
-#             ''', (zone_id, branch_id))
-#             conn.commit()
-
-#         flash('Branch assigned to zone successfully!', 'success')
-#         return redirect(url_for('list_zones'))
-
-#     return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
-
-
 @app.route('/zone/<int:zone_id>/assign_branch', methods=['GET', 'POST'])
 def assign_branch_to_zone(zone_id):
     with get_db_connection() as conn:
@@ -1128,54 +1090,6 @@ def assign_branch_to_zone(zone_id):
         return redirect(url_for('list_zones'))
 
     return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
-
-
-# @app.route('/zone/assign_branch', methods=['GET', 'POST'])
-# def assign_branch_to_zone():
-#     zone_id = request.args.get('zone_id', type=int)
-
-#     if not zone_id:
-#         flash('Zone ID is required.', 'danger')
-#         return redirect(url_for('list_zones'))
-
-#     with get_db_connection() as conn:
-#         zone = conn.execute(
-#             'SELECT * FROM zones WHERE ID = ?', (zone_id,)
-#         ).fetchone()
-
-#         if not zone:
-#             flash('Zone not found.', 'danger')
-#             return redirect(url_for('list_zones'))
-
-#         branches = conn.execute('SELECT * FROM branches').fetchall()
-
-#     if request.method == 'POST':
-#         branch_id = request.form.get('branch_id')  # Safely get branch_id
-
-#         if not branch_id:
-#             flash('Please select a branch to assign to this zone.', 'warning')
-#             return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
-
-#         with get_db_connection() as conn:
-#             existing_assignment = conn.execute(
-#                 'SELECT * FROM zone_branch WHERE zone_id = ? AND branch_id = ?',
-#                 (zone_id, branch_id)
-#             ).fetchone()
-
-#             if existing_assignment:
-#                 flash('This branch is already assigned to the zone.', 'warning')
-#                 return redirect(url_for('assign_branch_to_zone', zone_id=zone_id))
-
-#             conn.execute(
-#                 'INSERT INTO zone_branch (zone_id, branch_id) VALUES (?, ?)',
-#                 (zone_id, branch_id)
-#             )
-#             conn.commit()
-
-#         flash('Branch assigned to zone successfully!', 'success')
-#         return redirect(url_for('list_zones'))
-
-#     return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
 
 
 @app.route('/confirms')
@@ -3454,16 +3368,206 @@ def add_leave_hours():
 #     return render_template('leaves/leave_many.html', employees=employees, users=users)
 
 
-@app.route('/leave_many/add', methods=['GET', 'POST'])
-def add_many_leave():
+# @app.route('/leave_many/add', methods=['GET', 'POST'])
+# def add_many_leave():
+#     employees = []
+#     users = []
+
+#     with get_db_connection() as conn:
+#         employees = conn.execute(
+#             'SELECT id, name, branch FROM employees').fetchall()
+#         users = conn.execute(
+#             'SELECT id, username FROM users WHERE RoleDefault IN (35,140,145,180)').fetchall()
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+#         # Convert dates and calculate service_count (number of leave days)
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + \
+#             1  # Include both start and end date
+#         # Determine leave category
+#         if service_count <= 2:
+#             category = "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#         else:
+#             category = "L"
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category))
+#             leave_id = cursor.lastrowid
+
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+#         return redirect(url_for('view_leaves'))
+#     return render_template('leaves/leave_many.html', employees=employees, users=users)
+
+
+# @app.route('/leave_many/add', methods=['GET', 'POST'])
+# def add_many_leave():
+#     employees = []
+#     users = []
+
+#     with get_db_connection() as conn:
+#         employees = conn.execute(
+#             'SELECT id, name, branch FROM employees').fetchall()
+#         users = conn.execute(
+#             'SELECT id, username FROM users WHERE RoleDefault IN (35,140,145,180)').fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+
+#         # Add branch information to the leave entry
+#         branch = request.form['branch']  # The branch chosen from the form
+
+#         # Convert dates and calculate service_count (number of leave days)
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + \
+#             1  # Include both start and end date
+
+#         # Determine leave category
+#         if service_count <= 2:
+#             category = "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#         else:
+#             category = "L"
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch))
+#             leave_id = cursor.lastrowid
+
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('leaves/leave_many.html', employees=employees, users=users)
+
+
+# @app.route('/leave_many/add', methods=['GET', 'POST'])
+# def add_many_leave():
+#     employees = []
+#     users = []
+
+#     with get_db_connection() as conn:
+#         employees = conn.execute(
+#             'SELECT id, name, branch FROM employees').fetchall()
+
+#         # Initially, just get the users filtered by RoleDefault
+#         users = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (35, 140, 180)').fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+
+#         # Add branch information to the leave entry
+#         branch = request.form['branch']  # The branch chosen from the form
+
+#         # Convert dates and calculate service_count (number of leave days)
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + \
+#             1  # Include both start and end date
+
+#         # Determine leave category
+#         if service_count <= 2:
+#             category = "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#         else:
+#             category = "L"
+
+#         # Filter users by the branch selected
+#         with get_db_connection() as conn:
+#             # Get users matching the branch and RoleDefault filter
+#             users = conn.execute(
+#                 '''
+#                 SELECT id, username
+#                 FROM users
+#                 WHERE branch = ? AND RoleDefault IN (35, 140, 180)
+#                 ''', (branch,)).fetchall()
+
+#             # Insert the leave entry into the database
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch))
+#             leave_id = cursor.lastrowid
+
+#             # Insert user-leave associations into the user_leave table
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('leaves/leave_many.html', employees=employees, users=users)
+
+# Ensure user is logged in before accessing this route
+@app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
+@login_required  # Ensure user is logged in
+def add_many_leave(branch):
+    # Fetch the current user's branch, use URL branch if no user logged in
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+
     employees = []
     users = []
 
     with get_db_connection() as conn:
+        # Retrieve employees without filtering by branch yet
         employees = conn.execute(
             'SELECT id, name, branch FROM employees').fetchall()
+
+        # Use the current user's branch to filter users
         users = conn.execute(
-            'SELECT id, username FROM users WHERE RoleDefault IN (35,140,145,180)').fetchall()
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140,145,180) AND branch = ?', (user_branch,)).fetchall()
+
     if request.method == 'POST':
         employee_id = request.form['employee_id']
         leave_type = request.form['leave_type']
@@ -3473,11 +3577,16 @@ def add_many_leave():
         requested_by = request.form['requested_by']
         type_of_leave = request.form.get('type_of_leave', 'D')
         user_ids = request.form.getlist('user_ids')
+
+        # You can now remove the 'branch' from the form and use the user's branch instead
+        branch = user_branch  # Use the branch from current_user or URL
+
         # Convert dates and calculate service_count (number of leave days)
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
         service_count = (end_date_obj - start_date_obj).days + \
             1  # Include both start and end date
+
         # Determine leave category
         if service_count <= 2:
             category = "S"
@@ -3488,12 +3597,14 @@ def add_many_leave():
 
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            # Insert the leave entry into the database with the branch
             cursor.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category))
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch))
             leave_id = cursor.lastrowid
 
+            # Insert user-leave associations into the user_leave table
             for user_id in user_ids:
                 cursor.execute('''
                     INSERT INTO user_leave (user_id, leave_id)
@@ -3501,8 +3612,11 @@ def add_many_leave():
                 ''', (user_id, leave_id))
 
             conn.commit()
+
+        # Redirect to the 'view_leaves' page (or wherever you need to go)
         return redirect(url_for('view_leaves'))
-    return render_template('leaves/leave_many.html', employees=employees, users=users)
+
+    return render_template('leaves/leave_many.html', employees=employees, users=users, branch=user_branch)
 
 
 @app.route('/leave/add', methods=['GET', 'POST'])
