@@ -2994,246 +2994,6 @@ def leaves_by_gm():
     return render_template('leaves/leaves_gm_approve.html', leaves=leaves)
 
 
-# @app.route('/leaves/branch', methods=['GET'])
-# def filter_leaves_by_branch_name():
-#     if current_user.role_default in [145, 140, 35, 180]:
-#         pass
-#     elif not current_user.is_authenticated or current_user.role_default != 140:
-#         return redirect(url_for('access_denied'))
-
-#     # Get the optional branch_name parameter from the request
-#     branch_name = request.args.get('branch_name')
-
-#     # Define SQL queries
-#     if branch_name:
-#         # Query with branch_name filter
-#         query = '''
-#             SELECT
-#                 l.id,
-#                 e.name AS employee_name,
-#                 e.branch AS branch_name,
-#                 l.leave_type,
-#                 l.start_date,
-#                 l.end_date,
-#                 l.reason,
-#                 l.status,
-#                 l.type_of_leave,
-#                 l.verified_by,
-#                 l.approved_by,
-#                 l.leave_hours,
-#                 l.service_count,
-#                 l.requested_by
-#             FROM leaves l
-#             LEFT JOIN employees e ON l.employee_id = e.id
-#             WHERE e.branch = ?
-#         '''
-#         params = (branch_name,)
-#     else:
-#         # Default query without any branch filter
-#         query = '''
-#             SELECT
-#                 l.id,
-#                 e.name AS employee_name,
-#                 e.branch AS branch_name,
-#                 l.leave_type,
-#                 l.start_date,
-#                 l.end_date,
-#                 l.reason,
-#                 l.status,
-#                 l.type_of_leave,
-#                 l.verified_by,
-#                 l.approved_by,
-#                 l.leave_hours,
-#                 l.service_count,
-#                 l.requested_by
-#             FROM leaves l
-#             LEFT JOIN employees e ON l.employee_id = e.id
-#         '''
-#         params = ()  # No filtering by branch name
-
-#     # Execute the query with the database connection
-#     try:
-#         with get_db_connection() as conn:
-#             leaves = conn.execute(query, params).fetchall()
-
-#     except sqlite3.DatabaseError as e:
-#         return f"Database error: {e}", 500
-
-#     # Render the template with the query results
-#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
-
-
-# @app.route('/leaves/branch<string:branch_name>', methods=['GET'])
-# def filter_leaves_by_branch_name():
-#     if current_user.role_default in [145, 140, 35, 180]:
-#         pass
-#     elif not current_user.is_authenticated or current_user.role_default != 140:
-#         return redirect(url_for('access_denied'))
-
-#     # Get the optional branch_name parameter from the request
-#     branch_name = request.args.get('branch_name')
-
-#     # Log to verify branch_name is being passed
-#     if branch_name:
-#         app.logger.debug(f"Filtering by branch: {branch_name}")
-#     else:
-#         app.logger.debug("No branch filter applied.")
-
-#     # Define SQL queries
-#     if branch_name:
-#         # Query with branch_name filter
-#         query = '''
-#             SELECT
-#                 l.id,
-#                 e.name AS employee_name,
-#                 e.branch AS branch_name,
-#                 l.leave_type,
-#                 l.start_date,
-#                 l.end_date,
-#                 l.reason,
-#                 l.status,
-#                 l.type_of_leave,
-#                 l.verified_by,
-#                 l.approved_by,
-#                 l.leave_hours,
-#                 l.service_count,
-#                 l.requested_by
-#             FROM leaves l
-#             LEFT JOIN employees e ON l.employee_id = e.id
-#             WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
-#         '''
-#         params = (branch_name,)  # Filter by branch name
-#     else:
-#         # Default query without any branch filter
-#         query = '''
-#             SELECT
-#                 l.id,
-#                 e.name AS employee_name,
-#                 e.branch AS branch_name,
-#                 l.leave_type,
-#                 l.start_date,
-#                 l.end_date,
-#                 l.reason,
-#                 l.status,
-#                 l.type_of_leave,
-#                 l.verified_by,
-#                 l.approved_by,
-#                 l.leave_hours,
-#                 l.service_count,
-#                 l.requested_by
-#             FROM leaves l
-#             LEFT JOIN employees e ON l.employee_id = e.id
-#             WHERE (l.category = 'S' OR l.category = 'M')
-#         '''
-#         params = ()  # No filtering by branch name
-
-#     # Execute the query with the database connection
-#     try:
-#         with get_db_connection() as conn:
-#             leaves = conn.execute(query, params).fetchall()
-
-#     except sqlite3.DatabaseError as e:
-#         app.logger.error(f"Database error: {e}")
-#         return f"Database error: {e}", 500
-
-#     # Render the template with the query results
-#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
-
-
-# @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
-# def filter_leaves_by_branch_name(branch_name):
-#     if current_user.role_default in [145, 140, 35, 180]:
-#         pass
-#     elif not current_user.is_authenticated or current_user.role_default != 140:
-#         return redirect(url_for('access_denied'))
-
-#     # Log to verify branch_name is being passed
-#     app.logger.debug(f"Filtering by branch: {branch_name}")
-
-#     # Define SQL query with branch filter
-#     query = '''
-#         SELECT
-#             l.id,
-#             e.name AS employee_name,
-#             e.branch AS branch_name,
-#             l.leave_type,
-#             l.start_date,
-#             l.end_date,
-#             l.reason,
-#             l.status,
-#             l.type_of_leave,
-#             l.verified_by,
-#             l.approved_by,
-#             l.leave_hours,
-#             l.service_count,
-#             l.requested_by
-#         FROM leaves l
-#         LEFT JOIN employees e ON l.employee_id = e.id
-#         WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
-#     '''
-#     params = (branch_name,)
-
-#     # Execute the query with the database connection
-#     try:
-#         with get_db_connection() as conn:
-#             leaves = conn.execute(query, params).fetchall()
-#     except sqlite3.DatabaseError as e:
-#         app.logger.error(f"Database error: {e}")
-#         return "An error occurred while retrieving data. Please try again later.", 500
-
-#     # Render the template with the query results
-#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
-
-
-# @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
-# @login_required
-# def filter_leaves_by_branch_name(branch_name):
-#     # First check: if the user is role 140 and has a branch assigned, redirect to the dashboard
-#     if current_user.role_default == 140 and current_user.branch:
-#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
-
-#     elif not current_user.is_authenticated or current_user.role_default != 140:
-#         # Redirect if user is not authenticated or role doesn't match
-#         return redirect(url_for('access_denied'))
-
-#     # Log to verify branch_name is being passed
-#     app.logger.debug(f"Filtering by branch: {branch_name}")
-
-#     # Define SQL query with branch filter
-#     query = '''
-#         SELECT
-#             l.id,
-#             e.name AS employee_name,
-#             e.branch AS branch_name,
-#             l.leave_type,
-#             l.start_date,
-#             l.end_date,
-#             l.reason,
-#             l.status,
-#             l.type_of_leave,
-#             l.verified_by,
-#             l.approved_by,
-#             l.leave_hours,
-#             l.service_count,
-#             l.requested_by
-#         FROM leaves l
-#         LEFT JOIN employees e ON l.employee_id = e.id
-#         WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
-#     '''
-#     params = (branch_name,)
-
-#     # Execute the query with the database connection
-#     try:
-#         with get_db_connection() as conn:
-#             leaves = conn.execute(query, params).fetchall()
-#     except sqlite3.DatabaseError as e:
-#         app.logger.error(f"Database error: {e}")
-#         return "An error occurred while retrieving data. Please try again later.", 500
-
-#     # Render the template with the query results
-#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
-
-
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
 @login_required
 def filter_leaves_by_branch_name(branch_name):
@@ -3372,6 +3132,75 @@ def add_leave_hours():
 #     return render_template('leaves/leave_many.html', employees=employees, users=users)
 
 
+# @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required  # Ensure user is logged in
+# def add_many_leave(branch):
+#     # Fetch the current user's branch, use URL branch if no user logged in
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+#     employees = []
+#     users = []
+
+#     with get_db_connection() as conn:
+#         # Retrieve employees without filtering by branch yet
+#         employees = conn.execute(
+#             'SELECT id, name, branch FROM employees').fetchall()
+
+#         # Use the current user's branch to filter users
+#         users = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140,145,180) AND branch = ?', (user_branch,)).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+
+#         # You can now remove the 'branch' from the form and use the user's branch instead
+#         branch = user_branch  # Use the branch from current_user or URL
+
+#         # Convert dates and calculate service_count (number of leave days)
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + \
+#             1  # Include both start and end date
+
+#         # Determine leave category
+#         if service_count <= 2:
+#             category = "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#         else:
+#             category = "L"
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             # Insert the leave entry into the database with the branch
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch))
+#             leave_id = cursor.lastrowid
+
+#             # Insert user-leave associations into the user_leave table
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         # Redirect to the 'view_leaves' page (or wherever you need to go)
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('leaves/leave_many.html', employees=employees, users=users, branch=user_branch)
+
+
 @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
 @login_required  # Ensure user is logged in
 def add_many_leave(branch):
@@ -3403,11 +3232,21 @@ def add_many_leave(branch):
         # You can now remove the 'branch' from the form and use the user's branch instead
         branch = user_branch  # Use the branch from current_user or URL
 
-        # Convert dates and calculate service_count (number of leave days)
+        # Convert dates
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
-        service_count = (end_date_obj - start_date_obj).days + \
-            1  # Include both start and end date
+
+        # Calculate service_count excluding Saturdays and Sundays
+        service_count = 0
+        current_date = start_date_obj
+
+        while current_date <= end_date_obj:
+            # Check if the current date is not Saturday (5) or Sunday (6)
+            # Exclude Saturday and Sunday
+            if current_date.weekday() not in [5, 6]:
+                service_count += 1
+            # Move to the next day
+            current_date += timedelta(days=1)
 
         # Determine leave category
         if service_count <= 2:
