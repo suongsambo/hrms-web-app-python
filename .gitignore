@@ -9,6 +9,14 @@ core/__pycache__/version.cpython-36.pyc
 core/actions/__pycache__/__init__.cpython-36.pyc
 core/actions/__pycache__/action.cpython-36.pyc
 database
+
+# Ignore SQLite database
+*.sqlite3
+*.db
+
+# Ignore Flask-Migrate migrations
+migrations/
+
 .DS_Store
 *.log
 *.pot

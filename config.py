@@ -18,6 +18,9 @@ class Config:
     TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID', 'your_default_chat_id')
     DATABASE = os.path.join(os.path.dirname(
         os.path.abspath(__file__)), 'database/hr_management.db')
+    BACKUP_FILE = os.path.join(os.path.dirname(os.path.abspath(
+        __file__)), 'database', 'backup_hr_management.db')
+
     APP_NAME = 'KPCA'
     APP_NAME_FOOTER = 'HRMS'
     APP_DESCRIPTION = 'Port Phillip, Victoria, Australia'
