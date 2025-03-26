@@ -22,7 +22,11 @@ content %}
 
     <!-- Backup Management Buttons -->
     <div class="flex justify-center space-x-6 mb-8">
-      <form action="/backup" method="POST">
+      <form
+        action="/backup"
+        method="POST"
+        onsubmit="return confirm('Are you sure you want to create a backup?');"
+      >
         <button
           type="submit"
           class="bg-blue-600 text-white px-2 py-1 rounded-lg hover:bg-blue-700 transition duration-300 flex items-center space-x-1 text-sm"
@@ -31,16 +35,12 @@ content %}
           <span>Backup</span>
         </button>
       </form>
-      <form action="/restore" method="POST">
-        <button
-          type="submit"
-          class="bg-yellow-500 text-white px-2 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 flex items-center space-x-1 text-sm"
-        >
-          <span class="material-symbols-outlined">restore</span>
-          <span>Restore</span>
-        </button>
-      </form>
-      <form action="/download" method="GET">
+
+      <form
+        action="/download"
+        method="GET"
+        onsubmit="return confirm('Are you sure you want to download the backup?');"
+      >
         <button
           type="submit"
           class="bg-green-500 text-white px-2 py-1 rounded-lg hover:bg-green-600 transition duration-300 flex items-center space-x-1 text-sm"
@@ -49,14 +49,6 @@ content %}
           <span>Download</span>
         </button>
       </form>
-      <button
-        type="button"
-        onclick="window.location.reload()"
-        class="bg-yellow-500 text-white px-2 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 flex items-center space-x-1 text-sm"
-      >
-        <span class="material-symbols-outlined">refresh</span>
-        <span>Refresh</span>
-      </button>
     </div>
 
     <!-- List of backups -->
@@ -85,36 +77,52 @@ content %}
             <td class="px-6 py-4">
               <div class="flex space-x-4">
                 <!-- Restore Form -->
-                <form action="/restore" method="POST" class="inline-block">
+                <form
+                  action="/restore"
+                  method="POST"
+                  class="inline-block"
+                  onsubmit="return confirm('Are you sure you want to restore this backup?');"
+                >
                   <input type="hidden" name="backup" value="{{ backup }}" />
                   <button
                     type="submit"
-                    class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition duration-300 flex items-center space-x-1"
+                    class="bg-yellow-500 text-white px-2 py-1 rounded-lg hover:bg-yellow-600 transition duration-300 flex items-center space-x-1 text-sm"
                   >
                     <span class="material-symbols-outlined">restore</span>
                     <span>Restore</span>
                   </button>
                 </form>
-                <!-- Delete Form -->
-                <form action="/delete" method="POST" class="inline-block">
-                  <input type="hidden" name="backup" value="{{ backup }}" />
-                  <button
-                    type="submit"
-                    class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 flex items-center space-x-1"
-                  >
-                    <span class="material-symbols-outlined">delete</span>
-                    <span>Delete</span>
-                  </button>
-                </form>
+
                 <!-- Download Form -->
-                <form action="/download" method="GET" class="inline-block">
+                <form
+                  action="/download"
+                  method="GET"
+                  class="inline-block"
+                  onsubmit="return confirm('Are you sure you want to download this backup?');"
+                >
                   <input type="hidden" name="backup" value="{{ backup }}" />
                   <button
                     type="submit"
-                    class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition duration-300 flex items-center space-x-1"
+                    class="bg-green-500 text-white px-2 py-1 rounded-lg hover:bg-green-600 transition duration-300 flex items-center space-x-1 text-sm"
                   >
                     <span class="material-symbols-outlined">download</span>
                     <span>Download</span>
+                  </button>
+                </form>
+                <!-- Delete Form -->
+                <form
+                  action="/delete"
+                  method="POST"
+                  class="inline-block"
+                  onsubmit="return confirm('Are you sure you want to delete this backup?');"
+                >
+                  <input type="hidden" name="backup" value="{{ backup }}" />
+                  <button
+                    type="submit"
+                    class="bg-red-500 text-white px-2 py-1 rounded-lg hover:bg-red-600 transition duration-300 flex items-center space-x-1 text-sm"
+                  >
+                    <span class="material-symbols-outlined">delete</span>
+                    <span>Delete</span>
                   </button>
                 </form>
               </div>

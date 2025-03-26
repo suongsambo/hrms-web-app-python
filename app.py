@@ -14,10 +14,12 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 from werkzeug.utils import secure_filename
 from config import Config
 from flask_socketio import SocketIO, emit, join_room, leave_room, send
-from apscheduler.schedulers.background import BackgroundScheduler
 from datetime import datetime, timedelta
 from typing import Optional
 import eventlet
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
+
 eventlet.monkey_patch()
 
 app = Flask(__name__)
@@ -118,45 +120,105 @@ def clear_pycache(directory='.'):
 clear_pycache()  # This will delete all __pycache__ directories in the current directory
 
 
-# Route to backup the database
-# @app.route('/backup', methods=['GET', 'POST'])
-# @login_required
-# def backup_database():
-#     if os.path.exists(app.config['DATABASE']):
-#         # Generate backup file name with current date and time
-#         current_datetime = datetime.now().strftime("%m-%d-%Y_%I-%M-%S %p")
-#         backup_file_with_date = f"backup_hr_management_{current_datetime}.db"
-#         backup_file_path = os.path.join(os.path.dirname(
-#             app.config['BACKUP_FILE']), backup_file_with_date)
+# Function to create the backup
+def backup_database():
+    backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
 
-#         # Create backup by copying the database
-#         shutil.copy2(app.config['DATABASE'], backup_file_path)
-#         return render_template('/backups/backup.html', message=f"Database backup created successfully! Your database has been backed up to the file {backup_file_with_date}.")
-#     else:
-#         return render_template('/backups/backup.html', message="Database file not found!")
+    if os.path.exists(app.config['DATABASE']):
+        current_datetime = datetime.now().strftime("%m-%d-%Y_%I-%M-%S")
+        backup_file_with_date = f"backup_hr_management_{current_datetime}.db"
+        backup_file_path = os.path.join(backup_folder, backup_file_with_date)
+
+        shutil.copy2(app.config['DATABASE'], backup_file_path)
+
+        # You can implement your flash logic here to notify the success (e.g. in a background task or email)
+        print(f"Database backup created: {backup_file_with_date}")
+    else:
+        print("Database file not found!")
+
+# Set up APScheduler
 
 
-# Route to delete a backup file
+def start_scheduler():
+    scheduler = BackgroundScheduler()
+
+    # Schedule the backup to run at 00:00 on the 1st of each month
+    scheduler.add_job(backup_database, 'cron', day=1, hour=0, minute=0)
+
+    # Start the scheduler
+    scheduler.start()
+
+    # Handle job execution status
+    def job_listener(event):
+        if event.exception:
+            print(f'Job failed: {event.job_id}')
+        else:
+            print(f'Job {event.job_id} executed successfully')
+
+    scheduler.add_listener(job_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+
+    # This is required to keep the app running to allow the scheduler to work in the background
+    try:
+        while True:
+            pass
+    except (KeyboardInterrupt, SystemExit):
+        scheduler.shutdown()
+
+
+@app.route('/backup', methods=['GET', 'POST'])
+@login_required
+def backup_database_manual():
+    # Ensure backup folder exists
+    backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
+
+    if os.path.exists(app.config['DATABASE']):
+        # Generate backup file name with current date and time
+        current_datetime = datetime.now().strftime("%m-%d-%Y_%I-%M-%S")
+        backup_file_with_date = f"backup_hr_management_{current_datetime}.db"
+        backup_file_path = os.path.join(backup_folder, backup_file_with_date)
+
+        shutil.copy2(app.config['DATABASE'], backup_file_path)
+
+        # Flash a success message
+        flash(
+            f"Database backup created successfully! Your database has been backed up to {backup_file_with_date}.", "success")
+
+        # Redirect to the backups management page
+        return redirect(url_for('manage_backups'))
+    else:
+        # Flash an error message if the database is not found
+        flash("Database file not found!", "error")
+        return redirect(url_for('manage_backups'))
+
+
 @app.route('/delete', methods=['POST'])
+@login_required
 def delete_backup():
     # Get the backup file name from the form submission
     backup_filename = request.form.get('backup')
-    backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
-    backup_file_path = os.path.join(backup_folder, backup_filename)
 
-    # Ensure the backup file exists
-    if os.path.exists(backup_file_path):
-        # Delete the backup file
-        os.remove(backup_file_path)
-
-        # Get the updated list of backup files after deletion
-        backup_files = [f for f in os.listdir(
-            backup_folder) if f.endswith('.db')]
-
-        # Return a success message along with the updated list of backups
-        return render_template('/backups/backup.html', message=f"Backup file {backup_filename} deleted successfully!", backup_files=backup_files)
+    if backup_filename == 'hr_management.db':
+        # Flash an error message if the file is the database itself
+        flash("You cannot delete the database itself!", "error")
+        # Ensure the backup file exists
     else:
-        return render_template('/backups/backup.html', message="Selected backup file not found!")
+        backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
+        backup_file_path = os.path.join(backup_folder, backup_filename)
+
+        # Ensure the backup file exists
+        if os.path.exists(backup_file_path):
+            # Delete the backup file
+            os.remove(backup_file_path)
+
+            # Flash a success message
+            flash(
+                f"Backup file {backup_filename} deleted successfully!", "success")
+        else:
+            # Flash an error message if the file doesn't exist
+            flash("Selected backup file not found!", "error")
+
+            # Redirect to the backups management page
+    return redirect(url_for('manage_backups'))
 
 
 @app.route('/backup', methods=['GET', 'POST'])
@@ -166,7 +228,7 @@ def backup_database():
     backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
 
     # List all backup files in the backup folder
-    backup_files = [f for f in os.listdir(backup_folder) if f.endswith('.db')]
+    # backup_files = [f for f in os.listdir(backup_folder) if f.endswith('.db')]
 
     if os.path.exists(app.config['DATABASE']):
         # Generate backup file name with current date and time
@@ -177,12 +239,16 @@ def backup_database():
         # Create backup by copying the database
         shutil.copy2(app.config['DATABASE'], backup_file_path)
 
-        # Pass the backup files and success message to the template
-        return render_template('/backups/backup.html',
-                               message=f"Database backup created successfully! Your database has been backed up to {backup_file_with_date}.",
-                               backup_files=backup_files)
+        # Flash a success message
+        flash(
+            f"Database backup created successfully! Your database has been backed up to {backup_file_with_date}.", "success")
+
+        # Redirect to the backups management page
+        return redirect(url_for('manage_backups'))
     else:
-        return render_template('/backups/backup.html', message="Database file not found!", backup_files=backup_files)
+        # Flash an error message if the database is not found
+        flash("Database file not found!", "error")
+        return redirect(url_for('manage_backups'))
 
 
 @app.route('/restore', methods=['POST'])
@@ -230,24 +296,6 @@ def manage_backups():
     # List all backup files in the backup folder
     backup_files = [f for f in os.listdir(backup_folder) if f.endswith('.db')]
     return render_template('backups/manage_backups.html', backup_files=backup_files)
-
-# @app.route('/restore', methods=['GET', 'POST'])
-# @login_required
-# def restore_database():
-#     # Get the backup file name from the form submission
-#     backup_filename = request.form.get('backup')
-#     backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
-#     backup_file_path = os.path.join(backup_folder, backup_filename)
-
-#     # Ensure the selected backup file exists
-#     if os.path.exists(backup_file_path):
-#         # Restore the selected backup to the original database location
-#         shutil.copy2(backup_file_path, app.config['DATABASE'])
-
-#         # Pass a success message to the template
-#         return render_template('/backups/backup.html', message=f"Database restored successfully from {backup_filename}!")
-#     else:
-#         return render_template('/backups/backup.html', message="Selected backup file not found!")
 
 
 # Route to download the database file
@@ -5959,3 +6007,4 @@ def search_branches():
 if __name__ == "__main__":
     init_db()
     socketio.run(app, debug=True)
+    start_scheduler()
