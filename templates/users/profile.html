@@ -12,27 +12,36 @@ content %}
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
       <h2 class="text-2xl font-bold text-indigo-600 mb-4">User Information</h2>
       <div class="space-y-4">
-        <p>
+        <p class="flex items-center">
+          <i class="fas fa-user mr-2 text-indigo-500"></i>
           <strong class="text-indigo-500">Username:</strong> {{ user.username }}
         </p>
-        <p><strong class="text-indigo-500">Email:</strong> {{ user.email }}</p>
-        <p>
+        <p class="flex items-center">
+          <i class="fas fa-envelope mr-2 text-indigo-500"></i>
+          <strong class="text-indigo-500">Email:</strong> {{ user.email }}
+        </p>
+        <p class="flex items-center">
+          <i class="fas fa-mobile-alt mr-2 text-indigo-500"></i>
           <strong class="text-indigo-500">Mobile:</strong> {{ user.mobile1 }}
         </p>
-        <p>
+        <p class="flex items-center">
+          <i class="fas fa-user-circle mr-2 text-indigo-500"></i>
           <strong class="text-indigo-500">Full Name:</strong>
           {{ user['FirstNameEn'] }} {{ user['LastNameEn'] }}
         </p>
-        <p>
+        <p class="flex items-center">
+          <i class="fas fa-user-circle mr-2 text-indigo-500"></i>
           <strong class="text-indigo-500">Full Name (Khmer):</strong>
           {{ user['FirstNameKh'] }} {{ user['LastNameKh'] }}
         </p>
-        <p>
+        <p class="flex items-center">
+          <i class="fas fa-building mr-2 text-indigo-500"></i>
           <strong class="text-indigo-500">Branch:</strong> {{ user.branch }}
         </p>
       </div>
     </div>
 
+    <!-- Profile Image -->
     <div class="bg-white p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-bold text-indigo-600 mb-4">Profile Image</h2>
       <div class="flex justify-center">

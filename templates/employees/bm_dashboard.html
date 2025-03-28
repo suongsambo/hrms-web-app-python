@@ -1,174 +1,122 @@
 {% extends 'base.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
-  <h1 class="text-3xl font-semibold mb-6">
-    Branch Manager Dashboard - {{ branch_name }}
-  </h1>
-
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
     <!-- Total Employees Card -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h3 class="text-xl font-semibold text-gray-800">Total Employees</h3>
-      <p class="text-3xl font-bold text-blue-500">{{ employees|length }}</p>
+    <div
+      class="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+    >
+      <h3 class="text-xl font-semibold">Total Employees</h3>
+      <p class="text-4xl font-bold">{{ employees|length }}</p>
     </div>
 
-    <!-- Total Employees on Leave Card -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h3 class="text-xl font-semibold text-gray-800">Employees on Leave</h3>
-      <p class="text-3xl font-bold text-orange-500"></p>
+    <!-- Employees on Leave Card -->
+    <div
+      class="bg-gradient-to-r from-orange-400 to-orange-600 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+    >
+      <h3 class="text-xl font-semibold">Employees on Leave</h3>
+      <p class="text-4xl font-bold">{{ employees_on_leave }}</p>
     </div>
 
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h3 class="text-xl font-semibold text-gray-800">Total Payroll</h3>
-      <p class="text-3xl font-bold text-orange-500"></p>
+    <!-- Total Payroll Card -->
+    <div
+      class="bg-gradient-to-r from-green-500 to-green-700 text-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+    >
+      <h3 class="text-xl font-semibold">Total Payroll</h3>
+      <p class="text-4xl font-bold">${{ total_payroll }}</p>
     </div>
   </div>
 
-  <div class="grid grid-cols-2 gap-6">
+  <!-- User Information Section -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <div class="bg-white p-6 rounded-lg shadow-md">
-      <div class="flex items-center space-x-2 mb-2">
-        <!-- Icon for User Information -->
-        <i class="fas fa-info-circle w-5 h-5 text-blue-500"></i>
+      <div class="flex items-center space-x-2 mb-4">
+        <i class="fas fa-user-circle text-3xl text-blue-500"></i>
         <h3 class="text-xl font-semibold text-gray-800">User Information</h3>
       </div>
-      <ul class="list-disc list-inside space-y-2">
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Username -->
-          <i class="fas fa-user-circle w-5 h-5 text-blue-500"></i>
-          <span>Username: {{ current_user.username }}</span>
+      <ul class="space-y-2 text-gray-600">
+        <li><strong>Username:</strong> {{ current_user.username }}</li>
+        <li><strong>Zone ID:</strong> {{ current_user.zone_id }}</li>
+        <li><strong>Email:</strong> {{ current_user.email }}</li>
+        <li><strong>Branch:</strong> {{ current_user.branch }}</li>
+        <li>
+          <strong>Role:</strong>
+          {% if current_user.role_default == 20 %}Employee{% else %}{{
+          current_user.role_default }}{% endif %}
         </li>
-
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Username -->
-          <i class="fas fa-user-circle w-5 h-5 text-blue-500"></i>
-          <span>Zone Id: {{ current_user.zone_id }}</span>
-        </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Email -->
-          <i class="fas fa-envelope w-5 h-5 text-blue-500"></i>
-          <span>Email: {{ current_user.email }}</span>
-        </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Branch -->
-          <i class="fas fa-building w-5 h-5 text-blue-500"></i>
-          <span>Branch: {{ current_user.branch }}</span>
-        </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Role -->
-          <i class="fas fa-user-tag w-5 h-5 text-blue-500"></i>
-          <span
-            >Role: {% if current_user.role_default == 20 %}Employee{% else %}{{
-            current_user.role_default }}{% endif %}</span
-          >
-        </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Admin -->
-          <i class="fas fa-user-shield w-5 h-5 text-blue-500"></i>
-          <span
-            >Admin: {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif
-            %}</span
-          >
+        <li>
+          <strong>Admin:</strong>
+          {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif %}
         </li>
       </ul>
     </div>
-    <table class="table-auto w-full">
-      <thead>
-        <tr class="bg-gray-200">
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
-            ID
-          </th>
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
-            Username
-          </th>
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
-            Email
-          </th>
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
-            Profile Image
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for user in online_users %}
-        <tr class="hover:bg-gray-50">
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {{ user[0] }}
-          </td>
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {{ user[1] }}
-          </td>
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {{ user[2] }}
-          </td>
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {% if user[3] %}
-            <img
-              src="{{ url_for('get_user_image', user_id=user[0]) }}"
-              alt="User Profile Image"
-              class="w-10 h-10 rounded-full object-cover shadow-md"
-            />
-            {% else %}
-            <i
-              class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"
-            ></i>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+    <!-- Online Users Table -->
+    <div class="overflow-x-auto bg-white p-6 rounded-lg shadow-md">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-200 text-gray-700">
+            <th class="px-4 py-3 text-left">ID</th>
+            <th class="px-4 py-3 text-left">Username</th>
+            <th class="px-4 py-3 text-left">Email</th>
+            <th class="px-4 py-3 text-left">Profile</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in online_users %}
+          <tr class="hover:bg-gray-100 transition-all">
+            <td class="px-4 py-2">{{ user[0] }}</td>
+            <td class="px-4 py-2">{{ user[1] }}</td>
+            <td class="px-4 py-2">{{ user[2] }}</td>
+            <td class="px-4 py-2">
+              {% if user[3] %}
+              <img
+                src="{{ url_for('get_user_image', user_id=user[0]) }}"
+                alt="User Profile Image"
+                class="w-10 h-10 rounded-full shadow-md"
+              />
+              {% else %}
+              <i
+                class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"
+              ></i>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
 
+  <!-- Employee List Table -->
   {% if employees %}
-  <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-    <table class="min-w-full table-auto">
+  <div class="overflow-x-auto bg-white p-6 rounded-lg shadow-md mt-6">
+    <table class="w-full border-collapse">
       <thead class="bg-gray-100 border-b">
-        <tr>
-          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
-            ID
-          </th>
-          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
-            Name
-          </th>
-          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
-            Age
-          </th>
-          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
-            Salary
-          </th>
-          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
-            Position
-          </th>
-          <th class="py-3 px-6 text-left text-sm font-medium text-gray-700">
-            Department
-          </th>
+        <tr class="text-gray-700">
+          <th class="py-3 px-6 text-left">ID</th>
+          <th class="py-3 px-6 text-left">Name</th>
+          <th class="py-3 px-6 text-left">Age</th>
+          <th class="py-3 px-6 text-left">Salary</th>
+          <th class="py-3 px-6 text-left">Position</th>
+          <th class="py-3 px-6 text-left">Department</th>
         </tr>
       </thead>
       <tbody class="text-gray-600">
         {% for employee in employees %}
-        <tr class="border-b hover:bg-gray-50">
-          <td class="py-4 px-6 text-sm">{{ employee.ID }}</td>
-          <td class="py-4 px-6 text-sm">{{ employee.Name }}</td>
-          <td class="py-4 px-6 text-sm">{{ employee.Age }}</td>
-          <td class="py-4 px-6 text-sm">
-            {{ employee.Salary | float | round(2) }}
-          </td>
-          <td class="py-4 px-6 text-sm">{{ employee.Position }}</td>
-          <td class="py-4 px-6 text-sm">{{ employee.Department }}</td>
+        <tr class="border-b hover:bg-gray-50 transition-all">
+          <td class="py-4 px-6">{{ employee.ID }}</td>
+          <td class="py-4 px-6">{{ employee.Name }}</td>
+          <td class="py-4 px-6">{{ employee.Age }}</td>
+          <td class="py-4 px-6">${{ employee.Salary | float | round(2) }}</td>
+          <td class="py-4 px-6">{{ employee.Position }}</td>
+          <td class="py-4 px-6">{{ employee.Department }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div class="bg-red-100 text-red-600 px-4 py-3 rounded-md">
+  <div class="bg-red-100 text-red-600 px-4 py-3 mt-4 rounded-md">
     <p>No employees found in this branch.</p>
   </div>
   {% endif %}
