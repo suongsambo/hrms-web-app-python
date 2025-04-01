@@ -19,6 +19,7 @@ from typing import Optional
 import eventlet
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
+from typing import Union
 
 eventlet.monkey_patch()
 
@@ -340,6 +341,8 @@ def init_db():
                 AcceptedTerms INTEGER DEFAULT 0,
                 ImageUrl TEXT,
                 Image BLOB,
+                Signature BLOB DEFAULT NULL,
+                FingerPrint BLOB DEFAULT NULL,
                 ZoneID INTEGER,
                 FOREIGN KEY (ZoneID) REFERENCES zones(ID) ON DELETE SET NULL
             )
@@ -5119,33 +5122,40 @@ def users():
 
 
 @app.route('/users/add', methods=['GET', 'POST'])
-def add_user():
+def add_user() -> Union[str, 'Response']:
     if current_user.is_admin == 0:
         flash("You don't have permission to view this page.", "danger")
         return redirect(url_for('dashboard'))
 
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        email = request.form['email']
-        mobile1 = request.form['mobile1']
-        first_name_kh = request.form['first_name_kh']
-        last_name_kh = request.form['last_name_kh']
-        first_name_en = request.form['first_name_en']
-        last_name_en = request.form['last_name_en']
-        branch = request.form['branch']
-        branch_id = request.form['branch']
-        zone_id = request.form['zone_id']  # Get the Zone ID from the form
-        is_admin = request.form.get('is_admin', 0)
-        role_default = request.form.get('role_default', 0)
-        hashed_password = hashlib.sha256(password.encode()).hexdigest()
+        username: str = request.form['username']
+        password: str = request.form['password']
+        email: str = request.form['email']
+        mobile1: str = request.form['mobile1']
+        first_name_kh: str = request.form['first_name_kh']
+        last_name_kh: str = request.form['last_name_kh']
+        first_name_en: str = request.form['first_name_en']
+        last_name_en: str = request.form['last_name_en']
+        branch: str = request.form['branch']
+        branch_id: str = request.form['branch']
+        zone_id: str = request.form['zone_id']
+        is_admin: int = int(request.form.get('is_admin', 0))
+        role_default: int = int(request.form.get('role_default', 0))
+        hashed_password: str = hashlib.sha256(password.encode()).hexdigest()
 
         # Handle image upload
-        image_data = None
+        image_data: Union[bytes, None] = None
         if 'image' in request.files:
-            image = request.files['image']
+            image: FileStorage = request.files['image']
             if image and allowed_file(image.filename):
                 image_data = image.stream.read()
+
+        # Handle signature upload
+        signature_data: Union[bytes, None] = None
+        if 'signature' in request.files:
+            signature: FileStorage = request.files['signature']
+            if signature and allowed_file(signature.filename):
+                signature_data = signature.stream.read()
 
         # Insert user into 'users' table
         with get_db_connection() as conn:
@@ -5158,11 +5168,11 @@ def add_user():
                 flash('Username already exists. Please choose another one.', 'danger')
                 return redirect(url_for('add_user'))
 
-            # Insert user data into 'users' table with binary image data
+            # Insert user data including signature into 'users' table
             cursor.execute('''
-                INSERT INTO users(UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image, ZoneID)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, image_data, zone_id))
+                INSERT INTO users(UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image, ZoneID, Signature)
+                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, image_data, zone_id, signature_data))
 
             user_id = cursor.lastrowid
 
@@ -5181,6 +5191,71 @@ def add_user():
         zones = conn.execute('SELECT * FROM zones').fetchall()
 
     return render_template('/users/add_user.html', branches=branches, zones=zones)
+
+
+# @app.route('/users/add', methods=['GET', 'POST'])
+# def add_user():
+#     if current_user.is_admin == 0:
+#         flash("You don't have permission to view this page.", "danger")
+#         return redirect(url_for('dashboard'))
+
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         mobile1 = request.form['mobile1']
+#         first_name_kh = request.form['first_name_kh']
+#         last_name_kh = request.form['last_name_kh']
+#         first_name_en = request.form['first_name_en']
+#         last_name_en = request.form['last_name_en']
+#         branch = request.form['branch']
+#         branch_id = request.form['branch']
+#         zone_id = request.form['zone_id']  # Get the Zone ID from the form
+#         is_admin = request.form.get('is_admin', 0)
+#         role_default = request.form.get('role_default', 0)
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         # Handle image upload
+#         image_data = None
+#         if 'image' in request.files:
+#             image = request.files['image']
+#             if image and allowed_file(image.filename):
+#                 image_data = image.stream.read()
+
+#         # Insert user into 'users' table
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute(
+#                 'SELECT * FROM users WHERE UserName = ?', (username,))
+#             existing_user = cursor.fetchone()
+
+#             if existing_user:
+#                 flash('Username already exists. Please choose another one.', 'danger')
+#                 return redirect(url_for('add_user'))
+
+#             # Insert user data into 'users' table with binary image data
+#             cursor.execute('''
+#                 INSERT INTO users(UserName, Password, Email, Mobile1, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch, IsAdmin, RoleDefault, Image, ZoneID)
+#                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (username, hashed_password, email, mobile1, first_name_kh, last_name_kh, first_name_en, last_name_en, branch, is_admin, role_default, image_data, zone_id))
+
+#             user_id = cursor.lastrowid
+
+#             # Insert relationship into 'user_branches' table
+#             cursor.execute('''
+#                 INSERT INTO user_branches(user_id, branch_id)
+#                 VALUES(?, ?)
+#             ''', (user_id, branch_id))
+#             conn.commit()
+
+#         return redirect(url_for('list_users'))
+
+#     # Fetch all branches for selection
+#     with get_db_connection() as conn:
+#         branches = conn.execute('SELECT * FROM branches').fetchall()
+#         zones = conn.execute('SELECT * FROM zones').fetchall()
+
+#     return render_template('/users/add_user.html', branches=branches, zones=zones)
 
 
 @app.route('/user/<int:user_id>/image')
