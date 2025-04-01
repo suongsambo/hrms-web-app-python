@@ -5258,6 +5258,52 @@ def add_user() -> Union[str, 'Response']:
 #     return render_template('/users/add_user.html', branches=branches, zones=zones)
 
 
+# Route to serve the user's signature
+@app.route('/user/<int:user_id>/signature')
+def get_user_signature(user_id):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            'SELECT Signature FROM users WHERE id = ?', (user_id,))
+        signature_data = cursor.fetchone()
+
+        if signature_data and signature_data[0]:
+
+            return Response(signature_data[0], mimetype='image/png')
+        else:
+            return "Signature not found", 404
+
+
+# Route to upload a new signature
+@app.route('/users/<int:user_id>/signature/upload', methods=['GET', 'POST'])
+@login_required
+def upload_user_signature(user_id):
+    if request.method == 'GET':
+        # If GET request, render the upload form
+        return render_template('users/upload_signature.html', user_id=user_id)
+
+    # Handle the POST request for signature upload
+    signature_file = request.files.get('signature')
+
+    if not signature_file:
+        flash('No signature uploaded', 'danger')
+        return redirect(request.url)
+
+    # Read the signature file as binary data
+    signature_data = signature_file.read()
+
+    # Update the signature data in the database
+    with get_db_connection() as conn:
+        conn.execute(
+            'UPDATE users SET Signature = ? WHERE id = ?',
+            (signature_data, user_id)
+        )
+        conn.commit()
+
+    flash('Signature uploaded successfully!', 'success')
+    return redirect(url_for('profile', user_id=user_id))
+
+
 @app.route('/user/<int:user_id>/image')
 def get_user_image(user_id):
     with get_db_connection() as conn:

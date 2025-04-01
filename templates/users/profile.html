@@ -51,20 +51,72 @@ content %}
           alt="User Profile Image"
           class="w-48 h-48 rounded-full object-cover shadow-md"
         />
+
         {% else %}
         <p class="text-center text-gray-500">No image found for this user.</p>
         {% endif %}
       </div>
     </div>
+  </br>
 
-    <!-- Button to upload a new image -->
-    <a
-      href="{{ url_for('upload_user_image', user_id=user['id']) }}"
-      class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-2"
-    >
-      <i class="fas fa-camera"></i>
-      <button>Change Profile Image</button>
-    </a>
+
+
+    <div class="bg-white p-6 rounded-lg shadow-md min-h-[300px]">
+      <h2 class="text-2xl font-bold text-indigo-600 mb-4">Signature Image</h2>
+      <div class="flex justify-center">
+        {% if user.image %}
+          <div class="relative w-full max-w-md">
+            <!-- Image with modern styling -->
+            <img
+              src="{{ url_for('get_user_signature', user_id=user.id) }}"
+              alt="User Signature"
+              class="w-full h-auto object-cover rounded-lg shadow-xl transition-transform duration-300 transform hover:scale-105"
+            />
+          </div>
+        {% else %}
+          <p class="text-center text-gray-500">No signature found for this user.</p>
+        {% endif %}
+      </div>
+    </div>
+  </br>
+
+ 
+    
+
+    
+
+
+
+    <div class="profile-info">
+   
+      {% if user['signature_data'] %}
+      <img
+        src="{{ url_for('get_user_signature', user_id=user['id']) }}"
+        alt="User Signature"
+        class="img-fluid"
+      />
+      {% else %}
+   
+      {% endif %}
+    </div>
+
+  
+    <div class="grid grid-cols-2 gap-4">
+      <a
+        href="{{ url_for('upload_user_signature', user_id=user['id']) }}"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-2"
+      >
+        <i class="fas fa-signature"></i>
+        <span>Upload Signature</span>
+      </a>
+      <a
+        href="{{ url_for('upload_user_image', user_id=user['id']) }}"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-2"
+      >
+        <i class="fas fa-camera"></i>
+        <button>Change Profile Image</button>
+      </a>
+    </div>
   </div>
 </body>
 {% endblock %}
