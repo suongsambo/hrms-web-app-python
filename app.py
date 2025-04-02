@@ -957,22 +957,11 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('cb', hashed_password, 'cb@example.com', '010655037', 0, 190, 'SYS'))
 
-        # # Check if the 'HR' department already exists
-        # department_exists = conn.execute(
-        #     "SELECT 1 FROM departments WHERE Name = 'HR'").fetchone()
-
-        # # If the 'HR' department doesn't exist, insert it
-        # if not department_exists:
-        #     conn.execute('''
-        #         INSERT INTO departments (Name, Description)
-        #         VALUES (?, ?)
-        #     ''', ('HR', 'Human Resources Department'))
-
-        # List of department names and descriptions
+        # Create IT user
         departments = [
             ("HRD", "Human Resources Development Department"),
-            ("CRD", "Customer Relations Department"),
-            ("POD", "Product Operations Department"),
+            ("CRD", "Cridit  Department"),
+            ("OPD", "Operations Department"),
             ("FND", "Finance Department"),
             ("TRD", "Training Department"),
             ("ITD", "Information Technology Department")
@@ -3718,37 +3707,6 @@ def edit_leave_ccc_verify(id):
     return render_template('/leaves/edit_ccc_leave.html', leave=leave)
 
 
-# @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
-# def edit_leave_spm_approve(id):
-#     with get_db_connection() as conn:
-#         leave = conn.execute(
-#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
-
-#     if request.method == 'POST':
-#         leave_type = request.form['leave_type']
-#         start_date = request.form['start_date']
-#         end_date = request.form['end_date']
-#         reason = request.form['reason']
-#         status = request.form['status']
-#         approved_by = request.form['approved_by']
-
-#         # Calculate service count (difference between start_date and end_date)
-#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
-#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
-#         service_count = (end_date_obj - start_date_obj).days + 1
-
-#         with get_db_connection() as conn:
-#             conn.execute('''
-#                 UPDATE leaves
-#                 SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, approved_by= ?
-#                 WHERE id= ?
-#             ''', (leave_type, start_date, end_date, reason, status, service_count, approved_by,  id))
-
-#         return redirect(url_for('view_leaves'))
-
-#     return render_template('/leaves/edit_spm_leave.html', leave=leave)
-
-
 @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
 def edit_leave_spm_approve(id):
     with get_db_connection() as conn:
@@ -3793,6 +3751,49 @@ def edit_leave_spm_approve(id):
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
+@app.route('/leave/edit_gm_approve/<int:id>', methods=['GET', 'POST'])
+def edit_leave_gm_approve(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        status = request.form['status']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+        # Set category and approved_by
+        if service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = current_user.username
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get(
+                'approved_by', current_user.username)
+
+        # Update the leave in the database
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, 
+                    service_count= ?, category= ?, approved_by= ?
+                WHERE id= ?
+            ''', (leave_type, start_date, end_date, reason, status, service_count, category,
+                  approved_by, id))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_gm_leave.html', leave=leave)
 
 
 # @app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])

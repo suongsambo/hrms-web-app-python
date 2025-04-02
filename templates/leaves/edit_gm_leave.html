@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Leave{% endblock %}
+
+{% block content %}
+
+<body class="bg-gray-100">
+
+    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-900 mb-4">SPM Approval and Verification</h1>
+        <form method="POST" action="{{ url_for('edit_leave_gm_approve', id=leave['id']) }}"
+            class="bg-white shadow-lg rounded-lg p-6 space-y-6">
+
+            <!-- Leave Type -->
+            <div class="mb-4">
+                <label for="leave_type" class="block text-gray-700 font-medium">Leave Type</label>
+                <input type="text" id="leave_type" name="leave_type" value="{{ leave['leave_type'] }}"
+                    class="mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+
+            <!-- Start Date -->
+            <div class="mb-4">
+                <label for="start_date" class="block text-gray-700 font-medium">Start Date</label>
+                <input type="date" id="start_date" name="start_date" value="{{ leave['start_date'][:10] }}"
+                    class="mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+
+            <!-- End Date -->
+            <div class="mb-4">
+                <label for="end_date" class="block text-gray-700 font-medium">End Date</label>
+                <input type="date" id="end_date" name="end_date" value="{{ leave['end_date'][:10] }}"
+                    class="mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+
+            <!-- Reason -->
+            <div class="mb-4">
+                <label for="reason" class="block text-gray-700 font-medium">Reason</label>
+                <textarea id="reason" name="reason" rows="4"
+                    class="mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-indigo-500"
+                    required>{{ leave['reason'] }}</textarea>
+            </div>
+
+            <!-- Approved By and Verified By -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Approved By (if applicable)</label>
+                    <input type="text" name="approved_by"
+                        value="{% if leave['service_count'] >= 6 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
+                        class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-4">
+                <label for="status" class="block text-gray-700 font-medium">Status</label>
+                <select id="status" name="status"
+                    class="mt-1 p-2 w-full border rounded-md focus:ring-2 focus:ring-indigo-500">
+                    <option value="Approved" {% if leave['status']=='Approved' or leave['status'] is none %}selected{%
+                        endif %}>Approved</option>
+                    <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
+                </select>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="mb-4">
+                <button type="submit"
+                    class="w-full p-3 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">Update
+                    Leave</button>
+            </div>
+        </form>
+    </div>
+
+</body>
+{% endblock %}
