@@ -20,6 +20,11 @@ import eventlet
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from typing import Union
+from flask_caching import Cache
+from flask import session
+
+
+cache = Cache(config={'CACHE_TYPE': 'simple'})
 
 eventlet.monkey_patch()
 
@@ -68,6 +73,18 @@ class User(UserMixin):
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+
+@app.route('/clear_session')
+def clear_session():
+    session.clear()  # Clears the session data
+    return "Session cleared!"
+
+
+@app.route('/clear_cache')
+def clear_cache():
+    cache.clear()  # Clears the cache
+    return "Cache cleared!"
 
 
 @login_manager.user_loader
@@ -3413,6 +3430,7 @@ def add_many_leave(branch):
         # Calculate service_count excluding Saturdays and Sundays
         service_count = 0
         current_date = start_date_obj
+        leave_hours = service_count * 8
 
         while current_date <= end_date_obj:
             # Check if the current date is not Saturday (5) or Sunday (6)
@@ -3434,9 +3452,9 @@ def add_many_leave(branch):
             cursor = conn.cursor()
             # Insert the leave entry into the database with the branch
             cursor.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch))
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours))
             leave_id = cursor.lastrowid
 
             # Insert user-leave associations into the user_leave table

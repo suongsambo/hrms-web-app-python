@@ -7,11 +7,8 @@ content %}
     <div class="container mx-auto flex justify-between items-center">
       <a href="/" class="text-lg font-bold">Dashboard</a>
       <div>
-        <a
-          href="{{ url_for('get_all_leave_dates') }}"
-          class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md"
-          >View All Leaves</a
-        >
+        <a href="{{ url_for('get_all_leave_dates') }}"
+          class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md">View All Leaves</a>
       </div>
     </div>
   </nav>
@@ -25,10 +22,7 @@ content %}
 
     <!-- Print Button -->
     <div class="mb-4">
-      <button
-        id="printSelected"
-        class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 text-white rounded-md"
-      >
+      <button id="printSelected" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 text-white rounded-md">
         <i class="fas fa-print mr-2"></i> Print
       </button>
     </div>
@@ -48,18 +42,14 @@ content %}
 
             <th class="px-6 py-3">LeaveHours</th>
             <th class="px-6 py-3">LeaveDay</th>
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Reason
             </th>
             <th class="px-6 py-3">RequestedBy</th>
             <th class="px-6 py-3">VerifiedBy</th>
             <th class="px-6 py-3">ApprovedBy</th>
 
-            <th
-              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-            >
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
             <th class="px-6 py-3">Action</th>
@@ -69,34 +59,18 @@ content %}
           {% if leaves %} {% for leave in leaves %}
           <tr class="border-t">
             <td class="px-6 py-3">
-              <input
-                type="checkbox"
-                class="select-row-checkbox"
-                data-leave="{{ leave.id }}"
-              />
+              <input type="checkbox" class="select-row-checkbox" data-leave="{{ leave.id }}" />
             </td>
             <td class="px-6 py-3">{{ leave.employee_name }}</td>
             <td class="px-6 py-3">{{ leave.branch_name }}</td>
             <td class="px-6 py-3">{{ leave.leave_type }}</td>
-            <td
-              class="px-6 py-3 leave-start-date"
-              data-start="{{ leave.start_date }}"
-              style="min-width: 180px"
-            >
+            <td class="px-6 py-3 leave-start-date" data-start="{{ leave.start_date }}" style="min-width: 180px">
               <!-- Formatted Start Date will be inserted here -->
             </td>
-            <td
-              class="px-6 py-3 leave-end-date"
-              data-end="{{ leave.end_date }}"
-              style="min-width: 180px"
-            >
+            <td class="px-6 py-3 leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px">
               <!-- Formatted End Date will be inserted here -->
             </td>
-            <td
-              class="px-6 py-3 leave-hours"
-              data-start="{{ leave.start_date }}"
-              data-end="{{ leave.end_date }}"
-            >
+            <td class="px-6 py-3 leave-hours" data-start="{{ leave.start_date }}" data-end="{{ leave.end_date }}">
               <!-- Leave Hours will be calculated here dynamically -->
             </td>
 
@@ -110,8 +84,7 @@ content %}
 
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span
-                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
-              >
+                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
                 <b>{{ leave.status }}</b>
               </span>
             </td>
@@ -120,11 +93,9 @@ content %}
               <div class="flex justify-center gap-x-3">
                 {% if leave.status not in ['Approved', 'Rejected'] %}
 
-                <a
-                  href="{{ url_for('delete_leave', id=leave.id) }}"
+                <a href="{{ url_for('delete_leave', id=leave.id) }}"
                   class="text-red-500 hover:text-red-700 font-medium transition-colors duration-300"
-                  onclick="return confirm('Are you sure you want to delete this leave?')"
-                >
+                  onclick="return confirm('Are you sure you want to delete this leave?')">
                   <span class="material-symbols-outlined">delete</span>
                 </a>
                 {% endif %}
@@ -277,8 +248,8 @@ content %}
           );
           printWindow.document.write(
             "<p><b>Employee Name:</b> " +
-              selectedData[0].split(", ")[1] +
-              "</p>"
+            selectedData[0].split(", ")[1] +
+            "</p>"
           );
           printWindow.document.write(
             "<p><b>Branch:</b> " + selectedData[0].split(", ")[2] + "</p>"
@@ -321,8 +292,8 @@ content %}
           );
           printWindow.document.write(
             "<p><b>Verified By:</b> <span style='color: blue'>" +
-              selectedData[0].split(", ")[10] +
-              "</span></p>"
+            selectedData[0].split(", ")[10] +
+            "</span></p>"
           );
           printWindow.document.write(
             "<p><b>Approved By:</b> " + selectedData[0].split(", ")[11] + "</p>"
@@ -334,8 +305,8 @@ content %}
           printWindow.document.write("<div class='footer'>");
           printWindow.document.write(
             "<p>Leave Request Form - Printed on " +
-              new Date().toLocaleDateString() +
-              "</p>"
+            new Date().toLocaleDateString() +
+            "</p>"
           );
           printWindow.document.write("</div>");
 

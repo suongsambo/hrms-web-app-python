@@ -1,204 +1,161 @@
-
 {% extends 'base.html' %}
 
 {% block title %}Leaves{% endblock %}
 
 {% block content %}
-  <body class="bg-gray-100 text-gray-900 font-sans">
-    <header class="bg-blue-600 text-white p-6 rounded-b-lg shadow-md">
-      <h1 class="text-3xl font-semibold">All Leave Records</h1>
-      <p class="mt-2 text-lg">Total Leave Days: {{ total_leave_days }}</p>
-    </header>
 
-    <section
-      class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300"
-    >
+<body class="bg-gray-100 text-gray-900 font-sans">
+  <header class="bg-blue-600 text-white p-6 rounded-b-lg shadow-md">
+    <h1 class="text-3xl font-semibold">All Leave Records</h1>
+    <p class="mt-2 text-lg">Total Leave Days: {{ total_leave_days }}</p>
+  </header>
+
+  <section class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
     <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
-        Filter Leave Records
-      </h2>
-      <a
-        href="{{ url_for('view_leaves') }}"
-        class="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 flex items-center"
-      >
-        <i class="fas fa-arrow-left mr-2"></i> Back
-      </a>
-      <button
-        onclick="window.location.reload()"
-        class="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 flex items-center ml-4"
-      >
-        <i class="fas fa-sync-alt mr-2"></i> Refresh
+      Filter Leave Records
+    </h2>
+    <a href="{{ url_for('view_leaves') }}"
+      class="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 flex items-center">
+      <i class="fas fa-arrow-left mr-2"></i> Back
+    </a>
+    <button onclick="window.location.reload()"
+      class="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 flex items-center ml-4">
+      <i class="fas fa-sync-alt mr-2"></i> Refresh
+    </button>
+
+  </section>
+  </section>
+  <!-- Date Filter Form -->
+  <section class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+
+    <form method="get" action="/leaves/all" class="flex justify-between items-center gap-6">
+      <!-- Start Date Section -->
+      <div class="flex items-center gap-4">
+        <label for="start_date" class="text-lg text-gray-700 font-medium">
+          Start Date
+        </label>
+        <input type="date" name="start_date" id="start_date" value="{{ start_date }}"
+          class="p-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 w-40" />
+      </div>
+
+
+      <span class="text-lg text-gray-600">to</span>
+
+      <!-- End Date Section -->
+      <div class="flex items-center gap-4">
+        <label for="end_date" class="text-lg text-gray-700 font-medium mb-2">End Date</label>
+        <input type="date" name="end_date" id="end_date" value="{{ end_date }}"
+          class="p-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 w-40"
+          style="align-self: flex-start" />
+      </div>
+
+      <!-- Filter Button -->
+      <button type="submit"
+        class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
+        Filter
       </button>
+    </form>
+  </section>
 
-    </section>
- </section>
-    <!-- Date Filter Form -->
-    <section
-      class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300"
-    >
-    
-      <form
-        method="get"
-        action="/leaves/all"
-        class="flex justify-between items-center gap-6"
-      >
-        <!-- Start Date Section -->
-        <div class="flex items-center gap-4">
-            <label
-              for="start_date"
-              class="text-lg text-gray-700 font-medium"
-            >
-              Start Date
-            </label>
-            <input
-              type="date"
-              name="start_date"
-              id="start_date"
-              value="{{ start_date }}"
-              class="p-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 w-40"
-            />
-          </div>
-          
+  <!-- Leave Type Summary -->
+  <section
+    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
+      Leave Type Summary
+    </h2>
+    <table
+      class="min-w-full table-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-200 rounded-lg overflow-hidden shadow-md">
+      <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+        <tr>
+          <th class="px-6 py-4 text-left">Leave Type</th>
+          <th class="px-6 py-4 text-left">Count</th>
+          <th class="px-6 py-4 text-left">Total Leave Duration (Days)</th>
+        </tr>
+      </thead>
+      <tbody class="text-gray-700">
+        {% for leave_type, data in leave_type_count.items() %}
+        <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
+          <td class="px-6 py-4">{{ leave_type }}</td>
+          <td class="px-6 py-4">{{ data['count'] }}</td>
+          <td class="px-6 py-4">{{ data['total_days'] }} days</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 
-        <span class="text-lg text-gray-600">to</span>
+  <!-- Leave Records Table -->
+  <section
+    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
+      Leave Summary
+    </h2>
+    <table
+      class="min-w-full table-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-200 rounded-lg overflow-hidden shadow-md">
+      <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+        <tr>
+          <th class="px-6 py-4 text-left">Employee</th>
+          <th class="px-6 py-4 text-left">Leave Type</th>
+          <th class="px-6 py-4 text-left">Start Date</th>
+          <th class="px-6 py-4 text-left">End Date</th>
+          <th class="px-6 py-4 text-left">Leave Days</th>
+        </tr>
+      </thead>
+      <tbody class="text-gray-700">
+        {% for leave in leaves %}
+        <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
+          <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
+          <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
+          <td class="px-6 py-4">{{ leave['start_date'] }}</td>
+          <td class="px-6 py-4">{{ leave['end_date'] }}</td>
+          <td class="px-6 py-4">{{ leave['leave_days'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
 
-        <!-- End Date Section -->
-        <div class="flex items-center gap-4">
-          <label for="end_date" class="text-lg text-gray-700 font-medium mb-2"
-            >End Date</label
-          >
-          <input
-            type="date"
-            name="end_date"
-            id="end_date"
-            value="{{ end_date }}"
-            class="p-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 w-40"
-            style="align-self: flex-start"
-          />
-        </div>
+  <!-- Leave Detail Records Table -->
+  <section
+    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    <h2 class="text-3xl font-semibold text-center mb-6 text-indigo-700">
+      Leave Detail Summary
+    </h2>
+    <table class="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
+      <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+        <tr>
+          <th class="px-6 py-4 text-left text-lg font-medium">Employee</th>
+          <th class="px-6 py-4 text-left text-lg font-medium">Leave Type</th>
+          <th class="px-6 py-4 text-left text-lg font-medium">Start Date</th>
+          <th class="px-6 py-4 text-left text-lg font-medium">End Date</th>
+          <th class="px-6 py-4 text-left text-lg font-medium">Leave Days</th>
+          <th class="px-6 py-4 text-left text-lg font-medium">
+            Leave Days List
+          </th>
+        </tr>
+      </thead>
+      <tbody class="text-gray-700">
+        {% for leave in leaves %}
+        <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
+          <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
+          <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
+          <td class="px-6 py-4">{{ leave['start_date'] }}</td>
+          <td class="px-6 py-4">{{ leave['end_date'] }}</td>
+          <td class="px-6 py-4">{{ leave['leave_days'] }}</td>
+          <td class="px-6 py-4">
+            <!-- Displaying the list of leave days -->
+            <ul class="space-y-1">
+              {% for day in leave['leave_day_list'] %}
+              <li class="text-sm text-gray-500">{{ day }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</body>
 
-        <!-- Filter Button -->
-        <button
-          type="submit"
-          class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105"
-        >
-          Filter
-        </button>
-      </form>
-    </section>
 
-    <!-- Leave Type Summary -->
-    <section
-      class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300"
-    >
-      <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
-        Leave Type Summary
-      </h2>
-      <table
-        class="min-w-full table-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-200 rounded-lg overflow-hidden shadow-md"
-      >
-        <thead
-          class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
-        >
-          <tr>
-            <th class="px-6 py-4 text-left">Leave Type</th>
-            <th class="px-6 py-4 text-left">Count</th>
-            <th class="px-6 py-4 text-left">Total Leave Duration (Days)</th>
-          </tr>
-        </thead>
-        <tbody class="text-gray-700">
-          {% for leave_type, data in leave_type_count.items() %}
-          <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
-            <td class="px-6 py-4">{{ leave_type }}</td>
-            <td class="px-6 py-4">{{ data['count'] }}</td>
-            <td class="px-6 py-4">{{ data['total_days'] }} days</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Leave Records Table -->
-    <section
-      class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300"
-    >
-      <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
-        Leave Summary
-      </h2>
-      <table
-        class="min-w-full table-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-200 rounded-lg overflow-hidden shadow-md"
-      >
-        <thead
-          class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
-        >
-          <tr>
-            <th class="px-6 py-4 text-left">Employee</th>
-            <th class="px-6 py-4 text-left">Leave Type</th>
-            <th class="px-6 py-4 text-left">Start Date</th>
-            <th class="px-6 py-4 text-left">End Date</th>
-            <th class="px-6 py-4 text-left">Leave Days</th>
-          </tr>
-        </thead>
-        <tbody class="text-gray-700">
-          {% for leave in leaves %}
-          <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
-            <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
-            <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
-            <td class="px-6 py-4">{{ leave['start_date'] }}</td>
-            <td class="px-6 py-4">{{ leave['end_date'] }}</td>
-            <td class="px-6 py-4">{{ leave['leave_days'] }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
-
-    <!-- Leave Detail Records Table -->
-    <section
-      class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300"
-    >
-      <h2 class="text-3xl font-semibold text-center mb-6 text-indigo-700">
-        Leave Detail Summary
-      </h2>
-      <table
-        class="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden"
-      >
-        <thead
-          class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white"
-        >
-          <tr>
-            <th class="px-6 py-4 text-left text-lg font-medium">Employee</th>
-            <th class="px-6 py-4 text-left text-lg font-medium">Leave Type</th>
-            <th class="px-6 py-4 text-left text-lg font-medium">Start Date</th>
-            <th class="px-6 py-4 text-left text-lg font-medium">End Date</th>
-            <th class="px-6 py-4 text-left text-lg font-medium">Leave Days</th>
-            <th class="px-6 py-4 text-left text-lg font-medium">
-              Leave Days List
-            </th>
-          </tr>
-        </thead>
-        <tbody class="text-gray-700">
-          {% for leave in leaves %}
-          <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
-            <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
-            <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
-            <td class="px-6 py-4">{{ leave['start_date'] }}</td>
-            <td class="px-6 py-4">{{ leave['end_date'] }}</td>
-            <td class="px-6 py-4">{{ leave['leave_days'] }}</td>
-            <td class="px-6 py-4">
-              <!-- Displaying the list of leave days -->
-              <ul class="space-y-1">
-                {% for day in leave['leave_day_list'] %}
-                <li class="text-sm text-gray-500">{{ day }}</li>
-                {% endfor %}
-              </ul>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </section>
-  </body>
-  {% endblock %}
- 
- 
- 
+{% endblock %}

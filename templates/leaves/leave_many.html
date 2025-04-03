@@ -2,108 +2,59 @@
 content %}
 
 <head>
-  <link
-    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
-    rel="stylesheet"
-  />
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
 </head>
 
 <body class="bg-gray-100 flex justify-center items-center min-h-screen">
   <!-- Modal -->
-  <div
-    id="leaveModal"
-    class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50"
-  >
+  <div id="leaveModal" class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
       <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold">Add Leave</h2>
-        <button
-          type="button"
-          onclick="closeModal()"
-          class="text-gray-500 hover:text-gray-800"
-        >
+        <h2 class="text-xl font-bold">ពាក្យសុំច្បាប់ឈប់សម្រាក</h2>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-800">
           &times;
         </button>
       </div>
 
-      <form
-        method="POST"
-        action="{{ url_for('add_many_leave',  branch=branch) }}"
-        class="space-y-4"
-      >
+      <form method="POST" action="{{ url_for('add_many_leave',  branch=branch) }}" class="space-y-4">
         <div>
           <label for="branch" class="hidden">Branch</label>
-          <input
-            type="text"
-            id="branch"
-            name="branch"
-            value="{{ current_user.branch }}"
-            hidden
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
+          <input type="text" id="branch" name="branch" value="{{ current_user.branch }}" hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
         </div>
         <div>
           <label for="employee_id" class="hidden">Employee</label>
-          <input
-            type="text"
-            id="employee_id"
-            name="employee_id"
-            value="{{ current_user.employee_id }}"
-            hidden
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
+          <input type="text" id="employee_id" name="employee_id" value="{{ current_user.employee_id }}" hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
         </div>
 
         <div>
           <label for="requested_by" class="hidden">Requested By</label>
-          <input
-            type="text"
-            id="requested_by"
-            name="requested_by"
-            hidden
-            value="{{ current_user.username }}"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-          />
+          <input type="text" id="requested_by" name="requested_by" hidden value="{{ current_user.username }}"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
         </div>
 
         <div class="mb-4">
-          <label
-            for="leave_type"
-            class="block text-gray-700 text-sm font-medium"
-          >
-            Select Leave Type:
+          <label for="leave_type" class="block text-gray-700 text-sm font-medium">
+            ប្រភេទនៃការឈប់សម្រាក (Types of Leave):
           </label>
-          <select
-            id="leave_type"
-            name="leave_type"
-            class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="annualLeave">Annual Leave</option>
-            <option value="sickLeave">Sick Leave</option>
-            <option value="maternityLeave">Maternity Leave</option>
-            <option value="specialLeave">Special Leave</option>
+          <select id="leave_type" name="leave_type"
+            class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="annualLeave">ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</option>
+            <option value="sickLeave">ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</option>
+            <option value="maternityLeave">ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</option>
+            <option value="specialLeave">ការឈប់សម្រាកពិសេស (Special Leave)</option>
           </select>
         </div>
-
         <!-- Start Date with Icon -->
         <div class="relative">
-          <label
-            for="start_date"
-            class="block text-sm font-medium text-gray-700"
-            >Start Date</label
-          >
+          <label for="start_date" class="block text-sm font-medium text-gray-700">សំណើសុំឈប់សម្រាកពីថ្ងៃទី (From
+            Date)</label>
           <div class="relative">
-            <input
-              type="text"
-              id="start_date"
-              name="start_date"
-              required
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
+            <input type="text" id="start_date" name="start_date" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
             <!-- Calendar Icon -->
-            <span
-              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
-            >
+            <span class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none">
               <i class="fas fa-calendar-alt"></i>
             </span>
           </div>
@@ -111,56 +62,34 @@ content %}
 
         <!-- End Date with Icon -->
         <div class="relative">
-          <label for="end_date" class="block text-sm font-medium text-gray-700"
-            >End Date</label
-          >
+          <label for="end_date" class="block text-sm font-medium text-gray-700">រហូតដល់ថ្ងៃទី (To Date)</label>
           <div class="relative">
-            <input
-              type="text"
-              id="end_date"
-              name="end_date"
-              required
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
+            <input type="text" id="end_date" name="end_date" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
             <!-- Calendar Icon -->
-            <span
-              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
-            >
+            <span class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none">
               <i class="fas fa-calendar-alt"></i>
             </span>
           </div>
         </div>
 
         <div>
-          <label for="reason" class="block text-gray-700 text-sm font-medium"
-            >Reason:</label
-          >
-          <textarea
-            name="reason"
-            required
-            placeholder="250 words"
-            class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 resize-none placeholder-gray-500"
-          ></textarea>
+          <label for="reason" class="block text-gray-700 text-sm font-medium">មូលហេតុនៃការសុំឈប់សម្រាក (Reason for
+            Leave):</label>
+          <textarea name="reason" required placeholder="250 words"
+            class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 resize-none placeholder-gray-500"></textarea>
         </div>
         <div>
-          <label for="user_ids" class="block text-gray-700 text-sm font-medium"
-            >Assign to Users:</label
-          >
+          <label for="user_ids" class="block text-gray-700 text-sm font-medium">Assign to Users:</label>
 
           <!-- Buttons to select and deselect all options -->
           <div class="mb-2">
-            <button
-              type="button"
-              onclick="selectAll()"
-              class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 text-sm"
-            >
+            <button type="button" onclick="selectAll()"
+              class="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75 text-sm">
               <i class="fas fa-check-square mr-1"></i> Select All
             </button>
-            <button
-              type="button"
-              onclick="deselectAll()"
-              class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 ml-2 text-sm"
-            >
+            <button type="button" onclick="deselectAll()"
+              class="bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-75 ml-2 text-sm">
               <i class="fas fa-square mr-1"></i> Deselect All
             </button>
           </div>
@@ -169,17 +98,10 @@ content %}
           <div class="space-y-2 flex flex-wrap">
             {% for user in users %}
             <div class="flex items-center mr-4 mb-2">
-              <input
-                type="checkbox"
-                id="user_{{ user.id }}"
-                name="user_ids"
-                value="{{ user.id }}"
+              <input type="checkbox" id="user_{{ user.id }}" name="user_ids" value="{{ user.id }}"
                 class="form-checkbox h-5 w-5 text-blue-500 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75"
-                onclick="updateSelectAllButton()"
-              />
-              <label for="user_{{ user.id }}" class="ml-2 text-gray-800"
-                >{{ user.username }}</label
-              >
+                onclick="updateSelectAllButton()" />
+              <label for="user_{{ user.id }}" class="ml-2 text-gray-800">{{ user.username }}</label>
             </div>
             {% endfor %} {% if not users %}
             <div class="text-gray-500">No Users Available</div>
@@ -188,16 +110,12 @@ content %}
         </div>
 
         <div class="flex justify-between gap-4">
-          <button
-            type="submit"
-            class="w-1/2 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center"
-          >
+          <button type="submit"
+            class="w-1/2 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center">
             <i class="fas fa-paper-plane mr-2"></i> Submit
           </button>
-          <a
-            href="{{ url_for('view_leaves') }}"
-            class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center"
-          >
+          <a href="{{ url_for('view_leaves') }}"
+            class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
             <i class="fas fa-arrow-left mr-2"></i> Back
           </a>
         </div>
