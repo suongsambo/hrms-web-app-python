@@ -52,6 +52,7 @@ content %}
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
+
             <th class="px-6 py-3">Action</th>
           </tr>
         </thead>
@@ -256,7 +257,8 @@ content %}
 
         th, td {  
           text-align: left;
-          padding: 8px;
+          padding: 0px;
+          font-size: 13px;
         }
 
       </style>
@@ -318,20 +320,21 @@ content %}
                 <th>អនុញ្ញាតដោយ (Approved by)</th>
               </tr>
               <tr>
-                <td style="border-bottom: 1px solid #000;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[9]}</td>
-                <td style="border-bottom: 1px solid #000;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[10]}</td>
-                <td style="border-bottom: 1px solid #000; color: blue;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[11]}</td>
+                <td style="border-bottom: 1px solid #000; font-size: 13px;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[9]}</td>
+                <td style="border-bottom: 1px solid #000; font-size: 13px;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[10]}</td>
+                <td style="border-bottom: 1px solid #000; color: blue; font-size: 13px;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[11]}</td>
               </tr>
               <tr style="background-color: #f3f4f6;">
-                <th style="padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; color: #4b5563;">Signature (Requested by)</th>
-                <th style="padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; color: #4b5563;">Signature (Verified by)</th>
-                <th style="padding: 10px; border-bottom: 2px solid #e5e7eb; font-weight: bold; color: #4b5563;">Signature (Approved by)</th>
+                <th style="padding: 0px; border-bottom: 2px solid #e5e7eb;  color: #4b5563;">Signature (Requested by)</th>
+                <th style="padding: 0px; border-bottom: 2px solid #e5e7eb;  color: #4b5563;">Signature (Verified by)</th>
+                <th style="padding: 0px; border-bottom: 2px solid #e5e7eb;  color: #4b5563;">Signature (Approved by)</th>
               </tr>
               <tr>
               <td style="height: 60px; border-bottom: 1px solid #000;">
-            <img id="signatureImage" 
-              src="{{ url_for('static', filename='images/undraw_images_of1m.svg') }}" 
+          
+              <img src="{{ url_for('get_user_signature', user_id=current_user.id) }}" 
               alt="Signature" height="50" width="100">
+              
               </td>
               <td style="height: 60px; border-bottom: 1px solid #000;">
                   <img src="${selectedData[0].split(", ")[16] || 'https://via.placeholder.com/100x50?text=No+Signature'}" 

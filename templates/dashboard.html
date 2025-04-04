@@ -5,6 +5,7 @@ content %}
   <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
 
   {% if current_user.role_default == 20 %}
+
   <body>
     <div class="container mt-5">
       <h2 class="text-center">Employee Dashboard</h2>
@@ -58,14 +59,10 @@ content %}
     <table class="min-w-full table-auto border-collapse">
       <thead>
         <tr class="bg-blue-600 text-white">
-          <th
-            class="px-6 py-4 text-left text-sm font-medium border-r border-gray-300"
-          >
+          <th class="px-6 py-4 text-left text-sm font-medium border-r border-gray-300">
             Branch Name
           </th>
-          <th
-            class="px-6 py-4 text-left text-sm font-medium border-l border-gray-300"
-          >
+          <th class="px-6 py-4 text-left text-sm font-medium border-l border-gray-300">
             Average Salary
           </th>
         </tr>
@@ -73,14 +70,10 @@ content %}
       <tbody>
         {% for name in branch_names %}
         <tr class="hover:bg-gray-50 transition duration-300 ease-in-out">
-          <td
-            class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-r border-gray-300"
-          >
+          <td class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-r border-gray-300">
             {{ name }}
           </td>
-          <td
-            class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-l border-gray-300"
-          >
+          <td class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-l border-gray-300">
             ${{ '%.2f'|format(branch_salaries[loop.index0] /
             branch_counts[loop.index0]) }}
           </td>
@@ -116,42 +109,30 @@ content %}
         <li class="flex items-center space-x-2 text-gray-600">
           <!-- Icon for Role -->
           <i class="fas fa-user-tag w-5 h-5 text-blue-500"></i>
-          <span
-            >Role: {% if current_user.role_default == 20 %}Employee{% else %}{{
-            current_user.role_default }}{% endif %}</span
-          >
+          <span>Role: {% if current_user.role_default == 20 %}Employee{% else %}{{
+            current_user.role_default }}{% endif %}</span>
         </li>
         <li class="flex items-center space-x-2 text-gray-600">
           <!-- Icon for Admin -->
           <i class="fas fa-user-shield w-5 h-5 text-blue-500"></i>
-          <span
-            >Admin: {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif
-            %}</span
-          >
+          <span>Admin: {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif
+            %}</span>
         </li>
       </ul>
     </div>
     <table class="table-auto w-full">
       <thead>
         <tr class="bg-gray-200">
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
+          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
             ID
           </th>
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
+          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
             Username
           </th>
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
+          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
             Email
           </th>
-          <th
-            class="px-4 py-2 border-b border-gray-300 text-left font-semibold"
-          >
+          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
             Profile Image
           </th>
         </tr>
@@ -170,15 +151,10 @@ content %}
           </td>
           <td class="px-4 py-2 border-b border-gray-300 text-sm">
             {% if user[3] %}
-            <img
-              src="{{ url_for('get_user_image', user_id=user[0]) }}"
-              alt="User Profile Image"
-              class="w-10 h-10 rounded-full object-cover shadow-md"
-            />
+            <img src="{{ url_for('get_user_image', user_id=user[0]) }}" alt="User Profile Image"
+              class="w-10 h-10 rounded-full object-cover shadow-md" />
             {% else %}
-            <i
-              class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"
-            ></i>
+            <i class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"></i>
             {% endif %}
           </td>
         </tr>
@@ -205,37 +181,37 @@ content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-      let ctx = document.getElementById('employeeChart').getContext('2d');
-      let employeeChart = new Chart(ctx, {
-          type: 'bar',
-          data: {
-              labels: {{ branch_names | tojson }},
-              datasets: [
-                  {
-                      label: 'Number of Employees',
-                      data: {{ branch_counts | tojson }},
-                      backgroundColor: 'rgba(54, 162, 235, 0.6)',
-                      borderColor: 'rgba(54, 162, 235, 1)',
-                      borderWidth: 1
+  document.addEventListener("DOMContentLoaded", function () {
+    let ctx = document.getElementById('employeeChart').getContext('2d');
+    let employeeChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ branch_names | tojson }},
+    datasets: [
+    {
+      label: 'Number of Employees',
+      data: {{ branch_counts | tojson }},
+    backgroundColor: 'rgba(54, 162, 235, 0.6)',
+    borderColor: 'rgba(54, 162, 235, 1)',
+    borderWidth: 1
                   },
-                  {
-                      label: 'Total Salary',
-                      data: {{ branch_salaries | tojson }},
-                      backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                      borderColor: 'rgba(75, 192, 192, 1)',
-                      borderWidth: 1
+    {
+      label: 'Total Salary',
+      data: {{ branch_salaries | tojson }},
+    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+    borderColor: 'rgba(75, 192, 192, 1)',
+    borderWidth: 1
                   }
-              ]
+  ]
           },
-          options: {
-              responsive: true,
-              scales: {
-                  y: {
-                      beginAtZero: true
-                  }
-              }
-          }
+    options: {
+    responsive: true,
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
       });
   });
 </script>

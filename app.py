@@ -2542,6 +2542,8 @@ def view_leaves():
 
         return render_template('/leaves/view_leaves.html', leaves=leaves)
 
+# TODO: employee leave
+
 
 @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
 def filter_leaves_by_employee_id(employee_id):
@@ -2551,8 +2553,8 @@ def filter_leaves_by_employee_id(employee_id):
 
     # Define SQL query
     query = '''
-        SELECT l.id, e.name AS employee_name, e.branch AS branch_name, 
-               l.leave_type, l.start_date, l.end_date, l.reason, l.status, 
+        SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+               l.leave_type, l.start_date, l.end_date, l.reason, l.status,
                l.service_count, l.verified_by, l.approved_by, l.employee_id,
                l.spm_status, l.dd_status, l.manager_status, l.requested_by
         FROM leaves l
@@ -2572,6 +2574,63 @@ def filter_leaves_by_employee_id(employee_id):
     # Render the template with the query results
     return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
 
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id(employee_id):
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     query = '''
+#         SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                l.spm_status, l.dd_status, l.manager_status, l.requested_by
+#         FROM leaves l
+#         INNER JOIN employees e ON l.employee_id = e.id
+#         WHERE l.employee_id = ?
+#     '''
+#     params = (employee_id,)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+
+#             # Make sure column names match what is returned from DB
+#             user_rows = conn.execute(
+#                 "SELECT ID, UserName, Signature AS signature FROM users"
+#             ).fetchall()
+
+#             user_map = {
+#                 user['ID']: {
+#                     'username': user['UserName'],
+#                     'signature': user['signature']  # lowercase here
+#                 } for user in user_rows
+#             }
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     leave_list = []
+#     for leave in leaves:
+#         leave_dict = dict(leave)
+
+#         verified_by_user = user_map.get(leave['verified_by'], {})
+#         approved_by_user = user_map.get(leave['approved_by'], {})
+
+#         leave_dict['verified_by_name'] = verified_by_user.get(
+#             'username', 'Unknown')
+#         leave_dict['verified_by_signature'] = verified_by_user.get(
+#             'signature', 'No Signature')
+
+#         leave_dict['approved_by_name'] = approved_by_user.get(
+#             'username', 'Unknown')
+#         leave_dict['approved_by_signature'] = approved_by_user.get(
+#             'signature', 'No Signature')
+
+#         leave_list.append(leave_dict)
+
+#     return render_template('leaves/filter_leaves_by_employee.html',
+#                            leaves=leave_list,
+#                            employee_id=employee_id)
 
 # @app.route('/leaves/ccc/<string:branch_name>', methods=['GET'])
 # def leaves_by_branch_and_ccc_category():
