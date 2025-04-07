@@ -157,6 +157,13 @@ content %}
             totalHours -= 1;
           }
 
+          // // Check if the leave period includes any time after 5 PM
+          // var endOfDay = moment(startDate).hour(17).minute(0);
+          // if (endTime.isAfter(endOfDay)) {
+          //   var afterHoursDuration = moment.duration(endTime.diff(endOfDay));
+          //   totalHours -= afterHoursDuration.asHours();
+          // }
+
           // Update the Leave Hours cell with the calculated hours
           $(this).text(totalHours.toFixed(2) + " hours");
         } else {

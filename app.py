@@ -3501,10 +3501,20 @@ def add_leave_hours():
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
 
-        # Validation
+        # Validation: Ensure end time is after start time
         if end_date_obj <= start_date_obj:
             flash("End date/time must be after start date/time", "error")
             return redirect(url_for('add_leave_hours'))
+
+        # # Validation: Disallow times before 8 AM
+        # if start_date_obj.hour < 8 or (start_date_obj.hour == 8 and start_date_obj.minute == 0):
+        #     flash("Leave hours must be between 8:00 AM and 5:00 PM", "error")
+        #     return redirect(url_for('add_leave_hours'))
+
+        # Validation: Disallow times after 5 PM
+        # if start_date_obj.hour >= 17 or end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+        #     flash("Leave hours must be between 8:00 AM and 5:00 PM", "error")
+        #     return redirect(url_for('add_leave_hours'))
 
         # Calculate total hours (round up to nearest full hour)
         total_seconds = (end_date_obj - start_date_obj).total_seconds()
@@ -3535,6 +3545,75 @@ def add_leave_hours():
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/add_leave_hours.html', employees=employees)
+
+
+# @app.route('/leave_hours/add', methods=['GET', 'POST'])
+# def add_leave_hours():
+#     employees = []
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+
+#         # Convert to datetime objects
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+#         # Validation: Ensure end time is after start time
+#         if end_date_obj <= start_date_obj:
+#             flash("End date/time must be after start date/time", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         # Validation: Disallow times after 5 PM
+#         if start_date_obj.hour >= 17 or end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+#             flash("Leave hours must be between working hours (before 5:00 PM)", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         # Validation: Disallow times before 8 AM
+#         if start_date_obj.hour < 8 or (start_date_obj.hour == 8 and start_date_obj.minute == 0):
+#             flash("Leave hours must be between 8:00 AM and 5:00 PM", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         # Validation
+#         if end_date_obj <= start_date_obj:
+#             flash("End date/time must be after start date/time", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         # Calculate total hours (round up to nearest full hour)
+#         total_seconds = (end_date_obj - start_date_obj).total_seconds()
+#         total_hours = total_seconds / 3600
+#         leave_hours = math.ceil(total_hours)  # Always in hours
+
+#         # Check if leave overlaps with 12:00 PM – 1:00 PM
+#         lunch_start = start_date_obj.replace(hour=12, minute=0)
+#         lunch_end = start_date_obj.replace(hour=13, minute=0)
+
+#         # Only subtract 1 hour if the leave overlaps lunch break
+#         if start_date_obj < lunch_end and end_date_obj > lunch_start:
+#             total_hours -= 1
+
+#         # Make sure total_hours doesn't go below 0
+#         total_hours = max(total_hours, 0)
+
+#         # Round up to full hour
+#         leave_hours = math.ceil(total_hours)
+
+#         # Save to DB
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
+#                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H'))  # Store type_of_leave as 'H'
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/add_leave_hours.html', employees=employees)
 
 # @app.route('/leave_many/add', methods=['GET', 'POST'])
 # def add_many_leave():

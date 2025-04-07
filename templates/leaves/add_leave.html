@@ -3,127 +3,79 @@
 {% block title %}Add Leave{% endblock %}
 
 {% block content %}
-  <body class="bg-gray-100">
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <h1 class="text-3xl font-bold text-gray-900 mb-4">Add Leave Request</h1>
 
-      <form
-        action="{{ url_for('add_leave') }}"
-        method="POST"
-        class="bg-white shadow-md rounded-lg p-6"
-      >
+<body class="bg-gray-100">
+  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-4">Add Leave Request</h1>
+
+    {% if error_message %}
+    <p class="text-red-500 text-sm mb-4">{{ error_message }}</p>
+    {% endif %}
+    <form action="{{ url_for('add_leave') }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
 
 
       <div>
-        <label for="employee_id" class="hidden"
-          >Employee</label
-        >
-        <input
-          type="text"
-          id="employee_id"
-          name="employee_id"
-          value="{{ current_user.employee_id }}"
-          hidden
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
+        <label for="employee_id" class="hidden">Employee</label>
+        <input type="text" id="employee_id" name="employee_id" value="{{ current_user.employee_id }}" hidden
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       </div>
 
       <!-- Requested By -->
       <div>
         <label for="requested_by" class="hidden">Requested By</label>
-        <input
-          type="text"
-          id="requested_by"
-          name="requested_by"
-          hidden
-          value="{{ current_user.username }}"
-          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-        />
+        <input type="text" id="requested_by" name="requested_by" hidden value="{{ current_user.username }}"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
       </div>
 
 
-        <div class="mb-4">
-          <label
-            for="leave_type"
-            class="block text-gray-700 text-sm font-medium"
-          >
-            Select Leave Type:
-          </label>
-          <select
-            id="leave_type"
-            name="leave_type"
-           class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="annualLeave">Annual Leave</option>
-            <option value="sickLeave">Sick Leave</option>
-            <option value="maternityLeave">Maternity Leave</option>
-            <option value="specialLeave"> Special Leave</option>
-          </select>
-        </div>
+      <div class="mb-4">
+        <label for="leave_type" class="block text-gray-700 text-sm font-medium">
+          Select Leave Type:
+        </label>
+        <select id="leave_type" name="leave_type"
+          class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          <option value="annualLeave">Annual Leave</option>
+          <option value="sickLeave">Sick Leave</option>
+          <option value="maternityLeave">Maternity Leave</option>
+          <option value="specialLeave"> Special Leave</option>
+        </select>
+      </div>
 
-        <div class="mb-4">
-          <label
-            for="start_date"
-            class="block text-gray-700 text-sm font-medium"
-            >Start Date</label
-          >
-          <input
-            type="date"
-            name="start_date"
-            id="start_date"
-            required
-            class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full"
-          />
-        </div>
+      <div class="mb-4">
+        <label for="start_date" class="block text-gray-700 text-sm font-medium">Start Date</label>
+        <input type="date" name="start_date" id="start_date" required
+          class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full" />
+      </div>
 
-        <div class="mb-4">
-          <label for="end_date" class="block text-gray-700 text-sm font-medium"
-            >End Date</label
-          >
-          <input
-            type="date"
-            name="end_date"
-            id="end_date"
-            required
-            class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full"
-          />
-        </div>
+      <div class="mb-4">
+        <label for="end_date" class="block text-gray-700 text-sm font-medium">End Date</label>
+        <input type="date" name="end_date" id="end_date" required
+          class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full" />
+      </div>
 
-        <div class="mb-4">
-          <label for="reason" class="block text-gray-700 text-sm font-medium"
-            >Reason</label
-          >
-          <textarea
-            name="reason"
-            id="reason"
-            rows="4"
-            required
-            class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full"
-          ></textarea>
-        </div>
+      <div class="mb-4">
+        <label for="reason" class="block text-gray-700 text-sm font-medium">Reason</label>
+        <textarea name="reason" id="reason" rows="4" required
+          class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full"></textarea>
+      </div>
 
-        <div class="flex justify-start">
-          <button
-            type="submit"
-            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center"
-            class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-          >
-            <i class="fas fa-paper-plane mr-2"></i> Submit
-            
-          </button>
-          <a
-            href="{{ url_for('view_leaves') }}"
-            class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 ml-2 flex items-center"
-            class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 ml-2"
-          >
-            <i class="fas fa-arrow-left mr-2"></i> Back
-          </a>
-        </div>
-      </form>
-    </div>
-  </body>
+      <div class="flex justify-start">
+        <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center"
+          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+          <i class="fas fa-paper-plane mr-2"></i> Submit
+
+        </button>
+        <a href="{{ url_for('view_leaves') }}"
+          class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 ml-2 flex items-center"
+          class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 ml-2">
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </a>
+      </div>
+    </form>
+  </div>
+</body>
+
 </html>
 
 
 {% endblock %}
-
