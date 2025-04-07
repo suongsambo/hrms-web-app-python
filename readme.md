@@ -46,4 +46,6 @@ git rm -r --cached **pycache**
 find . -type d -name '**pycache**' -exec rm -r {} +
 git rm --cached .DS_Store
 
+sudo chown -R $(whoami):$(whoami) /home/kpca/sites/hrs-management-web-app/venv/
+
 pip install --force-reinstall MarkupSafe

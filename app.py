@@ -1,4 +1,4 @@
-from datetime import datetime
+# from datetime import datetime
 from flask import Flask, request, render_template, redirect, url_for
 import base64
 from flask import Flask, Response, render_template, flash, redirect, url_for, request, session, send_from_directory, jsonify, send_file
@@ -21,7 +21,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from typing import Union
 from flask_caching import Cache
-from flask import session
+# from flask import session
 
 
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -75,16 +75,16 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
-@app.route('/clear_session')
-def clear_session():
-    session.clear()  # Clears the session data
-    return "Session cleared!"
+# @app.route('/clear_session')
+# def clear_session():
+#     session.clear()  # Clears the session data
+#     return "Session cleared!"
 
 
-@app.route('/clear_cache')
-def clear_cache():
-    cache.clear()  # Clears the cache
-    return "Cache cleared!"
+# @app.route('/clear_cache')
+# def clear_cache():
+#     cache.clear()  # Clears the cache
+#     return "Cache cleared!"
 
 
 @login_manager.user_loader
@@ -119,6 +119,7 @@ def handle_message(msg):
     send(msg, broadcast=True)  # Broadcast message to all clients
 
 
+# FIXIT
 def get_db_connection():
     conn = sqlite3.connect(app.config['DATABASE'])
     conn.row_factory = sqlite3.Row
@@ -126,87 +127,86 @@ def get_db_connection():
 
 
 # Remove temp file
-def clear_pycache(directory='.'):
-    for root, dirs, files in os.walk(directory):
-        for dir_name in dirs:
-            if dir_name == '__pycache__':
-                dir_path = os.path.join(root, dir_name)
-                print(f"Removing {dir_path}")
-                shutil.rmtree(dir_path)
+# def clear_pycache(directory='.'):
+#     for root, dirs, files in os.walk(directory):
+#         for dir_name in dirs:
+#             if dir_name == '__pycache__':
+#                 dir_path = os.path.join(root, dir_name)
+#                 print(f"Removing {dir_path}")
+#                 shutil.rmtree(dir_path)
 
 
-clear_pycache()  # This will delete all __pycache__ directories in the current directory
+# clear_pycache()
 
 
 # Function to create the backup
-def backup_database():
-    backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
+# def backup_database():
+#     backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
 
-    if os.path.exists(app.config['DATABASE']):
-        current_datetime = datetime.now().strftime("%m-%d-%Y_%I-%M-%S")
-        backup_file_with_date = f"backup_hr_management_{current_datetime}.db"
-        backup_file_path = os.path.join(backup_folder, backup_file_with_date)
+#     if os.path.exists(app.config['DATABASE']):
+#         current_datetime = datetime.now().strftime("%m-%d-%Y_%I-%M-%S")
+#         backup_file_with_date = f"backup_hr_management_{current_datetime}.db"
+#         backup_file_path = os.path.join(backup_folder, backup_file_with_date)
 
-        shutil.copy2(app.config['DATABASE'], backup_file_path)
+#         shutil.copy2(app.config['DATABASE'], backup_file_path)
 
-        # You can implement your flash logic here to notify the success (e.g. in a background task or email)
-        print(f"Database backup created: {backup_file_with_date}")
-    else:
-        print("Database file not found!")
+#         # You can implement your flash logic here to notify the success (e.g. in a background task or email)
+#         print(f"Database backup created: {backup_file_with_date}")
+#     else:
+#         print("Database file not found!")
 
-# Set up APScheduler
+# # Set up APScheduler
+
+# def start_scheduler():
+#     scheduler = BackgroundScheduler()
+
+#     # Schedule the backup to run at 00:00 on the 1st of each month
+#     scheduler.add_job(backup_database, 'cron', day=1, hour=0, minute=0)
+
+#     # Start the scheduler
+#     scheduler.start()
+
+#     # Handle job execution status
+#     def job_listener(event):
+#         if event.exception:
+#             print(f'Job failed: {event.job_id}')
+#         else:
+#             print(f'Job {event.job_id} executed successfully')
+
+#     scheduler.add_listener(job_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+
+#     # This is required to keep the app running to allow the scheduler to work in the background
+#     try:
+#         while True:
+#             pass
+#     except (KeyboardInterrupt, SystemExit):
+#         scheduler.shutdown()
 
 
-def start_scheduler():
-    scheduler = BackgroundScheduler()
+# @app.route('/backup', methods=['GET', 'POST'])
+# @login_required
+# def backup_database_manual():
+#     # Ensure backup folder exists
+#     backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
 
-    # Schedule the backup to run at 00:00 on the 1st of each month
-    scheduler.add_job(backup_database, 'cron', day=1, hour=0, minute=0)
+#     if os.path.exists(app.config['DATABASE']):
+#         # Generate backup file name with current date and time
+#         current_datetime = datetime.now().strftime("%m-%d-%Y_%I-%M-%S")
+#         backup_file_with_date = f"backup_hr_management_{current_datetime}.db"
+#         backup_file_path = os.path.join(backup_folder, backup_file_with_date)
 
-    # Start the scheduler
-    scheduler.start()
+#         shutil.copy2(app.config['DATABASE'], backup_file_path)
 
-    # Handle job execution status
-    def job_listener(event):
-        if event.exception:
-            print(f'Job failed: {event.job_id}')
-        else:
-            print(f'Job {event.job_id} executed successfully')
+#         # Flash a success message
+#         flash(
+#             f"Database backup created successfully! Your database has been backed up to {backup_file_with_date}.", "success")
 
-    scheduler.add_listener(job_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
-
-    # This is required to keep the app running to allow the scheduler to work in the background
-    try:
-        while True:
-            pass
-    except (KeyboardInterrupt, SystemExit):
-        scheduler.shutdown()
-
-
-@app.route('/backup', methods=['GET', 'POST'])
-@login_required
-def backup_database_manual():
-    # Ensure backup folder exists
-    backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
-
-    if os.path.exists(app.config['DATABASE']):
-        # Generate backup file name with current date and time
-        current_datetime = datetime.now().strftime("%m-%d-%Y_%I-%M-%S")
-        backup_file_with_date = f"backup_hr_management_{current_datetime}.db"
-        backup_file_path = os.path.join(backup_folder, backup_file_with_date)
-
-        shutil.copy2(app.config['DATABASE'], backup_file_path)
-
-        # Flash a success message
-        flash(
-            f"Database backup created successfully! Your database has been backed up to {backup_file_with_date}.", "success")
-
-        # Redirect to the backups management page
-        return redirect(url_for('manage_backups'))
-    else:
-        # Flash an error message if the database is not found
-        flash("Database file not found!", "error")
-        return redirect(url_for('manage_backups'))
+#         # Redirect to the backups management page
+#         return redirect(url_for('manage_backups'))
+#     else:
+#         # Flash an error message if the database is not found
+#         flash("Database file not found!", "error")
+#         return redirect(url_for('manage_backups'))
 
 
 @app.route('/delete', methods=['POST'])
