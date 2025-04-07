@@ -131,7 +131,7 @@ content %}
         responsive: true,
       });
 
-      // Iterate over all leave rows and calculate the leave hours
+      // Iterate over all leave rows and calculate the leave hours excluding lunch break
       $(".leave-hours").each(function () {
         var startDate = $(this).data("start");
         var endDate = $(this).data("end");
@@ -147,6 +147,15 @@ content %}
 
           // Convert the duration to hours (including fractional hours)
           var totalHours = duration.asHours();
+
+          // Check if the duration includes the lunch break (12 PM to 1 PM)
+          var lunchStart = moment(startDate).hour(12).minute(0);
+          var lunchEnd = moment(startDate).hour(13).minute(0);
+
+          // If the leave period includes the lunch hour, subtract 1 hour
+          if (startTime.isBefore(lunchEnd) && endTime.isAfter(lunchStart)) {
+            totalHours -= 1;
+          }
 
           // Update the Leave Hours cell with the calculated hours
           $(this).text(totalHours.toFixed(2) + " hours");

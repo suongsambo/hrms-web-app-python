@@ -3235,7 +3235,8 @@ def leaves_by_gm():
             l.requested_by
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE l.category = 'L'
+        WHERE l.category = 'L' 
+        AND l.verified_by IS NOT NULL
     '''
     params = ()  # No branch_name parameter needed
 
@@ -3248,22 +3249,119 @@ def leaves_by_gm():
     return render_template('leaves/leaves_gm_approve.html', leaves=leaves)
 
 
+# @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
+# @login_required
+# def filter_leaves_by_branch_name(branch_name):
+#     # Check if the user is role 140 and has a branch assigned
+#     if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
+#         # Only redirect if the user's branch is different from the one in the URL
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif not current_user.is_authenticated or current_user.role_default != 140:
+#         # Redirect if user is not authenticated or role doesn't match
+#         return redirect(url_for('access_denied'))
+
+#     # Log to verify branch_name is being passed
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     # Define SQL query with branch filter
+#     query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             e.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
+#     '''
+#     params = (branch_name,)
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+# @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
+# @login_required
+# def filter_leaves_by_branch_name(branch_name):
+#     # Check if the user is role 140 and has a branch assigned
+#     if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
+#         # Only redirect if the user's branch is different from the one in the URL
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif not current_user.is_authenticated or current_user.role_default != 140:
+#         # Redirect if user is not authenticated or role doesn't match
+#         return redirect(url_for('access_denied'))
+
+#     # Log to verify branch_name is being passed
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     # Define SQL query with branch filter and check for verified_by not empty
+#     query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             e.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE e.branch = ?
+#         AND (l.category = 'S' OR l.category = 'M')
+#         AND l.verified_by IS NOT NULL
+#     '''
+#     params = (branch_name,)
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
 @login_required
 def filter_leaves_by_branch_name(branch_name):
-    # Check if the user is role 140 and has a branch assigned
+    # Check if user is role 140 and has a branch assigned
     if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
-        # Only redirect if the user's branch is different from the one in the URL
         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
 
-    elif not current_user.is_authenticated or current_user.role_default != 140:
-        # Redirect if user is not authenticated or role doesn't match
+    elif current_user.role_default != 140:
         return redirect(url_for('access_denied'))
 
-    # Log to verify branch_name is being passed
     app.logger.debug(f"Filtering by branch: {branch_name}")
 
-    # Define SQL query with branch filter
     query = '''
         SELECT 
             l.id, 
@@ -3282,11 +3380,14 @@ def filter_leaves_by_branch_name(branch_name):
             l.requested_by
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE e.branch = ? AND (l.category = 'S' OR l.category = 'M')
+        WHERE e.branch = ? 
+        AND (
+            (l.category = 'S' AND l.verified_by IS NOT NULL) 
+            OR (l.category = 'M' AND l.verified_by IS NULL)
+        )
     '''
     params = (branch_name,)
 
-    # Execute the query with the database connection
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query, params).fetchall()
@@ -3294,15 +3395,97 @@ def filter_leaves_by_branch_name(branch_name):
         app.logger.error(f"Database error: {e}")
         return "An error occurred while retrieving data. Please try again later.", 500
 
-    # Render the template with the query results
     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leave_hours/add', methods=['GET', 'POST'])
+# def add_leave_hours():
+#     employees = []
+
+#     # Fetch employee list from the database
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get(
+#             'type_of_leave', 'T')  # Set default value to 'D'
+
+#         # Convert start and end dates to datetime objects
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+#         # Calculate the total difference in hours
+#         total_seconds = (end_date_obj - start_date_obj).total_seconds()
+#         total_hours = total_seconds / 3600
+
+#         # Convert hours to "leave_hours" where 8 hours = 1 day (round up to nearest full day)
+#         leave_hours = math.ceil(total_hours / 8)  # Treat 8 hours as 1 full day
+
+#         # Insert the leave record into the database
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
+#                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave))
+
+#         # Redirect to view leaves page after insertion
+#         return redirect(url_for('view_leaves'))
+
+#     # Render the form page with employees list
+#     return render_template('/leaves/add_leave_hours.html', employees=employees)
+
+
+# @app.route('/leave_hours/add', methods=['GET', 'POST'])
+# def add_leave_hours():
+#     employees = []
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get(
+#             'type_of_leave', 'D')  # D = Daily, H = Hourly
+
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+#         if end_date_obj <= start_date_obj:
+#             flash("End date/time must be after start date/time", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         total_seconds = (end_date_obj - start_date_obj).total_seconds()
+#         total_hours = total_seconds / 3600
+
+#         if type_of_leave == 'H':
+#             leave_hours = round(total_hours, 2)
+#         else:
+#             leave_hours = math.ceil(total_hours / 8)  # 8 hours = 1 day
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
+#                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/add_leave_hours.html', employees=employees)
 
 
 @app.route('/leave_hours/add', methods=['GET', 'POST'])
 def add_leave_hours():
     employees = []
-
-    # Fetch employee list from the database
     with get_db_connection() as conn:
         employees = conn.execute('SELECT id, name FROM employees').fetchall()
 
@@ -3313,33 +3496,45 @@ def add_leave_hours():
         end_date = request.form['end_date']
         reason = request.form['reason']
         requested_by = request.form['requested_by']
-        type_of_leave = request.form.get(
-            'type_of_leave', 'T')  # Set default value to 'D'
 
-        # Convert start and end dates to datetime objects
+        # Convert to datetime objects
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
 
-        # Calculate the total difference in hours
+        # Validation
+        if end_date_obj <= start_date_obj:
+            flash("End date/time must be after start date/time", "error")
+            return redirect(url_for('add_leave_hours'))
+
+        # Calculate total hours (round up to nearest full hour)
         total_seconds = (end_date_obj - start_date_obj).total_seconds()
         total_hours = total_seconds / 3600
+        leave_hours = math.ceil(total_hours)  # Always in hours
 
-        # Convert hours to "leave_hours" where 8 hours = 1 day (round up to nearest full day)
-        leave_hours = math.ceil(total_hours / 8)  # Treat 8 hours as 1 full day
+        # Check if leave overlaps with 12:00 PM – 1:00 PM
+        lunch_start = start_date_obj.replace(hour=12, minute=0)
+        lunch_end = start_date_obj.replace(hour=13, minute=0)
 
-        # Insert the leave record into the database
+        # Only subtract 1 hour if the leave overlaps lunch break
+        if start_date_obj < lunch_end and end_date_obj > lunch_start:
+            total_hours -= 1
+
+        # Make sure total_hours doesn't go below 0
+        total_hours = max(total_hours, 0)
+
+        # Round up to full hour
+        leave_hours = math.ceil(total_hours)
+
+        # Save to DB
         with get_db_connection() as conn:
             conn.execute('''
                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave))
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H'))  # Store type_of_leave as 'H'
 
-        # Redirect to view leaves page after insertion
         return redirect(url_for('view_leaves'))
 
-    # Render the form page with employees list
     return render_template('/leaves/add_leave_hours.html', employees=employees)
-
 
 # @app.route('/leave_many/add', methods=['GET', 'POST'])
 # def add_many_leave():
@@ -5688,7 +5883,6 @@ def render_dashboard_employees(employee_id):
     end_date = request.args.get('end_date')
 
     with get_db_connection() as conn:
-
         # Fetch the specific employee's data
         employee = conn.execute(
             """
@@ -5735,13 +5929,7 @@ def render_dashboard_employees(employee_id):
             SELECT 
                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
                 COALESCE(
-                    SUM(
-                        CASE l.leave_hours 
-                        WHEN 1 THEN 4 
-                        WHEN 2 THEN 8 
-                        ELSE l.leave_hours 
-                        END
-                    ), 
+                    SUM(l.leave_hours), 
                     0
                 ) AS total_leaves_hours
             FROM leaves l 
