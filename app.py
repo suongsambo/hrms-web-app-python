@@ -2568,6 +2568,10 @@ def filter_leaves_by_employee_id(employee_id):
         with get_db_connection() as conn:
             leaves = conn.execute(query, params).fetchall()
             users = conn.execute("SELECT * FROM users").fetchall()
+            users_with_leaves = conn.execute(
+                "SELECT u.ID, u.UserName, l.id AS leave_id FROM users u LEFT JOIN leaves l ON u.ID = l.requested_by").fetchall()
+            print(users_with_leaves)
+
     except sqlite3.DatabaseError as e:
         return f"Database error: {e}", 500
 
