@@ -3503,18 +3503,20 @@ def add_leave_hours():
 
         # Validation: Ensure end time is after start time
         if end_date_obj <= start_date_obj:
-            flash("End date/time must be after start date/time", "error")
+            flash(
+                "កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់ពីកាលបរិច្ឆេទ/ពេលវេលាចាប់ផ្តើម", "error")
             return redirect(url_for('add_leave_hours'))
 
-        # # Validation: Disallow times before 8 AM
-        # if start_date_obj.hour < 8 or (start_date_obj.hour == 8 and start_date_obj.minute == 0):
-        #     flash("Leave hours must be between 8:00 AM and 5:00 PM", "error")
-        #     return redirect(url_for('add_leave_hours'))
+        # Validation: Disallow times before 8:00 AM
+        if start_date_obj.hour < 8 or (start_date_obj.hour == 8 and start_date_obj.minute < 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 8:00 ព្រឹក ដល់ 5:00 ល្ងាច", "error")
+            return redirect(url_for('add_leave_hours'))
 
-        # Validation: Disallow times after 5 PM
-        # if start_date_obj.hour >= 17 or end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
-        #     flash("Leave hours must be between 8:00 AM and 5:00 PM", "error")
-        #     return redirect(url_for('add_leave_hours'))
+        # Validation: Disallow times after 5:00 PM
+        if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+                end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 8:00 ព្រឹក ដល់ 5:00 ល្ងាច", "error")
+            return redirect(url_for('add_leave_hours'))
 
         # Calculate total hours (round up to nearest full hour)
         total_seconds = (end_date_obj - start_date_obj).total_seconds()
