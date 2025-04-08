@@ -1,6 +1,7 @@
 
 
 # from flask import Flask, request, render_template, redirect, url_for
+import base64
 from flask import Flask, Response, render_template, flash, redirect, url_for, request, session, send_from_directory, jsonify, send_file
 import sqlite3
 import hashlib
@@ -1099,6 +1100,108 @@ def view_leaves():
         return render_template('/leaves/view_leaves.html', leaves=leaves)
 
 # TODO: employee leave
+
+
+@app.route('/leave/<int:leave_id>/users')
+def users_for_leave(leave_id):
+    query = '''
+        SELECT u.ID, u.UserName, u.Email, u.Signature
+        FROM users u
+        INNER JOIN user_leave ul ON u.ID = ul.user_id
+        WHERE ul.leave_id = ?
+    '''
+    with get_db_connection() as conn:
+        users = conn.execute(query, (leave_id,)).fetchall()
+
+    # Process the Signature BLOBs
+    users_list = []
+    for user in users:
+        user_dict = dict(user)
+        if user_dict.get('Signature'):
+            user_dict['Signature'] = base64.b64encode(
+                user_dict['Signature']).decode('utf-8')
+        users_list.append(user_dict)
+
+    return render_template('leaves/users_for_leave.html', users=users_list)
+
+
+@app.route('/leave/users')
+def users_for_all_leaves():
+    # Query to get all leave details along with the associated employee data
+    leave_query = '''
+        SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+               l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+               l.service_count, l.verified_by, l.approved_by, l.employee_id,
+               l.spm_status, l.dd_status, l.manager_status, l.requested_by
+        FROM leaves l
+        INNER JOIN employees e ON l.employee_id = e.id
+    '''
+
+    # Query for users associated with the leave
+    user_query = '''
+        SELECT u.ID, u.UserName, u.Email, u.Signature
+        FROM users u
+        INNER JOIN user_leave ul ON u.ID = ul.user_id
+        WHERE ul.leave_id = ?
+    '''
+
+    with get_db_connection() as conn:
+        # Fetch all leave details
+        leave_details_list = conn.execute(leave_query).fetchall()
+
+        # Dictionary to hold leave details with associated users
+        all_leaves_data = []
+
+        # Iterate over each leave record
+        for leave_details in leave_details_list:
+            # Convert leave record to a dictionary
+            leave_data = dict(leave_details)
+
+            # Fetch the users associated with this leave
+            users = conn.execute(user_query, (leave_data['id'],)).fetchall()
+
+            # Process the Signature BLOBs for users
+            users_list = []
+            for user in users:
+                user_dict = dict(user)
+                if user_dict.get('Signature'):
+                    user_dict['Signature'] = base64.b64encode(
+                        user_dict['Signature']).decode('utf-8')
+                users_list.append(user_dict)
+
+            # Combine leave details and users data into a single object
+            leave_data['users'] = users_list
+            all_leaves_data.append(leave_data)
+
+    # If no leaves found, return an error
+    if not all_leaves_data:
+        return "No leaves found", 404
+
+    # Render template with all leaves and their associated users
+    return render_template('leaves/all_users_for_leaves.html', leaves=all_leaves_data)
+
+
+@app.route('/leave/<int:leave_id>/user/<int:user_id>')
+def user_signature_for_leave(leave_id, user_id):
+    query = '''
+        SELECT u.ID, u.UserName, u.Email, u.Signature
+        FROM users u
+        INNER JOIN user_leave ul ON u.ID = ul.user_id
+        WHERE ul.leave_id = ? AND u.ID = ?
+    '''
+    with get_db_connection() as conn:
+        user = conn.execute(query, (leave_id, user_id)).fetchone()
+
+    if user:
+        # Convert the user row to a dictionary
+        user_dict = dict(user)
+        # Process the Signature BLOB
+        if user_dict.get('Signature'):
+            user_dict['Signature'] = base64.b64encode(
+                user_dict['Signature']).decode('utf-8')
+        return render_template('leaves/user_signature.html', user=user_dict)
+    else:
+        return "User not found for this leave."
 
 
 @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
@@ -4339,7 +4442,7 @@ def spm_dashboard():
 
     # Prepare the data to send to the template
     data = {
-        'message': "Welcome Dashboard!",
+        'message': "Welcome",
         'zone': zone,  # Zone information for the current user
         'branches': branches_in_zone  # Branches in the user's zone
     }

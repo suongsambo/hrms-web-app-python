@@ -1,0 +1,32 @@
+<h2>All Leaves and Users</h2>
+
+{% for leave in leaves %}
+<h3>Leave ID: {{ leave.id }} - {{ leave.employee_name }}</h3>
+<p>Leave Type: {{ leave.leave_type }}</p>
+<p>Branch: {{ leave.branch_name }}</p>
+<p>Status: {{ leave.status }}</p>
+<p>Start Date: {{ leave.start_date }}</p>
+<p>End Date: {{ leave.end_date }}</p>
+<p>Reason: {{ leave.reason }}</p>
+<p>Requested By: {{ leave.requested_by }}</p>
+
+<h4>Users for this Leave</h4>
+<table>
+    <thead>
+        <tr>
+            <th>UserName</th>
+            <th>Email</th>
+            <th>Signature</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in leave.users %}
+        <tr>
+            <td>{{ user.UserName }}</td>
+            <td>{{ user.Email }}</td>
+            <td><img src="data:image/png;base64,{{ user.Signature }}" alt="Signature"></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endfor %}

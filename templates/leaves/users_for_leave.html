@@ -1,0 +1,27 @@
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Signature</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user['ID'] }}</td>
+            <td>{{ user['UserName'] }}</td>
+            <td>{{ user['Email'] }}</td>
+            <td>
+                {% if user['Signature'] %}
+                <!-- Ensure that the MIME type is correct for your image format -->
+                <img src="data:image/png;base64,{{ user['Signature'] }}" alt="Signature" width="50" height="" />
+                {% else %}
+                No signature available
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

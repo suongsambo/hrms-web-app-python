@@ -48,7 +48,7 @@
 
     var chart = new google.visualization.PieChart(document.getElementById("branchChart"));
     chart.draw(data, options);
-                        }
+                          }
   </script>
 
   <style>
@@ -426,6 +426,11 @@
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
           <span>Add Leave Days</span>
+        </a>
+        <a href="/leave/{{ current_user.id }}/users"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">group</span>
+          <span>Leave Users</span>
         </a>
 
         <a href="/leaves"
