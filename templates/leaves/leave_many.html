@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}Add Leave Days{% endblock %} {% block
 content %}
 
 <head>
@@ -40,10 +40,16 @@ content %}
           </label>
           <select id="leave_type" name="leave_type"
             class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-            <option value="annualLeave">ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</option>
+            <option value="annualLeave">
+              ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)
+            </option>
             <option value="sickLeave">ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</option>
-            <option value="maternityLeave">ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</option>
-            <option value="specialLeave">ការឈប់សម្រាកពិសេស (Special Leave)</option>
+            <option value="maternityLeave">
+              ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)
+            </option>
+            <option value="specialLeave">
+              ការឈប់សម្រាកពិសេស (Special Leave)
+            </option>
           </select>
         </div>
         <!-- Start Date with Icon -->
