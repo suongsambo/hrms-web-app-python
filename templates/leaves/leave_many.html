@@ -79,12 +79,8 @@ content %}
           </div>
         </div>
 
-        <div>
-          <label for="reason" class="block text-gray-700 text-sm font-medium">មូលហេតុនៃការសុំឈប់សម្រាក (Reason for
-            Leave):</label>
-          <textarea name="reason" required placeholder="250 words"
-            class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 resize-none placeholder-gray-500"></textarea>
-        </div>
+
+
         <div>
           <label for="user_ids" class="block text-gray-700 text-sm font-medium">Assign to Users:</label>
 
@@ -100,8 +96,8 @@ content %}
             </button>
           </div>
 
-          <!-- Checkboxes for each user -->
-          <div class="space-y-2 flex flex-wrap">
+
+          <!-- <div class="space-y-2 flex flex-wrap">
             {% for user in users %}
             <div class="flex items-center mr-4 mb-2">
               <input type="checkbox" id="user_{{ user.id }}" name="user_ids" value="{{ user.id }}"
@@ -113,18 +109,76 @@ content %}
             <div class="text-gray-500">No Users Available</div>
             {% endif %}
           </div>
-        </div>
+        </div> -->
 
-        <div class="flex justify-between gap-4">
-          <button type="submit"
-            class="w-1/2 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center">
-            <i class="fas fa-paper-plane mr-2"></i> Submit
-          </button>
-          <a href="{{ url_for('view_leaves') }}"
-            class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
-            <i class="fas fa-arrow-left mr-2"></i> Back
-          </a>
-        </div>
+          <!-- Users Checkbox Group 1 -->
+          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-blue-600">Short Leaves (2 Days):</legend>
+            <div class="grid grid-cols-3 gap-6">
+              {% for user in users %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user1_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                <label for="user1_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-blue-600">{{
+                  user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+          <!-- Users Checkbox Group 2 -->
+          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-orange-600">Medium Leaves (3-5 Days)</legend>
+            <div class="grid grid-cols-3 gap-6">
+              {% for user in users2 %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user2_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-orange-600 border-gray-300 rounded-md focus:ring-2 focus:ring-orange-500">
+                <label for="user2_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-orange-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+          <!-- Users Checkbox Group 3 -->
+          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-green-600">Long Leaves (6 Days):</legend>
+            <div class="grid grid-cols-3 gap-6">
+              {% for user in users3 %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user3_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-green-600 border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                <label for="user3_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-green-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+
+          <div>
+            <label for="reason" class="block text-gray-700 text-sm font-medium">មូលហេតុនៃការសុំឈប់សម្រាក (Reason for
+              Leave):</label>
+            <textarea name="reason" required placeholder="250 words"
+              class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 resize-none placeholder-gray-500"></textarea>
+          </div>
+
+
+
+          <div class="flex justify-between gap-4">
+            <button type="submit"
+              class="w-1/2 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center">
+              <i class="fas fa-paper-plane mr-2"></i> Submit
+            </button>
+            <a href="{{ url_for('view_leaves') }}"
+              class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
+              <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+          </div>
       </form>
     </div>
   </div>

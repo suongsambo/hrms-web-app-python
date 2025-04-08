@@ -1,6 +1,6 @@
 
 
-from flask import Flask, request, render_template, redirect, url_for
+# from flask import Flask, request, render_template, redirect, url_for
 from flask import Flask, Response, render_template, flash, redirect, url_for, request, session, send_from_directory, jsonify, send_file
 import sqlite3
 import hashlib
@@ -37,7 +37,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
 
 # def allowed_file(filename):
 #     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -2304,7 +2303,12 @@ def add_many_leave(branch):
 
         # Use the current user's branch to filter users
         users = conn.execute(
-            'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140,145,180) AND branch = ?', (user_branch,)).fetchall()
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?', (user_branch,)).fetchall()
+        users2 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (145,140) AND branch = ?', (user_branch,)).fetchall()
+
+        users3 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (145, 180) AND branch = ?', (user_branch,)).fetchall()
 
     if request.method == 'POST':
         employee_id = request.form['employee_id']
@@ -2365,7 +2369,7 @@ def add_many_leave(branch):
         # Redirect to the 'view_leaves' page (or wherever you need to go)
         return redirect(url_for('view_leaves'))
 
-    return render_template('leaves/leave_many.html', employees=employees, users=users, branch=user_branch)
+    return render_template('leaves/leave_many.html', employees=employees, users=users, users2=users2, users3=users3,  branch=user_branch)
 
 
 @app.route('/leave/add', methods=['GET', 'POST'])
