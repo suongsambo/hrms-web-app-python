@@ -3,68 +3,84 @@
 {% block title %}Edit Leave{% endblock %}
 
 {% block content %}
-<body class="bg-gray-100">
 
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">Edit Leave Request PM</h1>
-        
-        <!-- Form with grid layout -->
-        <form action="" method="POST" class="space-y-6 bg-white p-8 shadow-lg rounded-lg">
-         
-            
+<body class="bg-gray-100 min-h-screen">
+
+    <div class="max-w-4xl mx-auto py-10 px-6 sm:px-8">
+        <!-- -->
+
+        <!-- Edit Leave Form -->
+        <form action="" method="POST" class="bg-white p-8 rounded-2xl shadow-md space-y-8">
+            <h1 class="text-2xl font-semibold text-gray-800 mb-8  pb-4">Edit Leave Request</h1>
+
+            <!-- Grid Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Leave Type</label>
-                    <input  type="text" name="leave_type" value="{{ leave['leave_type'] }}" required 
-                        class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" name="leave_type" value="{{ leave['leave_type'] }}" required
+                        class="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Service Count</label>
+                    <label class="block text-sm font-medium text-gray-700">Leave Count</label>
                     <input type="number" name="service_count" value="{{ leave['service_count'] }}" required
-                        class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        class="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Start Date</label>
                     <input type="date" name="start_date" value="{{ leave['start_date'] }}" required
-                        class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        class="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">End Date</label>
                     <input type="date" name="end_date" value="{{ leave['end_date'] }}" required
-                        class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                        class="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
 
+            <!-- Reason -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Reason</label>
                 <textarea name="reason" required
-                    class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ leave['reason'] }}</textarea>
+                    class="mt-2 p-3 w-full border border-gray-300 rounded-md h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500">{{ leave['reason'] }}</textarea>
             </div>
 
+            <!-- Approval Section -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Approved By (if applicable)</label>
-                    <input type="text" name="approved_by" value="{% if leave['service_count'] <= 2 %}{{ current_user.username }}{% else %}{{ leave['approved_by'] or '' }}{% endif %}"
-                        class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" name="approved_by"
+                        value="{% if leave['service_count'] <= 2 %}{{ current_user.username }}{% else %}{{ leave['approved_by'] or '' }}{% endif %}"
+                        class="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Verified By (if applicable)</label>
-                    <input type="text" name="verified_by" value="{% if leave['service_count'] > 2 and leave['service_count'] <= 5 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
-                        class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    <input type="text" name="verified_by"
+                        value="{% if leave['service_count'] > 2 and leave['service_count'] <= 5 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
+                        class="mt-2 p-3 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
             </div>
 
+            <!-- Status Dropdown -->
             <div>
                 <label class="block text-sm font-medium text-gray-700">Status</label>
-                <select name="status" class="mt-1 p-3 w-full border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                    <option value="Approved" {% if leave['status'] == 'Approved' or not leave['status'] %}selected{% endif %}>Approved</option>
-                    <option value="Verified" {% if leave['status'] == 'Verified' %}selected{% endif %}>Verified</option>
+                <select name="status"
+                    class="mt-2 p-3 w-full border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="Approved" {% if leave['status']=='Approved' or not leave['status'] %}selected{% endif
+                        %}>Approved</option>
+                    <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
                 </select>
             </div>
 
-            <div class="flex justify-between mt-6">
-                <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">Update</button>
-                <a href="{{ url_for('view_leaves') }}" class="text-gray-600 px-4 py-3 border rounded-md hover:text-blue-600">Cancel</a>
+            <!-- Action Buttons -->
+            <div class="flex justify-between items-center pt-4">
+                <button type="submit"
+                    class="bg-blue-600 text-white font-medium px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 flex items-center">
+                    <i class="fas fa-check mr-2"></i> Update
+                </button>
+                <a href="{{ url_for('view_leaves') }}"
+                    class="text-gray-700 font-medium px-6 py-3 border border-gray-300 rounded-lg hover:text-blue-600 hover:border-blue-600 transition duration-200 flex items-center">
+                    <i class="fas fa-times mr-2"></i> Cancel
+                </a>
             </div>
         </form>
     </div>

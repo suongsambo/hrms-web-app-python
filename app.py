@@ -4339,7 +4339,7 @@ def spm_dashboard():
 
     # Prepare the data to send to the template
     data = {
-        'message': "Welcome to the SPM Dashboard!",
+        'message': "Welcome Dashboard!",
         'zone': zone,  # Zone information for the current user
         'branches': branches_in_zone  # Branches in the user's zone
     }

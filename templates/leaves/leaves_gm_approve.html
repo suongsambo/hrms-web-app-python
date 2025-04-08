@@ -1,22 +1,11 @@
 {% extends 'base.html' %} {% block title %}GM Approval{% endblock %} {% block
 content %}
 <div class="bg-gray-100 text-gray-800">
-  <!-- Navbar -->
-  <nav class="bg-indigo-600 text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <div>
-        <a href="{{ url_for('leaves_by_gm') }}" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 rounded-md">
-          View Leaves
-        </a>
-      </div>
-    </div>
-  </nav>
-
   <!-- Main Content -->
   <div class="container mx-auto mt-8 px-4">
     <!-- Branch Filter Form -->
     <div class="mb-4">
-      <h2 class="text-2xl font-semibold">GM Approval</h2>
+      <h3 class="text-2xl font-semibold">GM Approval</h3>
     </div>
 
     <!-- Leaves Table -->

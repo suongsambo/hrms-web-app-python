@@ -3,81 +3,78 @@
 {% block title %}Edit Leave{% endblock %}
 
 {% block content %}
-<body class="bg-gray-100">
+<div class="bg-gray-100 min-h-screen py-12 px-6">
+  <div class="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg p-10 transition-all">
+    <h1 class="text-4xl font-semibold text-gray-900 mb-8 tracking-tight">CCC Verify</h1>
 
-    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-4">CCC Verify</h1>
+    <form action="{{ url_for('edit_leave_ccc_verify', id=leave['id']) }}" method="POST" class="space-y-6">
 
-        <form action="{{ url_for('edit_leave_ccc_verify', id=leave['id']) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
-        
-            <div class="mb-4">
-                <label
-                  for="verified_by"
-                  class="block text-gray-700 text-sm font-medium"
-                >
-                  Verified By:
-                </label>
-                <input
-                  type="text"
-                  id="verified_by"
-                  name="verified_by"
-                  value="{{ current_user.username }}"
-                  class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                />
-            </div>
+      <!-- Verified By -->
+      <div>
+        <label for="verified_by" class="block text-sm font-medium text-gray-700 mb-1">Verified By</label>
+        <input type="text" id="verified_by" name="verified_by" value="{{ current_user.username }}"
+          class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none"
+          required />
+      </div>
 
-          
+      <!-- Leave Type -->
+      <div>
+        <label for="leave_type" class="block text-sm font-medium text-gray-700 mb-1">Leave Type</label>
+        <select id="leave_type" name="leave_type"
+          class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+          <option value="annualLeave">Annual Leave</option>
+          <option value="sickLeave">Sick Leave</option>
+          <option value="maternityLeave">Maternity Leave</option>
+          <option value="specialLeave">Special Leave</option>
+        </select>
+      </div>
 
+      <!-- Start Date -->
+      <div>
+        <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+        <input type="date" id="start_date" name="start_date" value="{{ leave['start_date'] }}"
+          class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none" />
+      </div>
 
-            <div class="mb-4">
-                <label
-                  for="leave_type"
-                  class="block text-gray-700 text-sm font-medium"
-                >
-                  Select Leave Type:
-                </label>
-                <select
-                  id="leave_type"
-                  name="leave_type"
-                 class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="annualLeave">Annual Leave</option>
-                  <option value="sickLeave">Sick Leave</option>
-                  <option value="maternityLeave">Maternity Leave</option>
-                  <option value="specialLeave"> Special Leave</option>
-                </select>
-              </div>
-            <div class="mb-4">
-                <label for="start_date" class="block text-gray-700 text-sm font-medium">Start Date</label>
-                <input  type="date" name="start_date" id="start_date" value="{{ leave['start_date'] }}"  class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
-            </div>
+      <!-- End Date -->
+      <div>
+        <label for="end_date" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+        <input type="date" id="end_date" name="end_date" value="{{ leave['end_date'] }}"
+          class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none" />
+      </div>
 
-            <div class="mb-4">
-                <label for="end_date" class="block text-gray-700 text-sm font-medium">End Date</label>
-                <input  type="date" name="end_date" id="end_date" value="{{ leave['end_date'] }}"  class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
-            </div>
+      <!-- Reason -->
+      <div>
+        <label for="reason" class="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+        <textarea id="reason" name="reason" rows="4" required
+          class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">{{ leave['reason'] }}</textarea>
+      </div>
 
-            <div class="mb-4">
-                <label for="reason" class="block text-gray-700 text-sm font-medium">Reason</label>
-                <textarea name="reason" id="reason" rows="4" required class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">{{ leave['reason'] }}</textarea>
-            </div>
+      <!-- Status -->
+      <div>
+        <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+        <select id="status" name="status" required
+          class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+          <option value="Approved" {% if leave['status'] is none or leave['status']=='Approved' %}selected{% endif %}>
+            Approved
+          </option>
+          <option value="Rejected" {% if leave['status']=='Rejected' %}selected{% endif %}>Rejected</option>
+        </select>
+      </div>
 
-            <div class="mb-4">
-                <label for="status" class="block text-gray-700 text-sm font-medium">Status</label>
-                <select name="status" id="status" required class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
-                    <option value="Pending" {% if leave['status'] == 'Pending' %}selected{% endif %}>Pending</option>
-                    <option value="Approved" {% if leave['status'] == 'Approved' %}selected{% endif %}>Approved</option>
-                    <option value="Rejected" {% if leave['status'] == 'Rejected' %}selected{% endif %}>Rejected</option>
-                </select>
-            </div>
+      <!-- Buttons -->
+      <div class="flex justify-end space-x-4 pt-6">
+        <button type="submit"
+          class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition duration-300 ease-in-out">
+          <i class="fas fa-save mr-2"></i> Update Leave
+        </button>
+        <a href="{{ url_for('view_leaves') }}"
+          class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 rounded-xl shadow-md transition duration-300 ease-in-out">
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </a>
+      </div>
 
-            <div class="grid grid-cols-2 gap-2">
-                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center justify-center"><i class="fas fa-save mr-2"></i> Update Leave</button>
-                <a href="{{ url_for('view_leaves') }}" class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center"><i class="fas fa-arrow-left mr-2"></i> Back</a>
-            </div>
-        </form>
-    </div>
-
-</body>
+    </form>
+  </div>
+</div>
 {% endblock %}
