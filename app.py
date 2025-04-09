@@ -1102,27 +1102,79 @@ def view_leaves():
 # TODO: employee leave
 
 
+# @app.route('/leave/<int:leave_id>/users')
+# def users_for_leave(leave_id):
+#     query = '''
+#         SELECT u.ID, u.UserName, u.Email, u.Signature
+#         FROM users u
+#         INNER JOIN user_leave ul ON u.ID = ul.user_id
+#         WHERE ul.leave_id = ?
+#     '''
+#     with get_db_connection() as conn:
+#         users = conn.execute(query, (leave_id,)).fetchall()
+
+#     # Process the Signature BLOBs
+#     users_list = []
+#     for user in users:
+#         user_dict = dict(user)
+#         if user_dict.get('Signature'):
+#             user_dict['Signature'] = base64.b64encode(
+#                 user_dict['Signature']).decode('utf-8')
+#         users_list.append(user_dict)
+
+#     return render_template('leaves/users_for_leave.html', users=users_list)
+
+
 @app.route('/leave/<int:leave_id>/users')
 def users_for_leave(leave_id):
-    query = '''
-        SELECT u.ID, u.UserName, u.Email, u.Signature
-        FROM users u
-        INNER JOIN user_leave ul ON u.ID = ul.user_id
-        WHERE ul.leave_id = ?
+    # Combined query to get both leave details and users associated with the leave
+    leave_query = '''
+        SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+               l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+               l.service_count, l.verified_by, l.approved_by, l.employee_id,
+              l.requested_by,
+               u.ID AS user_id, u.UserName, u.Email, u.Signature
+        FROM leaves l
+        INNER JOIN employees e ON l.employee_id = e.id
+        LEFT JOIN user_leave ul ON l.id = ul.leave_id
+        LEFT JOIN users u ON ul.user_id = u.ID
+        WHERE l.id = ?
     '''
+
     with get_db_connection() as conn:
-        users = conn.execute(query, (leave_id,)).fetchall()
+        result = conn.execute(leave_query, (leave_id,)).fetchall()
 
-    # Process the Signature BLOBs
+    # Process the Signature BLOBs and format the response
+    leave_info = None
     users_list = []
-    for user in users:
-        user_dict = dict(user)
-        if user_dict.get('Signature'):
-            user_dict['Signature'] = base64.b64encode(
-                user_dict['Signature']).decode('utf-8')
-        users_list.append(user_dict)
 
-    return render_template('leaves/users_for_leave.html', users=users_list)
+    for row in result:
+        leave_info = {
+            'id': row['id'],
+            'employee_name': row['employee_name'],
+            'branch_name': row['branch_name'],
+            'leave_type': row['leave_type'],
+            'start_date': row['start_date'],
+            'end_date': row['end_date'],
+            'reason': row['reason'],
+            'status': row['status'],
+            'service_count': row['service_count'],
+            'verified_by': row['verified_by'],
+            'approved_by': row['approved_by'],
+            'employee_id': row['employee_id'],
+            'requested_by': row['requested_by'],
+        }
+
+        if row['user_id']:  # Only add user details if they exist
+            user_dict = {
+                'user_id': row['user_id'],
+                'UserName': row['UserName'],
+                'Email': row['Email'],
+                'Signature': base64.b64encode(row['Signature']).decode('utf-8') if row['Signature'] else None
+            }
+            users_list.append(user_dict)
+
+    return render_template('leaves/users_for_leave.html', leave=leave_info, users=users_list)
 
 
 @app.route('/leave/users')
@@ -1204,38 +1256,511 @@ def user_signature_for_leave(leave_id, user_id):
         return "User not found for this leave."
 
 
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id(employee_id):
+#     # Check if the user is authenticated and has role_default 20
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     # Define SQL query
+#     query = '''
+#         SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                l.spm_status, l.dd_status, l.manager_status, l.requested_by
+#         FROM leaves l
+#         INNER JOIN employees e ON l.employee_id = e.id
+#         WHERE l.employee_id = ?
+#     '''
+#     params = (employee_id,)
+
+#     # Execute the query with the database connection
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#             users = conn.execute("SELECT * FROM users").fetchall()
+#             users_with_leaves = conn.execute(
+#                 "SELECT u.ID, u.UserName, l.id AS leave_id FROM users u LEFT JOIN leaves l ON u.ID = l.requested_by").fetchall()
+#             print(users_with_leaves)
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     # Render the template with the query results
+#     return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
+
+
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id(employee_id):
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     # Optional leave_id in query params
+#     leave_id = request.args.get('leave_id', type=int)
+#     print(f"Received leave_id: {leave_id} for employee_id: {employee_id}")
+
+#     try:
+#         with get_db_connection() as conn:
+#             if leave_id:  # Show users for a specific leave
+#                 leave_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.requested_by,
+#                            u.ID AS user_id, u.UserName, u.Email, u.Signature
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     LEFT JOIN user_leave ul ON l.id = ul.leave_id
+#                     LEFT JOIN users u ON ul.user_id = u.ID
+#                     WHERE l.id = ?
+#                 '''
+#                 print(f"Executing query for specific leave: {leave_query}")
+#                 result = conn.execute(leave_query, (leave_id,)).fetchall()
+#                 print(f"Query result: {result}")
+
+#                 leave_info = None
+#                 users_list = []
+
+#                 for row in result:
+#                     if not leave_info:
+#                         leave_info = {
+#                             'id': row['id'],
+#                             'employee_name': row['employee_name'],
+#                             'branch_name': row['branch_name'],
+#                             'leave_type': row['leave_type'],
+#                             'start_date': row['start_date'],
+#                             'end_date': row['end_date'],
+#                             'reason': row['reason'],
+#                             'status': row['status'],
+#                             'service_count': row['service_count'],
+#                             'verified_by': row['verified_by'],
+#                             'approved_by': row['approved_by'],
+#                             'employee_id': row['employee_id'],
+#                             'requested_by': row['requested_by'],
+#                         }
+#                         print(f"Leave info populated: {leave_info}")
+
+#                     if row['user_id']:
+#                         user_info = {
+#                             'user_id': row['user_id'],
+#                             'UserName': row['UserName'],
+#                             'Signature': base64.b64encode(row['Signature']).decode('utf-8') if row['Signature'] else None
+#                         }
+#                         users_list.append(user_info)
+#                         print(f"Added user to list: {user_info}")
+
+#                 return render_template('leaves/users_for_leave.html', leave=leave_info, users=users_list)
+
+#             else:  # Show all leaves for employee
+#                 leaves_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.spm_status, l.dd_status, l.manager_status, l.requested_by
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     WHERE l.employee_id = ?
+#                 '''
+#                 print(
+#                     f"Executing query for all leaves of employee: {leaves_query}")
+#                 leaves = conn.execute(leaves_query, (employee_id,)).fetchall()
+#                 print(f"Leaves found: {leaves}")
+
+#                 users = conn.execute("SELECT * FROM users").fetchall()
+#                 print(f"Users found: {users}")
+
+#                 return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
+
+#     except sqlite3.DatabaseError as e:
+#         print(f"Database error occurred: {e}")
+#         return f"Database error: {e}", 500
+
+
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id(employee_id):
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     # Optional leave_id in query params
+#     leave_id = request.args.get('leave_id', type=int)
+#     print(f"Received leave_id: {leave_id} for employee_id: {employee_id}")
+
+#     try:
+#         with get_db_connection() as conn:
+#             if leave_id:  # Show users for a specific leave
+#                 leave_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.requested_by,
+#                            u.ID AS user_id, u.UserName, u.Email, u.Signature
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     LEFT JOIN user_leave ul ON l.id = ul.leave_id
+#                     LEFT JOIN users u ON ul.user_id = u.ID
+#                     WHERE l.id = ?
+#                 '''
+#                 print(f"Executing query for specific leave: {leave_query}")
+#                 result = conn.execute(leave_query, (leave_id,)).fetchall()
+#                 print(f"Query result: {result}")
+
+#                 leave_info = None
+#                 users_list = []
+
+#                 # Add current_user information to the users list
+#                 current_user_info = {
+#                     'user_id': current_user.id,
+#                     'UserName': current_user.username,
+#                     'Signature': None
+#                 }
+#                 users_list.append(current_user_info)
+#                 print(
+#                     f"Added current user info to users list: {current_user_info}")
+
+#                 for row in result:
+#                     if not leave_info:
+#                         leave_info = {
+#                             'id': row['id'],
+#                             'employee_name': row['employee_name'],
+#                             'branch_name': row['branch_name'],
+#                             'leave_type': row['leave_type'],
+#                             'start_date': row['start_date'],
+#                             'end_date': row['end_date'],
+#                             'reason': row['reason'],
+#                             'status': row['status'],
+#                             'service_count': row['service_count'],
+#                             'verified_by': row['verified_by'],
+#                             'approved_by': row['approved_by'],
+#                             'employee_id': row['employee_id'],
+#                             'requested_by': row['requested_by'],
+#                         }
+#                         print(f"Leave info populated: {leave_info}")
+
+#                     if row['user_id']:
+#                         user_info = {
+#                             'user_id': row['user_id'],
+#                             'UserName': row['UserName'],
+#                             'Email': row['Email'],
+#                             'Signature': base64.b64encode(row['Signature']).decode('utf-8') if row['Signature'] else None
+#                         }
+#                         users_list.append(user_info)
+#                         print(f"Added user to list: {user_info}")
+
+#                 return render_template('leaves/users_for_leave.html', leave=leave_info, users=users_list)
+
+#             else:  # Show all leaves for employee
+#                 leaves_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.spm_status, l.dd_status, l.manager_status, l.requested_by
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     WHERE l.employee_id = ?
+#                 '''
+#                 print(
+#                     f"Executing query for all leaves of employee: {leaves_query}")
+#                 leaves = conn.execute(leaves_query, (employee_id,)).fetchall()
+#                 print(f"Leaves found: {leaves}")
+
+#                 users = conn.execute("SELECT * FROM users").fetchall()
+#                 print(f"Users found: {users}")
+
+#                 return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
+
+#     except sqlite3.DatabaseError as e:
+#         print(f"Database error occurred: {e}")
+#         return f"Database error: {e}", 500
+
+
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id(employee_id):
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     leave_id = request.args.get('leave_id', type=int)
+
+#     try:
+#         with get_db_connection() as conn:
+#             # Fetch current user's signature from the database
+#             user_query = '''
+#                 SELECT Signature
+#                 FROM users
+#                 WHERE ID = ?
+#             '''
+#             result = conn.execute(user_query, (current_user.id,)).fetchone()
+#             user_signature = result['Signature'] if result else None
+
+#             # Now add the current user's info to the users_list
+#             current_user_info = {
+#                 'user_id': current_user.id,
+#                 'UserName': current_user.username,
+#                 'Signature': user_signature  # The signature fetched from DB or None
+#             }
+
+#             users_list = [current_user_info]
+
+#             # Continue with your existing leave query and logic
+#             if leave_id:
+#                 leave_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.requested_by,
+#                            u.ID AS user_id, u.UserName, u.Email, u.Signature
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     LEFT JOIN user_leave ul ON l.id = ul.leave_id
+#                     LEFT JOIN users u ON ul.user_id = u.ID
+#                     WHERE l.id = ?
+#                 '''
+#                 result = conn.execute(leave_query, (leave_id,)).fetchall()
+#                 leave_info = None
+
+#                 for row in result:
+#                     if not leave_info:
+#                         leave_info = {
+#                             'id': row['id'],
+#                             'employee_name': row['employee_name'],
+#                             'branch_name': row['branch_name'],
+#                             'leave_type': row['leave_type'],
+#                             'start_date': row['start_date'],
+#                             'end_date': row['end_date'],
+#                             'reason': row['reason'],
+#                             'status': row['status'],
+#                             'service_count': row['service_count'],
+#                             'verified_by': row['verified_by'],
+#                             'approved_by': row['approved_by'],
+#                             'employee_id': row['employee_id'],
+#                             'requested_by': row['requested_by'],
+#                         }
+
+#                     if row['user_id']:
+#                         user_info = {
+#                             'user_id': row['user_id'],
+#                             'UserName': row['UserName'],
+#                             'Email': row['Email'],
+#                             'Signature': base64.b64encode(row['Signature']).decode('utf-8') if row['Signature'] else None
+#                         }
+#                         users_list.append(user_info)
+
+#                 return render_template('leaves/users_for_leave.html', leave=leave_info, users=users_list)
+
+#             else:
+#                 leaves_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.spm_status, l.dd_status, l.manager_status, l.requested_by
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     WHERE l.employee_id = ?
+#                 '''
+#                 leaves = conn.execute(leaves_query, (employee_id,)).fetchall()
+
+#                 users = conn.execute("SELECT * FROM users").fetchall()
+
+#                 return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
+
+#     except sqlite3.DatabaseError as e:
+#         print(f"Database error occurred: {e}")
+#         return f"Database error: {e}", 500
+
+
 @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
 def filter_leaves_by_employee_id(employee_id):
-    # Check if the user is authenticated and has role_default 20
     if not current_user.is_authenticated or current_user.role_default != 20:
         return redirect(url_for('access_denied'))
 
-    # Define SQL query
-    query = '''
-        SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
-               l.leave_type, l.start_date, l.end_date, l.reason, l.status,
-               l.service_count, l.verified_by, l.approved_by, l.employee_id,
-               l.spm_status, l.dd_status, l.manager_status, l.requested_by
-        FROM leaves l
-        INNER JOIN employees e ON l.employee_id = e.id
-        WHERE l.employee_id = ?
-    '''
-    params = (employee_id,)
+    leave_id = request.args.get('leave_id', type=int)
 
-    # Execute the query with the database connection
     try:
         with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
-            users = conn.execute("SELECT * FROM users").fetchall()
-            users_with_leaves = conn.execute(
-                "SELECT u.ID, u.UserName, l.id AS leave_id FROM users u LEFT JOIN leaves l ON u.ID = l.requested_by").fetchall()
-            print(users_with_leaves)
+            # Fetch current user's signature from the database
+            user_query = '''
+                SELECT Signature
+                FROM users 
+                WHERE ID = ?
+            '''
+            result = conn.execute(user_query, (current_user.id,)).fetchone()
+            # If Signature is in binary, encode it to base64
+            user_signature = base64.b64encode(result['Signature']).decode(
+                'utf-8') if result and result['Signature'] else None
+
+            # Now add the current user's info to the users_list
+            current_user_info = {
+                'user_id': current_user.id,
+                'UserName': current_user.username,
+                'Signature': user_signature  # The signature fetched from DB or None
+            }
+
+            # Add current user to the users list
+            users_list = [current_user_info]
+
+            if leave_id:  # If we are looking for specific leave info
+                leave_query = '''
+                    SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+                           l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+                           l.service_count, l.verified_by, l.approved_by, l.employee_id,
+                           l.requested_by,
+                           u.ID AS user_id, u.UserName, u.Email, u.Signature
+                    FROM leaves l
+                    INNER JOIN employees e ON l.employee_id = e.id
+                    LEFT JOIN user_leave ul ON l.id = ul.leave_id
+                    LEFT JOIN users u ON ul.user_id = u.ID
+                    WHERE l.id = ?
+                '''
+                result = conn.execute(leave_query, (leave_id,)).fetchall()
+                leave_info = None
+
+                for row in result:
+                    if not leave_info:
+                        leave_info = {
+                            'id': row['id'],
+                            'employee_name': row['employee_name'],
+                            'branch_name': row['branch_name'],
+                            'leave_type': row['leave_type'],
+                            'start_date': row['start_date'],
+                            'end_date': row['end_date'],
+                            'reason': row['reason'],
+                            'status': row['status'],
+                            'service_count': row['service_count'],
+                            'verified_by': row['verified_by'],
+                            'approved_by': row['approved_by'],
+                            'employee_id': row['employee_id'],
+                            'requested_by': row['requested_by'],
+                        }
+
+                    if row['user_id']:
+                        # If the user has a Signature, encode it
+                        user_signature = base64.b64encode(row['Signature']).decode(
+                            'utf-8') if row['Signature'] else None
+                        user_info = {
+                            'user_id': row['user_id'],
+                            'UserName': row['UserName'],
+                            'Email': row['Email'],
+                            'Signature': user_signature  # Base64 encoded signature
+                        }
+                        users_list.append(user_info)
+
+                return render_template('leaves/users_for_leave.html', leave=leave_info, users=users_list)
+
+            else:  # Show all leaves for employee
+                leaves_query = '''
+                    SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+                           l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+                           l.service_count, l.verified_by, l.approved_by, l.employee_id,
+                           l.spm_status, l.dd_status, l.manager_status, l.requested_by
+                    FROM leaves l
+                    INNER JOIN employees e ON l.employee_id = e.id
+                    WHERE l.employee_id = ?
+                '''
+                leaves = conn.execute(leaves_query, (employee_id,)).fetchall()
+
+                users = conn.execute("SELECT * FROM users").fetchall()
+
+                return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
 
     except sqlite3.DatabaseError as e:
+        print(f"Database error occurred: {e}")
         return f"Database error: {e}", 500
 
-    # Render the template with the query results
-    return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
+
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id(employee_id):
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     # Optional leave_id in query params
+#     leave_id = request.args.get('leave_id', type=int)
+#     print(f"Received leave_id: {leave_id} for employee_id: {employee_id}")
+
+#     try:
+#         with get_db_connection() as conn:
+#             if leave_id:  # Show users for a specific leave
+#                 leave_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.requested_by,
+#                            u.ID AS user_id, u.UserName, u.Email, u.Signature
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     LEFT JOIN user_leave ul ON l.id = ul.leave_id
+#                     LEFT JOIN users u ON ul.user_id = u.ID
+#                     WHERE l.id = ?
+#                 '''
+#                 print(f"Executing query for specific leave: {leave_query}")
+#                 result = conn.execute(leave_query, (leave_id,)).fetchall()
+#                 print(f"Query result: {result}")
+
+#                 leave_info = None
+#                 users_list = []
+
+#                 # Add current_user information to the users list
+#                 current_user_info = {
+#                     'user_id': current_user.id,
+#                     'UserName': current_user.username,
+#                     'Email': current_user.email,
+#                     'Signature': base64.b64encode(current_user.Signature).decode('utf-8') if hasattr(current_user, 'Signature') and current_user.Signature else None
+#                 }
+#                 users_list.append(current_user_info)
+
+#                 for row in result:
+#                     if not leave_info:
+#                         leave_info = {
+#                             'id': row['id'],
+#                             'employee_name': row['employee_name'],
+#                             'branch_name': row['branch_name'],
+#                             'leave_type': row['leave_type'],
+#                             'start_date': row['start_date'],
+#                             'end_date': row['end_date'],
+#                             'reason': row['reason'],
+#                             'status': row['status'],
+#                             'service_count': row['service_count'],
+#                             'verified_by': row['verified_by'],
+#                             'approved_by': row['approved_by'],
+#                             'employee_id': row['employee_id'],
+#                             'requested_by': row['requested_by'],
+#                         }
+#                         print(f"Leave info populated: {leave_info}")
+
+#                     if row['user_id']:
+#                         user_info = {
+#                             'user_id': row['user_id'],
+#                             'UserName': row['UserName'],
+#                             'Email': row['Email'],
+#                             'Signature': base64.b64encode(row['Signature']).decode('utf-8') if row['Signature'] else None
+#                         }
+#                         users_list.append(user_info)
+#                         print(f"Added user to list: {user_info}")
+
+#                 return render_template('leaves/users_for_leave.html', leave=leave_info, users=users_list)
+
+#             else:  # Show all leaves for employee
+#                 leaves_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.spm_status, l.dd_status, l.manager_status, l.requested_by
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     WHERE l.employee_id = ?
+#                 '''
+#                 print(
+#                     f"Executing query for all leaves of employee: {leaves_query}")
+#                 leaves = conn.execute(leaves_query, (employee_id,)).fetchall()
+#                 print(f"Leaves found: {leaves}")
+
+#                 users = conn.execute("SELECT * FROM users").fetchall()
+#                 print(f"Users found: {users}")
+
+#                 return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
+
+#     except sqlite3.DatabaseError as e:
+#         print(f"Database error occurred: {e}")
+#         return f"Database error: {e}", 500
+
 
 # @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
 # def filter_leaves_by_employee_id(employee_id):
