@@ -5,9 +5,11 @@
 {% block content %}
 
 <!-- Print Button -->
-<div class="flex justify-end mb-4 print:hidden">
-    <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-        🖨️ Print
+<div class=" flex justify-start mb-4 p-1 container bg-white mx-auto p-1 text-gray-800 print:hidden">
+    <button onclick="window.print()"
+        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-2">
+        <span class="material-symbols-outlined">print</span>
+        Print
     </button>
 </div>
 
@@ -70,76 +72,6 @@
                 <p><strong>ពិនិត្យដោយ ( Verified by ):</strong> {{ leave.verified_by or 'Not Verified' }}</p>
                 <p><strong>អនុញ្ញាតដោយ ( Approved by ):</strong> {{ leave.approved_by or 'Not Approved' }}</p </div>
             </div>
-
-
-
-
-
-            <!-- <div class="text-md bg-white p-2 r">
-                <h4 class="text-md font-semibold text-gray-700 mb-1">
-                    Users Associated with this Leave
-                </h4>
-
-                {% if users %}
-                <table class="min-w-full table-auto text-sm">
-                    <thead>
-                        <tr class="bg-gray-100 text-gray-700">
-                            <th class="text-left font-semibold py-2 px-4">UserName</th>
-                            <th class="text-left font-semibold py-2 px-4">Signature</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in users %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="py-2 px-4">Name: {{ user.UserName }}</td>
-                            <td class="py-2 px-4">
-                                {% if user.Signature %}
-                                <img src="data:image/png;base64,{{ user.Signature }}" alt="Signature"
-                                    class="h-12 w-12 rounded border object-contain mx-auto" width="100px" />
-                                {% else %}
-                                <span class="text-gray-500">No Signature</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p class="text-gray-600">No users associated with this leave.</p>
-                {% endif %}
-            </div> -->
-
-
-            <!-- <div class="text-md bg-white justify-center ">
-                <h4 class="text-md font-semibold text-gray-700 mb-1">
-                    Users Associated with this Leave
-                </h4>
-
-                {% if users %}
-                <ul class="space-y-1 grid grid-cols-1  leading-relaxed">
-                    {% for user in users %}
-                    <li class="grid grid-cols-1  leading-relaxed">
-                        <div class="font-semibold text-gray-700">ឈ្មោះ (Name): {{ user.UserName }} </div>
-                        <div>
-                            {% if user.Signature %}
-                            <div class="flex items-center space-x-1">
-                                <span>Signature:</span>
-                                <img src="data:image/png;base64,{{ user.Signature }}" alt="Signature"
-                                    class="h-19 w-19  object-contain" />
-                            </div>
-
-                            {% else %}
-                            <span class="text-gray-500">No Signature</span>
-                            {% endif %}
-                        </div>
-                    </li>
-                    {% endfor %}
-                </ul>
-
-                {% else %}
-                <p class="text-gray-600">No users associated with this leave.</p>
-                {% endif %}
-            </div> -->
             <br>
             <div class="text-md p-1 bg-white justify-center">
                 <h3 class="text-md font-semibold text-gray-700 mb-1">

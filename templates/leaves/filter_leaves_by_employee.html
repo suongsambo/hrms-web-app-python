@@ -6,9 +6,17 @@ block content %}
   <div class="container mx-auto mt-2 px-4">
     <!-- Print Button -->
     <div class="mb-2">
-      <button id="printSelected" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 text-white rounded-md">
+      <!-- <button id="printSelected" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 text-white rounded-md">
         <i class="fas fa-print mr-2"></i> Print
-      </button>
+      </button> -->
+      <!-- Add Button to Get Selected Rows -->
+
+      <div class="mb-2">
+        <a d="printSelected" href="{{ url_for('filter_leaves_by_employee_id', employee_id=employee_id, leave_id=5) }}"
+          class="inline-block px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
+          <i class="fas fa-arrow-left mr-2"></i> View
+        </a>
+      </div>
     </div>
 
     <!-- Leaves Table -->
@@ -99,7 +107,6 @@ block content %}
         </tbody>
       </table>
     </div>
-
   </div>
 
   <!-- Initialize DataTable -->
@@ -117,6 +124,57 @@ block content %}
           formatLeaveDatesAndHours(); // <-- Call your formatting function on each draw
         },
       });
+
+      function getSelectedRows() {
+        var selectedData = [];
+        console.log("🚀 ~ getSelectedRows ~ selectedData:", selectedData);
+
+        try {
+          // Iterate over all checked checkboxes to get selected rows
+          $(".select-row-checkbox:checked").each(function () {
+            var row = $(this).closest("tr");
+            var rowData = row
+              .find("td")
+              .map(function () {
+                return $(this).text().trim();
+              })
+              .get()
+              .join(", ");
+
+            console.log("Row Data: ", rowData); // Log each row's data for debugging
+            selectedData.push(rowData); // Store row data in the array
+          });
+
+          if (selectedData.length === 0) {
+            console.log("No rows selected.");
+          }
+
+          return selectedData; // Return the array of selected row data
+        } catch (error) {
+          console.error("Error getting selected rows:", error);
+          return [];
+        }
+      }
+
+      // Function to display selected rows
+      function displaySelectedRows() {
+        var selectedRows = getSelectedRows(); // Get the selected rows' data
+        var resultDiv = $("#result");
+
+        if (selectedRows.length > 0) {
+          resultDiv.html(
+            "<strong>Selected Rows:</strong><ul>" +
+            selectedRows
+              .map(function (row) {
+                return "<li>" + row + "</li>";
+              })
+              .join("") +
+            "</ul>"
+          );
+        } else {
+          resultDiv.html("<strong>No rows selected</strong>");
+        }
+      }
 
       function formatLeaveDatesAndHours() {
         $(".leave-start-date").each(function () {
@@ -225,6 +283,20 @@ block content %}
         }
       });
 
+      // Iterate over all checkboxes to get selected rows
+      $(".select-row-checkbox:checked").each(function () {
+        var row = $(this).closest("tr");
+        var rowData = row
+          .find("td")
+          .map(function () {
+            return $(this).text().trim();
+          })
+          .get()
+          .join(", ");
+        console.log("Row Data: ", rowData); // Add log
+        selectedData.push(rowData);
+      });
+
       // Print Selected Leaves Data
       $("#printSelected").on("click", function () {
         var selectedData = [];
@@ -239,6 +311,7 @@ block content %}
             })
             .get()
             .join(", ");
+          console.log("Row Data: ", rowData); // Add log
           selectedData.push(rowData);
         });
 
