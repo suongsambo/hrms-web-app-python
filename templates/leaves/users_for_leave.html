@@ -18,59 +18,60 @@
             ពាក្យសុំច្បាប់ឈប់សម្រាក
 
         </h2>
-        <h4 class=" font-bold text-center text-gray-800 mb-1 print:text-2xl">
+        <h4 class="text-2md font-bold text-center text-gray-800 mb-1 print:text-2xl">
 
             APPLICATION FORM FOR LEAVE
         </h4>
 
-        <h3 class="text-2md font-semibold mb-1 text-center">
-            Leave Details for {{ leave.employee_name }}
+        <h3 class="text-2md font-semibold  text-center">
+            ច្បាប់សំរាកលម្អិតសម្រាប់ (Leave Details for): {{ leave.employee_name }}
         </h3>
 
         <!-- Employee Information Section -->
         <div class="bg-white p-4 print:break-inside-avoid" style="font-size: 11px;">
-            <h4 class="text-md font-bold text-gray-800 mb-1">
-                Employee Information
-            </h4>
-            <div class="grid grid-cols-4 gap-1 leading-relaxed">
-                <p><strong>Employee Name:</strong> {{ leave.employee_name }}</p>
-                <p><strong>Branch:</strong> {{ leave.branch_name }}</p>
-                <p><strong>Signature:</strong></p>
-                <!-- <img src="{{ url_for('get_user_signature', user_id=current_user.id) }}" alt="Signature" height="50"
-                    width="100"> -->
+            <h3 class="text-2md font-bold text-gray-800 mb-1">
+                ព័ត៌មានបុគ្គលិក ( Employee Information )
+            </h3>
+            <hr class="border-gray-300">
+            <div class="grid grid-cols-2 gap-1 leading-relaxed">
+                <p><strong>គោត្តនាម និងនាម ( Name ):</strong> {{ leave.employee_name }}</p>
+                <p><strong>បម្រើការងារនៅ (Duty Station):</strong> {{ leave.branch_name }}</p>
             </div>
         </div>
-        <hr class="border-gray-300">
+
 
         <!-- Leave Time Section -->
         <div class="bg-white p-4 print:break-inside-avoid" style="font-size: 11px;">
-            <h4 class="ttext-md font-bold text-gray-800 mb-1">
-                Leave Time
+            <h4 class="ttext-md font-bold text-gray-800 ">
+                ពត៌មានរយៈពេលនៃការឈប់សម្រាក ( Leave Time Information)
             </h4>
-            <div class="grid grid-cols-4 gap-1 leading-relaxed">
-                <p><strong>Leave Type:</strong> {{ leave.leave_type }}</p>
-                <p><strong>Start Date:</strong> {{ leave.start_date }}</p>
-                <p><strong>End Date:</strong> {{ leave.end_date }}</p>
-                <p><strong>Status:</strong> {{ leave.status }}</p>
-                <p><strong>Reason:</strong> {{ leave.reason }}</p>
-                <p><strong>Requested By:</strong> {{ leave.requested_by }}</p>
-                <p><strong>Total Days:</strong> {{ leave.service_count }} {{ "Day" if leave.service_count == 1 else
+            <hr class="border-gray-300">
+            <div class="grid grid-cols-2 gap-1 leading-relaxed">
+                <p><strong>ប្រភេទនៃការឈប់សម្រាក (Types of Leave) :</strong> {{ leave.leave_type }}</p>
+                <p><strong>សំណើសុំឈប់សម្រាកពីថ្ងៃទី (From Date):</strong> {{ leave.start_date }}</p>
+                <p><strong>រហូតដល់ថ្ងៃទី ( To Date ):</strong> {{ leave.end_date }}</p>
+                <!-- <p><strong>Status:</strong> {{ leave.status }}</p> -->
+                <p><strong>មូលហេតុនៃការសុំឈប់សម្រាក ( Reason for Leave ):</strong> {{ leave.reason }}</p>
+                <p><strong>ស្នើដោយ ( Requested by ):</strong> {{ leave.requested_by }}</p>
+                <p><strong>ការឈប់សម្រាកសរុប ( Total Leave ):</strong> {{ leave.service_count }} {{ "Day" if
+                    leave.service_count == 1 else
                     "Days" }}</p>
             </div>
         </div>
-        <hr class="border-gray-300">
+
         <!-- Approver Information Section -->
-        <div class="bg-white p-1 print:break-inside-avoid" style="font-size: 11px;">
+        <div class="bg-white p-4 print:break-inside-avoid" style="font-size: 11px;">
             <h4 class="text-md font-bold text-gray-800 mb-1">
-                Approver Information
+                ពត៌មានអ្នកស្នើសុំនិងអ្នកអនុម័ត ( Requester and Approver Information )
             </h4>
-            <div class="grid grid-cols-3 gap-1 leading-relaxed">
-                <p><strong>Requested By:</strong> {{current_user.username or 'Not Approved' }}</p>
-                <p><strong>Verified By:</strong> {{ leave.verified_by or 'Not Verified' }}</p>
-                <p><strong>Approved By:</strong> {{ leave.approved_by or 'Not Approved' }}</p </div>
+            <hr class="border-gray-300">
+            <div class="grid grid-cols-1 gap-1 leading-relaxed mb-1">
+                <p><strong>ស្នើដោយ ( Requested by ):</strong> {{current_user.username or 'Not Approved' }}</p>
+                <p><strong>ពិនិត្យដោយ ( Verified by ):</strong> {{ leave.verified_by or 'Not Verified' }}</p>
+                <p><strong>អនុញ្ញាតដោយ ( Approved by ):</strong> {{ leave.approved_by or 'Not Approved' }}</p </div>
             </div>
 
-            <hr class="border-gray-300">
+
 
 
 
@@ -139,25 +140,24 @@
                 <p class="text-gray-600">No users associated with this leave.</p>
                 {% endif %}
             </div> -->
-
-
-
-
-            <div class="text-md bg-white justify-center">
-                <h4 class="text-md font-semibold text-gray-700 mb-1">
-                    Users Associated with this Leave
-                </h4>
+            <br>
+            <div class="text-md p-1 bg-white justify-center">
+                <h3 class="text-md font-semibold text-gray-700 mb-1">
+                    ពត៌មានអ្នកប្រើប្រាស់ដែលពាក់ព័ន្ធជាមួយនឹងច្បាប់សំរាកចេញនេះ ( Users Associated with this Leave
+                    Information)
+                </h3>
+                <hr class="border-gray-300">
 
                 {% if users %}
                 <ul class="grid grid-cols-3 gap-1 leading-relaxed">
                     {% for user in users %}
-                    <li class="flex items-center space-x-4">
-                        <!-- User Name Section -->
+                    <!-- <li class="flex items-center space-x-4">
+                    
                         <div class="font-semibold text-gray-700">
                             <span>ឈ្មោះ (Name):</span> {{ user.UserName }}
                         </div>
 
-                        <!-- Signature Section -->
+                      
                         <div>
                             {% if user.Signature %}
                             <div class="flex items-center space-x-2">
@@ -169,7 +169,27 @@
                             <span class="text-gray-500">No Signature</span>
                             {% endif %}
                         </div>
+                    </li> -->
+                    <li class="flex flex-col items-start space-y-1 p-1 ">
+                        <!-- User Name Section -->
+                        <div class="font-semibold text-gray-700">
+                            <span>ឈ្មោះ (Name):</span> {{ user.UserName }}<br>
+                        </div>
+
+                        <!-- Signature Section -->
+                        <div>
+                            {% if user.Signature %}
+                            <div class="flex items-center space-x-2">
+                                <!-- <span>Signature:</span> -->
+                                <img src="data:image/png;base64,{{ user.Signature }}" alt="Signature"
+                                    class="h-24 w-24 object-contain" />
+                            </div>
+                            {% else %}
+                            <span class="text-gray-500">No Signature</span>
+                            {% endif %}
+                        </div>
                     </li>
+
                     {% endfor %}
                 </ul>
 
@@ -177,38 +197,6 @@
                 <p class="text-gray-600">No users associated with this leave.</p>
                 {% endif %}
             </div>
-
-
-
-
-
-            <!-- <div class="text-md bg-white p-2 r">
-            <h4 class="text-md font-semibold text-gray-700 mb-1">
-                Users Associated with this Leave
-            </h4>
-
-            {% if users %}
-            <div class="grid grid-cols-2 gap-4">
-                <div class="font-semibold text-gray-700">UserName</div>
-                <div class="font-semibold text-gray-700">Signature</div>
-
-                {% for user in users %}
-                <div class="py-2 px-4">{{ user.UserName }}</div>
-                <div class="py-2 px-4">
-                    {% if user.Signature %}
-                    <img src="data:image/png;base64,{{ user.Signature }}" alt="Signature"
-                        class="h-12 w-12 rounded border object-contain mx-auto" />
-                    {% else %}
-                    <span class="text-gray-500">No Signature</span>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-gray-600">No users associated with this leave.</p>
-            {% endif %}
-        </div> -->
-
         </div>
     </div>
 
@@ -229,6 +217,7 @@
                 left: 0;
                 top: 0;
                 width: 100%;
+                height: inherit;
                 margin: 0px;
             }
 
