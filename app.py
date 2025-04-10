@@ -1596,7 +1596,7 @@ def filter_leaves_by_employee_id(employee_id):
             # Fetch current user's signature from the database
             user_query = '''
                 SELECT Signature
-                FROM users 
+                FROM users
                 WHERE ID = ?
             '''
             result = conn.execute(user_query, (current_user.id,)).fetchone()
@@ -1656,7 +1656,7 @@ def filter_leaves_by_employee_id(employee_id):
                             'user_id': row['user_id'],
                             'UserName': row['UserName'],
                             'Email': row['Email'],
-                            'Signature': user_signature  # Base64 encoded signature
+                            'Signature': user_signature
                         }
                         users_list.append(user_info)
 
@@ -1681,6 +1681,114 @@ def filter_leaves_by_employee_id(employee_id):
     except sqlite3.DatabaseError as e:
         print(f"Database error occurred: {e}")
         return f"Database error: {e}", 500
+
+
+# @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
+# def filter_leaves_by_employee_id(employee_id):
+#     if not current_user.is_authenticated or current_user.role_default != 20:
+#         return redirect(url_for('access_denied'))
+
+#     leave_id = request.args.get('leave_id', type=int)
+
+#     try:
+#         with get_db_connection() as conn:
+#             # Fetch current user's signature from the database
+#             user_query = '''
+#                 SELECT Signature
+#                 FROM users
+#                 WHERE ID = ?
+#             '''
+#             result = conn.execute(user_query, (current_user.id,)).fetchone()
+#             # If Signature is in binary, encode it to base64
+#             user_signature = base64.b64encode(result['Signature']).decode(
+#                 'utf-8') if result and result['Signature'] else None
+
+#             # Now add the current user's info to the users_list
+#             current_user_info = {
+#                 'user_id': current_user.id,
+#                 'UserName': current_user.username,
+#                 'Signature': user_signature  # The signature fetched from DB or None
+#             }
+
+#             # Add current user to the users list
+#             users_list = [current_user_info]
+
+#             if leave_id:  # If we are looking for specific leave info
+#                 leave_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.requested_by,
+#                            u.ID AS user_id, u.UserName, u.Email, u.Signature
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     LEFT JOIN user_leave ul ON l.id = ul.leave_id
+#                     LEFT JOIN users u ON ul.user_id = u.ID
+#                     WHERE l.id = ?
+#                 '''
+#                 result = conn.execute(leave_query, (leave_id,)).fetchall()
+#                 leave_info = None
+
+#                 for row in result:
+#                     if not leave_info:
+#                         leave_info = {
+#                             'id': row['id'],
+#                             'employee_name': row['employee_name'],
+#                             'branch_name': row['branch_name'],
+#                             'leave_type': row['leave_type'],
+#                             'start_date': row['start_date'],
+#                             'end_date': row['end_date'],
+#                             'reason': row['reason'],
+#                             'status': row['status'],
+#                             'service_count': row['service_count'],
+#                             'verified_by': row['verified_by'],
+#                             'approved_by': row['approved_by'],
+#                             'employee_id': row['employee_id'],
+#                             'requested_by': row['requested_by'],
+#                         }
+
+#                     # Check if the leave status is such that you want to hide user information
+#                     if row['status'] not in ['approved', 'pending']:  # Example statuses to include
+#                         user_info = {
+#                             'user_id': row['user_id'],
+#                             'UserName': None,  # Hide UserName
+#                             'Email': row['Email'],
+#                             'Signature': None  # Hide Signature
+#                         }
+#                     else:
+#                         # If status is 'approved' or 'pending', show the UserName and Signature
+#                         user_signature = base64.b64encode(row['Signature']).decode(
+#                             'utf-8') if row['Signature'] else None
+#                         user_info = {
+#                             'user_id': row['user_id'],
+#                             'UserName': row['UserName'],
+#                             'Email': row['Email'],
+#                             'Signature': user_signature
+#                         }
+
+#                     users_list.append(user_info)
+
+#                 return render_template('leaves/users_for_leave.html', leave=leave_info, users=users_list)
+
+#             else:  # Show all leaves for employee
+#                 leaves_query = '''
+#                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
+#                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
+#                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
+#                            l.spm_status, l.dd_status, l.manager_status, l.requested_by
+#                     FROM leaves l
+#                     INNER JOIN employees e ON l.employee_id = e.id
+#                     WHERE l.employee_id = ?
+#                 '''
+#                 leaves = conn.execute(leaves_query, (employee_id,)).fetchall()
+
+#                 users = conn.execute("SELECT * FROM users").fetchall()
+
+#                 return render_template('leaves/filter_leaves_by_employee.html', leaves=leaves, employee_id=employee_id, users=users)
+
+#     except sqlite3.DatabaseError as e:
+#         print(f"Database error occurred: {e}")
+#         return f"Database error: {e}", 500
 
 
 # @app.route('/leaves/employee/<int:employee_id>', methods=['GET'])
