@@ -5,7 +5,13 @@
 {% block content %}
 
 <!-- Print Button -->
-<div class=" flex justify-start mb-4 p-1 container bg-white mx-auto p-1 text-gray-800 print:hidden">
+<div class=" flex justify-start mb-4 p-2 container bg-white mx-auto p-1 text-gray-800 print:hidden">
+    <div class="space-x-2 ml-4 mr-4">
+        <a href="{{ url_for('view_leaves') }}"
+            class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back
+        </a>
+    </div>
     <button onclick="window.print()"
         class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center space-x-2">
         <span class="material-symbols-outlined">print</span>
@@ -103,10 +109,7 @@
                         </div>
                     </li> -->
                     <li class="flex flex-col items-start space-y-1 p-1 ">
-                        <!-- User Name Section -->
-                        <div class="font-semibold text-gray-700">
-                            <span>ឈ្មោះ (Name):</span> {{ user.UserName }}<br>
-                        </div>
+
 
                         <!-- Signature Section -->
                         <div>
@@ -119,6 +122,10 @@
                             {% else %}
                             <span class="text-gray-500">No Signature</span>
                             {% endif %}
+                        </div>
+                        <!-- User Name Section -->
+                        <div class="font-semibold text-gray-700">
+                            <span>ឈ្មោះ (Name):</span> {{ user.UserName }}<br>
                         </div>
                     </li>
 

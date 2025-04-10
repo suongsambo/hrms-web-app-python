@@ -321,6 +321,23 @@ def download_db():
     return send_file(app.config['DATABASE'], as_attachment=True)
 
 
+@app.route('/filter-leaves')
+def filter_leaves_by_ids():
+    ids = request.args.get('ids')
+    id_list = [int(i) for i in ids.split(',')] if ids else []
+    with get_db_connection() as conn:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT *
+            FROM leaves
+            WHERE id IN ({seq})
+            ORDER BY start_date DESC
+        '''.format(seq=','.join(['?']*len(id_list))), id_list)
+        leaves = cur.fetchall()
+    return render_template('leaves.html', leaves=leaves)
+
+
 @app.route('/zones/add', methods=['GET', 'POST'])
 def add_zone():
     if request.method == 'POST':

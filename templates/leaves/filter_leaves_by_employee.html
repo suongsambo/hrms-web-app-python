@@ -1,22 +1,17 @@
-{% extends 'base.html' %} {% block title %}Add Leave Hours{% endblock %} {%
-block content %}
+{% extends 'base.html' %}
+{% block title %}Add Leave Hours{% endblock %}
+{% block content %}
 
 <body class="bg-gray-100 text-gray-800">
-  <!-- Main Content -->
   <div class="container mx-auto mt-2 px-4">
-    <!-- Print Button -->
     <div class="mb-2">
-      <!-- <button id="printSelected" class="px-4 py-2 bg-indigo-500 hover:bg-indigo-700 text-white rounded-md">
-        <i class="fas fa-print mr-2"></i> Print
-      </button> -->
-      <!-- Add Button to Get Selected Rows -->
-
-      <div class="mb-2">
-        <a d="printSelected" href="{{ url_for('filter_leaves_by_employee_id', employee_id=employee_id, leave_id=5) }}"
-          class="inline-block px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
-          <i class="fas fa-arrow-left mr-2"></i> View
-        </a>
-      </div>
+      {% if leaves %}
+      <a id="viewLeaveLink"
+        href="{{ url_for('filter_leaves_by_employee_id', employee_id=employee_id, leave_id=leaves[0].id) }}"
+        class="inline-block px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
+        <i class="fas fa-eye mr-2"></i> View Leave
+      </a><br>
+      {% endif %}
     </div>
 
     <!-- Leaves Table -->
@@ -38,19 +33,19 @@ block content %}
             <th class="px-6 py-3">RequestedBy</th>
             <th class="px-6 py-3">VerifiedBy</th>
             <th class="px-6 py-3">ApprovedBy</th>
-
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Status
             </th>
-
             <th class="px-6 py-3">Action</th>
           </tr>
         </thead>
         <tbody class="text-gray-600">
-          {% if leaves %} {% for leave in leaves %}
+          {% if leaves %}
+          {% for leave in leaves %}
           <tr class="border-t">
             <td class="px-6 py-3">
-              <input type="checkbox" class="select-row-checkbox" data-leave="{{ leave.id }}" />
+              <input type="checkbox" class="select-row-checkbox" data-leave="{{ leave.id }}"
+                onchange="updateLink(this)" />
             </td>
             <td class="px-6 py-3">{{ leave.employee_name }}</td>
             <td class="px-6 py-3">{{ leave.branch_name }}</td>
@@ -64,10 +59,8 @@ block content %}
             <td class="px-6 py-3 leave-hours" data-start="{{ leave.start_date }}" data-end="{{ leave.end_date }}">
               <!-- Leave Hours will be calculated here dynamically -->
             </td>
-
             <td class="px-6 py-3">
-              {{ leave.service_count }} {{ "Day" if leave.service_count == 1
-              else "Days" }}
+              {{ leave.service_count }} {{ "Day" if leave.service_count == 1 else "Days" }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <b>{{ leave.reason }}</b>
@@ -75,18 +68,15 @@ block content %}
             <td class="px-6 py-3">{{ leave.requested_by }}</td>
             <td class="px-6 py-3">{{ leave.verified_by }}</td>
             <td class="px-6 py-3">{{ leave.approved_by }}</td>
-
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
               <span
                 class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
                 <b>{{ leave.status }}</b>
               </span>
             </td>
-
             <td class="px-6 py-3">
               <div class="flex justify-center gap-x-3">
                 {% if leave.status not in ['Approved', 'Rejected'] %}
-
                 <a href="{{ url_for('delete_leave', id=leave.id) }}"
                   class="text-red-500 hover:text-red-700 font-medium transition-colors duration-300"
                   onclick="return confirm('Are you sure you want to delete this leave?')">
@@ -96,8 +86,8 @@ block content %}
               </div>
             </td>
           </tr>
-
-          {% endfor %} {% else %}
+          {% endfor %}
+          {% else %}
           <tr>
             <td colspan="7" class="px-6 py-3 text-center text-gray-500">
               No leaves found for this employee.
@@ -109,10 +99,17 @@ block content %}
     </div>
   </div>
 
-  <!-- Initialize DataTable -->
   <script>
+    // Update the link dynamically based on selected leave
+    function updateLink(selectElement) {
+      const leaveId = selectElement.getAttribute('data-leave');
+      const employeeId = "{{ employee_id }}";
+      const newHref = `/leaves/employee/${employeeId}?leave_id=${leaveId}`;
+      document.getElementById('viewLeaveLink').href = newHref;
+    }
+
+    // Initialize DataTable and Format Dates & Hours
     $(document).ready(function () {
-      // Initialize DataTable
       $("#leaveTable").DataTable({
         paging: true,
         searching: true,
@@ -121,66 +118,14 @@ block content %}
         order: [[3, "desc"]],
         responsive: true,
         drawCallback: function () {
-          formatLeaveDatesAndHours(); // <-- Call your formatting function on each draw
+          formatLeaveDatesAndHours();
         },
       });
-
-      function getSelectedRows() {
-        var selectedData = [];
-        console.log("🚀 ~ getSelectedRows ~ selectedData:", selectedData);
-
-        try {
-          // Iterate over all checked checkboxes to get selected rows
-          $(".select-row-checkbox:checked").each(function () {
-            var row = $(this).closest("tr");
-            var rowData = row
-              .find("td")
-              .map(function () {
-                return $(this).text().trim();
-              })
-              .get()
-              .join(", ");
-
-            console.log("Row Data: ", rowData); // Log each row's data for debugging
-            selectedData.push(rowData); // Store row data in the array
-          });
-
-          if (selectedData.length === 0) {
-            console.log("No rows selected.");
-          }
-
-          return selectedData; // Return the array of selected row data
-        } catch (error) {
-          console.error("Error getting selected rows:", error);
-          return [];
-        }
-      }
-
-      // Function to display selected rows
-      function displaySelectedRows() {
-        var selectedRows = getSelectedRows(); // Get the selected rows' data
-        var resultDiv = $("#result");
-
-        if (selectedRows.length > 0) {
-          resultDiv.html(
-            "<strong>Selected Rows:</strong><ul>" +
-            selectedRows
-              .map(function (row) {
-                return "<li>" + row + "</li>";
-              })
-              .join("") +
-            "</ul>"
-          );
-        } else {
-          resultDiv.html("<strong>No rows selected</strong>");
-        }
-      }
 
       function formatLeaveDatesAndHours() {
         $(".leave-start-date").each(function () {
           var startDate = $(this).data("start");
-          var formattedStartDate =
-            moment(startDate).format("MM-DD-YYYY hh:mm A");
+          var formattedStartDate = moment(startDate).format("MM-DD-YYYY hh:mm A");
           $(this).text(formattedStartDate);
         });
 
@@ -214,292 +159,8 @@ block content %}
           }
         });
       }
-      // Iterate over all leave rows and calculate the leave hours excluding lunch break
-      $(".leave-hours").each(function () {
-        var startDate = $(this).data("start");
-        var endDate = $(this).data("end");
-
-        // Convert to moment objects
-        var startTime = moment(startDate);
-        var endTime = moment(endDate);
-
-        // Ensure that the dates are valid
-        if (startTime.isValid() && endTime.isValid()) {
-          // Calculate the difference in milliseconds
-          var duration = moment.duration(endTime.diff(startTime));
-
-          // Convert the duration to hours (including fractional hours)
-          var totalHours = duration.asHours();
-
-          // Check if the duration includes the lunch break (12 PM to 1 PM)
-          var lunchStart = moment(startDate).hour(12).minute(0);
-          var lunchEnd = moment(startDate).hour(13).minute(0);
-
-          // If the leave period includes the lunch hour, subtract 1 hour
-          if (startTime.isBefore(lunchEnd) && endTime.isAfter(lunchStart)) {
-            totalHours -= 1;
-          }
-
-          // // Check if the leave period includes any time after 5 PM
-          // var endOfDay = moment(startDate).hour(17).minute(0);
-          // if (endTime.isAfter(endOfDay)) {
-          //   var afterHoursDuration = moment.duration(endTime.diff(endOfDay));
-          //   totalHours -= afterHoursDuration.asHours();
-          // }
-
-          // Update the Leave Hours cell with the calculated hours
-          $(this).text(totalHours.toFixed(2) + " hours");
-        } else {
-          // If the dates are invalid, set an error message
-          $(this).text("Invalid dates");
-        }
-      });
-
-      // Format the Start and End Dates
-      $(".leave-start-date").each(function () {
-        var startDate = $(this).data("start");
-        var formattedStartDate = moment(startDate).format("MM-DD-YYYY hh:mm A");
-        $(this).text(formattedStartDate);
-      });
-
-      $(".leave-end-date").each(function () {
-        var endDate = $(this).data("end");
-        var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
-        $(this).text(formattedEndDate);
-      });
-
-      // Add event listener to checkbox
-      $(".select-row-checkbox").on("change", function () {
-        var row = $(this).closest("tr");
-        if ($(this).is(":checked")) {
-          var rowData = row
-            .find("td")
-            .map(function () {
-              return $(this).text().trim();
-            })
-            .get()
-            .join(", ");
-          console.log("Selected Row Data: ", rowData);
-        }
-      });
-
-      // Iterate over all checkboxes to get selected rows
-      $(".select-row-checkbox:checked").each(function () {
-        var row = $(this).closest("tr");
-        var rowData = row
-          .find("td")
-          .map(function () {
-            return $(this).text().trim();
-          })
-          .get()
-          .join(", ");
-        console.log("Row Data: ", rowData); // Add log
-        selectedData.push(rowData);
-      });
-
-      // Print Selected Leaves Data
-      $("#printSelected").on("click", function () {
-        var selectedData = [];
-
-        // Iterate over all checkboxes to get selected rows
-        $(".select-row-checkbox:checked").each(function () {
-          var row = $(this).closest("tr");
-          var rowData = row
-            .find("td")
-            .map(function () {
-              return $(this).text().trim();
-            })
-            .get()
-            .join(", ");
-          console.log("Row Data: ", rowData); // Add log
-          selectedData.push(rowData);
-        });
-
-        // Print the selected data in a new window
-        if (selectedData.length > 0) {
-          var printWindow = window.open("", "_blank");
-
-          // Add custom styles for the printout
-          printWindow.document.write(`
-      <style>
-        body {
-          font-family: Arial, sans-serif;
-          margin: 20px;
-          color: #333;
-        }
-       h2, h1 {
-          text-align: center;
-          color: #0073e6;
-          margin: 0;
-          padding: 0;
-        }
-          
-        h3 {
-          color: #555;
-          font-size: 15px;
-          margin: 0;
-          padding: 0;
-        }
-        p {
-          font-size: 13px;
-          margin: 0;
-          padding: 0;
-        }
-        .footer {
-          position: fixed;
-          bottom: 20px;
-          width: 100%;
-          text-align: center;
-          font-size: 14px;
-          color: #888;
-        }
-        .content-section {
-          margin-bottom: 20px;
-        }
-        hr {
-          border: 0;
-          border-top: 1px solid #ccc;
-          margin: 0;
-          padding: 0;
-        }
-
-        table {
-          border-collapse: collapse;
-          width: 100%;
-          margin-bottom: 20px;
-        }
-
-        th, td {  
-          text-align: left;
-          padding: 0px;
-          font-size: 13px;
-        }
-
-      </style>
-    `);
-          // Write header for the printout
-          printWindow.document.write("<h1>ពាក្យសុំច្បាប់ឈប់សម្រាក</h1>");
-          printWindow.document.write("<h2>APPLICATION FORM FOR LEAVE</h2>");
-
-          // Employee Information Section
-          printWindow.document.write(
-            "<div class='content-section'><h3>ព័ត៌មានបុគ្គលិក(Employee Information):</h3>"
-          );
-          printWindow.document.write("<hr>");
-          printWindow.document.write(
-            "<p><b>គោត្តនាម និងនាម (Name):</b> " +
-            selectedData[0].split(", ")[1] +
-            "</p>"
-          );
-          printWindow.document.write(
-            "<p><b>បម្រើការងារនៅ (Duty Station):</b> " +
-            selectedData[0].split(", ")[2] +
-            "</p>"
-          );
-          printWindow.document.write(
-            "<p><b>ប្រភេទនៃការឈប់សម្រាក (Types of Leave): </b> " +
-            selectedData[0].split(", ")[3] +
-            "</p>"
-          );
-
-          printWindow.document.write(
-            "<p><b>មូលហេតុនៃការសុំឈប់សម្រាក (Reason for Leave):</b> " +
-            selectedData[0].split(", ")[8] +
-            "</p>"
-          );
-          printWindow.document.write("</div>");
-
-          // Leave Time Section
-          printWindow.document.write(
-            "<div class='content-section'><h3>Leave Time:</h3>"
-          );
-          printWindow.document.write("<hr>");
-          printWindow.document.write(
-            "<p><b>សំណើសុំឈប់សម្រាកពីថ្ងៃទី (From Date):</b> " +
-            selectedData[0].split(", ")[4] +
-            "</p>"
-          );
-          printWindow.document.write(
-            "<p><b>រហូតដល់ថ្ងៃទី (To Date):</b> " +
-            selectedData[0].split(", ")[5] +
-            "</p>"
-          );
-          printWindow.document.write(
-            "<p><b>Leave Hours:</b> " + selectedData[0].split(", ")[6] + "</p>"
-          );
-          printWindow.document.write(
-            "<p><b>Leave Days:</b> " + selectedData[0].split(", ")[7] + "</p>"
-          );
-          printWindow.document.write("</div>");
-          // printWindow.document.write("<hr>");
-          printWindow.document.write(`
-          <div class="content-section">
-            <h3>ព័ត៌មានអ្នកអនុម័ត (Approver Information):</h3>
-
-            
-            <table border="1" width="100%">
-              <tr>
-                <th>ស្នើដោយ (Requested by)</th>
-                <th>ពិនិត្យដោយ (Verified by)</th>
-                <th>អនុញ្ញាតដោយ (Approved by)</th>
-              </tr>
-              <tr>
-                <td style="border-bottom: 1px solid #000; font-size: 13px;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[9]
-            }</td>
-                <td style="border-bottom: 1px solid #000; font-size: 13px;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[10]
-            }</td>
-                <td style="border-bottom: 1px solid #000; color: blue; font-size: 13px;">ឈ្មោះ (Name): ${selectedData[0].split(", ")[11]
-            }</td>
-              </tr>
-              <tr style="background-color: #f3f4f6;">
-                <th style="padding: 0px; border-bottom: 2px solid #e5e7eb;  color: #4b5563;">Signature (Requested by)</th>
-                <th style="padding: 0px; border-bottom: 2px solid #e5e7eb;  color: #4b5563;">Signature (Verified by)</th>
-                <th style="padding: 0px; border-bottom: 2px solid #e5e7eb;  color: #4b5563;">Signature (Approved by)</th>
-              </tr>
-              <tr>
-              <td style="height: 60px; border-bottom: 1px solid #000;">
-          
-              <img src="{{ url_for('get_user_signature', user_id=current_user.id) }}" 
-              alt="Signature" height="50" width="100">
-              
-              </td>
-              <td style="height: 60px; border-bottom: 1px solid #000;">
-                  <img src="${selectedData[0].split(", ")[16] ||
-            "https://via.placeholder.com/100x50?text=No+Signature"
-            }" 
-                      alt="Signature" height="50">
-              </td>
-              <td style="height: 60px; border-bottom: 1px solid #000;">
-                  <img src="${selectedData[0].split(", ")[17] ||
-            "https://via.placeholder.com/100x50?text=No+Signature"
-            }" 
-                      alt="Signature" height="50">
-                </td>
-              </tr >
-            </table >
-          </div >
-        `);
-          printWindow.document.write("</div>");
-          printWindow.document.write("</div>");
-          printWindow.document.write("</div>");
-          printWindow.document.write("<hr>");
-
-          // Add footer
-          printWindow.document.write("<div class='footer'>");
-          printWindow.document.write(
-            "<p>Leave Request Form - Printed on " +
-            new Date().toLocaleDateString() +
-            "</p>"
-          );
-          printWindow.document.write("</div>");
-
-          printWindow.document.close();
-          printWindow.print();
-        } else {
-          alert("No rows selected for printing.");
-        }
-      });
     });
   </script>
 </body>
+
 {% endblock %}
