@@ -7,6 +7,7 @@ import sqlite3
 import hashlib
 import os
 import math
+import json
 import pyotp
 import requests
 import shutil
@@ -135,7 +136,114 @@ def clear_pycache(directory='.'):
 clear_pycache()
 
 
+def get_holidays(year: int):
+    holidays = [
+        {"label": datetime(year, 1, 1).strftime('%Y-%m-%d'),
+         "value": "ទិវាចូលឆ្នាំសាកល"},
+        {"label": datetime(year, 2, 7).strftime('%Y-%m-%d'),
+         "value": "ទិវាជ័យជម្នះលើរបបប្រល័យពូជសាសន៍"},
+        {"label": datetime(year, 3, 8).strftime('%Y-%m-%d'),
+         "value": "ទិវាអន្តរជាតិនារី"},
+        {"label": datetime(year, 5, 1).strftime('%Y-%m-%d'),
+         "value": "ទិវាពលកម្មអន្តរជាតិ"},
+        # {"label": datetime(year, 4, 13).strftime('%Y-%m-%d'),
+        #  "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
+        {"label": datetime(year, 4, 14).strftime('%Y-%m-%d'),
+         "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
+        {"label": datetime(year, 4, 15).strftime('%Y-%m-%d'),
+         "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
+        {"label": datetime(year, 4, 16).strftime('%Y-%m-%d'),
+         "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
+        {"label": datetime(year, 5, 1).strftime('%Y-%m-%d'),
+         "value": "ទិវាពលកម្មអន្តរជាតិ"},
+        {"label": datetime(year, 4, 14).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី"},
+        {"label": datetime(year, 4, 22).strftime(
+            '%Y-%m-%d'), "value": "ពិធីបុណ្យវិសាខបូជា"},
+        {"label": datetime(year, 4, 26).strftime('%Y-%m-%d'),
+         "value": "ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល"},
+        {"label": datetime(year, 5, 18).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី ព្រះវររាជមាតា នរោត្តម មុនិនាថ​ សីហនុ"},
+        {"label": datetime(year, 8, 24).strftime('%Y-%m-%d'),
+         "value": "ទិវាប្រកាសរដ្ឋធម្មនុញ្ញ"},
+        {"label": datetime(year, 9, 21).strftime('%Y-%m-%d'),
+         "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
+        {"label": datetime(year, 9, 22).strftime('%Y-%m-%d'),
+         "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
+        {"label": datetime(year, 9, 23).strftime('%Y-%m-%d'),
+         "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
+        {"label": datetime(year, 9, 15).strftime(
+            '%Y-%m-%d'), "value": "ទិវាប្រារព្ឋពិធីគោរពព្រះវិញ្ញាណក្ខន្ឋ ព្រះករុណា ព្រះបាទសម្តេចព្រះ នរោត្តម សីហនុ ព្រះមហាវីរក្សត្រ ព្រះវររាជបិតាឯករាជ្យ បូរណភាពទឹកដី និងឯកភាពជាតិខ្មែរ  'ព្រះបរមរតនកោដ្ឋ'"},
+        {"label": datetime(year, 9, 29).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីគ្រងព្រះបរមរាជសម្បត្តិ របស់ ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី ព្រះមហាក្សត្រនៃព្រះរាជាណាចក្រកម្ពុជា"},
+        {"label": datetime(year, 10, 9).strftime('%Y-%m-%d'),
+         "value": "ពិធីបុណ្យឯករាជ្យជាតិ"},
+        {"label": datetime(year, 11, 4).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
+        {"label": datetime(year, 11, 5).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
+        {"label": datetime(year, 11, 6).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
+        {"label": datetime(year, 12, 29).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
+
+    ]
+    return holidays
+
+
+def get_holiday_labels(year: int):
+    holidays = get_holidays(year)
+    return [holiday['label'] for holiday in holidays]
+
+
+holidays = []
+
+
+def load_holidays():
+    try:
+        with open('holidays.json', 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
+
+
+def save_holidays():
+    with open('holidays.json', 'w') as f:
+        json.dump(holidays, f)
+
+
+@app.route('/add_holiday', methods=['GET', 'POST'])
+def add_holiday():
+    if request.method == 'POST':
+        holiday_date = request.form['holiday_date']
+        holiday_name = request.form['holiday_name']
+
+        # Add new holiday
+        holidays.append({
+            "label": holiday_date,
+            "value": holiday_name
+        })
+        # Save the updated holidays list to a file
+        save_holidays()
+        # Redirect to the page showing all holidays
+        return redirect(url_for('show_holidays'))
+    else:
+        return render_template('holidays/add_holiday.html')
+
+
+@app.route('/holidays')
+def show_holidays():
+    # Load holidays from the file
+    holidays = load_holidays()
+    # Get holidays for the current year
+    holidays = get_holidays(datetime.now().year)
+    holiday_labels = get_holiday_labels(datetime.now().year)
+    return render_template('holidays/holidays.html', holidays=holidays, holiday_labels=holiday_labels)
+
+
 # TODO: Backup database to a file Automatically
+
+
 def backup_database_auto():
     backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
 
@@ -3039,6 +3147,25 @@ def add_leave_hours():
 
 #     return render_template('leaves/leave_many.html', employees=employees, users=users, branch=user_branch)
 
+def calculate_service_count(start_date_obj, end_date_obj, holiday_labels=None):
+    # Initialize service count
+    service_count = 0
+    current_date = start_date_obj
+
+    # Ensure holiday_labels is an empty list if None is provided
+    if holiday_labels is None:
+        holiday_labels = [
+            holiday["label"] for holiday in get_holidays(current_date.year)
+        ]
+
+    # Loop through each date and count weekdays only (excluding Saturday, Sunday, and holidays)
+    while current_date <= end_date_obj:
+        # Exclude Saturday (5), Sunday (6), and holidays
+        if current_date.weekday() not in [5, 6] and current_date.strftime('%Y-%m-%d') not in holiday_labels:
+            service_count += 1
+        current_date += timedelta(days=1)
+    return service_count
+
 
 @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
 @login_required  # Ensure user is logged in
@@ -3080,20 +3207,13 @@ def add_many_leave(branch):
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
 
-        # Calculate service_count excluding Saturdays and Sundays
-        service_count = 0
-        current_date = start_date_obj
+        # Calculate the service count excluding weekends
+        service_count = calculate_service_count(start_date_obj, end_date_obj)
+
+        # Calculate leave hours
         leave_hours = service_count * 8
 
-        while current_date <= end_date_obj:
-            # Check if the current date is not Saturday (5) or Sunday (6)
-            # Exclude Saturday and Sunday
-            if current_date.weekday() not in [5, 6]:
-                service_count += 1
-            # Move to the next day
-            current_date += timedelta(days=1)
-
-        # Determine leave category
+        # Leave category determination
         if service_count <= 2:
             category = "S"
         elif 3 <= service_count <= 5:
@@ -3103,14 +3223,13 @@ def add_many_leave(branch):
 
         with get_db_connection() as conn:
             cursor = conn.cursor()
-            # Insert the leave entry into the database with the branch
             cursor.execute('''
                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours))
-            leave_id = cursor.lastrowid
 
-            # Insert user-leave associations into the user_leave table
+            leave_id = cursor.lastrowid
+            # Insert user-leave associations
             for user_id in user_ids:
                 cursor.execute('''
                     INSERT INTO user_leave (user_id, leave_id)
@@ -3122,7 +3241,92 @@ def add_many_leave(branch):
         # Redirect to the 'view_leaves' page (or wherever you need to go)
         return redirect(url_for('view_leaves'))
 
-    return render_template('leaves/leave_many.html', employees=employees, users=users, users2=users2, users3=users3,  branch=user_branch)
+    return render_template('leaves/leave_many.html', employees=employees, users=users, users2=users2, users3=users3, branch=user_branch)
+
+
+# @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required  # Ensure user is logged in
+# def add_many_leave(branch):
+#     # Fetch the current user's branch, use URL branch if no user logged in
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+#     employees = []
+#     users = []
+
+#     with get_db_connection() as conn:
+#         # Retrieve employees without filtering by branch yet
+#         employees = conn.execute(
+#             'SELECT id, name, branch FROM employees').fetchall()
+
+#         # Use the current user's branch to filter users
+#         users = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?', (user_branch,)).fetchall()
+#         users2 = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (145,140) AND branch = ?', (user_branch,)).fetchall()
+
+#         users3 = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (145, 180) AND branch = ?', (user_branch,)).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+
+#         # You can now remove the 'branch' from the form and use the user's branch instead
+#         branch = user_branch  # Use the branch from current_user or URL
+
+#         # Convert dates
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+
+#         # Calculate service_count excluding Saturdays and Sundays
+#         service_count = 0
+#         current_date = start_date_obj
+#         leave_hours = service_count * 8
+
+#         while current_date <= end_date_obj:
+#             # Check if the current date is not Saturday (5) or Sunday (6)
+#             # Exclude Saturday and Sunday
+#             if current_date.weekday() not in [5, 6]:
+#                 service_count += 1
+#             # Move to the next day
+#             current_date += timedelta(days=1)
+
+#         # Determine leave category
+#         if service_count <= 2:
+#             category = "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#         else:
+#             category = "L"
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             # Insert the leave entry into the database with the branch
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours))
+#             leave_id = cursor.lastrowid
+
+#             # Insert user-leave associations into the user_leave table
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         # Redirect to the 'view_leaves' page (or wherever you need to go)
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('leaves/leave_many.html', employees=employees, users=users, users2=users2, users3=users3,  branch=user_branch)
 
 
 @app.route('/leave/add', methods=['GET', 'POST'])
@@ -3346,6 +3550,36 @@ def leaves_user_id(user_id):
                            start_date=start_date_filter,
                            end_date=end_date_filter)
 
+# @app.route('/leave/edit_ccc_verify/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_ccc_verify(id):
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         # start_date = request.form['start_date']
+#         # end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         status = request.form['status']
+#         verified_by = request.form['verified_by']
+
+#         # Calculate service count (difference between start_date and end_date)
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, verified_by= ?
+#                 WHERE id= ?
+#             ''', (leave_type, start_date, end_date, reason, status, service_count, verified_by,  id))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_ccc_leave.html', leave=leave)
+
 
 @app.route('/leave/edit_ccc_verify/<int:id>', methods=['GET', 'POST'])
 def edit_leave_ccc_verify(id):
@@ -3355,23 +3589,16 @@ def edit_leave_ccc_verify(id):
 
     if request.method == 'POST':
         leave_type = request.form['leave_type']
-        start_date = request.form['start_date']
-        end_date = request.form['end_date']
         reason = request.form['reason']
         status = request.form['status']
         verified_by = request.form['verified_by']
 
-        # Calculate service count (difference between start_date and end_date)
-        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
-        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
-        service_count = (end_date_obj - start_date_obj).days + 1
-
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, service_count= ?, verified_by= ?
-                WHERE id= ?
-            ''', (leave_type, start_date, end_date, reason, status, service_count, verified_by,  id))
+                SET leave_type = ?, reason = ?, status = ?, verified_by = ?
+                WHERE id = ?
+            ''', (leave_type, reason, status, verified_by, id))
 
         return redirect(url_for('view_leaves'))
 
@@ -3413,7 +3640,7 @@ def edit_leave_spm_approve(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, 
+                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?,
                     service_count= ?, category= ?, approved_by= ?, verified_by= ?
                 WHERE id= ?
             ''', (leave_type, start_date, end_date, reason, status, service_count, category,
@@ -3422,6 +3649,122 @@ def edit_leave_spm_approve(id):
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
+# FIXME: USE LETTER
+# @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_spm_approve(id):
+#     with get_db_connection() as conn:
+#         leave = conn.execute('SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         reason = request.form['reason']
+#         status = request.form['status']
+
+#         # Use the original start_date and end_date from the database
+#         start_date = leave['start_date']
+#         end_date = leave['end_date']
+
+#         # Calculate service count (difference between start_date and end_date)
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         if 3 <= service_count <= 5:
+#             category = "M"
+#             status = "Approved"
+#             approved_by = current_user.username
+#             verified_by = request.form.get('verified_by', None)
+#         elif service_count >= 6:
+#             category = "L"
+#             status = request.form['status']
+#             approved_by = request.form.get('approved_by', None)
+#             verified_by = current_user.username
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type= ?, reason= ?, status= ?,
+#                     service_count= ?, category= ?, approved_by= ?, verified_by= ?
+#                 WHERE id= ?
+#             ''', (leave_type, reason, status, service_count, category,
+#                   approved_by, verified_by, id))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
+# @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_spm_approve(id):
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)
+#         ).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         status = request.form['status']
+
+#         # parse dates
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10],   "%Y-%m-%d")
+
+#         # use our helper to count working days
+#         service_count = calculate_service_count(start_date_obj, end_date_obj)
+
+#         # Determine leave category, status, approved_by, verified_by
+#         if 3 <= service_count <= 5:
+#             category = "M"
+#             status = "Approved"
+#             approved_by = current_user.username
+#             verified_by = request.form.get(
+#                 'verified_by') or current_user.username
+#         elif service_count >= 6:
+#             category = "L"
+#             # keep whatever status came from the form
+#             approved_by = request.form.get('approved_by') or None
+#             verified_by = current_user.username
+#         else:
+#             # fewer than 3 days: you might want a default case
+#             category = None
+#             approved_by = None
+#             verified_by = None
+
+#         # persist changes
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type   = ?,
+#                     start_date   = ?,
+#                     end_date     = ?,
+#                     reason       = ?,
+#                     status       = ?,
+#                     service_count= ?,
+#                     category     = ?,
+#                     approved_by  = ?,
+#                     verified_by  = ?
+#                 WHERE id = ?
+#             ''', (
+#                 leave_type,
+#                 start_date,
+#                 end_date,
+#                 reason,
+#                 status,
+#                 service_count,
+#                 category,
+#                 approved_by,
+#                 verified_by,
+#                 id
+#             ))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_spm_leave.html', leave=leave)
 
 
 @app.route('/leave/edit_gm_approve/<int:id>', methods=['GET', 'POST'])
