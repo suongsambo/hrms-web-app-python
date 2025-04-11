@@ -309,6 +309,8 @@ def init_db():
                 reason TEXT NOT NULL,
                 start_date_obj DATE,
                 end_date_obj DATE,
+                excluded_days INTEGER,
+                final_end_date DATE,
                 service_count INTEGER,
                 leave_hours REAL,
                 requested_by TEXT,

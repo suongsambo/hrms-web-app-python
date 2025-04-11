@@ -3147,7 +3147,8 @@ def add_leave_hours():
 
 #     return render_template('leaves/leave_many.html', employees=employees, users=users, branch=user_branch)
 
-def calculate_service_count(start_date_obj, end_date_obj, holiday_labels=None):
+
+def calculate_service_count_1(start_date_obj, end_date_obj, holiday_labels=None):
     # Initialize service count
     service_count = 0
     current_date = start_date_obj
@@ -3167,28 +3168,74 @@ def calculate_service_count(start_date_obj, end_date_obj, holiday_labels=None):
     return service_count
 
 
+def calculate_add_day_and_final_end_date(start_date_str, end_date_str, public_holidays_str):
+    # Convert string inputs to datetime.date objects
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    public_holidays = [datetime.strptime(date.strip(), "%Y-%m-%d").date()
+                       for date in public_holidays_str.split(",")]
+
+    # Calculate excluded days (weekends and public holidays)
+    current_date = start_date
+    excluded_days = 0
+    while current_date <= end_date:
+        if current_date.weekday() >= 5 or current_date in public_holidays:
+            excluded_days += 1
+        current_date += timedelta(days=1)
+
+    # Add excluded days as working days after end date
+    final_end_date = end_date
+    days_added = 0
+    while days_added < excluded_days:
+        final_end_date += timedelta(days=1)
+        if final_end_date.weekday() < 5 and final_end_date not in public_holidays:
+            days_added += 1
+
+    return {
+        "StartDate": start_date,
+        "EndDate": end_date,
+        "PublicHolidays": public_holidays,
+        "ExcludedDays": excluded_days,
+        "FinalEndDate": final_end_date
+    }
+
+# Optional: Replace this with your actual logic
+
+
+def calculate_service_count(start_date, end_date):
+    # Count working days between start_date and end_date (excluding weekends)
+    count = 0
+    current = start_date
+    while current <= end_date:
+        if current.weekday() < 5:  # Mon-Fri are 0-4
+            count += 1
+        current += timedelta(days=1)
+    return count
+
+
 @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
-@login_required  # Ensure user is logged in
+@login_required
 def add_many_leave(branch):
-    # Fetch the current user's branch, use URL branch if no user logged in
     user_branch = branch if not current_user.is_authenticated else current_user.branch
 
-    employees = []
-    users = []
-
     with get_db_connection() as conn:
-        # Retrieve employees without filtering by branch yet
         employees = conn.execute(
             'SELECT id, name, branch FROM employees').fetchall()
 
-        # Use the current user's branch to filter users
         users = conn.execute(
-            'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?', (user_branch,)).fetchall()
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?', (
+                user_branch,)
+        ).fetchall()
+
         users2 = conn.execute(
-            'SELECT id, username, branch FROM users WHERE RoleDefault IN (145,140) AND branch = ?', (user_branch,)).fetchall()
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (145,140) AND branch = ?', (
+                user_branch,)
+        ).fetchall()
 
         users3 = conn.execute(
-            'SELECT id, username, branch FROM users WHERE RoleDefault IN (145, 180) AND branch = ?', (user_branch,)).fetchall()
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (145, 180) AND branch = ?', (
+                user_branch,)
+        ).fetchall()
 
     if request.method == 'POST':
         employee_id = request.form['employee_id']
@@ -3200,20 +3247,29 @@ def add_many_leave(branch):
         type_of_leave = request.form.get('type_of_leave', 'D')
         user_ids = request.form.getlist('user_ids')
 
-        # You can now remove the 'branch' from the form and use the user's branch instead
-        branch = user_branch  # Use the branch from current_user or URL
+        branch = user_branch
 
-        # Convert dates
+        current_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        holiday_labels = None
+        if holiday_labels is None:
+            holiday_labels = [holiday["label"]
+                              for holiday in get_holidays(current_date.year)]
+        public_holidays_str = ",".join(holiday_labels)
+
+       # Calculate the adjusted leave details
+        result = calculate_add_day_and_final_end_date(
+            start_date, end_date, public_holidays_str)
+        excluded_days = result['ExcludedDays']
+        final_end_date = result['FinalEndDate']
+        final_end_date_obj = datetime.strptime(str(final_end_date), "%Y-%m-%d")
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
-        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
 
-        # Calculate the service count excluding weekends
-        service_count = calculate_service_count(start_date_obj, end_date_obj)
-
-        # Calculate leave hours
+        # Now calculate working days between actual start and adjusted final end
+        service_count = calculate_service_count_1(
+            start_date_obj, final_end_date_obj)
         leave_hours = service_count * 8
 
-        # Leave category determination
+        # Determine category
         if service_count <= 2:
             category = "S"
         elif 3 <= service_count <= 5:
@@ -3224,12 +3280,15 @@ def add_many_leave(branch):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours))
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours, excluded_days, final_end_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
+                reason, service_count, type_of_leave, requested_by, category, branch, leave_hours, excluded_days, final_end_date
+            ))
 
             leave_id = cursor.lastrowid
-            # Insert user-leave associations
+
             for user_id in user_ids:
                 cursor.execute('''
                     INSERT INTO user_leave (user_id, leave_id)
@@ -3238,10 +3297,93 @@ def add_many_leave(branch):
 
             conn.commit()
 
-        # Redirect to the 'view_leaves' page (or wherever you need to go)
         return redirect(url_for('view_leaves'))
 
-    return render_template('leaves/leave_many.html', employees=employees, users=users, users2=users2, users3=users3, branch=user_branch)
+    return render_template(
+        'leaves/leave_many.html',
+        employees=employees,
+        users=users,
+        users2=users2,
+        users3=users3,
+        branch=user_branch
+    )
+
+
+# @app.route('/leave_many_1/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required  # Ensure user is logged in
+# def add_many_leave_1(branch):
+#     # Fetch the current user's branch, use URL branch if no user logged in
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+#     employees = []
+#     users = []
+
+#     with get_db_connection() as conn:
+#         # Retrieve employees without filtering by branch yet
+#         employees = conn.execute(
+#             'SELECT id, name, branch FROM employees').fetchall()
+
+#         # Use the current user's branch to filter users
+#         users = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?', (user_branch,)).fetchall()
+#         users2 = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (145,140) AND branch = ?', (user_branch,)).fetchall()
+
+#         users3 = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (145, 180) AND branch = ?', (user_branch,)).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+
+#         # You can now remove the 'branch' from the form and use the user's branch instead
+#         branch = user_branch  # Use the branch from current_user or URL
+
+#         # Convert dates
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d")
+
+#         # Calculate the service count excluding weekends
+#         service_count = calculate_service_count_1(start_date_obj, end_date_obj)
+
+#         # Calculate leave hours
+#         leave_hours = service_count * 8
+
+#         # Leave category determination
+#         if service_count <= 2:
+#             category = "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#         else:
+#             category = "L"
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours))
+
+#             leave_id = cursor.lastrowid
+#             # Insert user-leave associations
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         # Redirect to the 'view_leaves' page (or wherever you need to go)
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('leaves/leave_many.html', employees=employees, users=users, users2=users2, users3=users3, branch=user_branch)
 
 
 # @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])

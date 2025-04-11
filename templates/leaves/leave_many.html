@@ -97,6 +97,7 @@ content %}
           </div>
 
 
+
           <!-- <div class="space-y-2 flex flex-wrap">
             {% for user in users %}
             <div class="flex items-center mr-4 mb-2">
@@ -180,6 +181,13 @@ content %}
             </a>
           </div>
       </form>
+
+      {% if excluded_days is defined and final_end_date is defined %}
+      <div class="mt-6 p-4 bg-green-50 border border-green-300 rounded">
+        <p><strong>Excluded Days:</strong> {{ excluded_days }}</p>
+        <p><strong>Final End Date:</strong> {{ final_end_date }}</p>
+      </div>
+      {% endif %}
     </div>
   </div>
 
