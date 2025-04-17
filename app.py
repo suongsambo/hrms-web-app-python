@@ -146,8 +146,6 @@ def get_holidays(year: int):
          "value": "ទិវាអន្តរជាតិនារី"},
         {"label": datetime(year, 5, 1).strftime('%Y-%m-%d'),
          "value": "ទិវាពលកម្មអន្តរជាតិ"},
-        # {"label": datetime(year, 4, 13).strftime('%Y-%m-%d'),
-        #  "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
         {"label": datetime(year, 4, 14).strftime('%Y-%m-%d'),
          "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
         {"label": datetime(year, 4, 15).strftime('%Y-%m-%d'),
@@ -156,15 +154,13 @@ def get_holidays(year: int):
          "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
         {"label": datetime(year, 5, 1).strftime('%Y-%m-%d'),
          "value": "ទិវាពលកម្មអន្តរជាតិ"},
-        {"label": datetime(year, 4, 14).strftime(
+        {"label": datetime(year, 5, 14).strftime(
             '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី"},
-        {"label": datetime(year, 4, 22).strftime(
-            '%Y-%m-%d'), "value": "ពិធីបុណ្យវិសាខបូជា"},
-        {"label": datetime(year, 4, 26).strftime('%Y-%m-%d'),
-         "value": "ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល"},
-        {"label": datetime(year, 5, 18).strftime(
+        {"label": datetime(year, 5, 15).strftime(
+            '%Y-%m-%d'), "value": "ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល"},
+        {"label": datetime(year, 6, 18).strftime(
             '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី ព្រះវររាជមាតា នរោត្តម មុនិនាថ​ សីហនុ"},
-        {"label": datetime(year, 8, 24).strftime('%Y-%m-%d'),
+        {"label": datetime(year, 9, 24).strftime('%Y-%m-%d'),
          "value": "ទិវាប្រកាសរដ្ឋធម្មនុញ្ញ"},
         {"label": datetime(year, 9, 21).strftime('%Y-%m-%d'),
          "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
@@ -172,11 +168,11 @@ def get_holidays(year: int):
          "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
         {"label": datetime(year, 9, 23).strftime('%Y-%m-%d'),
          "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
-        {"label": datetime(year, 9, 15).strftime(
+        {"label": datetime(year, 10, 15).strftime(
             '%Y-%m-%d'), "value": "ទិវាប្រារព្ឋពិធីគោរពព្រះវិញ្ញាណក្ខន្ឋ ព្រះករុណា ព្រះបាទសម្តេចព្រះ នរោត្តម សីហនុ ព្រះមហាវីរក្សត្រ ព្រះវររាជបិតាឯករាជ្យ បូរណភាពទឹកដី និងឯកភាពជាតិខ្មែរ  'ព្រះបរមរតនកោដ្ឋ'"},
-        {"label": datetime(year, 9, 29).strftime(
+        {"label": datetime(year, 10, 29).strftime(
             '%Y-%m-%d'), "value": "ព្រះរាជពិធីគ្រងព្រះបរមរាជសម្បត្តិ របស់ ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី ព្រះមហាក្សត្រនៃព្រះរាជាណាចក្រកម្ពុជា"},
-        {"label": datetime(year, 10, 9).strftime('%Y-%m-%d'),
+        {"label": datetime(year, 11, 9).strftime('%Y-%m-%d'),
          "value": "ពិធីបុណ្យឯករាជ្យជាតិ"},
         {"label": datetime(year, 11, 4).strftime(
             '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
@@ -185,7 +181,7 @@ def get_holidays(year: int):
         {"label": datetime(year, 11, 6).strftime(
             '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
         {"label": datetime(year, 12, 29).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
+            '%Y-%m-%d'), "value": "ទិវាសន្តិភាពនៅកម្ពុជា"},
 
     ]
     return holidays
@@ -1727,7 +1723,7 @@ def filter_leaves_by_employee_id(employee_id):
                     SELECT l.id, e.name AS employee_name, e.branch AS branch_name,
                            l.leave_type, l.start_date, l.end_date, l.reason, l.status,
                            l.service_count, l.verified_by, l.approved_by, l.employee_id,
-                           l.requested_by,
+                           l.requested_by,l.leave_hours, l.type_of_leave,
                            u.ID AS user_id, u.UserName, u.Email, u.Signature
                     FROM leaves l
                     INNER JOIN employees e ON l.employee_id = e.id
@@ -1754,6 +1750,10 @@ def filter_leaves_by_employee_id(employee_id):
                             'approved_by': row['approved_by'],
                             'employee_id': row['employee_id'],
                             'requested_by': row['requested_by'],
+                            # <-- added this line
+                            'leave_hours': row['leave_hours'],
+                            'type_of_leave': row['type_of_leave']
+
                         }
 
                     if row['user_id']:
@@ -2900,11 +2900,257 @@ def filter_leaves_by_branch_name(branch_name):
 #     return render_template('/leaves/add_leave_hours.html', employees=employees)
 
 
-@app.route('/leave_hours/add', methods=['GET', 'POST'])
-def add_leave_hours():
+# @app.route('/leave_hours/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required
+# def add_leave_hours(branch):
+#     employees = []
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+#         users = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?', (
+#                 user_branch,)
+#         ).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+
+#         # Convert to datetime objects
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+#         # Validation: Ensure end time is after start time
+#         if end_date_obj <= start_date_obj:
+#             flash(
+#                 "កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់ពីកាលបរិច្ឆេទ/ពេលវេលាចាប់ផ្តើម", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         # Validation: Disallow times before 7:30 AM
+#         if start_date_obj.hour < 7 or (start_date_obj.hour == 7 and start_date_obj.minute < 30):
+#             flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 7:30 ព្រឹក ដល់ 5:00 ល្ងាច", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         # Validation: Disallow times after 5:00 PM
+#         if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+#                 end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+#             flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 8:00 ព្រឹក ដល់ 5:00 ល្ងាច", "error")
+#             return redirect(url_for('add_leave_hours'))
+
+#         # Calculate total hours (round up to nearest full hour)
+#         total_seconds = (end_date_obj - start_date_obj).total_seconds()
+#         total_hours = total_seconds / 3600
+#         leave_hours = math.ceil(total_hours)  # Always in hours
+
+#         # Check if leave overlaps with 12:00 PM – 1:30 PM
+#         lunch_start = start_date_obj.replace(hour=12, minute=0)
+#         lunch_end = start_date_obj.replace(hour=13, minute=30)
+
+#         # Only subtract 1 hour if the leave overlaps lunch break
+#         if start_date_obj < lunch_end and end_date_obj > lunch_start:
+#             total_hours -= 1
+
+#         # Make sure total_hours doesn't go below 0
+#         total_hours = max(total_hours, 0)
+
+#         # Round up to full hour
+#         leave_hours = math.ceil(total_hours)
+
+#         # Save to DB
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
+#                 VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H'))  # Store type_of_leave as 'H'
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/add_leave_hours.html', employees=employees)
+
+
+# @app.route('/leave_hours/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required
+# def add_leave_hours(branch):
+#     employees = []
+#     users = []
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+#         users = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?',
+#             (user_branch,)
+#         ).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         # selected_users = request.form.getlist(
+#         #     'user_ids')  # <- Grab selected user IDs
+#         user_ids = request.form.getlist('user_ids')
+
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+#         # Validations...
+#         if end_date_obj <= start_date_obj:
+#             flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+#             return redirect(url_for('add_leave_hours', branch=branch))
+
+#         if start_date_obj.hour < 7 or (start_date_obj.hour == 7 and start_date_obj.minute < 30):
+#             flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 7:30...", "error")
+#             return redirect(url_for('add_leave_hours', branch=branch))
+
+#         if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+#                 end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+#             flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 8:00...", "error")
+#             return redirect(url_for('add_leave_hours', branch=branch))
+
+#         total_seconds = (end_date_obj - start_date_obj).total_seconds()
+#         total_hours = total_seconds / 3600
+
+#         lunch_start = start_date_obj.replace(hour=12, minute=0)
+#         lunch_end = start_date_obj.replace(hour=13, minute=30)
+
+#         if start_date_obj < lunch_end and end_date_obj > lunch_start:
+#             total_hours -= 1
+
+#         total_hours = max(total_hours, 0)
+#         leave_hours = math.ceil(total_hours)
+
+#         # Save to DB
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+
+#             cursor.execute('''
+#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H'))
+
+#             leave_id = cursor.lastrowid
+
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/add_leave_hours.html', employees=employees, users=users)
+
+
+# @app.route('/leave_hours/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required
+# def add_leave_hours(branch):
+#     employees = []
+#     users = []
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+#         users = conn.execute(
+#             'SELECT id, username FROM users WHERE RoleDefault IN (35,140) AND branch = ?',
+#             (user_branch,)
+#         ).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         # <-- this must be populated via template
+#         user_ids = request.form.getlist('user_ids')
+
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+#         # Validations...
+#         if end_date_obj <= start_date_obj:
+#             flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+#             return redirect(url_for('add_leave_hours', branch=branch))
+
+#         if start_date_obj.hour < 7 or (start_date_obj.hour == 7 and start_date_obj.minute < 30):
+#             flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 7:30...", "error")
+#             return redirect(url_for('add_leave_hours', branch=branch))
+
+#         if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+#            end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+#             flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 8:00...", "error")
+#             return redirect(url_for('add_leave_hours', branch=branch))
+
+#         # total_seconds = (end_date_obj - start_date_obj).total_seconds()
+#         # total_hours = total_seconds / 3600
+
+#         lunch_start = start_date_obj.replace(hour=12, minute=0)
+#         lunch_end = start_date_obj.replace(hour=13, minute=30)
+
+#         if start_date_obj < lunch_end and end_date_obj > lunch_start:
+#             total_hours -= 1
+
+#         total_hours = max(total_hours, 0)
+#         leave_hours = math.ceil(total_hours)
+
+#         total_hours = max(total_hours, 0)
+#         leave_hours = math.ceil(total_hours)
+#         if start_date_obj < lunch_start and end_date_obj > lunch_start:
+#             lunch_overlap_start = max(start_date_obj, lunch_start)
+#             lunch_overlap_end = min(end_date_obj, lunch_end)
+#             if lunch_overlap_end > lunch_overlap_start:
+#                 lunch_overlap = (lunch_overlap_end -
+#                                  lunch_overlap_start).total_seconds() / 3600
+#                 total_hours -= lunch_overlap
+
+#         # leave_hours = math.ceil(total_hours)
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+
+#             cursor.execute('''
+#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H'))
+
+#             leave_id = cursor.lastrowid
+
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/add_leave_hours.html', employees=employees, users=users, branch=branch)
+
+
+@app.route('/leave_hours/add/<string:branch>', methods=['GET', 'POST'])
+@login_required
+def add_leave_hours(branch):
     employees = []
+    users = []
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+
     with get_db_connection() as conn:
         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        users = conn.execute(
+            'SELECT id, username FROM users WHERE RoleDefault IN (35,140) AND branch = ?',
+            (user_branch,)
+        ).fetchall()
 
     if request.method == 'POST':
         employee_id = request.form['employee_id']
@@ -2913,57 +3159,70 @@ def add_leave_hours():
         end_date = request.form['end_date']
         reason = request.form['reason']
         requested_by = request.form['requested_by']
+        user_ids = request.form.getlist('user_ids')
 
-        # Convert to datetime objects
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
 
-        # Validation: Ensure end time is after start time
+        # Validations...
         if end_date_obj <= start_date_obj:
-            flash(
-                "កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់ពីកាលបរិច្ឆេទ/ពេលវេលាចាប់ផ្តើម", "error")
-            return redirect(url_for('add_leave_hours'))
+            flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+            return redirect(url_for('add_leave_hours', branch=branch))
 
-        # Validation: Disallow times before 8:00 AM
-        if start_date_obj.hour < 8 or (start_date_obj.hour == 8 and start_date_obj.minute < 0):
-            flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 8:00 ព្រឹក ដល់ 5:00 ល្ងាច", "error")
-            return redirect(url_for('add_leave_hours'))
+            # Disallow leave hours on Saturday and Sunday
+        if start_date_obj.weekday() >= 5 or end_date_obj.weekday() >= 5:
+            flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
+            return redirect(url_for('add_leave_hours', branch=branch))
 
-        # Validation: Disallow times after 5:00 PM
+        if start_date_obj.hour < 7:
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
+            return redirect(url_for('add_leave_hours', branch=branch))
+
         if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
-                end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
-            flash("ម៉ោងឈប់សម្រាកត្រូវតែនៅចន្លោះម៉ោង 8:00 ព្រឹក ដល់ 5:00 ល្ងាច", "error")
-            return redirect(url_for('add_leave_hours'))
+           end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
+            return redirect(url_for('add_leave_hours', branch=branch))
 
-        # Calculate total hours (round up to nearest full hour)
+        # Calculate total hours
         total_seconds = (end_date_obj - start_date_obj).total_seconds()
         total_hours = total_seconds / 3600
-        leave_hours = math.ceil(total_hours)  # Always in hours
 
-        # Check if leave overlaps with 12:00 PM – 1:00 PM
+        # Define lunch time range
         lunch_start = start_date_obj.replace(hour=12, minute=0)
-        lunch_end = start_date_obj.replace(hour=13, minute=0)
+        lunch_end = start_date_obj.replace(hour=13, minute=30)
 
-        # Only subtract 1 hour if the leave overlaps lunch break
+        # Subtract lunch only if overlapping
         if start_date_obj < lunch_end and end_date_obj > lunch_start:
-            total_hours -= 1
+            lunch_overlap_start = max(start_date_obj, lunch_start)
+            lunch_overlap_end = min(end_date_obj, lunch_end)
+            if lunch_overlap_end > lunch_overlap_start:
+                lunch_overlap = (lunch_overlap_end -
+                                 lunch_overlap_start).total_seconds() / 3600
+                total_hours -= lunch_overlap
 
-        # Make sure total_hours doesn't go below 0
         total_hours = max(total_hours, 0)
+        leave_hours = round(total_hours, 2)  # Show decimals like 4.5
 
-        # Round up to full hour
-        leave_hours = math.ceil(total_hours)
-
-        # Save to DB
         with get_db_connection() as conn:
-            conn.execute('''
+            cursor = conn.cursor()
+            cursor.execute('''
                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H'))  # Store type_of_leave as 'H'
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H'))
+
+            leave_id = cursor.lastrowid
+
+            for user_id in user_ids:
+                cursor.execute('''
+                    INSERT INTO user_leave (user_id, leave_id)
+                    VALUES (?, ?)
+                ''', (user_id, leave_id))
+
+            conn.commit()
 
         return redirect(url_for('view_leaves'))
 
-    return render_template('/leaves/add_leave_hours.html', employees=employees)
+    return render_template('/leaves/add_leave_hours.html', employees=employees, users=users, branch=branch)
 
 
 # @app.route('/leave_hours/add', methods=['GET', 'POST'])
@@ -3168,12 +3427,44 @@ def calculate_service_count_1(start_date_obj, end_date_obj, holiday_labels=None)
     return service_count
 
 
+# def calculate_add_day_and_final_end_date(start_date_str, end_date_str, public_holidays_str):
+#     # Convert string inputs to datetime.date objects
+#     start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+#     end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+#     public_holidays = [datetime.strptime(date.strip(), "%Y-%m-%d").date()
+#                        for date in public_holidays_str.split(",")]
+
+#     # Calculate excluded days (weekends and public holidays)
+#     current_date = start_date
+#     excluded_days = 0
+#     while current_date <= end_date:
+#         if current_date.weekday() >= 5 or current_date in public_holidays:
+#             excluded_days += 1
+#         current_date += timedelta(days=1)
+
+#     # Add excluded days as working days after end date
+#     final_end_date = end_date
+#     days_added = 0
+#     while days_added < excluded_days:
+#         final_end_date += timedelta(days=1)
+#         if final_end_date.weekday() < 5 and final_end_date not in public_holidays:
+#             days_added += 1
+
+#     return {
+#         "StartDate": start_date,
+#         "EndDate": end_date,
+#         "PublicHolidays": public_holidays,
+#         "ExcludedDays": excluded_days,
+#         "FinalEndDate": final_end_date
+#     }
+
+
 def calculate_add_day_and_final_end_date(start_date_str, end_date_str, public_holidays_str):
     # Convert string inputs to datetime.date objects
     start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
     end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
     public_holidays = [datetime.strptime(date.strip(), "%Y-%m-%d").date()
-                       for date in public_holidays_str.split(",")]
+                       for date in public_holidays_str.split(",") if date.strip()]
 
     # Calculate excluded days (weekends and public holidays)
     current_date = start_date
@@ -3267,7 +3558,7 @@ def add_many_leave(branch):
         # Now calculate working days between actual start and adjusted final end
         service_count = calculate_service_count_1(
             start_date_obj, final_end_date_obj)
-        leave_hours = service_count * 8
+        # leave_hours = service_count * 8
 
         # Determine category
         if service_count <= 2:
@@ -3280,11 +3571,11 @@ def add_many_leave(branch):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, leave_hours, excluded_days, final_end_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch,  excluded_days, final_end_date)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
-                reason, service_count, type_of_leave, requested_by, category, branch, leave_hours, excluded_days, final_end_date
+                reason, service_count, type_of_leave, requested_by, category, branch,  excluded_days, final_end_date
             ))
 
             leave_id = cursor.lastrowid

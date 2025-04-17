@@ -29,8 +29,13 @@ content %}
       <div id="message" class="bg-green-200 text-green-800 px-4 py-2 rounded-md shadow-md mt-4 hidden">
         Your message has been successfully rendered!
       </div>
-      <form method="POST" action="{{ url_for('add_leave_hours') }}" class="space-y-6">
+      <form method="POST" action="{{ url_for('add_leave_hours', branch=branch) }}" class="space-y-6">
         <!-- Employee selection -->
+
+
+
+
+
         <div>
           <label for="employee_id" class="hidden">Employee</label>
           <input type="text" id="employee_id" name="employee_id" value="{{ current_user.employee_id }}" hidden
@@ -90,6 +95,24 @@ content %}
           </div>
         </div>
 
+
+
+        <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+          <legend class="text-md font-semibold text-blue-600"> Leaves Hours (>= 8hours):</legend>
+          <div class="grid grid-cols-3 gap-6">
+            {% for user in users %}
+            <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+              <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user1_{{ user.id }}"
+                class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+              <label for="user1_{{ user.id }}"
+                class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-blue-600">{{
+                user.username
+                }}</label>
+            </div>
+            {% endfor %}
+          </div>
+        </fieldset>
+
         <!-- Reason -->
         <div>
           <label for="reason" class="block text-sm font-medium text-gray-700">មូលហេតុនៃការសុំឈប់សម្រាក (Reason for
@@ -97,6 +120,9 @@ content %}
           <textarea id="reason" name="reason" rows="4" required
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
         </div>
+
+
+
 
         <div class="flex justify-between gap-2">
           <button type="submit"

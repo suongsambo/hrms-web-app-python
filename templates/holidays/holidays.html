@@ -1,19 +1,44 @@
-{% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
-content %}
+{% extends 'base.html' %}
+{% block title %}Add Leave{% endblock %}
+{% block content %}
 
-<body>
-    <h1 class="text-3xl font-bold mb-4">Public Holidays</h1>
-    <ul class="list-none p-0">
-        {% for holiday in holidays %}
-        <li class="mb-1 p-2 border border-gray-300 rounded">
-            {{ holiday.label }} - {{ holiday.value }}
-        </li>
-        {% endfor %}
-    </ul>
+<div class="container mx-auto py-1 ">
 
-    <p class="text-gray-600">There are {{ holiday_labels|length }} holidays in the list.</p>
 
-    <!-- <a href="/add_holiday">Add a New Holiday</a> -->
-</body>
+    <h3 class="text-1xl font-bold mb-6">
+        ថ្ងៃឈប់សម្រាកប្រចាំឆ្នាំ <span id="currentYear"></span>
+    </h3>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-sm">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Holiday</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for holiday in holidays %}
+                <tr class="border-t border-gray-200 hover:bg-gray-50">
+                    <td class="px-4 py-2 text-sm text-gray-800">{{ holiday.label }}</td>
+                    <td class="px-4 py-2 text-sm text-gray-800">{{ holiday.value }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <p class="text-gray-600 mt-4">There are {{ holiday_labels|length }} holidays in the list.</p>
+
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const currentYear = new Date().getFullYear();
+            document.getElementById("currentYear").textContent = currentYear;
+        });
+    </script>
+</div>
+<!-- <a href="/add_holiday" class="inline-block mt-4 text-blue-600 hover:underline">Add a New Holiday</a> -->
 
 {% endblock %}

@@ -61,9 +61,21 @@
                 <!-- <p><strong>Status:</strong> {{ leave.status }}</p> -->
                 <p><strong>មូលហេតុនៃការសុំឈប់សម្រាក ( Reason for Leave ):</strong> {{ leave.reason }}</p>
                 <p><strong>ស្នើដោយ ( Requested by ):</strong> {{ leave.requested_by }}</p>
-                <p><strong>ការឈប់សម្រាកសរុប ( Total Leave ):</strong> {{ leave.service_count }} {{ "Day" if
+                <p><strong>ប្រភេទ (Type) :</strong> {{ leave.type_of_leave }}</p>
+
+                {% if leave.type_of_leave != 'H' %}
+                <p><strong>ការសុំឈប់សម្រាកសរុបគិតជាថ្ងៃ ( Total Leave Day ):</strong> {{ leave.service_count }} {{ "Day"
+                    if
                     leave.service_count == 1 else
                     "Days" }}</p>
+                {% endif %}
+
+                {% if leave.type_of_leave != 'D' %}
+                <p><strong>ការសុំឈប់សម្រាកសរុបគិតជាម៉ោង ( Leave Hours ):</strong> {{ leave.leave_hours }} {{ "Hour" if
+                    leave.leave_hours == 1 else
+                    "Hours" }}</p>
+                {% endif %}
+
             </div>
         </div>
 
