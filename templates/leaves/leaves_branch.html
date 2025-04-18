@@ -14,14 +14,9 @@ content %}
 
   <!-- Main Content -->
   <div class="container mx-auto mt-8 px-4">
-    <!-- Branch Filter Form -->
-    <div class="mb-4">
-      <h2 class="text-2xl font-semibold">Filter Leaves by Branch</h2>
-    </div>
-
     <!-- Leaves Table -->
     <div class="overflow-x-auto bg-white shadow-lg rounded-md border border-gray-300">
-      <table id="leaveTable" class="min-w-full text-sm text-left border-collapse">
+      <table id="leaveTable" class="min-w-full text-sm text-left border-collapse nowrap" style="width: 100%">
         <thead class="bg-gray-200 text-gray-700">
           <tr>
             <th class="px-6 py-3 border-b">EmployeeName</th>
@@ -107,11 +102,17 @@ content %}
   <script>
     $(document).ready(function () {
       $("#leaveTable").DataTable({
-        paging: true, // Enables pagination
-        searching: true, // Enables the search box
-        ordering: true, // Enables sorting
-        responsive: true, // Makes the table responsive for smaller screens
-        order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
+        scrollX: true, // Enable horizontal scrolling
+        scrollCollapse: true,
+        paging: true,
+        searching: true,
+        ordering: true,
+        responsive: false,
+        order: [[3, "asc"]],
+        fixedColumns: {
+          leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
+          rightColumns: 2, // Fix last 2 columns (like Reason and Status)
+        },
       });
 
       // Format the Start and End Dates using Moment.js

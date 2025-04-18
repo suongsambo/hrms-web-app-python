@@ -112,6 +112,17 @@ block content %}
         pageLength: 12,
         order: [[3, "desc"]],
         responsive: true,
+        scrollX: true, // Enable horizontal scrolling
+        scrollCollapse: true,
+        paging: true,
+        searching: true,
+        ordering: true,
+        responsive: false,
+        order: [[3, "asc"]],
+        fixedColumns: {
+          leftColumns: 3, // Fix first 2 columns (like EmployeeName and Branch)
+          rightColumns: 2,// Fix last 2 columns (like Reason and Status)
+        },
         drawCallback: function () {
           formatLeaveDatesAndHours();
         },

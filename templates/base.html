@@ -33,6 +33,15 @@
 
   <!-- Font Awesome (Optional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+  <!-- DataTables CSS -->
+  <!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" /> -->
+  <link rel="stylesheet" href="https://cdn.datatables.net/fixedcolumns/4.3.0/css/fixedColumns.dataTables.min.css" />
+
+  <!-- DataTables JS -->
+  <!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+  <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
+
   <script type="text/javascript">
     google.charts.load("current", { packages: ["corechart"] });
     google.charts.setOnLoadCallback(drawChart);
@@ -51,27 +60,7 @@
                             }
   </script>
 
-  <style>
-    #user-table {
-      position: relative;
-    }
 
-    /* Freeze the last column */
-    #user-table th:last-child,
-    #user-table td:last-child {
-      color: black;
-      position: sticky;
-      right: 0;
-      background-color: #fff;
-      z-index: 1;
-    }
-
-    /* Optional: Add a box-shadow for better visual effect */
-    #user-table th:last-child,
-    #user-table td:last-child {
-      box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
-    }
-  </style>
 </head>
 
 <header class="bg-gray-800 text-white p-1">
@@ -362,12 +351,12 @@
               <span class="material-symbols-outlined">timer</span>
               <span>Work Time</span>
             </a> -->
-
+        <!-- 
         <a href="/leave/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
           <span>Add Leave</span>
-        </a>
+        </a> -->
 
         <a href="/leaves"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
