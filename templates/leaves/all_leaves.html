@@ -25,35 +25,45 @@
 
   </section>
   </section>
-  <!-- Date Filter Form -->
-  <section class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
 
-    <form method="get" action="/leaves/all" class="flex justify-between items-center gap-6">
-      <!-- Start Date Section -->
+
+
+
+  <section
+    class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 mb-8 print:hidden">
+
+    <!-- Search & Filter Form -->
+    <form method="get" action="/leaves/all"
+      class="flex flex-col lg:flex-row justify-between items-center gap-4 flex-wrap">
+
+      <!-- Date Filters -->
       <div class="flex items-center gap-4">
-        <label for="start_date" class="text-lg text-gray-700 font-medium">
-          Start Date
-        </label>
-        <input type="date" name="start_date" id="start_date" value="{{ start_date }}"
-          class="p-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 w-40" />
+        <label for="start_date" class="text-base text-gray-700 font-medium">Start Date</label>
+        <input type="date" name="start_date" id="start_date" value="{{ start_date or '' }}"
+          class="px-4 py-2 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40" />
+
+        <span class="text-gray-500 font-semibold">to</span>
+
+        <label for="end_date" class="text-base text-gray-700 font-medium">End Date</label>
+        <input type="date" name="end_date" id="end_date" value="{{ end_date or '' }}"
+          class="px-4 py-2 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40" />
       </div>
 
-
-      <span class="text-lg text-gray-600">to</span>
-
-      <!-- End Date Section -->
+      <!-- Employee Search -->
       <div class="flex items-center gap-4">
-        <label for="end_date" class="text-lg text-gray-700 font-medium mb-2">End Date</label>
-        <input type="date" name="end_date" id="end_date" value="{{ end_date }}"
-          class="p-3 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 w-40"
-          style="align-self: flex-start" />
+        <label for="employee_name" class="text-base text-gray-700 font-medium">Employee</label>
+        <input type="text" name="employee_name" id="employee_name" placeholder="Search by name"
+          value="{{ employee_name or '' }}"
+          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" />
       </div>
 
-      <!-- Filter Button -->
-      <button type="submit"
-        class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105">
-        Filter
-      </button>
+      <!-- Submit Button -->
+      <div>
+        <button type="submit"
+          class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">
+          Apply Filters
+        </button>
+      </div>
     </form>
   </section>
 
@@ -82,6 +92,33 @@
         {% endfor %}
       </tbody>
     </table>
+  </section>
+
+  <section
+    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Leave Count by Branch</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-100">
+          <tr>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Branch</th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Number of Leaves
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Total Leave Days
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          {% for branch, data in branch_leave_count.items() %}
+          <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">{{ branch }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ data.leave_count }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ data.total_days }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </section>
 
 

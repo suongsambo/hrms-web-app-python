@@ -1163,8 +1163,6 @@ def view_leaves():
 
         return render_template('/leaves/view_leaves.html', leaves=leaves)
 
-# TODO: employee leave
-
 
 @app.route('/leave/<int:leave_id>/users')
 def users_for_leave(leave_id):
@@ -1933,79 +1931,189 @@ def add_leave():
     return render_template('/leaves/add_leave.html', employees=employees, users=users)
 
 
+# @app.route('/leaves/all', methods=['GET'])
+# @login_required
+# def get_all_leave_dates():
+#     if current_user.is_admin == 0:
+#         return redirect(url_for('leaves_user_id', user_id=current_user.id))
+
+#     # Get optional filters from the request
+#     start_date_filter = request.args.get('start_date')
+#     end_date_filter = request.args.get('end_date')
+
+#     # SQL query with branch info
+#     query = '''
+#         SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#     '''
+
+#     # Apply date filters
+#     if start_date_filter and end_date_filter:
+#         query += ' WHERE l.start_date BETWEEN ? AND ?'
+#         date_params = (start_date_filter, end_date_filter)
+#     elif start_date_filter:
+#         query += ' WHERE l.start_date >= ?'
+#         date_params = (start_date_filter,)
+#     elif end_date_filter:
+#         query += ' WHERE l.start_date <= ?'
+#         date_params = (end_date_filter,)
+#     else:
+#         date_params = ()
+
+#     # Fetch leave records
+#     with get_db_connection() as conn:
+#         leaves = conn.execute(query, date_params).fetchall()
+
+#     total_leave_days = 0
+#     leave_records = []
+#     leave_type_count = {}
+#     branch_leave_count = {}
+
+#     for leave in leaves:
+#         employee_name = leave['employee_name'] or "Unknown Employee"
+#         branch = leave['branch'] or "Unknown Branch"
+
+#         # Parse the dates
+#         try:
+#             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
+#             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
+#         except ValueError:
+#             continue  # Skip if date is invalid
+
+#         # Calculate leave days
+#         leave_days = (end_date_obj - start_date_obj).days + 1
+#         total_leave_days += leave_days
+
+#         # List of leave dates
+#         leave_day_list = []
+#         current_day = start_date_obj
+#         while current_day <= end_date_obj:
+#             leave_day_list.append(current_day.strftime('%Y-%m-%d'))
+#             current_day += timedelta(days=1)
+
+#         # Count leave by type
+#         if leave['leave_type'] not in leave_type_count:
+#             leave_type_count[leave['leave_type']] = {
+#                 'count': 0, 'total_days': 0}
+#         leave_type_count[leave['leave_type']]['count'] += 1
+#         leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+#         # Count leave by branch
+#         if branch not in branch_leave_count:
+#             branch_leave_count[branch] = {'leave_count': 0, 'total_days': 0}
+#         branch_leave_count[branch]['leave_count'] += 1
+#         branch_leave_count[branch]['total_days'] += leave_days
+
+#         # Build record
+#         leave_records.append({
+#             'employee_name': employee_name,
+#             'leave_type': leave['leave_type'],
+#             'start_date': leave['start_date'],
+#             'end_date': leave['end_date'],
+#             'leave_days': leave_days,
+#             'leave_day_list': leave_day_list
+#         })
+
+#     return render_template('/leaves/all_leaves.html',
+#                            leaves=leave_records,
+#                            total_leave_days=total_leave_days,
+#                            leave_type_count=leave_type_count,
+#                            branch_leave_count=branch_leave_count,
+#                            start_date=start_date_filter,
+#                            end_date=end_date_filter)
+
+
 @app.route('/leaves/all', methods=['GET'])
 @login_required
 def get_all_leave_dates():
     if current_user.is_admin == 0:
-        # Redirect non-admin users to their specific check-ins page
         return redirect(url_for('leaves_user_id', user_id=current_user.id))
 
-        # Get the optional date range parameters from the request
     start_date_filter = request.args.get('start_date')
     end_date_filter = request.args.get('end_date')
+    employee_name_filter = request.args.get('employee_name')  # 🆕
 
-    # Prepare SQL query based on whether the date filters are provided
     query = '''
-        SELECT l.id, e.name AS employee_name, l.leave_type, l.start_date, l.end_date
+        SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date
         FROM leaves l
-        LEFT JOIN employees e ON l.employee_id=e.id
+        LEFT JOIN employees e ON l.employee_id = e.id
     '''
 
-    # Add conditions to the query if date filters are provided
-    if start_date_filter and end_date_filter:
-        query += ' WHERE l.start_date BETWEEN ? AND ?'
-        date_params = (start_date_filter, end_date_filter)
-    elif start_date_filter:
-        query += ' WHERE l.start_date >= ?'
-        date_params = (start_date_filter,)
-    elif end_date_filter:
-        query += ' WHERE l.start_date <= ?'
-        date_params = (end_date_filter,)
-    else:
-        date_params = ()
+    # Dynamic WHERE clauses
+    conditions = []
+    params = []
 
-    # Fetch the leave records based on the query
+    if start_date_filter:
+        conditions.append('l.start_date >= ?')
+        params.append(start_date_filter)
+    if end_date_filter:
+        conditions.append('l.start_date <= ?')
+        params.append(end_date_filter)
+    if employee_name_filter:
+        conditions.append('e.name LIKE ?')
+        params.append(f"%{employee_name_filter}%")
+
+    if conditions:
+        query += ' WHERE ' + ' AND '.join(conditions)
+
     with get_db_connection() as conn:
-        leaves = conn.execute(query, date_params).fetchall()
+        leaves = conn.execute(query, params).fetchall()
 
-    # Initialize total_leave_days to accumulate total leave days
     total_leave_days = 0
     leave_records = []
-
-    # Create a dictionary to count leave types and accumulate their leave days
     leave_type_count = {}
+    branch_leave_count = {}
 
     for leave in leaves:
-        # Ensure employee_name is available and handle missing data
-        employee_name = leave['employee_name'] if leave['employee_name'] else "Unknown Employee"
+        employee_name = leave['employee_name'] or "Unknown Employee"
+        branch = leave['branch'] or "Unknown Branch"
 
-        # Parse the start and end dates (ensure they're in 'YYYY-MM-DD' format)
         try:
             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
         except ValueError:
-            # If the date format is incorrect, continue to the next record
             continue
 
-        # Calculate the leave days for each record
-        leave_days = (end_date_obj - start_date_obj).days + 1
+        holidays = get_holidays(start_date_obj.year)
+        holiday_labels = [holiday["label"] for holiday in holidays]
+        public_holidays_str = ",".join(holiday_labels)
+
+        result = calculate_add_day_and_final_end_date(
+            start_date_obj.strftime("%Y-%m-%d"),
+            end_date_obj.strftime("%Y-%m-%d"),
+            public_holidays_str
+        )
+
+        valid_leave_days = result.get("ValidLeaveDays", [])
+        leave_days = len(valid_leave_days)
         total_leave_days += leave_days
 
-        # Generate a list of all the leave days (mapping days between start and end date)
+        # Build formatted list of valid leave dates
+        leave_day_list = [day.strftime('%Y-%m-%d') for day in valid_leave_days]
+
+        # Filter out weekends
         leave_day_list = []
         current_day = start_date_obj
         while current_day <= end_date_obj:
-            leave_day_list.append(current_day.strftime('%Y-%m-%d'))
+            if current_day.weekday() < 5:  # 0 = Monday, 4 = Friday
+                leave_day_list.append(current_day.strftime('%Y-%m-%d'))
             current_day += timedelta(days=1)
 
-        # Update leave type count (both count of leaves and total leave duration)
+        leave_days = len(leave_day_list)
+        total_leave_days += leave_days
+
         if leave['leave_type'] not in leave_type_count:
             leave_type_count[leave['leave_type']] = {
                 'count': 0, 'total_days': 0}
         leave_type_count[leave['leave_type']]['count'] += 1
         leave_type_count[leave['leave_type']]['total_days'] += leave_days
 
-        # Append the leave record with calculated leave days and the list of all leave days
+        if branch not in branch_leave_count:
+            branch_leave_count[branch] = {'leave_count': 0, 'total_days': 0}
+        branch_leave_count[branch]['leave_count'] += 1
+        branch_leave_count[branch]['total_days'] += leave_days
+
         leave_records.append({
             'employee_name': employee_name,
             'leave_type': leave['leave_type'],
@@ -2015,13 +2123,14 @@ def get_all_leave_dates():
             'leave_day_list': leave_day_list
         })
 
-    # Return the leave records, total leave days, and leave type counts to the template
     return render_template('/leaves/all_leaves.html',
                            leaves=leave_records,
                            total_leave_days=total_leave_days,
                            leave_type_count=leave_type_count,
+                           branch_leave_count=branch_leave_count,
                            start_date=start_date_filter,
-                           end_date=end_date_filter)
+                           end_date=end_date_filter,
+                           employee_name=employee_name_filter)
 
 
 @app.route('/leaves/user/<int:user_id>', methods=['GET'])
