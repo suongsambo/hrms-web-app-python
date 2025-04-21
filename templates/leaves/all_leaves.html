@@ -1,8 +1,5 @@
-{% extends 'base.html' %}
-
-{% block title %}Leaves{% endblock %}
-
-{% block content %}
+{% extends 'base.html' %} {% block title %}Leaves{% endblock %} {% block content
+%}
 
 <body class="bg-gray-100 text-gray-900 font-sans">
   <header class="bg-blue-600 text-white p-6 rounded-b-lg shadow-md">
@@ -10,7 +7,7 @@
     <p class="mt-2 text-lg">Total Leave Days: {{ total_leave_days }}</p>
   </header>
 
-  <section class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+  <section class="p-1 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
     <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
       Filter Leave Records
     </h2>
@@ -22,22 +19,15 @@
       class="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 flex items-center ml-4">
       <i class="fas fa-sync-alt mr-2"></i> Refresh
     </button>
-
   </section>
-  </section>
-
-
-
 
   <section
-    class="p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 mb-8 print:hidden">
-
+    class="p-1 pb-1 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 mb-8 print:hidden">
     <!-- Search & Filter Form -->
     <form method="get" action="/leaves/all"
       class="flex flex-col lg:flex-row justify-between items-center gap-4 flex-wrap">
-
       <!-- Date Filters -->
-      <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2">
         <label for="start_date" class="text-base text-gray-700 font-medium">Start Date</label>
         <input type="date" name="start_date" id="start_date" value="{{ start_date or '' }}"
           class="px-4 py-2 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40" />
@@ -67,9 +57,31 @@
     </form>
   </section>
 
+  <section
+    class="mt-1 p-2 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    <h2 class="text-2xl font-semibold text-center mb-2 text-indigo-600">
+      Print Leave Records
+    </h2>
+    <div class="flex justify-start gap-4">
+      <button onclick="printSection('print-branch-leave')"
+        class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+        <i class="fas fa-print mr-2"></i> Leave Count by Branch
+      </button>
+
+      <button onclick="printSection('leave-summary-section')"
+        class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center">
+        <i class="fas fa-print mr-2"></i> Print Leave Summary
+      </button>
+
+      <button onclick="printLeaveDetail()" class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+        <i class="fas fa-print mr-2"></i> Print Leave Detail Summary
+      </button>
+    </div>
+  </section>
+
   <!-- Leave Type Summary -->
   <section
-    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    class="mt-4 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
     <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
       Leave Type Summary
     </h2>
@@ -94,26 +106,38 @@
     </table>
   </section>
 
-  <section
+  <section id="print-branch-leave"
     class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">Leave Count by Branch</h2>
+    <h4 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
+      Leave Count by Branch
+    </h4>
     <div class="overflow-x-auto">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-100">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Branch</th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Number of Leaves
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+              Branch
             </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">Total Leave Days
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+              Number of Leaves
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+              Total Leave Days
             </th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
           {% for branch, data in branch_leave_count.items() %}
           <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">{{ branch }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ data.leave_count }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ data.total_days }}</td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
+              {{ branch }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ data.leave_count }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              {{ data.total_days }}
+            </td>
           </tr>
           {% endfor %}
         </tbody>
@@ -121,19 +145,16 @@
     </div>
   </section>
 
-
-
-
-  <!-- Leave Records Table -->
-  <section
+  <section id="leave-summary-section"
     class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
+    <h4 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
       Leave Summary
-    </h2>
+    </h4>
     <table
       class="min-w-full table-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-200 rounded-lg overflow-hidden shadow-md">
       <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
         <tr>
+          <th class="px-6 py-4 text-left">Branch</th>
           <th class="px-6 py-4 text-left">Employee</th>
           <th class="px-6 py-4 text-left">Leave Type</th>
           <th class="px-6 py-4 text-left">Start Date</th>
@@ -144,6 +165,7 @@
       <tbody class="text-gray-700">
         {% for leave in leaves %}
         <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
+          <td class="px-6 py-4">{{ leave['branch'] }}</td>
           <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
           <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
           <td class="px-6 py-4">{{ leave['start_date'] }}</td>
@@ -156,14 +178,15 @@
   </section>
 
   <!-- Leave Detail Records Table -->
-  <section
-    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h2 class="text-3xl font-semibold text-center mb-6 text-indigo-700">
+  <section id="leave-detail-section"
+    class="mt-4 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
+    <h4 class="text-2xl font-semibold text-center mb-6 text-indigo-700">
       Leave Detail Summary
-    </h2>
+    </h4>
     <table class="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
       <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
         <tr>
+          <th class="px-6 py-4 text-left">Branch</th>
           <th class="px-6 py-4 text-left text-lg font-medium">Employee</th>
           <th class="px-6 py-4 text-left text-lg font-medium">Leave Type</th>
           <th class="px-6 py-4 text-left text-lg font-medium">Start Date</th>
@@ -177,6 +200,7 @@
       <tbody class="text-gray-700">
         {% for leave in leaves %}
         <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
+          <td class="px-6 py-4">{{ leave['branch'] }}</td>
           <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
           <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
           <td class="px-6 py-4">{{ leave['start_date'] }}</td>
@@ -195,7 +219,300 @@
       </tbody>
     </table>
   </section>
-</body>
 
+  <script>
+    function printSection(sectionId) {
+      const printContent = document.getElementById(sectionId).innerHTML;
+
+      // Get values from input fields (make sure these IDs exist in your HTML)
+      const startDate = document.getElementById("start_date")?.value || "";
+      const endDate = document.getElementById("end_date")?.value || "";
+
+      const printStyles = `
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+          }
+          th, td {
+            border: 1px solid #333;
+            padding: 8px;
+            text-align: left;
+          }
+          th {
+            background-color: #f0f0f0;
+          }
+          h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+          }
+          .print-header {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 10px;
+            font-weight: bold;
+          }
+          .print-dates {
+            text-align: center;
+            font-size: 16px;
+            margin-bottom: 30px;
+          }
+          .footer-note {
+            margin-top: 40px;
+            font-size: 14px;
+            font-style: italic;
+            color: #444;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+          }
+        </style>
+      `;
+
+      const headerTitle = `
+        <div class="print-header">
+          របាយការណ៍សុំច្បាប់សរុបតាមសាខា<br>
+          <span style="font-size: 16px; font-weight: normal;">(Total Leave Summary by Branch)</span>
+        </div>
+        <div class="print-dates">
+          ពីថ្ងៃ: <strong>${startDate}</strong> ដល់ថ្ងៃ: <strong>${endDate}</strong>
+        </div>
+      `;
+
+      const footerNote = `
+        <div class="footer-note">
+          <ul>
+            <li>សុំច្បាប់ឈប់សម្រាកជាថ្ងៃ​ (គិតតែថ្ងៃធ្វើការសុទ្ធ)</li>
+            <li>គិតតែថ្ងៃធ្វើការសុទ្ធ (ចន្ទ - សុក្រ)</li>
+            <li>មិនរួមបញ្ជូលថ្ងៃ ចុងសប្តាហ៍ (ថ្ងៃសៅរ៍ និង​ អាទិត្យ​)</li>
+            <li>មិនរួមបញ្ជូលថ្ងៃបុណ្យជាតិ</li>
+          </ul>
+        </div>
+      `;
+
+      const printWindowContent = `
+        <html>
+          <head>
+            <title>Print Section</title>
+            ${printStyles}
+          </head>
+          <body>
+            ${headerTitle}
+            ${printContent}
+            ${footerNote}
+          </body>
+        </html>
+      `;
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.open();
+      printWindow.document.write(printWindowContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  </script>
+  <script>
+    function printSection(sectionId) {
+      const printContent = document.getElementById(sectionId).innerHTML;
+
+      // Get values from input fields (make sure you have inputs with these IDs)
+      const startDate = document.getElementById("start_date")?.value || "";
+      const endDate = document.getElementById("end_date")?.value || "";
+
+      const printStyles = `
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        th, td {
+          border: 1px solid #333;
+          padding: 8px;
+          text-align: left;
+        }
+        th {
+          background-color: #f0f0f0;
+        }
+        h2 {
+          margin-bottom: 20px;
+          font-size: 24px;
+        }
+        .print-header {
+          text-align: center;
+          font-size: 20px;
+          margin-bottom: 10px;
+          font-weight: bold;
+        }
+        .print-dates {
+          text-align: center;
+          font-size: 16px;
+          margin-bottom: 30px;
+        }
+        .footer-note {
+          margin-top: 40px;
+          font-size: 14px;
+          font-style: italic;
+          color: #444;
+          border-top: 1px solid #ccc;
+          padding-top: 10px;
+        }
+      </style>
+    `;
+
+      const headerTitle = `
+      <div class="print-header">
+        Leave Summary Report
+      </div>
+      <div class="print-dates">
+        From: <strong>${startDate}</strong> To: <strong>${endDate}</strong>
+      </div>
+    `;
+
+      const footerNote = `
+      <div class="footer-note">
+        <ul>
+          <li>សុំច្បាប់ឈប់សម្រាកជាថ្ងៃ​ (គិតតែថ្ងៃធ្វើការសុទ្ធ)</li>
+          <li>គិតតែថ្ងៃធ្វើការសុទ្ធ (ចន្ទ - សុក្រ)</li>
+          <li>មិនរួមបញ្ជូលថ្ងៃ ចុងសប្តាហ៍ (ថ្ងៃសៅរ៍ និង​ អាទិត្យ​)</li>
+          <li>មិនរួមបញ្ជូលថ្ងៃបុណ្យជាតិ</li>
+        </ul>
+      </div>
+    `;
+
+      const printWindowContent = `
+      <html>
+        <head>
+          <title>Print Section</title>
+          ${printStyles}
+        </head>
+        <body>
+          ${headerTitle}
+          ${printContent}
+          ${footerNote}
+        </body>
+      </html>
+    `;
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.open();
+      printWindow.document.write(printWindowContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  </script>
+  <script>
+    function printLeaveDetail() {
+      const sectionId = "leave-detail-section";
+      const printContent = document.getElementById(sectionId).innerHTML;
+      const startDate = document.getElementById("start_date")?.value || "";
+      const endDate = document.getElementById("end_date")?.value || "";
+
+      const printStyles = `
+      <style>
+        body {
+          font-family: 'Arial', sans-serif;
+          padding: 20px;
+        }
+        table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 20px;
+        }
+        th, td {
+          border: 1px solid #333;
+          padding: 8px;
+          vertical-align: top;
+        }
+        th {
+          background-color: #f0f0f0;
+          font-size: 16px;
+        }
+        ul {
+          margin: 0;
+          padding-left: 20px;
+        }
+        li {
+          font-size: 13px;
+          color: #333;
+        }
+        .print-header {
+          text-align: center;
+          font-size: 22px;
+          margin-bottom: 10px;
+          font-weight: bold;
+        }
+        .print-dates {
+          text-align: center;
+          font-size: 16px;
+          margin-bottom: 30px;
+        }
+        .footer-note {
+          margin-top: 40px;
+          font-size: 14px;
+          font-style: italic;
+          color: #444;
+          border-top: 1px solid #ccc;
+          padding-top: 10px;
+        }
+      </style>
+    `;
+
+      const headerTitle = `
+      <div class="print-header">
+        Leave Detail Summary Report
+      </div>
+      <div class="print-dates">
+        From: <strong>${startDate}</strong> To: <strong>${endDate}</strong>
+      </div>
+    `;
+
+      const footerNote = `
+      <div class="footer-note">
+        <ul>
+          <li>សុំច្បាប់ឈប់សម្រាកជាថ្ងៃ​ (គិតតែថ្ងៃធ្វើការសុទ្ធ)</li>
+          <li>គិតតែថ្ងៃធ្វើការសុទ្ធ (ចន្ទ - សុក្រ)</li>
+          <li>មិនរួមបញ្ជូលថ្ងៃ ចុងសប្តាហ៍ (ថ្ងៃសៅរ៍ និង​ អាទិត្យ​)</li>
+          <li>មិនរួមបញ្ជូលថ្ងៃបុណ្យជាតិ</li>
+        </ul>
+      </div>
+    `;
+
+      const printWindowContent = `
+      <html>
+        <head>
+          <title>Print Leave Detail</title>
+          ${printStyles}
+        </head>
+        <body>
+          ${headerTitle}
+          ${printContent}
+          ${footerNote}
+        </body>
+      </html>
+    `;
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.open();
+      printWindow.document.write(printWindowContent);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  </script>
+</body>
 
 {% endblock %}

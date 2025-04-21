@@ -2250,6 +2250,7 @@ def get_all_leave_dates():
         branch_leave_count[branch]['total_days'] += leave_days
 
         leave_records.append({
+            'branch': branch,
             'employee_name': employee_name,
             'leave_type': leave['leave_type'],
             'start_date': leave['start_date'],
