@@ -1786,6 +1786,34 @@ def calculate_add_day_and_final_end_date(start_date_str, end_date_str, public_ho
     }
 
 
+def remove_sun_sat_and_holiday(start_date_str, end_date_str, public_holidays_str):
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    public_holidays = [datetime.strptime(date.strip(), "%Y-%m-%d").date()
+                       for date in public_holidays_str.split(",") if date.strip()]
+
+    # Initialize
+    current_date = start_date
+    valid_dates = []
+    excluded_days = 0
+
+    while current_date <= end_date:
+        if current_date.weekday() < 5 and current_date not in public_holidays:
+            valid_dates.append(current_date)
+        else:
+            excluded_days += 1
+        current_date += timedelta(days=1)
+
+    return {
+        "StartDate": start_date,
+        "EndDate": end_date,
+        "PublicHolidays": public_holidays,
+        "ExcludedDays": excluded_days,
+        "ValidWorkingDays": valid_dates,
+        "TotalWorkingDays": len(valid_dates)
+    }
+
+
 def calculate_service_count(start_date, end_date):
     # Count working days between start_date and end_date (excluding weekends)
     count = 0
@@ -2024,6 +2052,122 @@ def add_leave():
 #                            end_date=end_date_filter)
 
 
+# @app.route('/leaves/all', methods=['GET'])
+# @login_required
+# def get_all_leave_dates():
+#     if current_user.is_admin == 0:
+#         return redirect(url_for('leaves_user_id', user_id=current_user.id))
+
+#     start_date_filter = request.args.get('start_date')
+#     end_date_filter = request.args.get('end_date')
+#     employee_name_filter = request.args.get('employee_name')  # 🆕
+
+#     query = '''
+#         SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#     '''
+
+#     # Dynamic WHERE clauses
+#     conditions = []
+#     params = []
+
+#     if start_date_filter:
+#         conditions.append('l.start_date >= ?')
+#         params.append(start_date_filter)
+#     if end_date_filter:
+#         conditions.append('l.start_date <= ?')
+#         params.append(end_date_filter)
+#     if employee_name_filter:
+#         conditions.append('e.name LIKE ?')
+#         params.append(f"%{employee_name_filter}%")
+
+#     if conditions:
+#         query += ' WHERE ' + ' AND '.join(conditions)
+
+#     with get_db_connection() as conn:
+#         leaves = conn.execute(query, params).fetchall()
+
+#     total_leave_days = 0
+#     leave_records = []
+#     leave_type_count = {}
+#     branch_leave_count = {}
+
+#     for leave in leaves:
+#         employee_name = leave['employee_name'] or "Unknown Employee"
+#         branch = leave['branch'] or "Unknown Branch"
+
+#         try:
+#             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
+#             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
+#         except ValueError:
+#             continue
+
+#         holidays = get_holidays(start_date_obj.year)
+#         holiday_labels = [holiday["label"] for holiday in holidays]
+#         public_holidays_str = ",".join(holiday_labels)
+
+#         result = remove_sun_sat_and_holiday(
+#             start_date_obj.strftime("%Y-%m-%d"),
+#             end_date_obj.strftime("%Y-%m-%d"),
+#             public_holidays_str
+#         )
+
+#         valid_leave_days = result.get("ValidLeaveDays", [])
+#         leave_days = len(valid_leave_days)
+#         total_leave_days += leave_days
+
+
+#          # Use the valid working days from the function directly
+#         valid_leave_days = result.get("ValidWorkingDays", [])  # <- This is the correct key
+#         leave_day_list = [day.strftime('%Y-%m-%d') for day in valid_leave_days]
+#         leave_days = len(valid_leave_days)
+#         total_leave_days += leave_days
+
+#         # Build formatted list of valid leave dates
+#         leave_day_list = [day.strftime('%Y-%m-%d') for day in valid_leave_days]
+
+#         # Filter out weekends
+#         leave_day_list = []
+#         current_day = start_date_obj
+#         while current_day <= end_date_obj:
+#             if current_day.weekday() < 5:  # 0 = Monday, 4 = Friday
+#                 leave_day_list.append(current_day.strftime('%Y-%m-%d'))
+#             current_day += timedelta(days=1)
+
+#         leave_days = len(leave_day_list)
+#         total_leave_days += leave_days
+
+#         if leave['leave_type'] not in leave_type_count:
+#             leave_type_count[leave['leave_type']] = {
+#                 'count': 0, 'total_days': 0}
+#         leave_type_count[leave['leave_type']]['count'] += 1
+#         leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+#         if branch not in branch_leave_count:
+#             branch_leave_count[branch] = {'leave_count': 0, 'total_days': 0}
+#         branch_leave_count[branch]['leave_count'] += 1
+#         branch_leave_count[branch]['total_days'] += leave_days
+
+#         leave_records.append({
+#             'employee_name': employee_name,
+#             'leave_type': leave['leave_type'],
+#             'start_date': leave['start_date'],
+#             'end_date': leave['end_date'],
+#             'leave_days': leave_days,
+#             'leave_day_list': leave_day_list
+#         })
+
+#     return render_template('/leaves/all_leaves.html',
+#                            leaves=leave_records,
+#                            total_leave_days=total_leave_days,
+#                            leave_type_count=leave_type_count,
+#                            branch_leave_count=branch_leave_count,
+#                            start_date=start_date_filter,
+#                            end_date=end_date_filter,
+#                            employee_name=employee_name_filter)
+
+
 @app.route('/leaves/all', methods=['GET'])
 @login_required
 def get_all_leave_dates():
@@ -2032,7 +2176,7 @@ def get_all_leave_dates():
 
     start_date_filter = request.args.get('start_date')
     end_date_filter = request.args.get('end_date')
-    employee_name_filter = request.args.get('employee_name')  # 🆕
+    employee_name_filter = request.args.get('employee_name')
 
     query = '''
         SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date
@@ -2040,7 +2184,6 @@ def get_all_leave_dates():
         LEFT JOIN employees e ON l.employee_id = e.id
     '''
 
-    # Dynamic WHERE clauses
     conditions = []
     params = []
 
@@ -2075,40 +2218,32 @@ def get_all_leave_dates():
         except ValueError:
             continue
 
+        # Get holidays for the year of the start date
         holidays = get_holidays(start_date_obj.year)
-        holiday_labels = [holiday["label"] for holiday in holidays]
-        public_holidays_str = ",".join(holiday_labels)
+        public_holidays_str = ",".join(
+            [holiday["label"] for holiday in holidays])
 
-        result = calculate_add_day_and_final_end_date(
+        # Remove weekends and holidays
+        result = remove_sun_sat_and_holiday(
             start_date_obj.strftime("%Y-%m-%d"),
             end_date_obj.strftime("%Y-%m-%d"),
             public_holidays_str
         )
 
-        valid_leave_days = result.get("ValidLeaveDays", [])
+        valid_leave_days = result.get(
+            "ValidWorkingDays", [])  # The correct key
+        leave_day_list = [day.strftime('%Y-%m-%d') for day in valid_leave_days]
         leave_days = len(valid_leave_days)
         total_leave_days += leave_days
 
-        # Build formatted list of valid leave dates
-        leave_day_list = [day.strftime('%Y-%m-%d') for day in valid_leave_days]
-
-        # Filter out weekends
-        leave_day_list = []
-        current_day = start_date_obj
-        while current_day <= end_date_obj:
-            if current_day.weekday() < 5:  # 0 = Monday, 4 = Friday
-                leave_day_list.append(current_day.strftime('%Y-%m-%d'))
-            current_day += timedelta(days=1)
-
-        leave_days = len(leave_day_list)
-        total_leave_days += leave_days
-
+        # Count by leave type
         if leave['leave_type'] not in leave_type_count:
             leave_type_count[leave['leave_type']] = {
                 'count': 0, 'total_days': 0}
         leave_type_count[leave['leave_type']]['count'] += 1
         leave_type_count[leave['leave_type']]['total_days'] += leave_days
 
+        # Count by branch
         if branch not in branch_leave_count:
             branch_leave_count[branch] = {'leave_count': 0, 'total_days': 0}
         branch_leave_count[branch]['leave_count'] += 1
