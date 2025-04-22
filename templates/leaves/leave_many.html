@@ -115,7 +115,7 @@ content %}
           <!-- Users Checkbox Group 1 -->
           <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
             <legend class="text-md font-semibold text-blue-600">Short Leaves (2 Days):</legend>
-            <div class="grid grid-cols-3 gap-6">
+            <div class="grid grid-cols-2 gap-6">
               {% for user in users %}
               <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
                 <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user1_{{ user.id }}"
@@ -130,7 +130,7 @@ content %}
           </fieldset>
 
           <!-- Users Checkbox Group 2 -->
-          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+          <!-- <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
             <legend class="text-md font-semibold text-orange-600">Medium Leaves (3-5 Days)</legend>
             <div class="grid grid-cols-3 gap-6">
               {% for user in users2 %}
@@ -143,9 +143,37 @@ content %}
               </div>
               {% endfor %}
             </div>
-          </fieldset>
-          <!-- Users Checkbox Group 3 -->
+          </fieldset> -->
+
+
+          <!-- Combined Users Checkbox Group -->
           <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-green-600">Medium Leaves (3-5 Days):</legend>
+            <div class="grid grid-cols-2 gap-4">
+              {% for user in users2 %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user3_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-green-600 border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                <label for="user3_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-green-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+
+              {% for user in users3 %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user4_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-green-600 border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                <label for="user4_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-green-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+
+          <!-- <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
             <legend class="text-md font-semibold text-green-600">Long Leaves (≥ 6 days):</legend>
             <div class="grid grid-cols-3 gap-6">
               {% for user in users3 %}
@@ -159,6 +187,55 @@ content %}
               {% endfor %}
             </div>
           </fieldset>
+
+       
+          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-green-600">Long Leaves (≥ 6 days):</legend>
+            <div class="grid grid-cols-3 gap-6">
+              {% for user in users4 %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user3_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-green-600 border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                <label for="user3_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-green-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset> -->
+
+
+
+
+
+          <!-- Combined Users Checkbox Group -->
+          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-green-600">Long Leaves (≥ 6 days):</legend>
+            <div class="grid grid-cols-2 gap-4">
+              {% for user in users3 %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user3_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-green-600 border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                <label for="user3_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-green-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+
+              {% for user in users4 %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user4_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-green-600 border-gray-300 rounded-md focus:ring-2 focus:ring-green-500">
+                <label for="user4_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-green-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+
+
 
 
           <div>

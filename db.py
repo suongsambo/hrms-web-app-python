@@ -451,18 +451,18 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('pm', hashed_password, 'pm@example.com', '010655037', 0, 140, 'SYS'))
 
-        # Create SQM user
-        user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'spm'").fetchone()
+        # # Create SQM user
+        # user_exists = conn.execute(
+        #     "SELECT 1 FROM users WHERE UserName = 'spm'").fetchone()
 
-        if not user_exists:
+        # if not user_exists:
 
-            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
 
-            conn.execute('''
-                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('spm', hashed_password, 'spm@example.com', '010655037', 0, 145, 'SYS'))
+        #     conn.execute('''
+        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+        #         VALUES (?, ?, ?, ?, ?, ?, ?)
+        #     ''', ('spm', hashed_password, 'spm@example.com', '010655037', 0, 145, 'SYS'))
 
       # Create DC user
         user_exists = conn.execute(
