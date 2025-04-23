@@ -1829,9 +1829,6 @@ def calculate_service_count(start_date, end_date):
 @login_required
 def add_many_leave(branch):
     user_branch = branch if not current_user.is_authenticated else current_user.branch
-    print("User Branch:", user_branch)
-
-    # Get the branch ID by name
 
     with get_db_connection() as conn:
         users3 = []
@@ -1839,33 +1836,43 @@ def add_many_leave(branch):
             "SELECT id FROM branches WHERE Branch = ?", (user_branch,)
         ).fetchone()
 
-        # if branch_row:
-        #     branch_id = branch_row[0]
-        #     print("Branch ID:", branch_id)
-        # else:
-        #     print("Branch not found.")
-
-        # if branch_row:
-        #     branch_id = branch_row[0]
-        #     print("Branch ID:", branch_id)
-
-        #     # Check if branch_id exists in zone_branch
-        #     zone_check = conn.execute(
-        #         "SELECT 1 FROM zone_branch WHERE branch_id = ? LIMIT 1", (
-        #             branch_id,)
-        #     ).fetchone()
-
-        #     if zone_check:
-        #         print("Branch is in zone_branch ✅")
-        #     else:
-        #         print("Branch is NOT in zone_branch ❌")
-
-        # else:
-        #     print("Branch not found.")
-
         if branch_row:
             branch_id = branch_row[0]
             print("Branch ID:", branch_id)
+
+            # Check if the branch_id exists in zone_branch table
+            cursor = conn.execute(
+                "SELECT zone_id FROM zone_branch WHERE branch_id = ?", (branch_id,))
+
+            zone_row = cursor.fetchone()
+            zone_id = zone_row[0] if zone_row else None
+
+            if zone_row:
+                print(
+                    f"Branch ID {branch_id} is linked to Zone ID {zone_row[0]}")
+            else:
+                print(f"Branch ID {branch_id} is not linked to any zone.")
+
+            # Now find users that belong to this zone
+            if zone_id:
+                cursor.execute(
+                    "SELECT * FROM users WHERE ZoneID = ?", (zone_id,))
+                users_in_zone = cursor.fetchall()
+
+                if users_in_zone:
+                    for user in users_in_zone:
+                        user_info = {
+                            "id": user[0],
+                            "Username": user[1],
+                            "Branch": user[2],
+                            "ZoneID": user[3]
+                        }
+                        users3.append(user_info)
+                        print(f"User added: {user_info}")
+                else:
+                    print(f"No users found in zone ID {zone_id}")
+            else:
+                print("Zone ID not found for the given branch.")
 
             # Check if branch_id exists in zone_branch
             zone_check = conn.execute(
@@ -1875,8 +1882,6 @@ def add_many_leave(branch):
 
             if zone_check:
                 print("Branch is in zone_branch ✅")
-
-                # Now run the users3 query
                 users3 = conn.execute('''
                     SELECT DISTINCT
                         u.id,
@@ -1885,17 +1890,13 @@ def add_many_leave(branch):
                         u.ZoneID
                     FROM
                         users AS u
-                    LEFT JOIN zone_branch AS zb
-                        ON u.branch = zb.branch_id AND u.ZoneID = zb.zone_id
                     WHERE
                         u.RoleDefault = 145
                         AND u.ZoneID IS NOT NULL
                         AND u.branch IS NOT NULL
-                        AND (
-                            zb.branch_id IS NULL
-                            OR u.branch = ?
-                        )
-                ''', (user_branch,)).fetchall()
+                        AND u.ZoneID = ?
+                ''', (zone_id,)).fetchall()
+
             else:
                 print("Branch is NOT in zone_branch ❌")
         else:
@@ -1913,34 +1914,6 @@ def add_many_leave(branch):
             'SELECT id, username, branch FROM users WHERE RoleDefault IN (140) AND branch = ?', (
                 user_branch,)
         ).fetchall()
-
-        # users3 = conn.execute('''
-        #     SELECT DISTINCT
-        #         u.id,
-        #         u.username,
-        #         u.branch,
-        #         u.ZoneID
-        #     FROM
-        #         users AS u
-        #     LEFT JOIN zone_branch AS zb
-        #         ON u.branch = zb.branch_id AND u.ZoneID = zb.zone_id
-        #     WHERE
-        #         u.RoleDefault = 145
-        #         AND u.ZoneID IS NOT NULL
-        #         AND u.branch IS NOT NULL
-        #         AND (
-        #             zb.branch_id IS NULL  -- This means the branch is NOT in zone_branch
-        #             OR u.branch = ?       -- Or the user.branch matches the given branch (even if it is in zone_branch)
-        #         )
-        # ''', (user_branch,)).fetchall()
-
-        # users3 = list(map(lambda user: {
-        #     'UserID': user['id'],
-        #     'UserName': user['username'],
-        #     'Branch': user['branch'],
-        #     'ZoneID': user['ZoneID']
-        # }, users3))
-        # print("🚀 ~ users3:", users3)
         users4 = conn.execute(
             'SELECT id, username, branch FROM users WHERE RoleDefault = 180'
         ).fetchall()
