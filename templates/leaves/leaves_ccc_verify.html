@@ -43,8 +43,20 @@ content %}
             <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td>
             <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
             <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
-            <td class="px-6 py-3 border-b">{{ leave.verified_by }}</td>
-            <td class="px-6 py-3 border-b">{{ leave.approved_by }}</td>
+            <td class="px-6 py-3 border-b">
+              {% if leave.verified_by is none %}
+              <span class="text-blue-500">Pending</span>
+              {% else %}
+              {{ leave.verified_by }}
+              {% endif %}
+            </td>
+            <td class="px-6 py-3 border-b">
+              {% if leave.approved_by is none %}
+              <span class="text-blue-500">Pending</span>
+              {% else %}
+              {{ leave.approved_by }}
+              {% endif %}
+            </td>
             <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
               <b>{{ leave.reason }}</b>
@@ -89,8 +101,9 @@ content %}
         searching: true, // Enables the search box
         ordering: true, // Enables sorting
         responsive: true, // Makes the table responsive for smaller screens
+        pageLength: 14, // Number of rows per page
         order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
-        scrollX: true,         // Enable horizontal scrolling
+        scrollX: true, // Enable horizontal scrolling
         scrollCollapse: true,
         paging: true,
         searching: true,
@@ -98,10 +111,63 @@ content %}
         responsive: false,
         order: [[3, "asc"]],
         fixedColumns: {
-          leftColumns: 2,      // Fix first 2 columns (like EmployeeName and Branch)
-          rightColumns: 2      // Fix last 2 columns (like Reason and Status)
-        }
+          leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
+          rightColumns: 2, // Fix last 2 columns (like Reason and Status)
+        },
+
+        drawCallback: function () {
+          formatLeaveDatesAndHours();
+        },
       });
+
+      function formatLeaveDatesAndHours() {
+        $(".leave-start-date").each(function () {
+          var startDate = $(this).data("start");
+          var formattedStartDate =
+            moment(startDate).format("MM-DD-YYYY hh:mm A");
+          $(this).text(formattedStartDate);
+        });
+
+        $(".leave-end-date").each(function () {
+          var endDate = $(this).data("end");
+          var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
+          $(this).text(formattedEndDate);
+        });
+
+        $(".leave-hours").each(function () {
+          var startDate = $(this).data("start");
+          var endDate = $(this).data("end");
+
+          var startTime = moment(startDate);
+          var endTime = moment(endDate);
+
+          if (startTime.isValid() && endTime.isValid()) {
+            var duration = moment.duration(endTime.diff(startTime));
+            var totalHours = duration.asHours();
+
+            // Subtract lunch overlap
+            var lunchStart = moment(startDate).hour(12).minute(0).second(0);
+            var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
+
+            var overlapStart = moment.max(startTime, lunchStart);
+            var overlapEnd = moment.min(endTime, lunchEnd);
+
+            if (overlapEnd.isAfter(overlapStart)) {
+              var lunchOverlap = moment
+                .duration(overlapEnd.diff(overlapStart))
+                .asHours();
+              totalHours -= lunchOverlap;
+            }
+
+            totalHours = Math.max(totalHours, 0);
+            var displayHours = totalHours.toFixed(1) + " H";
+
+            $(this).text(displayHours);
+          } else {
+            $(this).text("Invalid dates");
+          }
+        });
+      }
 
       // Format the Start and End Dates using Moment.js
       $(".leave-start-date").each(function () {

@@ -3,74 +3,76 @@
 {% block title %}Edit Leave{% endblock %}
 
 {% block content %}
+<div class="bg-gradient-to-br from-blue-50 to-white min-h-screen py-10">
+  <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
+    <h4 class="text-2xl font-bold text-blue-700 mb-6 text-center">Edit Leave</h4>
 
-<body class="bg-gray-100">
-
-  <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-    <h1 class="text-3xl font-bold text-gray-900 mb-4">Edit Leave</h1>
-
-    <form action="{{ url_for('edit_leave', id=leave['id']) }}" method="POST" class="bg-white shadow-md rounded-lg p-6">
-
-      <div class="mb-4">
-        <label for="verified_by" class="block text-gray-700 text-sm font-medium">
-          Verified By:
-        </label>
+    <form action="{{ url_for('edit_leave', id=leave['id']) }}" method="POST" class="space-y-6">
+      <!-- Verified By -->
+      <div>
+        <label for="verified_by" class="block text-gray-700 font-semibold">Verified By</label>
         <input type="text" id="verified_by" name="verified_by" value="{{ current_user.username }}"
-          class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-          required />
+          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          required>
       </div>
-      <div class="mb-4">
-        <label for="leave_type" class="block text-gray-700 text-sm font-medium">
-          Select Leave Type:
-        </label>
+
+      <!-- Leave Type -->
+      <div>
+        <label for="leave_type" class="block text-gray-700 font-semibold">Select Leave Type</label>
         <select id="leave_type" name="leave_type"
-          class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
           <option value="annualLeave">Annual Leave</option>
           <option value="sickLeave">Sick Leave</option>
           <option value="maternityLeave">Maternity Leave</option>
-          <option value="specialLeave"> Special Leave</option>
+          <option value="specialLeave">Special Leave</option>
         </select>
       </div>
-      <div class="mb-4">
-        <label for="start_date" class="block text-gray-700 text-sm font-medium">Start Date</label>
+
+      <!-- Start Date -->
+      <div>
+        <label for="start_date" class="block text-gray-700 font-semibold">Start Date</label>
         <input type="datetime-local" name="start_date" id="start_date" value="{{ leave['start_date'] }}"
-          class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
+          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
       </div>
 
-      <div class="mb-4">
-        <label for="end_date" class="block text-gray-700 text-sm font-medium">End Date</label>
+      <!-- End Date -->
+      <div>
+        <label for="end_date" class="block text-gray-700 font-semibold">End Date</label>
         <input type="datetime-local" name="end_date" id="end_date" value="{{ leave['end_date'] }}"
-          class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">
+          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
       </div>
 
-      <div class="mb-4">
-        <label for="reason" class="block text-gray-700 text-sm font-medium">Reason</label>
-        <textarea name="reason" id="reason" rows="4" required
-          class="mt-2 px-4 py-2 border border-gray-300 rounded-md w-full">{{ leave['reason'] }}</textarea>
+      <!-- Reason -->
+      <div>
+        <label for="reason" class="block text-gray-700 font-semibold">Reason</label>
+        <textarea name="reason" id="reason" rows="4"
+          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          required>{{ leave['reason'] }}</textarea>
       </div>
 
       <!-- Status -->
       <div>
-        <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+        <label for="status" class="block text-gray-700 font-semibold">Status</label>
         <select id="status" name="status"
-          class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-3">
+          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
           <option value="Approved" {% if leave['status']=='Approved' or leave['status'] is none %}selected{% endif %}>
             Approved</option>
-          <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified
-          </option>
+          <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
         </select>
       </div>
 
-      <div class="grid grid-cols-2 gap-2">
+      <!-- Buttons -->
+      <div class="flex justify-between items-center mt-6 space-x-4">
         <button type="submit"
-          class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 flex items-center justify-center"><i
-            class="fas fa-save mr-2"></i> Update Leave</button>
+          class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+          <i class="fas fa-save mr-2"></i> Update Leave
+        </button>
         <a href="{{ url_for('view_leaves') }}"
-          class="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 flex items-center justify-center"><i
-            class="fas fa-arrow-left mr-2"></i> Back</a>
+          class="w-full py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </a>
       </div>
     </form>
   </div>
-
-</body>
+</div>
 {% endblock %}

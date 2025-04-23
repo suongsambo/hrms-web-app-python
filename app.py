@@ -2400,7 +2400,8 @@ def edit_leave(id):
         reason = request.form['reason']
         # approved_by = request.form.get('approved_by')
         verified_by = request.form.get('verified_by')
-        status = "Pending"
+        status = request.form.get('status')
+        # status = "Pending"
 
         # Logic for half-day leave only
         if type_of_leave == 'H':
@@ -2482,8 +2483,9 @@ def edit_leave_hours_pm(id):
         end_date = request.form['end_date']
         reason = request.form['reason']
         approved_by = request.form.get('approved_by')
+        status = request.form.get('status')
 
-        status = "Pending"
+        # status = "Pending"
 
         if type_of_leave == 'H':
             status = "Approved"

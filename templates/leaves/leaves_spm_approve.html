@@ -119,7 +119,60 @@ content %}
           leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
           rightColumns: 2, // Fix last 2 columns (like Reason and Status)
         },
+        drawCallback: function () {
+          formatLeaveDatesAndHours();
+        },
       });
+
+
+      function formatLeaveDatesAndHours() {
+        $(".leave-start-date").each(function () {
+          var startDate = $(this).data("start");
+          var formattedStartDate =
+            moment(startDate).format("MM-DD-YYYY hh:mm A");
+          $(this).text(formattedStartDate);
+        });
+
+        $(".leave-end-date").each(function () {
+          var endDate = $(this).data("end");
+          var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
+          $(this).text(formattedEndDate);
+        });
+
+        $(".leave-hours").each(function () {
+          var startDate = $(this).data("start");
+          var endDate = $(this).data("end");
+
+          var startTime = moment(startDate);
+          var endTime = moment(endDate);
+
+          if (startTime.isValid() && endTime.isValid()) {
+            var duration = moment.duration(endTime.diff(startTime));
+            var totalHours = duration.asHours();
+
+            // Subtract lunch overlap
+            var lunchStart = moment(startDate).hour(12).minute(0).second(0);
+            var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
+
+            var overlapStart = moment.max(startTime, lunchStart);
+            var overlapEnd = moment.min(endTime, lunchEnd);
+
+            if (overlapEnd.isAfter(overlapStart)) {
+              var lunchOverlap = moment
+                .duration(overlapEnd.diff(overlapStart))
+                .asHours();
+              totalHours -= lunchOverlap;
+            }
+
+            totalHours = Math.max(totalHours, 0);
+            var displayHours = totalHours.toFixed(1) + " H";
+
+            $(this).text(displayHours);
+          } else {
+            $(this).text("Invalid dates");
+          }
+        });
+      }
 
       // Format the Start and End Dates using Moment.js
       $(".leave-start-date").each(function () {
