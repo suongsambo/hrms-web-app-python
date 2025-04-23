@@ -6,7 +6,6 @@ from flask import Flask, Response, render_template, flash, redirect, url_for, re
 import sqlite3
 import hashlib
 import os
-import math
 import json
 import pyotp
 import requests
@@ -39,9 +38,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 class User(UserMixin):
@@ -1422,7 +1418,9 @@ def leaves_by_branch_and_ccc_category(branch_name):
                 l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE e.branch = ? AND (l.category = 'S' OR l.type_of_leave = 'T')
+            WHERE e.branch = ? AND (l.category IS NULL
+                                    OR l.category = 'S'
+                                    OR l.type_of_leave = 'H')
         '''
         params = (branch_name,)
     else:
@@ -1444,7 +1442,10 @@ def leaves_by_branch_and_ccc_category(branch_name):
                 l.requested_by
             FROM leaves l
             LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE l.category = 'S' OR l.type_of_leave = 'T'
+            WHERE
+                l.category IS NULL
+                OR l.category = 'S'
+                OR l.type_of_leave = 'H'
         '''
         params = ()
 
@@ -1633,8 +1634,11 @@ def filter_leaves_by_branch_name(branch_name):
         AND (
             (l.category = 'S' AND l.verified_by IS NOT NULL)
             OR (l.category = 'M' AND l.verified_by IS NULL)
+            OR l.category IS NULL
+            OR l.type_of_leave = 'H'
         )
     '''
+
     params = (branch_name,)
 
     try:
@@ -2379,57 +2383,128 @@ def edit_leave_pm(id):
     return render_template('/leaves/edit_leave_pm.html', leave=leave)
 
 
-@app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])
+@app.route('/leave/edit/hours/ccc/<int:id>', methods=['GET', 'POST'])
 def edit_leave(id):
     with get_db_connection() as conn:
         leave = conn.execute(
             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
 
+    if not leave:
+        return "Leave record not found", 404
+
     if request.method == 'POST':
         leave_type = request.form['leave_type']
+        type_of_leave = request.form.get('type_of_leave')
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
+        # approved_by = request.form.get('approved_by')
+        verified_by = request.form.get('verified_by')
+        status = "Pending"
 
-        # Get values for approved_by and verified_by if they exist
-        approved_by = request.form.get('approved_by', None)
-        verified_by = request.form.get('verified_by', None)
-
-        # Calculate service count (difference between start_date and end_date)
-        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
-        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
-        service_count = (end_date_obj - start_date_obj).days + 1
-
-        # Determine leave category and set the appropriate fields
-        if service_count <= 2:
-            category = "S"
+        # Logic for half-day leave only
+        if type_of_leave == 'H':
             status = "Approved"
-            # Require verified_by for small leaves
             verified_by = request.form['verified_by']
-            approved_by = None  # Clear approved_by for category "S"
-        elif 3 <= service_count <= 5:
-            category = "M"
-            status = "Verified"
-            # Require approved_by for medium leaves
-            approved_by = request.form['approved_by']
-            verified_by = None  # Clear verified_by for category "M"
-        else:
-            category = "L"
-            status = request.form['status']  # User-defined status
-            # Keep approved_by and verified_by unchanged
 
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?, start_date= ?, end_date= ?, reason= ?, status= ?, 
-                    service_count= ?, category= ?, approved_by= ?, verified_by= ?
-                WHERE id= ?
-            ''', (leave_type, start_date, end_date, reason, status, service_count, category,
-                  approved_by, verified_by, id))
+                SET leave_type = ?, reason = ?, status = ?, 
+                    verified_by = ?, 
+                    start_date = ?, end_date = ?
+                WHERE id = ?
+            ''', (
+                leave_type, reason, status,
+                verified_by,
+                start_date, end_date, id
+            ))
 
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_leave.html', leave=leave)
+
+
+# @app.route('/leave/edit/hours/pm/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_hours_pm(id):
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if not leave:
+#         return "Leave record not found", 404
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         type_of_leave = request.form.get('type_of_leave')
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         approved_by = request.form.get('approved_by')
+
+#         status = "Pending"
+
+#         if type_of_leave == 'H':
+#             status = "Approved"
+#             approved_by = request.form['approved_by']
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type = ?, reason = ?, status = ?,
+#                     approved_by = ?,
+#                     start_date = ?, end_date = ?
+#                 WHERE id = ?
+#             ''', (
+#                 leave_type, reason, status,
+#                 approved_by,
+#                 start_date, end_date, id
+#             ))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_leave_hours_pm.html', leave=leave)
+
+
+@app.route('/leave/edit/hours/pm/<int:id>', methods=['GET', 'POST'])
+def edit_leave_hours_pm(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if not leave:
+        return "Leave record not found", 404
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        type_of_leave = request.form.get('type_of_leave', '').strip().upper()
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        approved_by = request.form.get('approved_by')
+
+        status = "Pending"
+
+        if type_of_leave == 'H':
+            status = "Approved"
+            approved_by = request.form['approved_by']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type = ?, reason = ?, status = ?, 
+                    approved_by = ?, 
+                    start_date = ?, end_date = ?
+                WHERE id = ?
+            ''', (
+                leave_type, reason, status,
+                approved_by,
+                start_date, end_date, id
+            ))
+
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_leave_hours_pm.html', leave=leave)
 
 
 @app.route('/leave/edit/<int:id>', methods=['GET', 'POST'])

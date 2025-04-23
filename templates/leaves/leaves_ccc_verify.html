@@ -51,12 +51,12 @@ content %}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
               <span
-                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
+                class="{% if leave.status is not none and leave.status == 'Approved' %}text-green-500{% elif leave.status is not none and leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
                 <b>{{ leave.status }}</b>
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">
-              {% if leave.type_of_leave == 'T' %}
+              {% if leave.type_of_leave == 'H' %}
               <a href="{{ url_for('edit_leave', id=leave.id) }}"
                 class="text-blue-600 hover:text-blue-900 flex items-center space-x-1">
                 <i class="fas fa-edit mr-1"></i> Edit

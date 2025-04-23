@@ -55,26 +55,26 @@ content %}
             <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
             <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
             <td class="px-6 py-3 border-b">
-              {% if leave.verified_by %}{{ leave.verified_by }}{% else
-              %}&nbsp;{% endif %}
+              {% if leave.verified_by %}{{ leave.verified_by }}{% else %}
+              <span class="text-blue-500">Pending</span>
+              {% endif %}
             </td>
             <td class="px-6 py-3 border-b">
-              {% if leave.approved_by %}{{ leave.approved_by }}{% else
-              %}&nbsp;{% endif %}
+              {% if leave.approved_by %}{{ leave.approved_by }}{% else %}
+              <span class="text-blue-500">Pending</span>
+              {% endif %}
             </td>
             <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
               <b>{{ leave.reason }}</b>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
-              <span
-                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
-                <b>{{ leave.status }}</b>
+              <span <b>{{ leave.status }}</b>
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">
-              {% if leave.type_of_leave == 'T' %}
-              <a href="{{ url_for('edit_leave', id=leave.id) }}"
+              {% if leave.type_of_leave == 'H' %}
+              <a href="{{ url_for('edit_leave_hours_pm', id=leave.id) }}"
                 class="text-blue-600 hover:text-blue-900 flex items-center space-x-1">
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
@@ -111,7 +111,7 @@ content %}
         order: [[3, "asc"]],
         fixedColumns: {
           leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
-          rightColumns: 2, // Fix last 2 columns (like Reason and Status)
+          rightColumns: 1, // Fix last 2 columns (like Reason and Status)
         },
       });
 
