@@ -13,30 +13,22 @@ content %}
       <!-- Buttons Section -->
       <div class="flex justify-end gap-4">
         <!-- Print Button -->
-        <button
-          type="button"
-          onclick="printTable()"
-          class="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out"
-        >
+        <button type="button" onclick="printTable()"
+          class="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out">
           <span class="material-symbols-outlined">print</span>
           <span class="text-sm">Print</span>
         </button>
 
         <!-- Refresh Button -->
-        <button
-          type="button"
-          onclick="window.location.reload()"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out"
-        >
+        <button type="button" onclick="window.location.reload()"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out">
           <span class="material-symbols-outlined">autorenew</span>
           <span class="text-sm">Refresh</span>
         </button>
 
         <!-- Add Branch Button -->
-        <a
-          href="{{ url_for('add_branch') }}"
-          class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out"
-        >
+        <a href="{{ url_for('add_branch') }}"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out">
           <span class="material-symbols-outlined">add_box</span>
           <span class="text-sm font-medium">Add Branch</span>
         </a>
@@ -44,51 +36,58 @@ content %}
     </div>
 
     <!-- Branch Table -->
-    <table class="min-w-full bg-white shadow-md rounded-lg" id="branch-table">
+    <table class="min-w-full text-sm text-left border-collapse nowrap" id="branch-table">
       <thead class="bg-gray-800 text-white">
         <tr>
-          <th class="py-3 px-6 text-left">ID</th>
-          <th class="py-3 px-6 text-left">Branch</th>
-          <th class="py-3 px-6 text-left">Branch Manager</th>
-          <th class="py-3 px-6 text-left">Status</th>
-          <th class="py-3 px-6 text-left">Contact Number</th>
-          <th class="py-3 px-6 text-center">Actions</th>
+          <th class="py-2 px-4 text-center border border-gray-300">ID</th>
+          <th class="py-2 px-4 text-center border border-gray-300">Branch</th>
+          <th class="py-2 px-4 text-center border border-gray-300">
+            Branch Manager
+          </th>
+          <th class="py-2 px-4 text-center border border-gray-300">Status</th>
+          <th class="py-2 px-4 text-center border border-gray-300">
+            Contact Number
+          </th>
+          <th class="py-2 px-4 text-center border border-gray-300">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for branch in branches %}
         <tr class="border-b hover:bg-gray-50">
-          <td class="py-2 px-6">{{ branch['ID'] }}</td>
-          <td class="py-2 px-6">{{ branch['Branch'] }}</td>
-          <td class="py-2 px-6">{{ branch['BranchManagerName'] }}</td>
-          <td class="py-2 px-6">{{ branch['Status'] }}</td>
-          <td class="py-2 px-6">{{ branch['ContactNumber'] }}</td>
-          <td class="py-2 px-6 text-center">
-            <a
-              href="{{ url_for('edit_branch', id=branch['ID']) }}"
-              class="text-blue-500 hover:text-blue-700 font-semibold transition-colors duration-300"
-            >
-              Edit
-            </a>
-            <a
-              href="{{ url_for('view_branch', id=branch['ID']) }}"
-              class="text-green-500 hover:text-green-700 font-semibold transition-colors duration-300"
-            >
-              View
-            </a>
-            <form
-              action="{{ url_for('delete_branch', id=branch['ID']) }}"
-              method="POST"
-              class="inline"
-            >
-              <button
-                type="submit"
-                class="text-red-500 hover:text-red-700 font-semibold transition-colors duration-300"
-                onclick="return confirm('Delete branch?')"
-              >
-                Delete
-              </button>
-            </form>
+          <td class="py-2 px-4 border border-gray-300">{{ branch['ID'] }}</td>
+          <td class="py-2 px-4 border border-gray-300">
+            {{ branch['Branch'] }}
+          </td>
+          <td class="py-2 px-4 border border-gray-300">
+            {{ branch['BranchManagerName'] }}
+          </td>
+          <td class="py-2 px-4 border border-gray-300">
+            {{ branch['Status'] }}
+          </td>
+          <td class="py-2 px-4 border border-gray-300">
+            {{ branch['ContactNumber'] }}
+          </td>
+          <td class="py-2 px-4 border border-gray-300 jstify-space-between">
+            <div class="flex justify-center gap-x-2">
+              <a href="{{ url_for('edit_branch', id=branch['ID']) }}"
+                class="text-blue-500 hover:text-blue-700 font-semibold transition-colors duration-300 flex items-center space-x-2">
+                <span class="material-symbols-outlined">edit</span>
+                <!-- <span class="text-sm">Edit</span> -->
+              </a>
+              <a href="{{ url_for('view_branch', id=branch['ID']) }}"
+                class="text-green-500 hover:text-green-700 font-semibold transition-colors duration-300 flex items-center space-x-2">
+                <span class="material-symbols-outlined">visibility</span>
+                <!-- <span class="text-sm">View</span> -->
+              </a>
+              <form action="{{ url_for('delete_branch', id=branch['ID']) }}" method="POST" class="inline">
+                <button type="submit"
+                  class="text-red-500 hover:text-red-700 font-semibold transition-colors duration-300 flex items-center space-x-2"
+                  onclick="return confirm('Delete branch?')">
+                  <span class="material-symbols-outlined">delete</span>
+                  <!-- <span class="text-sm">Delete</span> -->
+                </button>
+              </form>
+            </div>
           </td>
         </tr>
         {% endfor %}
@@ -164,6 +163,14 @@ content %}
         ordering: true,
         info: true,
         autoWidth: false,
+        border: true,
+        autoWidth: false,
+        pageLength: 14, // Number of rows per page
+        // order: [[3, "asc"]],
+        // fixedColumns: {
+        //   leftColumns: 2,      // Fix first 2 columns (like EmployeeName and Branch)
+        //   rightColumns: 1      // Fix last 2 columns (like Reason and Status)
+        // },
       });
     });
   </script>

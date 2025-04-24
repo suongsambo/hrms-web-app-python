@@ -1,49 +1,63 @@
 {% extends 'base.html' %} {% block title %}View Branch{% endblock %} {% block
 content %}
 
-<body class="bg-gray-100">
-  <div class="container mx-auto mt-10">
-    <h1 class="text-3xl font-semibold mb-6">Branch Details</h1>
-
-    {% if branch %}
-    <div class="bg-white shadow-lg rounded-lg p-6">
-      <div class="grid grid-cols-2 gap-4">
-        <div><strong>ID:</strong> {{ branch['ID'] }}</div>
-        <div><strong>Branch:</strong> {{ branch['Branch'] }}</div>
-        <div><strong>Status:</strong> {{ branch['status'] }}</div>
-        <div>
-          <strong>Contact Number:</strong> {{ branch['ContactNumber'] }}
-        </div>
-        <div>
-          <strong>Branch Manager Name:</strong> {{ branch['BranchManagerName']
-          }}
-        </div>
-        <div><strong>Description:</strong> {{ branch['Description'] }}</div>
-        <div><strong>Address:</strong> {{ branch['Address'] }}</div>
-        <div><strong>Register Date:</strong> {{ branch['RegisterDate'] }}</div>
-        <div>
-          <strong>Local Description:</strong> {{ branch['LocalDescription'] }}
-        </div>
-        <div>
-          <strong>Local Branch Manager Name:</strong> {{
-          branch['LocalBranchManagerName'] }}
-        </div>
-        <div><strong>Local Address:</strong> {{ branch['LocalAddress'] }}</div>
-      </div>
-      <div class="mt-4 text-center">
-        <button
-          type="button"
-          onclick="window.location.href='/branches'"
-          class="bg-gray-700 hover:bg-gray-100 text-white hover:text-gray-500 font-semibold py-2 px-4 border border-gray-300 rounded-md shadow-sm"
-        >
-          Back
-        </button>
-      </div>
+<div class="bg-white shadow-xl rounded-lg p-8 max-w-4xl mx-auto">
+  <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-2">
+    Branch Details
+  </h2>
+  <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6 text-gray-700">
+    <div>
+      <dt class="font-semibold">ID</dt>
+      <dd class="mt-1">{{ branch['ID'] }}</dd>
     </div>
-    {% else %}
-    <p class="text-red-500">Branch not found.</p>
-    {% endif %}
+    <div>
+      <dt class="font-semibold">Branch</dt>
+      <dd class="mt-1">{{ branch['Branch'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Status</dt>
+      <dd class="mt-1">{{ branch['Status'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Contact Number</dt>
+      <dd class="mt-1">{{ branch['ContactNumber'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Branch Manager Name</dt>
+      <dd class="mt-1">{{ branch['BranchManagerName'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Description</dt>
+      <dd class="mt-1">{{ branch['Description'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Address</dt>
+      <dd class="mt-1">{{ branch['Address'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Register Date</dt>
+      <dd class="mt-1">{{ branch['RegisterDate'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Local Description</dt>
+      <dd class="mt-1">{{ branch['LocalDescription'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Local Branch Manager Name</dt>
+      <dd class="mt-1">{{ branch['LocalBranchManagerName'] }}</dd>
+    </div>
+    <div>
+      <dt class="font-semibold">Local Address</dt>
+      <dd class="mt-1">{{ branch['LocalAddress'] }}</dd>
+    </div>
+  </dl>
+  <div class="mt-8 justify-start">
+    <button type="button" onclick="window.location.href='{{ url_for('list_branches') }}'"
+      class="bg-black hover:bg-gray-900 text-white font-medium py-2 px-6 rounded-lg transition duration-300 flex items-center space-x-2">
+      <i class="fas fa-arrow-left"></i>
+      <span>Back</span>
+    </button>
   </div>
-</body>
+</div>
 
 {% endblock %}

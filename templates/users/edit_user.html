@@ -5,104 +5,60 @@ Edit User
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto bg-white py-8 px-3">
+<!-- <div class="container mx-auto bg-white py-8 px-3"> -->
+<!-- <div class="max-w-5xl mx-auto bg-white p-8 rounded-2xl shadow-lg ring-1 ring-gray-200"> -->
+<div class="max-w-4xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
   <h2 class="text-2xl font-bold mb-6">Edit User</h2>
-  <form
-    method="POST"
-    action="{{ url_for('edit_user', id=user['ID']) }}"
-    class="space-y-4"
-  >
+  <form method="POST" action="{{ url_for('edit_user', id=user['ID']) }}" class="space-y-4">
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      
+
       <!-- Username Field -->
       <div class="flex flex-col">
         <label for="username" class="block text-sm font-medium text-gray-700">Username:</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          value="{{ user['UserName'] }}"
-          required
-          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400"
-        />
+        <input type="text" id="username" name="username" value="{{ user['UserName'] }}" required
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400" />
       </div>
 
       <!-- Email Field -->
       <div class="flex flex-col">
         <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value="{{ user['Email'] }}"
-          required
-          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400"
-        />
+        <input type="email" id="email" name="email" value="{{ user['Email'] }}" required
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400" />
       </div>
 
       <!-- First Name (Khmer) Field -->
       <div class="flex flex-col">
         <label for="first_name_kh" class="block text-sm font-medium text-gray-700">First Name (Khmer):</label>
-        <input
-          type="text"
-          id="first_name_kh"
-          name="first_name_kh"
-          value="{{ user['FirstNameKh'] }}"
-          required
-          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400"
-        />
+        <input type="text" id="first_name_kh" name="first_name_kh" value="{{ user['FirstNameKh'] }}" required
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400" />
       </div>
 
       <!-- Last Name (Khmer) Field -->
       <div class="flex flex-col">
         <label for="last_name_kh" class="block text-sm font-medium text-gray-700">Last Name (Khmer):</label>
-        <input
-          type="text"
-          id="last_name_kh"
-          name="last_name_kh"
-          value="{{ user['LastNameKh'] }}"
-          required
-          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400"
-        />
+        <input type="text" id="last_name_kh" name="last_name_kh" value="{{ user['LastNameKh'] }}" required
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400" />
       </div>
 
       <!-- First Name (English) Field -->
       <div class="flex flex-col">
         <label for="first_name_en" class="block text-sm font-medium text-gray-700">First Name (English):</label>
-        <input
-          type="text"
-          id="first_name_en"
-          name="first_name_en"
-          value="{{ user['FirstNameEn'] }}"
-          required
-          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400"
-        />
+        <input type="text" id="first_name_en" name="first_name_en" value="{{ user['FirstNameEn'] }}" required
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400" />
       </div>
 
       <!-- Last Name (English) Field -->
       <div class="flex flex-col">
         <label for="last_name_en" class="block text-sm font-medium text-gray-700">Last Name (English):</label>
-        <input
-          type="text"
-          id="last_name_en"
-          name="last_name_en"
-          value="{{ user['LastNameEn'] }}"
-          required
-          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400"
-        />
+        <input type="text" id="last_name_en" name="last_name_en" value="{{ user['LastNameEn'] }}" required
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400" />
       </div>
 
       <!-- Mobile Number Field -->
       <div class="flex flex-col">
         <label for="mobile1" class="block text-sm font-medium text-gray-700">Mobile Number:</label>
-        <input
-          type="text"
-          id="mobile1"
-          name="mobile1"
-          value="{{ user['Mobile1'] }}"
-          required
-          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400"
-        />
+        <input type="text" id="mobile1" name="mobile1" value="{{ user['Mobile1'] }}" required
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 px-3 py-2 placeholder-gray-400" />
       </div>
 
       <!-- Branch Select Field -->
@@ -111,7 +67,8 @@ Edit User
         <select name="branch" required class="w-full px-3 py-2 border rounded-md">
           <option value="">Select a Branch</option>
           {% for branch in branches %}
-          <option value="{{ branch['Branch'] }}" {% if selected_branch == branch['ID'] %}selected{% endif %}>{{ branch['Branch'] }}</option>
+          <option value="{{ branch['Branch'] }}" {% if selected_branch==branch['ID'] %}selected{% endif %}>{{
+            branch['Branch'] }}</option>
           {% endfor %}
         </select>
       </div>
@@ -120,11 +77,8 @@ Edit User
       <div class="flex flex-col">
         <label for="role_default" class="block text-lg font-medium text-gray-700">Select Role</label>
         <div class="relative">
-          <select
-            id="role_default"
-            name="role_default"
-            class="mt-1 block w-full px-4 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          >
+          <select id="role_default" name="role_default"
+            class="mt-1 block w-full px-4 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected hidden>Select Role</option>
             <option value="1">GUEST</option>
             <option value="10">CUSTOMER</option>
@@ -159,14 +113,8 @@ Edit User
       <!-- Is Admin Checkbox -->
       <div class="flex items-center space-x-3 mt-4">
         <label for="is_admin" class="block text-sm font-medium text-gray-700">Is Admin:</label>
-        <input
-          type="checkbox"
-          id="is_admin"
-          name="is_admin"
-          value="1"
-          {% if user['IsAdmin'] == 1 %}checked{% endif %}
-        class="h-5 w-5 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
-        />
+        <input type="checkbox" id="is_admin" name="is_admin" value="1" {% if user['IsAdmin']==1 %}checked{% endif %}
+          class="h-5 w-5 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
       </div>
 
     </div>
@@ -174,16 +122,12 @@ Edit User
 
     <!-- Submit and Cancel Buttons -->
     <div class="flex space-x-4 mt-6">
-      <button
-        type="submit"
-        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      >
+      <button type="submit"
+        class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
         <i class="fas fa-save mr-2"></i> Update
       </button>
-      <a
-        href="{{ url_for('list_users') }}"
-        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-      >
+      <a href="{{ url_for('list_users') }}"
+        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
         <i class="fas fa-times mr-2"></i> Cancel
       </a>
     </div>

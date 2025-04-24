@@ -555,7 +555,7 @@ def init_db():
             ("CRD", "Credit Department"),
             ("OPD", "Operations Department"),
             ("FND", "Finance Department"),
-            ("TRD", "Training Department"),
+            ("TRD", "Treasury Department"),
             ("ITD", "Information Technology Department")
         ]
 
