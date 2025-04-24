@@ -16,7 +16,7 @@ from werkzeug.utils import secure_filename
 from config import Config
 from flask_socketio import SocketIO, emit, join_room, leave_room, send
 import time  # Make sure this is the standard time module
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import Optional
 import eventlet
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -4050,14 +4050,103 @@ def render_dashboard_branch_manager(branch_name):
         )
 
 
+# @app.route('/dashboard/employee/<int:employee_id>')
+# @login_required
+# def render_dashboard_employees(employee_id):
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+
+#     with get_db_connection() as conn:
+#         # Fetch the specific employee's data
+#         employee = conn.execute(
+#             """
+#             SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch,
+#                    p.PositionName AS Position, d.Name AS Department
+#             FROM employees e
+#             LEFT JOIN positions p ON e.position_id = p.ID
+#             LEFT JOIN departments d ON p.department_id = d.ID
+#             WHERE e.ID = ?
+#             """,
+#             (employee_id,)
+#         ).fetchone()
+
+#         if not employee:
+#             flash("Employee not found!", "danger")
+#             return redirect(url_for('dashboard', id=current_user.id))
+
+#         employee_data = {
+#             'ID': employee['ID'] or '',
+#             'Name': employee['Name'] or '',
+#             'Age': employee['Age'] or '',
+#             'Salary': employee['Salary'] or '',
+#             'Branch': employee['Branch'] or '',
+#             'Position': employee['Position'] or '',
+#             'Department': employee['Department'] or ''
+#         }
+
+#         # Get Payroll by employee ID and optional date range
+#         payroll_query = """
+#             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary
+#             FROM payroll p
+#             WHERE p.employee_id = ?
+#         """
+#         payroll_params = [employee['ID']]
+#         if start_date and end_date:
+#             payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
+#             payroll_params.extend([start_date, end_date])
+
+#         total_salary = conn.execute(payroll_query, payroll_params).fetchone()
+#         total_salary = total_salary["total_salary"] if total_salary else 0
+
+#         # Get Leaves by employee ID and optional date range
+#         leaves_query = """
+#             SELECT
+#                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
+#                 COALESCE(
+#                     SUM(l.leave_hours),
+#                     0
+#                 ) AS total_leaves_hours
+#             FROM leaves l
+#             WHERE l.employee_id = ?
+#         """
+#         leaves_params = [employee['ID']]
+#         if start_date and end_date:
+#             leaves_query += " AND l.start_date >= ? AND l.end_date <= ?"
+#             leaves_params.extend([start_date, end_date])
+
+#         leaves = conn.execute(leaves_query, leaves_params).fetchone()
+
+#         # Ensure we handle cases where the query returns None
+#         total_leaves_days = leaves["total_leaves_days"] if leaves else 0
+#         total_leaves_hours = "{:.0f} hours".format(
+#             leaves["total_leaves_hours"]) if leaves else "0 hours"
+
+#         return render_template(
+#             'employees/employee_dashboard.html',
+#             employee=employee_data,
+#             total_salary=total_salary,
+#             total_leaves_days=total_leaves_days,
+#             total_leaves_hours=total_leaves_hours
+#         )
+
 @app.route('/dashboard/employee/<int:employee_id>')
 @login_required
 def render_dashboard_employees(employee_id):
+    # Get date filter from query params or set to current month
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
+    if not start_date or not end_date:
+        today = date.today()
+        start_date = date(today.year, today.month, 1)
+        # calculate end of current month
+        next_month = today.replace(day=28) + timedelta(days=4)
+        end_date = next_month - timedelta(days=next_month.day)
+        # Convert to string format for SQL
+        start_date = start_date.isoformat()
+        end_date = end_date.isoformat()
+
     with get_db_connection() as conn:
-        # Fetch the specific employee's data
         employee = conn.execute(
             """
             SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch, 
@@ -4084,39 +4173,24 @@ def render_dashboard_employees(employee_id):
             'Department': employee['Department'] or ''
         }
 
-        # Get Payroll by employee ID and optional date range
         payroll_query = """
             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary 
             FROM payroll p 
-            WHERE p.employee_id = ?
+            WHERE p.employee_id = ? AND p.period_start_date >= ? AND p.period_end_date <= ?
         """
-        payroll_params = [employee['ID']]
-        if start_date and end_date:
-            payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
-            payroll_params.extend([start_date, end_date])
-
-        total_salary = conn.execute(payroll_query, payroll_params).fetchone()
+        total_salary = conn.execute(
+            payroll_query, (employee['ID'], start_date, end_date)).fetchone()
         total_salary = total_salary["total_salary"] if total_salary else 0
 
-        # Get Leaves by employee ID and optional date range
         leaves_query = """
             SELECT 
                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
-                COALESCE(
-                    SUM(l.leave_hours), 
-                    0
-                ) AS total_leaves_hours
+                COALESCE(SUM(l.leave_hours), 0) AS total_leaves_hours
             FROM leaves l 
-            WHERE l.employee_id = ?
+            WHERE l.employee_id = ? AND l.start_date >= ? AND l.end_date <= ?
         """
-        leaves_params = [employee['ID']]
-        if start_date and end_date:
-            leaves_query += " AND l.start_date >= ? AND l.end_date <= ?"
-            leaves_params.extend([start_date, end_date])
-
-        leaves = conn.execute(leaves_query, leaves_params).fetchone()
-
-        # Ensure we handle cases where the query returns None
+        leaves = conn.execute(
+            leaves_query, (employee['ID'], start_date, end_date)).fetchone()
         total_leaves_days = leaves["total_leaves_days"] if leaves else 0
         total_leaves_hours = "{:.0f} hours".format(
             leaves["total_leaves_hours"]) if leaves else "0 hours"
@@ -4126,7 +4200,9 @@ def render_dashboard_employees(employee_id):
             employee=employee_data,
             total_salary=total_salary,
             total_leaves_days=total_leaves_days,
-            total_leaves_hours=total_leaves_hours
+            total_leaves_hours=total_leaves_hours,
+            start_date=start_date,
+            end_date=end_date
         )
 
 
