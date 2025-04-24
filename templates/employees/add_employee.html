@@ -1,762 +1,472 @@
 {% extends 'base.html' %} {% block title %} Add Employee {% endblock %} {% block
 content %}
-<div class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-lg">
+<div class="max-w-7xl mx-auto bg-white p-4 rounded-lg shadow-lg">
   <!-- Form Title -->
-  <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">
+  <!-- <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">
     Add New Employee
-  </h2>
+  </h2> -->
 
-  <form
-    action="{{ url_for('add_employee') }}"
-    method="POST"
-    enctype="multipart/form-data"
-    class="space-y-6"
-  >
+  <form action="{{ url_for('add_employee') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
     <!-- Employee Information Section -->
-    <div class="border-b pb-4 mb-6">
-      <h3 class="text-xl font-semibold text-gray-800 mb-4">
-        Employee Information
-      </h3>
+    <!-- <div class="border-b pb-4 mb-6"> -->
+    <h3 class="text-xl font-semibold text-gray-800 mb-4">
+      Employee Information
+    </h3>
 
-      <!-- Grid Layout with 2 columns -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Name Field -->
-        <div>
-          <label for="name" class="block text-sm font-medium text-gray-700"
-            >Name:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
+    <!-- TODO: one -->
 
-        <!-- Age Field -->
-        <div>
-          <label for="age" class="block text-sm font-medium text-gray-700"
-            >Age:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="number"
-              id="age"
-              name="age"
-              required
-              min="18"
-              max="99"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Department Field -->
-        <div>
-          <label
-            for="department"
-            class="block text-sm font-medium text-gray-700"
-            >Department:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="department"
-              name="department"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Position Field -->
-        <div>
-          <label for="position" class="block text-sm font-medium text-gray-700">
-            Position:
-          </label>
-          <div class="mt-2 relative">
-            <select
-              id="position"
-              name="position_id"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="" disabled selected>Select a Position</option>
-              {% for position in positions %}
-              <option value="{{ position.id }}">
-                {{ position.PositionName }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <!-- Joining Date Field -->
-        <div>
-          <label
-            for="joining_date"
-            class="block text-sm font-medium text-gray-700"
-            >Joining Date:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="date"
-              id="joining_date"
-              name="joining_date"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Status Field -->
-        <div>
-          <label for="status" class="block text-sm font-medium text-gray-700"
-            >Status:</label
-          >
-          <div class="mt-2 relative">
-            <select
-              id="status"
-              name="status"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="" disabled selected>Select a Status</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="On Leave">On Leave</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Branch Field -->
-        <div>
-          <label for="branch" class="block text-sm font-medium text-gray-700"
-            >Branch:</label
-          >
-          <div class="mt-2 relative">
-            <select
-              id="branch"
-              name="branch"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="" disabled selected>Select a Branch</option>
-              {% for branch in branches %}
-              <option value="{{ branch['Branch'] }}">
-                {{ branch['Branch'] }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <!-- User ID Field -->
-        <div>
-          <label for="user_id" class="block text-sm font-medium text-gray-700"
-            >User ID:</label
-          >
-          <div class="mt-2 relative">
-            <select
-              id="user_id"
-              name="user_id"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="" disabled selected>Select a User</option>
-              {% for user in users %}
-              <option value="{{ user.id }}">
-                {{ user.id }} - {{ user.UserName }}
-              </option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-
-        <!-- Phone Number Field -->
-        <div>
-          <label
-            for="phone_number"
-            class="block text-sm font-medium text-gray-700"
-            >Phone Number:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="phone_number"
-              name="phone_number"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Email Field -->
-        <div>
-          <label for="email" class="block text-sm font-medium text-gray-700"
-            >Email:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="email"
-              id="email"
-              name="email"
-              required
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Emergency Contact Name Field -->
-        <div>
-          <label
-            for="emergency_contact_name"
-            class="block text-sm font-medium text-gray-700"
-            >Emergency Contact Name:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="emergency_contact_name"
-              name="emergency_contact_name"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Emergency Contact Phone Field -->
-        <div>
-          <label
-            for="emergency_contact_phone"
-            class="block text-sm font-medium text-gray-700"
-            >Emergency Contact Phone:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="emergency_contact_phone"
-              name="emergency_contact_phone"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Address Field -->
-        <div>
-          <label for="address" class="block text-sm font-medium text-gray-700"
-            >Address:</label
-          >
-          <div class="mt-2 relative">
-            <textarea
-              id="address"
-              name="address"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-              rows="3"
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- Salary Field -->
-        <div>
-          <label for="salary" class="block text-sm font-medium text-gray-700"
-            >Salary:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="number"
-              id="salary"
-              name="salary"
-              step="0.01"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Height Field -->
-        <div>
-          <label
-            for="employees_height"
-            class="block text-sm font-medium text-gray-700"
-            >Height:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="number"
-              id="employees_height"
-              name="employees_height"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Ethnicity Field -->
-        <div>
-          <label for="ethnicity" class="block text-sm font-medium text-gray-700"
-            >Ethnicity:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="ethnicity"
-              name="ethnicity"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Nationality Field -->
-        <div>
-          <label
-            for="nationality"
-            class="block text-sm font-medium text-gray-700"
-            >Nationality:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="nationality"
-              name="nationality"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Religion Field -->
-        <div>
-          <label for="religion" class="block text-sm font-medium text-gray-700"
-            >Religion:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="religion"
-              name="religion"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Family Status Field -->
-        <div>
-          <label
-            for="family_status"
-            class="block text-sm font-medium text-gray-700"
-            >Family Status:</label
-          >
-          <div class="mt-2 relative">
-            <select
-              id="family_status"
-              name="family_status"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="" disabled selected>Select a Family Status</option>
-              <option value="single">Single</option>
-              <option value="married">Married</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Place of Birth Field -->
-        <div>
-          <label
-            for="place_of_birth"
-            class="block text-sm font-medium text-gray-700"
-            >Place of Birth:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="place_of_birth"
-              name="place_of_birth"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Permanent Address Field -->
-        <div>
-          <label
-            for="permanent_address"
-            class="block text-sm font-medium text-gray-700"
-            >Permanent Address:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="permanent_address"
-              name="permanent_address"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Village Field -->
-        <div>
-          <label for="village" class="block text-sm font-medium text-gray-700"
-            >Village:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="village"
-              name="village"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Commune Field -->
-        <div>
-          <label for="commune" class="block text-sm font-medium text-gray-700"
-            >Commune:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="commune"
-              name="commune"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- District Field -->
-        <div>
-          <label for="district" class="block text-sm font-medium text-gray-700"
-            >District:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="district"
-              name="district"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Province Field -->
-        <div>
-          <label for="province" class="block text-sm font-medium text-gray-700"
-            >Province:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="province"
-              name="province"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Home Number Field -->
-        <div>
-          <label
-            for="home_number"
-            class="block text-sm font-medium text-gray-700"
-            >Home Number:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="home_number"
-              name="home_number"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Street Number Field -->
-        <div>
-          <label
-            for="street_number"
-            class="block text-sm font-medium text-gray-700"
-            >Street Number:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="street_number"
-              name="street_number"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <!-- Group Name Field -->
-        <div>
-          <label
-            for="group_name"
-            class="block text-sm font-medium text-gray-700"
-            >Group Name:</label
-          >
-          <div class="mt-2 relative">
-            <input
-              type="text"
-              id="group_name"
-              name="group_name"
-              class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Personal Phone Number Field -->
-    <div>
-      <label
-        for="personal_phone_number"
-        class="block text-sm font-medium text-gray-700"
-        >Personal Phone Number:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="personal_phone_number"
-          name="personal_phone_number"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Level of Culture Field -->
-    <div>
-      <label
-        for="level_of_culture"
-        class="block text-sm font-medium text-gray-700"
-        >Level of Culture:</label
-      >
-      <div class="mt-2 relative">
-        <select
-          id="level_of_culture"
-          name="level_of_culture"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        >
-          <option value="bachelor_degree">-- Select One --</option>
-          <option value="diploma_degree">Diploma Degree</option>
-          <option value="bachelor_degree">Bachelor Degree</option>
-          <option value="master_degree">Master Degree</option>
-          <option value="doctor">Doctor</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Skill Field -->
-    <div>
-      <label for="skill" class="block text-sm font-medium text-gray-700"
-        >Skill:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="skill"
-          name="skill"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Name of Educational Institution Field -->
-    <div>
-      <label
-        for="name_of_educational_institution"
-        class="block text-sm font-medium text-gray-700"
-        >Name of Educational Institution:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="name_of_educational_institution"
-          name="name_of_educational_institution"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Knowledge of Foreign Languages Field -->
-    <div>
-      <label
-        for="knowledge_of_foreign_languages"
-        class="block text-sm font-medium text-gray-700"
-        >Knowledge of Foreign Languages:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="knowledge_of_foreign_languages"
-          name="knowledge_of_foreign_languages"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Current Function Field -->
-    <div>
-      <label
-        for="current_function"
-        class="block text-sm font-medium text-gray-700"
-        >Current Function:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="current_function"
-          name="current_function"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- ID Card Number Field -->
-    <div>
-      <label
-        for="id_card_number"
-        class="block text-sm font-medium text-gray-700"
-        >ID Card Number:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="id_card_number"
-          name="id_card_number"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Work At Field -->
-    <div>
-      <label for="work_at" class="block text-sm font-medium text-gray-700"
-        >Work At:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="work_at"
-          name="work_at"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Employment ID Field -->
-    <div>
-      <label for="employment_id" class="block text-sm font-medium text-gray-700"
-        >Employment ID:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="employment_id"
-          name="employment_id"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Employment Date Field -->
-    <div>
-      <label
-        for="employment_date"
-        class="block text-sm font-medium text-gray-700"
-        >Employment Date:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="employment_date"
-          name="employment_date"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-    </div>
-
-    <!-- Khmer Nationality Identity Card Field -->
-    <div>
-      <label
-        for="khmer_nationality_identity_card"
-        class="block text-sm font-medium text-gray-700"
-        >Khmer Nationality Identity Card:</label
-      >
-      <div class="mt-2 relative">
-        <input
-          type="text"
-          id="khmer_nationality_identity_card"
-          name="khmer_nationality_identity_card"
-          class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-
-      <!-- Photo Field -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Name Field -->
       <div>
-        <label for="photo" class="block text-sm font-medium text-gray-700"
-          >Upload Photo</label
-        >
-        <input
-          type="file"
-          name="photo"
-          id="photo"
-          class="mt-1 block w-full px-4 py-2 border rounded-md"
-          accept="image/*"
-        />
+        <label for="name" class="block text-sm font-medium text-gray-700">Name:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="name" name="name" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
       </div>
 
-      <!-- Fingerprints Field -->
+      <!-- Department Field -->
+      <!-- Department Field -->
       <div>
-        <label
-          for="fingerprints"
-          class="block text-sm font-medium text-gray-700"
-          >Upload Fingerprints Image</label
-        >
-        <input
-          type="file"
-          name="fingerprints"
-          id="fingerprints"
-          class="mt-1 block w-full px-4 py-2 border rounded-md"
-          accept="image/*"
-        />
+        <label for="department" class="block text-sm font-medium text-gray-700">Department:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="department" name="department" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
       </div>
 
-      <!-- Signature Field -->
+      <!-- Age Field -->
       <div>
-        <label for="signature" class="block text-sm font-medium text-gray-700"
-          >Upload Signature Image</label
-        >
-        <input
-          type="file"
-          name="signature"
-          id="signature"
-          class="mt-1 block w-full px-4 py-2 border rounded-md"
-          accept="image/*"
-        />
+        <label for="age" class="block text-sm font-medium text-gray-700">Age:</label>
+        <div class="mt-2 relative">
+          <input type="number" id="age" name="age" required min="18" max="99"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Position Field -->
+      <div>
+        <label for="position" class="block text-sm font-medium text-gray-700">Position:</label>
+        <div class="mt-2 relative">
+          <select id="position" name="position_id" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="" disabled selected>Select a Position</option>
+            {% for position in positions %}
+            <option value="{{ position.id }}">
+              {{ position.PositionName }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Joining Date Field -->
+      <div>
+        <label for="joining_date" class="block text-sm font-medium text-gray-700">Joining Date:</label>
+        <div class="mt-2 relative">
+          <input type="date" id="joining_date" name="joining_date" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Status Field -->
+      <div>
+        <label for="status" class="block text-sm font-medium text-gray-700">Status:</label>
+        <div class="mt-2 relative">
+          <select id="status" name="status" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="" disabled selected>Select a Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="On Leave">On Leave</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Branch Field -->
+      <div>
+        <label for="branch" class="block text-sm font-medium text-gray-700">Branch:</label>
+        <div class="mt-2 relative">
+          <select id="branch" name="branch" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="" disabled selected>Select a Branch</option>
+            {% for branch in branches %}
+            <option value="{{ branch['Branch'] }}">
+              {{ branch['Branch'] }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- User ID Field -->
+      <div>
+        <label for="user_id" class="block text-sm font-medium text-gray-700">User ID:</label>
+        <div class="mt-2 relative">
+          <select id="user_id" name="user_id" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="" disabled selected>Select a User</option>
+            {% for user in users %}
+            <option value="{{ user.id }}">
+              {{ user.id }} - {{ user.UserName }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Phone Number Field -->
+      <div>
+        <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="phone_number" name="phone_number" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Email Field -->
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
+        <div class="mt-2 relative">
+          <input type="email" id="email" name="email" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Address Field -->
+      <div class="lg:col-span-4">
+        <label for="address" class="block text-sm font-medium text-gray-700">Address:</label>
+        <div class="mt-2 relative">
+          <textarea id="address" name="address"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            rows="3"></textarea>
+        </div>
       </div>
     </div>
+
+    <hr class="my-6 border-gray-300" />
+
+    <!-- TODO: tow -->
+
+    <!-- </div> -->
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Emergency Contact Name Field -->
+      <div>
+        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">Emergency Contact
+          Name:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="emergency_contact_name" name="emergency_contact_name"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Emergency Contact Phone Field -->
+      <div>
+        <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700">Emergency Contact
+          Phone:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="emergency_contact_phone" name="emergency_contact_phone"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Salary Field -->
+      <div>
+        <label for="salary" class="block text-sm font-medium text-gray-700">Salary:</label>
+        <div class="mt-2 relative">
+          <input type="number" id="salary" name="salary" step="0.01"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Height Field -->
+      <div>
+        <label for="employees_height" class="block text-sm font-medium text-gray-700">Height:</label>
+        <div class="mt-2 relative">
+          <input type="number" id="employees_height" name="employees_height"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Ethnicity Field -->
+      <div>
+        <label for="ethnicity" class="block text-sm font-medium text-gray-700">Ethnicity:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="ethnicity" name="ethnicity"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Nationality Field -->
+      <div>
+        <label for="nationality" class="block text-sm font-medium text-gray-700">Nationality:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="nationality" name="nationality"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Religion Field -->
+      <div>
+        <label for="religion" class="block text-sm font-medium text-gray-700">Religion:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="religion" name="religion"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Family Status Field -->
+      <div>
+        <label for="family_status" class="block text-sm font-medium text-gray-700">Family Status:</label>
+        <div class="mt-2 relative">
+          <select id="family_status" name="family_status"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="" disabled selected>Select a Family Status</option>
+            <option value="single">Single</option>
+            <option value="married">Married</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Place of Birth Field -->
+      <div>
+        <label for="place_of_birth" class="block text-sm font-medium text-gray-700">Place of Birth:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="place_of_birth" name="place_of_birth"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Permanent Address Field -->
+      <div>
+        <label for="permanent_address" class="block text-sm font-medium text-gray-700">Permanent Address:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="permanent_address" name="permanent_address"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Village Field -->
+      <div>
+        <label for="village" class="block text-sm font-medium text-gray-700">Village:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="village" name="village"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Commune Field -->
+      <div>
+        <label for="commune" class="block text-sm font-medium text-gray-700">Commune:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="commune" name="commune"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- District Field -->
+      <div>
+        <label for="district" class="block text-sm font-medium text-gray-700">District:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="district" name="district"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Province Field -->
+      <div>
+        <label for="province" class="block text-sm font-medium text-gray-700">Province:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="province" name="province"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Home Number Field -->
+      <div>
+        <label for="home_number" class="block text-sm font-medium text-gray-700">Home Number:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="home_number" name="home_number"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Street Number Field -->
+      <div>
+        <label for="street_number" class="block text-sm font-medium text-gray-700">Street Number:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="street_number" name="street_number"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Group Name Field -->
+      <div>
+        <label for="group_name" class="block text-sm font-medium text-gray-700">Group Name:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="group_name" name="group_name"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+    </div>
+
+    <hr class="my-6 border-gray-300" />
+
+    <!-- TODO: three -->
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- Personal Phone Number Field -->
+      <div>
+        <label for="personal_phone_number" class="block text-sm font-medium text-gray-700">Personal Phone
+          Number:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="personal_phone_number" name="personal_phone_number"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Level of Culture Field -->
+      <div>
+        <label for="level_of_culture" class="block text-sm font-medium text-gray-700">Level of Culture:</label>
+        <div class="mt-2 relative">
+          <select id="level_of_culture" name="level_of_culture"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="bachelor_degree">-- Select One --</option>
+            <option value="diploma_degree">Diploma Degree</option>
+            <option value="bachelor_degree">Bachelor Degree</option>
+            <option value="master_degree">Master Degree</option>
+            <option value="doctor">Doctor</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Skill Field -->
+      <div>
+        <label for="skill" class="block text-sm font-medium text-gray-700">Skill:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="skill" name="skill"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Name of Educational Institution Field -->
+      <div>
+        <label for="name_of_educational_institution" class="block text-sm font-medium text-gray-700">Name of Educational
+          Institution:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="name_of_educational_institution" name="name_of_educational_institution"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Knowledge of Foreign Languages Field -->
+      <div>
+        <label for="knowledge_of_foreign_languages" class="block text-sm font-medium text-gray-700">Knowledge of Foreign
+          Languages:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="knowledge_of_foreign_languages" name="knowledge_of_foreign_languages"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Current Function Field -->
+      <div>
+        <label for="current_function" class="block text-sm font-medium text-gray-700">Current Function:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="current_function" name="current_function"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- ID Card Number Field -->
+      <div>
+        <label for="id_card_number" class="block text-sm font-medium text-gray-700">ID Card Number:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="id_card_number" name="id_card_number"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Work At Field -->
+      <div>
+        <label for="work_at" class="block text-sm font-medium text-gray-700">Work At:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="work_at" name="work_at"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Employment ID Field -->
+      <div>
+        <label for="employment_id" class="block text-sm font-medium text-gray-700">Employment ID:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="employment_id" name="employment_id"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Employment Date Field -->
+      <div>
+        <label for="employment_date" class="block text-sm font-medium text-gray-700">Employment Date:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="employment_date" name="employment_date"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+      <!-- Khmer Nationality Identity Card Field -->
+      <div>
+        <label for="khmer_nationality_identity_card" class="block text-sm font-medium text-gray-700">Khmer Nationality
+          Identity Card:</label>
+        <div class="mt-2 relative">
+          <input type="text" id="khmer_nationality_identity_card" name="khmer_nationality_identity_card"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Photo Field -->
+    <!-- <div>
+        <label for="photo" class="block text-sm font-medium text-gray-700">Upload Photo</label>
+        <input type="file" name="photo" id="photo" class="mt-1 block w-full px-4 py-2 border rounded-md"
+          accept="image/*" />
+      </div>
+
+   
+      <div>
+        <label for="fingerprints" class="block text-sm font-medium text-gray-700">Upload Fingerprints Image</label>
+        <input type="file" name="fingerprints" id="fingerprints" class="mt-1 block w-full px-4 py-2 border rounded-md"
+          accept="image/*" />
+      </div>
+
+   
+      <div>
+        <label for="signature" class="block text-sm font-medium text-gray-700">Upload Signature Image</label>
+        <input type="file" name="signature" id="signature" class="mt-1 block w-full px-4 py-2 border rounded-md"
+          accept="image/*" />
+      </div>
+    </div> -->
 
     <!-- Submit Button -->
-    <div>
-      <button
-        type="submit"
-        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300"
-      >
+    <!-- <div>
+      <button type="submit"
+        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300">
         Add Employee
       </button>
+    </div> -->
+
+    <div class="mt-4">
+      <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md">
+        Submit
+      </button>
+
+      <a href="{{ url_for('list_employees') }}" class="text-blue-500 hover:text-blue-700 transition duration-300">
+        ← Back to Employees List
+      </a>
     </div>
   </form>
-
-  <!-- Back Link -->
-  <div class="mt-6 text-center">
-    <a
-      href="{{ url_for('list_employees') }}"
-      class="text-blue-500 hover:text-blue-700 transition duration-300"
-    >
-      ← Back to Employees List
-    </a>
-  </div>
 </div>
 
 {% endblock %}
