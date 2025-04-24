@@ -50,6 +50,7 @@ def init_db():
                 Signature BLOB DEFAULT NULL,
                 FingerPrint BLOB DEFAULT NULL,
                 ZoneID INTEGER,
+                Force_Password_Change BOOLEAN DEFAULT FALSE,
                 FOREIGN KEY (ZoneID) REFERENCES zones(ID) ON DELETE SET NULL
             )
         ''')

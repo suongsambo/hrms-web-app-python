@@ -174,7 +174,7 @@
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'users'" @click.away="activeMenu = ''"
-        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
         <a href="/users/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">person_add</span>
@@ -186,10 +186,17 @@
           <span class="material-symbols-outlined">admin_panel_settings</span>
           <span>Roles</span>
         </a>
+
+
         <a href="/users"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">people</span>
           <span>Manage Users</span>
+        </a>
+        <a href="/force_reset_password"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">lock_reset</span>
+          <span>Force Reset Password</span>
         </a>
       </div>
     </div>
