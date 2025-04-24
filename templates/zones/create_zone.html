@@ -14,7 +14,7 @@ content %}
     {% endfor %} {% endif %} {% endwith %}
 
     <form method="POST">
-      <div class="grid grid-cols-2 gap-4 mb-4">
+      <!-- <div class="grid grid-cols-2 gap-4 mb-4">
         <div>
           <label for="name" class="block text-sm font-medium text-gray-700">Zone Name</label>
           <input type="text" name="name" id="name"
@@ -27,9 +27,28 @@ content %}
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
           </>
         </div>
+      </div> -->
+
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6 bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+        <!-- Zone Name -->
+        <div>
+          <label for="name" class="block text-sm font-semibold text-gray-800 mb-1">Zone Name</label>
+          <input type="text" name="name" id="name" placeholder="Enter zone name"
+            class="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out"
+            required />
+        </div>
+
+        <!-- Description -->
+        <div>
+          <label for="description" class="block text-sm font-semibold text-gray-800 mb-1">Description</label>
+          <input type="text" name="description" id="description" placeholder="Short description"
+            class="w-full px-4 py-2 text-gray-800 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-150 ease-in-out" />
+        </div>
       </div>
 
-      <div class="mb-4">
+
+      <!-- <div class="mb-4">
         <label class="block text-sm font-medium text-gray-700">Assign Branches</label>
         <div class="space-y-2">
           <div class="flex items-center">
@@ -38,17 +57,49 @@ content %}
               Select All
             </label>
           </div>
+          <div class="grid grid-cols-5 gap-4">
+            {% for branch in branches %}
+            <div class="flex items-center">
+              <input type="checkbox" name="branches" value="{{ branch.ID }}" class="form-checkbox text-blue-500"
+                id="branch_{{ branch.ID|default(0)|string }}" />
+              <label class="ml-2 text-sm text-gray-700" for="branch_{{ branch.ID|default(0)|string }}">
+                {{ branch.Branch }}
+              </label>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div> -->
+
+
+      <div class="mb-6 bg-white p-6 rounded-2xl shadow-md border border-gray-200">
+        <label class="block text-lg font-semibold text-gray-800 mb-4">Assign Branches</label>
+
+        <!-- Select All -->
+        <div class="flex items-center mb-4">
+          <input type="checkbox" id="select-all-branches"
+            class="form-checkbox h-5 w-5 text-blue-600 transition duration-150 ease-in-out focus:ring-blue-500" />
+          <label for="select-all-branches"
+            class="ml-3 text-sm font-medium text-gray-700 hover:text-blue-600 cursor-pointer">
+            Select All
+          </label>
+        </div>
+
+        <!-- Individual Branches Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {% for branch in branches %}
-          <div class="flex items-center">
-            <input type="checkbox" name="branches" value="{{ branch.ID }}" class="form-checkbox text-blue-500"
-              id="branch_{{ branch.ID|default(0)|string }}" />
-            <label class="ml-2 text-sm text-gray-700" for="branch_{{ branch.ID|default(0)|string }}">
+          <div class="flex items-center bg-gray-50 hover:bg-gray-100 p-3 rounded-lg shadow-sm transition">
+            <input type="checkbox" name="branches" value="{{ branch.ID }}" id="branch_{{ branch.ID|default(0)|string }}"
+              class="form-checkbox h-5 w-5 text-blue-500 focus:ring-blue-500 transition duration-150 ease-in-out" />
+            <label for="branch_{{ branch.ID|default(0)|string }}"
+              class="ml-3 text-sm text-gray-800 font-medium hover:text-blue-600 cursor-pointer">
               {{ branch.Branch }}
             </label>
           </div>
           {% endfor %}
         </div>
       </div>
+
 
       <script>
         document.getElementById('select-all-branches').addEventListener('change', function () {
@@ -62,10 +113,14 @@ content %}
       <div class="flex space-x-4">
         <button type="submit"
           class="bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+          <i class="fas fa-plus mr-2"></i>
           Create Zone
         </button>
         <a href="{{ url_for('list_zones') }}"
-          class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50">Cancel</a>
+          class="bg-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-opacity-50">
+          <i class="fas fa-arrow-left mr-2"></i>
+          Cancel
+        </a>
       </div>
     </form>
   </div>
