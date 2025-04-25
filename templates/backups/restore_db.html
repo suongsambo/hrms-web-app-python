@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Restore Database From Local{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100 min-h-screen flex items-center justify-center">
+    <div class="bg-white shadow-lg rounded-2xl p-2 w-full max-w-md">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">Restore Database</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <ul class="mb-4">
+            {% for category, message in messages %}
+            <li class="text-sm text-center text-{{ 'green' if category == 'success' else 'red' }}-600 font-medium">
+                {{ message }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
+        <form method="post" enctype="multipart/form-data" class="space-y-4">
+            <div class="flex items-center space-x-2">
+                <span class="material-symbols-outlined">backup</span>
+                <input type="file" name="file" accept=".db"
+                    class="w-full p-2 border border-gray-300 rounded-lg file:bg-blue-500 file:text-white file:font-semibold file:border-none file:py-2 file:px-4"
+                    required>
+            </div>
+
+            <button type="submit"
+                class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-xl transition duration-200 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined">restore</span>
+                <span>Restore</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

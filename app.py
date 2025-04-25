@@ -35,6 +35,12 @@ eventlet.monkey_patch()
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+
+def allowed_file(filename: str) -> bool:
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -415,10 +421,42 @@ def manage_backups():
 
 
 # Route to download the database file
+# @app.route('/download')
+# @login_required
+# def download_db():
+#     return send_file(app.config['DATABASE'], as_attachment=True)
+
+
 @app.route('/download')
 @login_required
 def download_db():
-    return send_file(app.config['DATABASE'], as_attachment=True)
+    # Format current datetime as MM-DD-YYYY_HH-MM-SS
+    timestamp = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+    filename = f"backup_{timestamp}.db"
+
+    return send_file(
+        app.config['DATABASE'],
+        as_attachment=True,
+        download_name=filename
+    )
+
+
+@app.route('/restore_local', methods=['GET', 'POST'])
+@login_required
+def restore_db():
+    if request.method == 'POST':
+        file = request.files.get('file')
+        if file and file.filename.endswith('.db'):
+            filepath = app.config['DATABASE']
+            file.save(filepath)  # Overwrite the existing DB
+            flash('Database restored successfully.', 'success')
+            return redirect(url_for('manage_backups'))
+        else:
+            flash('Please upload a valid .db file.', 'error')
+            return redirect(request.url)
+
+    # Render upload form on GET
+    return render_template('/backups/restore_db.html')
 
 
 @app.route('/filter-leaves')
