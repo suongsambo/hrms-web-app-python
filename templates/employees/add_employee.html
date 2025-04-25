@@ -1,36 +1,25 @@
 {% extends 'base.html' %} {% block title %} Add Employee {% endblock %} {% block
 content %}
 <div class="max-w-7xl mx-auto bg-white p-4 rounded-lg shadow-lg">
-  <!-- Form Title -->
-  <!-- <h2 class="text-3xl font-semibold text-gray-800 mb-8 text-center">
-    Add New Employee
-  </h2> -->
 
   <form action="{{ url_for('add_employee') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-    <!-- Employee Information Section -->
-    <!-- <div class="border-b pb-4 mb-6"> -->
+
     <h3 class="text-xl font-semibold text-gray-800 mb-4">
       Employee Information
     </h3>
 
+
+    <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
+      🧑‍💼 Employment Information
+    </h2>
     <!-- TODO: one -->
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
       <!-- Name Field -->
       <div>
         <label for="name" class="block text-sm font-medium text-gray-700">Name:</label>
         <div class="mt-2 relative">
           <input type="text" id="name" name="name" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
-        </div>
-      </div>
-
-      <!-- Department Field -->
-      <!-- Department Field -->
-      <div>
-        <label for="department" class="block text-sm font-medium text-gray-700">Department:</label>
-        <div class="mt-2 relative">
-          <input type="text" id="department" name="department" required
             class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
@@ -43,6 +32,20 @@ content %}
             class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
+
+      <div>
+        <label for="department" class="block text-sm font-medium text-gray-700">Department:</label>
+        <div class="mt-2 relative">
+          <select id="department" name="department" required
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="" disabled selected>Select a Department</option>
+            {% for department in departments %}
+            <option value="{{ department.id}}">{{ department.Name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
 
       <!-- Position Field -->
       <div>
@@ -116,7 +119,7 @@ content %}
       </div>
 
       <!-- Phone Number Field -->
-      <div>
+      <div class="lg:col-span-2">
         <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number:</label>
         <div class="mt-2 relative">
           <input type="text" id="phone_number" name="phone_number" required
@@ -125,7 +128,7 @@ content %}
       </div>
 
       <!-- Email Field -->
-      <div>
+      <div class="lg:col-span-2">
         <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
         <div class="mt-2 relative">
           <input type="email" id="email" name="email" required
@@ -144,13 +147,15 @@ content %}
       </div>
     </div>
 
-    <hr class="my-6 border-gray-300" />
+
+
+    <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
+      🚨 Emergency & Personal Information
+    </h2>
 
     <!-- TODO: tow -->
 
-    <!-- </div> -->
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <!-- Emergency Contact Name Field -->
       <div>
         <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">Emergency Contact
@@ -189,30 +194,63 @@ content %}
         </div>
       </div>
 
-      <!-- Ethnicity Field -->
+      <!-- Ethnicity Field as Select -->
       <div>
         <label for="ethnicity" class="block text-sm font-medium text-gray-700">Ethnicity:</label>
         <div class="mt-2 relative">
-          <input type="text" id="ethnicity" name="ethnicity"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <select id="ethnicity" name="ethnicity"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            <option value="">Select Ethnicity</option>
+            <option value="khmer">Khmer</option>
+            <option value="chinese">Chinese</option>
+            <option value="vietnamese">Vietnamese</option>
+            <option value="cham">Cham</option>
+            <option value="lao">Lao</option>
+            <option value="thai">Thai</option>
+            <option value="other">Other</option>
+          </select>
         </div>
       </div>
 
-      <!-- Nationality Field -->
+      <!-- Nationality Field as Select -->
       <div>
         <label for="nationality" class="block text-sm font-medium text-gray-700">Nationality:</label>
         <div class="mt-2 relative">
-          <input type="text" id="nationality" name="nationality"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <select id="nationality" name="nationality"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            <option value="">Select Nationality</option>
+            <option value="cambodian">Cambodian</option>
+            <option value="thai">Thai</option>
+            <option value="vietnamese">Vietnamese</option>
+            <option value="laotian">Laotian</option>
+            <option value="chinese">Chinese</option>
+            <option value="japanese">Japanese</option>
+            <option value="korean">Korean</option>
+            <option value="american">American</option>
+            <option value="british">British</option>
+            <option value="french">French</option>
+          </select>
         </div>
       </div>
 
-      <!-- Religion Field -->
+
+
+      <!-- Religion Field as Select -->
       <div>
         <label for="religion" class="block text-sm font-medium text-gray-700">Religion:</label>
         <div class="mt-2 relative">
-          <input type="text" id="religion" name="religion"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <select id="religion" name="religion"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            <option value="">Select Religion</option>
+            <option value="buddhism">Buddhism</option>
+            <option value="christianity">Christianity</option>
+            <option value="islam">Islam</option>
+            <option value="hinduism">Hinduism</option>
+            <option value="judaism">Judaism</option>
+            <option value="taoism">Taoism</option>
+            <option value="confucianism">Confucianism</option>
+            <option value="other">Other</option>
+          </select>
         </div>
       </div>
 
@@ -312,9 +350,18 @@ content %}
       </div>
     </div>
 
-    <hr class="my-6 border-gray-300" />
+
+
+
+
+
 
     <!-- TODO: three -->
+
+    <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
+      📄 Personal & Employment Details
+    </h2>
+
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Personal Phone Number Field -->
@@ -342,12 +389,35 @@ content %}
         </div>
       </div>
 
-      <!-- Skill Field -->
+
+
+      <!-- Skill Field as Select -->
       <div>
         <label for="skill" class="block text-sm font-medium text-gray-700">Skill:</label>
         <div class="mt-2 relative">
-          <input type="text" id="skill" name="skill"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <select id="skill" name="skill"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            <option value="">Select Skill</option>
+            <option value="driving">Driving</option>
+            <option value="computer">Computer</option>
+            <option value="electrician">Electrician</option>
+            <option value="translation">Translation</option>
+            <option value="teaching">Teaching</option>
+            <option value="agriculture">Agriculture</option>
+            <option value="construction">Construction</option>
+            <option value="management">Management</option>
+            <option value="it">Information Technology (IT)</option>
+            <option value="accounting">Accounting</option>
+            <option value="bookkeeping">Bookkeeping</option>
+            <option value="payroll">Payroll Processing</option>
+            <option value="tax">Tax Preparation</option>
+            <option value="audit">Internal Auditing</option>
+            <option value="financial_analysis">Financial Analysis</option>
+            <option value="budgeting">Budgeting</option>
+            <option value="quickbooks">QuickBooks</option>
+            <option value="excel_advanced">Advanced Excel</option>
+            <option value="other">Other</option>
+          </select>
         </div>
       </div>
 
@@ -361,13 +431,19 @@ content %}
         </div>
       </div>
 
-      <!-- Knowledge of Foreign Languages Field -->
+      <!-- Knowledge of Foreign Languages Field (as select) -->
       <div>
-        <label for="knowledge_of_foreign_languages" class="block text-sm font-medium text-gray-700">Knowledge of Foreign
-          Languages:</label>
+        <label for="knowledge_of_foreign_languages" class="block text-sm font-medium text-gray-700">
+          Knowledge of Foreign Languages:
+        </label>
         <div class="mt-2 relative">
-          <input type="text" id="knowledge_of_foreign_languages" name="knowledge_of_foreign_languages"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <select id="knowledge_of_foreign_languages" name="knowledge_of_foreign_languages"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            <option value="">Select Language</option>
+            <option value="khmer">Khmer</option>
+            <option value="english">English</option>
+            <option value="chinese">Chinese</option>
+          </select>
         </div>
       </div>
 
@@ -389,14 +465,43 @@ content %}
         </div>
       </div>
 
-      <!-- Work At Field -->
+
+      <!-- Work At Field as Select -->
       <div>
         <label for="work_at" class="block text-sm font-medium text-gray-700">Work At:</label>
         <div class="mt-2 relative">
-          <input type="text" id="work_at" name="work_at"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          <select id="work_at" name="work_at"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            <option value="">Select Work Location</option>
+            <option value="BanteayMeanchey">Banteay Meanchey</option>
+            <option value="Battambang">Battambang</option>
+            <option value="KampongCham">Kampong Cham </option>
+            <option value="KampongChhnang">Kampong Chhnang</option>
+            <option value="KampongSpeu">Kampong Speu</option>
+            <option value="KampongThom">Kampong Thom</option>
+            <option value="Kampot">Kampot</option>
+            <option value="Kandal">Kandal</option>
+            <option value="Kep">Kep</option>
+            <option value="KohKong">Koh Kong</option>
+            <option value="Kratie">Kratié</option>
+            <option value="Mondulkiri">Mondulkiri</option>
+            <option value="OddarMeanchey">Oddar Meanchey</option>
+            <option value="Pailin">Pailin</option>
+            <option value="PhnomPenh">Phnom Penh Capital</option>
+            <option value="PreahVihear">Preah Vihear</option>
+            <option value="Pursat">Pursat</option>
+            <option value="PreyVeng">Prey Veng </option>
+            <option value="Ratanakiri">Ratanakiri</option>
+            <option value="SiemReap">Siem Reap</option>
+            <option value="PreahSihanouk">Preah Sihanouk</option>
+            <option value="StungTreng">Stung Treng</option>
+            <option value="SvayRieng">Svay Rieng</option>
+            <option value="Takeo">Takéo</option>
+            <option value="Tboung Khmum">Tboung Khmum</option>
+          </select>
         </div>
       </div>
+
 
       <!-- Employment ID Field -->
       <div>
@@ -427,8 +532,165 @@ content %}
       </div>
     </div>
 
-    <!-- Photo Field -->
-    <!-- <div>
+    <!-- TODO: Four sections -->
+
+    <section class="mb-6">
+      <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
+        🏡 Family Information
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <!-- Passing Test Date -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Passing Test Date</label>
+          <input type="date" name="passing_test_date"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Residence Book or Family Book -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Residence Book / Family Book</label>
+          <input type="text" name="residence_book_or_family_book" placeholder="Book number or details"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Made On -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Made On</label>
+          <input type="date" name="made_on"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Number of Children -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Number of Children</label>
+          <input type="number" name="have_a_number_of_children" min="0"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Father Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Father's Name</label>
+          <input type="text" name="father_name"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Mother Name -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Mother's Name</label>
+          <input type="text" name="mother_name"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Father Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Father Status</label>
+          <select name="father_status"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="alive">Alive</option>
+            <option value="dead">Dead</option>
+          </select>
+        </div>
+
+        <!-- Mother Status -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Mother Status</label>
+          <select name="mother_status"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            <option value="alive" selected>Alive</option>
+            <option value="dead">Dead</option>
+          </select>
+        </div>
+
+        <!-- Father Occupation -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Father's Occupation</label>
+          <input type="text" name="father_occupation"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Mother Occupation -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Mother's Occupation</label>
+          <input type="text" name="mother_occupation"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Father Permanent Address -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Father's Permanent Address</label>
+          <input type="text" name="father_permanent_address"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Mother Permanent Address -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Mother's Permanent Address</label>
+          <input type="text" name="mother_permanent_address"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents Village -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents Village</label>
+          <input type="text" name="parents_village"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents Commune -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents Commune</label>
+          <input type="text" name="parents_commune"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents District -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents District</label>
+          <input type="text" name="parents_district"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents Province -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents Province</label>
+          <input type="text" name="parents_province"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents Home Number -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents Home Number</label>
+          <input type="text" name="parents_home_number"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents Street Number -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents Street Number</label>
+          <input type="text" name="parents_street_number"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents Group -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents Group</label>
+          <input type="text" name="parents_group"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+
+        <!-- Parents Phone -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Parents Phone</label>
+          <input type="text" name="parents_phone"
+            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+        </div>
+      </div>
+
+
+
+      <!-- Photo Field -->
+      <!-- <div>
         <label for="photo" class="block text-sm font-medium text-gray-700">Upload Photo</label>
         <input type="file" name="photo" id="photo" class="mt-1 block w-full px-4 py-2 border rounded-md"
           accept="image/*" />
@@ -449,23 +711,23 @@ content %}
       </div>
     </div> -->
 
-    <!-- Submit Button -->
-    <!-- <div>
+      <!-- Submit Button -->
+      <!-- <div>
       <button type="submit"
         class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300">
         Add Employee
       </button>
     </div> -->
 
-    <div class="mt-4">
-      <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md">
-        Submit
-      </button>
+      <div class="mt-4">
+        <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md">
+          Submit
+        </button>
 
-      <a href="{{ url_for('list_employees') }}" class="text-blue-500 hover:text-blue-700 transition duration-300">
-        ← Back to Employees List
-      </a>
-    </div>
+        <a href="{{ url_for('list_employees') }}" class="text-blue-500 hover:text-blue-700 transition duration-300">
+          ← Back to Employees List
+        </a>
+      </div>
   </form>
 </div>
 

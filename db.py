@@ -61,7 +61,7 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 age INTEGER NOT NULL CHECK(age >= 18 AND age <= 100),
-                department TEXT NOT NULL,
+                department TEXT NULL,
                 salary REAL NOT NULL CHECK(salary > 0),
                 position_id INTEGER,  -- Reference to the position table
                 joining_date TEXT DEFAULT CURRENT_TIMESTAMP,
@@ -104,10 +104,10 @@ def init_db():
                 have_a_number_of_children INTEGER NULL,  -- Optional field
                 father_name TEXT NULL,                 -- Optional field
                 mother_name TEXT NULL,                 -- Optional field
-                father_status TEXT CHECK(father_status IN ('dead', 'alive')) NULL,  -- Optional field
+                father_status TEXT NULL,  -- Optional field
                 father_occupation TEXT NULL,           -- Optional field
                 mother_occupation TEXT NULL,           -- Optional field
-                mother_status TEXT CHECK(mother_status IN ('dead', 'alive')) NULL, -- Optional field
+                mother_status TEXT  NULL, -- Optional field
                 father_permanent_address TEXT NULL,    -- Optional field
                 mother_permanent_address TEXT NULL,    -- Optional field
                 parents_village TEXT NULL,             -- Optional field

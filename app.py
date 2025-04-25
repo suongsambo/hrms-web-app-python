@@ -4426,6 +4426,7 @@ def add_employee():
     branches = []
     users = []
     positions = []
+    departments = []
 
     # Get branches, users, and positions from the database
     with get_db_connection() as conn:
@@ -4433,6 +4434,7 @@ def add_employee():
         users = conn.execute(
             "SELECT id, UserName FROM users").fetchall()  # Fetch users
         positions = conn.execute("SELECT * FROM positions").fetchall()
+        departments = conn.execute("SELECT * FROM departments").fetchall()
 
     if request.method == 'POST':
         # Collect all form data
@@ -4480,6 +4482,28 @@ def add_employee():
         employment_date = request.form.get('employment_date')
         khmer_nationality_identity_card = request.form.get(
             'khmer_nationality_identity_card')
+        passing_test_date = request.form.get('passing_test_date')
+        residence_book_or_family_book = request.form.get(
+            'residence_book_or_family_book')
+        made_on = request.form.get('made_on')
+        have_a_number_of_children = request.form.get(
+            'have_a_number_of_children')
+        father_name = request.form.get('father_name')
+        mother_name = request.form.get('mother_name')
+        father_status = request.form.get('father_status')
+        father_occupation = request.form.get('father_occupation')
+        mother_occupation = request.form.get('mother_occupation')
+        mother_status = request.form.get('mother_status')
+        father_permanent_address = request.form.get('father_permanent_address')
+        mother_permanent_address = request.form.get('mother_permanent_address')
+        parents_village = request.form.get('parents_village')
+        parents_commune = request.form.get('parents_commune')
+        parents_district = request.form.get('parents_district')
+        parents_province = request.form.get('parents_province')
+        parents_home_number = request.form.get('parents_home_number')
+        parents_street_number = request.form.get('parents_street_number')
+        parents_group = request.form.get('parents_group')
+        parents_phone = request.form.get('parents_phone')
 
         # Handle photo, fingerprints, and signature upload
         photo = request.files.get('photo')
@@ -4519,15 +4543,23 @@ def add_employee():
                     commune, district, province, home_number, street_number, group_name,
                     personal_phone_number, level_of_culture, skill, name_of_educational_institution,
                     knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
-                    khmer_nationality_identity_card, photo, fingerprints, signature)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?)""",
+                    khmer_nationality_identity_card,
+                    passing_test_date, residence_book_or_family_book, made_on, have_a_number_of_children,
+                    father_name, mother_name, father_status, father_occupation, mother_occupation, mother_status,
+                    father_permanent_address, mother_permanent_address, parents_village, parents_commune, parents_district,
+                    parents_province, parents_home_number, parents_street_number, parents_group, parents_phone,
+                    photo, fingerprints, signature)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (name, age, department, salary, position_id, joining_date, status, branch, user_id,
                  phone_number, email, address, emergency_contact_name, emergency_contact_phone,
                  employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
                  commune, district, province, home_number, street_number, group_name,
                  personal_phone_number, level_of_culture, skill, name_of_educational_institution,
                  knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
-                 khmer_nationality_identity_card, photo_data, fingerprints_data, signature_data)
+                 khmer_nationality_identity_card, passing_test_date, residence_book_or_family_book, made_on, have_a_number_of_children,
+                 father_name, mother_name, father_status, father_occupation, mother_occupation, mother_status,
+                 father_permanent_address, mother_permanent_address, parents_village, parents_commune, parents_district,
+                 parents_province, parents_home_number, parents_street_number, parents_group, parents_phone, photo_data, fingerprints_data, signature_data)
             )
             conn.commit()
 
@@ -4535,7 +4567,7 @@ def add_employee():
         return redirect(url_for('list_employees'))
 
     # Render the form to add a new employee with necessary context
-    return render_template('employees/add_employee.html', branches=branches, users=users, positions=positions)
+    return render_template('employees/add_employee.html', branches=branches, users=users, positions=positions, departments=departments)
 
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
