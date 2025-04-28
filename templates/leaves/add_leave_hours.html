@@ -95,23 +95,24 @@ content %}
           </div>
         </div>
 
-
-
-        <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
-          <legend class="text-md font-semibold text-blue-600"> Leaves Hours (>= 8hours):</legend>
-          <div class="grid grid-cols-3 gap-6">
-            {% for user in users %}
-            <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
-              <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user1_{{ user.id }}"
-                class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
-              <label for="user1_{{ user.id }}"
-                class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-blue-600">{{
-                user.username
-                }}</label>
+        <div>
+          <label for="user_ids" class="block text-gray-700 text-sm font-medium">Assign to Users:</label>
+          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-blue-600"> Leaves Hours (>= 8hours):</legend>
+            <div class="grid grid-cols-2 gap-6">
+              {% for user in users %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user1_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500">
+                <label for="user1_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-blue-600">{{
+                  user.username
+                  }}</label>
+              </div>
+              {% endfor %}
             </div>
-            {% endfor %}
-          </div>
-        </fieldset>
+          </fieldset>
+        </div>
 
         <!-- Reason -->
         <div>

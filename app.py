@@ -420,13 +420,6 @@ def manage_backups():
     return render_template('backups/manage_backups.html', backup_files=backup_files)
 
 
-# Route to download the database file
-# @app.route('/download')
-# @login_required
-# def download_db():
-#     return send_file(app.config['DATABASE'], as_attachment=True)
-
-
 @app.route('/download')
 @login_required
 def download_db():
@@ -3651,8 +3644,8 @@ def login():
         #     flash("Please change your password before proceeding.", "warning")
         #     return redirect(url_for('change_password'))
 
-        flash(
-            f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
+        # flash(
+        #     f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
         return redirect(url_for('dashboard'))
 
     else:
@@ -3674,7 +3667,7 @@ def logout():
     # Log out the user using Flask-Login
     logout_user()
 
-    flash('You have been logged out successfully.', 'success')
+    # flash('You have been logged out successfully.', 'success')
     return redirect(url_for('index'))
 
 

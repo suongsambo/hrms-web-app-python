@@ -616,7 +616,7 @@ def init_db():
             "HQ", "AKC", "BSD", "BVL", "CHK", "CHP", "KPT", "KTR", "PKB", "PRN",
             "SNG", "TTG", "TTY", "BTB", "CBA", "DKR", "PNH", "KKD", "KTL", "PMR",
             "PPN", "PSC", "SAN", "KPS", "SAT", "SST", "SVR", "KPCA", "SUB", "SAB",
-            "BTI", "KMP", "KAD", "MCH"
+            "BTI", "KMP", "KAD", "MCH", "CHC"
         ]
 
         # Loop through each branch in the list

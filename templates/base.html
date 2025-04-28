@@ -42,6 +42,12 @@
   <!-- <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
   <script src="https://cdn.datatables.net/fixedcolumns/4.3.0/js/dataTables.fixedColumns.min.js"></script>
 
+  <!-- Use daisyUI from CDN -->
+
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+
   <script type="text/javascript">
     google.charts.load("current", { packages: ["corechart"] });
     google.charts.setOnLoadCallback(drawChart);
@@ -57,10 +63,8 @@
 
     var chart = new google.visualization.PieChart(document.getElementById("branchChart"));
     chart.draw(data, options);
-                            }
+                                }
   </script>
-
-
 </head>
 
 <header class="bg-gray-800 text-white p-1">
@@ -187,7 +191,6 @@
           <span>Roles</span>
         </a>
 
-
         <a href="/users"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">people</span>
@@ -254,7 +257,6 @@
           <span class="material-symbols-outlined">restore</span>
           <span>Restore Local</span>
         </a>
-
       </div>
     </div>
 
@@ -380,7 +382,6 @@
       </div>
     </div>
 
-
     <!-- Holiday -->
     <div class="relative z-10">
       <button @click="activeMenu = activeMenu === 'holiday' ? '' : 'holiday'"
@@ -460,10 +461,6 @@
           <span class="material-symbols-outlined">event</span>
           <span>Leave Manage</span>
         </a>
-
-
-
-
       </div>
     </div>
 
@@ -497,7 +494,6 @@
           <span class="material-symbols-outlined">add_task</span>
           <span>Add Leave Days</span>
         </a>
-
 
         <a href="/leaves"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
@@ -771,50 +767,391 @@
   </nav>
 </div>
 
-<script>
-  // Get elements for notification button and dropdown
-  const notificationButton = document.querySelector(".notification-button");
-  const notificationDropdown = document.querySelector(
-    ".notification-dropdown"
-  );
+<body class="flex flex-col h-[calc(100vh-300px)] over">
+  <div class="flex-1 flex h-[100vh] ">
 
-  // Toggle notification dropdown visibility when clicked
-  notificationButton.addEventListener("click", () => {
-    notificationDropdown.classList.toggle("hidden");
-  });
 
-  // Optionally, you can close the notification dropdown if clicking outside
-  document.addEventListener("click", (event) => {
-    if (
-      !notificationButton.contains(event.target) &&
-      !notificationDropdown.contains(event.target)
-    ) {
-      notificationDropdown.classList.add("hidden");
-    }
-  });
 
-  $(document).ready(function () {
-    $("#logoutButton").click(function (event) {
-      event.preventDefault(); // Prevent the form from submitting immediately
-      // Custom confirmation message
-      var userConfirmed = confirm(
-        "Are you sure you want to logout?\nYou will be redirected to the login page."
-      );
-      if (userConfirmed) {
-        // Submit the form if user confirms
-        $(this).closest("form").submit();
-      }
-    });
-  });
-</script>
 
-<body class="flex flex-col h-[calc(100vh-300px)]">
-  <div class="flex-1 flex">
+    <!-- Sidebar -->
+    {% if current_user.is_admin == 1 %}
+    <div class="h-[calc(100vh-150px)] overflow-x-hidden overflow-y-scroll bg-[#48D2BB] m-0 p-0">
+      <ul class="menu bg-accent  w-75">
+        <!-- Section Name -->
+        <li class="menu-title">
+          <span>Main Menu</span>
+        </li>
+
+        <!-- Home Link -->
+        <li
+          class="{% if request.path == '/dashboard' %} bg-indigo-600 text-white {% else %} hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 {% endif %}">
+          <a href="/dashboard"
+            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">home</span>
+            <span class="ml-2">Dashboard</span>
+          </a>
+        </li>
+
+        <!-- Users Section (If admin) -->
+        {% if current_user.is_admin == 1 %}
+        <li class="menu-title">
+          <span>Users Section</span>
+        </li>
+
+
+        <li class="menu-item-toggle">
+          <details>
+
+
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/users/add', '/users/roles', '/users', '/force_reset_password'] %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">groups</span>
+              <span class="ml-2">Users</span>
+            </summary>
+            <ul class="hidden">
+              <li class="{% if request.path == '/users/add' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/users/add"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">person_add</span>
+                  <span class="ml-2">Add User</span>
+                </a>
+              </li>
+
+              <li class="{% if request.path == '/users/roles' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/users/roles"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">admin_panel_settings</span>
+                  <span class="ml-2">Roles</span>
+                </a>
+              </li>
+
+              <li class="{% if request.path == '/users' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/users"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">people</span>
+                  <span class="ml-2">Manage Users</span>
+                </a>
+              </li>
+
+              <li class="{% if request.path == '/force_reset_password' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/force_reset_password"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">lock_reset</span>
+                  <span class="ml-2">Force Reset Password</span>
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- Departments Section -->
+        <li class="menu-title">
+          <span>Departments Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+          <details>
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/positions/add', '/positions', '/departments/add', '/departments'] %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">apartment</span>
+              <span class="ml-2">Departments</span>
+            </summary>
+            <ul class="hidden">
+              <!-- Add Position -->
+              <li class="{% if request.path == '/positions/add' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/positions/add"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">add_business</span>
+                  <span class="ml-2">Add Position</span>
+                </a>
+              </li>
+
+              <!-- Manage Positions -->
+              <li class="{% if request.path == '/positions' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/positions"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">business</span>
+                  <span class="ml-2">Manage Positions</span>
+                </a>
+              </li>
+
+              <!-- Add Department -->
+              <li class="{% if request.path == '/departments/add' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/departments/add"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">add_business</span>
+                  <span class="ml-2">Add Department</span>
+                </a>
+              </li>
+
+              <!-- Manage Departments -->
+              <li class="{% if request.path == '/departments' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/departments"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">business</span>
+                  <span class="ml-2">Manage Departments</span>
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- Backup Section -->
+        <li class="menu-title">
+          <span>Backup Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+          <details>
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/backups', '/restore_local'] %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">save</span>
+              <span class="ml-2">Backup</span>
+            </summary>
+            <ul class="hidden">
+              <!-- Manage Backup -->
+              <li class="{% if request.path == '/backups' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/backups"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">save</span>
+                  <span class="ml-2">Manage Backup</span>
+                </a>
+              </li>
+
+              <!-- Restore Local -->
+              <li class="{% if request.path == '/restore_local' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/restore_local"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">restore</span>
+                  <span class="ml-2">Restore Local</span>
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- Zones Section -->
+        <li class="menu-title">
+          <span>Zones Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+          <details>
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/zone/create', '/zones'] %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">location_pin</span>
+              <span class="ml-2">Zones</span>
+            </summary>
+            <ul class="hidden">
+              <!-- Assign Branch -->
+              <li class="{% if request.path == '/zone/create' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/zone/create"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">map</span>
+                  <span class="ml-2">Assign Branch</span>
+                </a>
+              </li>
+
+              <!-- Manage Zones -->
+              <li class="{% if request.path == '/zones' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/zones"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">location_pin</span>
+                  <span class="ml-2">Manage Zones</span>
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- Branch Section -->
+        <li class="menu-title">
+          <span>Branch Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+          <details>
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/branches/add', '/branches'] %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">store</span>
+              <span class="ml-2">Branch</span>
+            </summary>
+            <ul class="hidden">
+              <!-- Add Branch -->
+              <li class="{% if request.path == '/branches/add' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/branches/add"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">add_business</span>
+                  <span class="ml-2">Add Branch</span>
+                </a>
+              </li>
+
+              <!-- Manage Branches -->
+              <li class="{% if request.path == '/branches' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/branches"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">business</span>
+                  <span class="ml-2">Manage Branches</span>
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- Employees Section -->
+        <li class="menu-title">
+          <span>Employees Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+          <details>
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/employees/add', '/employees', '/bankstatement/add', '/bankstatements'] %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">person</span>
+              <span class="ml-2">Employees</span>
+            </summary>
+            <ul class="hidden">
+              <!-- Add Employee -->
+              <li class="{% if request.path == '/employees/add' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/employees/add"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">person_add</span>
+                  <span class="ml-2">Add Employee</span>
+                </a>
+              </li>
+
+              <!-- Manage Employees -->
+              <li class="{% if request.path == '/employees' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/employees"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">people</span>
+                  <span class="ml-2">Manage Employees</span>
+                </a>
+              </li>
+
+              <!-- Add BankStatement -->
+              <li class="{% if request.path == '/bankstatement/add' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/bankstatement/add"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">attach_money</span>
+                  <span class="ml-2">Add BankStatement</span>
+                </a>
+              </li>
+
+              <!-- Manage BankStatements -->
+              <li class="{% if request.path == '/bankstatements' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/bankstatements"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">attach_money</span>
+                  <span class="ml-2">Manage BankStatements</span>
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+        <!-- Attendance Section -->
+        <li class="menu-title">
+          <span>Attendance Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+          <details>
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path == '/leaves' %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">event</span>
+              <span class="ml-2">Attendance</span>
+            </summary>
+            <ul class="hidden">
+              <!-- Manage Leaves -->
+              <li class="{% if request.path == '/leaves' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/leaves"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">event</span>
+                  <span class="ml-2">Leave Manage</span>
+                </a>
+              </li>
+            </ul>
+          </details>
+        </li>
+
+
+        <!-- Attendance Section -->
+        <li class="menu-title">
+          <span>Holiday Section</span>
+        </li>
+
+
+        <!-- Holiday Section -->
+        <li class="menu-item-toggle">
+          <details>
+            <summary class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105
+      {% if request.path in ['/holidays'] %} bg-indigo-600 text-white {% endif %}">
+              <span class="material-symbols-outlined">event</span>
+              <span class="ml-2">Holiday</span>
+            </summary>
+            <ul class="hidden">
+
+              <!-- Manage Holidays -->
+              <li class="{% if request.path == '/holidays' %} bg-indigo-600 text-white {% endif %}">
+                <a href="/holidays"
+                  class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                  <span class="material-symbols-outlined">event</span>
+                  <span class="ml-2">Manage Holidays</span>
+                </a>
+              </li>
+
+            </ul>
+          </details>
+        </li>
+
+        {% endif %}
+      </ul>
+
+    </div>
+    {% endif %}
     <!-- Main Content -->
     <div class="flex-1 p-0 h-[calc(100vh-148px)] overflow-x-auto overflow-y-scroll">
       <main>{% block content %}{% endblock %}</main>
     </div>
   </div>
+
+  <script>
+    // Get elements for notification button and dropdown
+    const notificationButton = document.querySelector(".notification-button");
+    const notificationDropdown = document.querySelector(
+      ".notification-dropdown"
+    );
+
+    // Toggle notification dropdown visibility when clicked
+    notificationButton.addEventListener("click", () => {
+      notificationDropdown.classList.toggle("hidden");
+    });
+
+    // Optionally, you can close the notification dropdown if clicking outside
+    document.addEventListener("click", (event) => {
+      if (
+        !notificationButton.contains(event.target) &&
+        !notificationDropdown.contains(event.target)
+      ) {
+        notificationDropdown.classList.add("hidden");
+      }
+    });
+
+    $(document).ready(function () {
+      $("#logoutButton").click(function (event) {
+        event.preventDefault(); // Prevent the form from submitting immediately
+        // Custom confirmation message
+        var userConfirmed = confirm(
+          "Are you sure you want to logout?\nYou will be redirected to the login page."
+        );
+        if (userConfirmed) {
+          // Submit the form if user confirms
+          $(this).closest("form").submit();
+        }
+      });
+    });
+  </script>
 
   <script>
     function toggleMenu(id) {
@@ -832,6 +1169,21 @@
       "system-date"
     ).textContent = `Date: ${formattedDate}`;
   </script>
+
+  <script>
+    // Toggle visibility of menu items when the user clicks on a summary
+    const detailsElements = document.querySelectorAll(".menu-item-toggle");
+
+    detailsElements.forEach((detail) => {
+      const summary = detail.querySelector("summary");
+      const menuItems = detail.querySelector("ul");
+
+      summary.addEventListener("click", () => {
+        menuItems.classList.toggle("hidden");
+      });
+    });
+  </script>
+
   {% block scripts %}
 
   <footer class="bg-gradient-to-r from-gray-800 to-gray-600 text-white py-2">
