@@ -1,0 +1,246 @@
+{% extends 'base.html' %} {% block title %} GM Dashboard {% endblock %} {% block
+content %}
+<div class="max-w-7xl mx-auto py-10 px-6">
+    <div class="mb-4">
+        <h1 class="text-3xl font-bold text-indigo-800 mb-2">
+            Welcome, {{ current_user.username }}!
+        </h1>
+        <p class="text-gray-600 text-lg">
+            Welcome to your centralized dashboard, where you can easily manage and
+            track the key data points for Zones, Branches, Employees, and Users.
+        </p>
+    </div>
+
+    <!-- Summary Report Section -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div
+            class="bg-gradient-to-r from-indigo-500 via-indigo-600 to-indigo-700 p-6 rounded-2xl shadow-lg text-center transform hover:scale-105 transition duration-300 ease-in-out">
+            <h3 class="text-white text-sm">Total Sun Zones</h3>
+            <p class="text-3xl font-bold text-white">{{ sun_zones|length }}</p>
+        </div>
+        <div
+            class="bg-gradient-to-r from-green-400 via-green-500 to-green-600 p-6 rounded-2xl shadow-lg text-center transform hover:scale-105 transition duration-300 ease-in-out">
+            <h3 class="text-white text-sm">Total Branches</h3>
+            <p class="text-3xl font-bold text-white">{{ branches|length }}</p>
+        </div>
+        <div
+            class="bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg text-center transform hover:scale-105 transition duration-300 ease-in-out">
+            <h3 class="text-white text-sm">Total Employees</h3>
+            <p class="text-3xl font-bold text-white">{{ employees|length }}</p>
+        </div>
+        <div
+            class="bg-gradient-to-r from-pink-400 via-pink-500 to-pink-600 p-6 rounded-2xl shadow-lg text-center transform hover:scale-105 transition duration-300 ease-in-out">
+            <h3 class="text-white text-sm">Total Users</h3>
+            <p class="text-3xl font-bold text-white">{{ users|length }}</p>
+        </div>
+    </div>
+
+    <!-- Leave Summary by Zone -->
+    <div class="bg-white shadow-xl rounded-2xl p-6 mt-8">
+        <h2 class="text-xl font-semibold text-blue-700 mb-4">
+            Total Leave by Zone
+        </h2>
+        {% if leave_summary_by_zone %}
+        <table class="min-w-full table-auto border-collapse">
+            <thead>
+                <tr class="bg-blue-100 text-blue-700">
+                    <th class="px-4 py-2 text-left">Zone</th>
+                    <th class="px-4 py-2 text-left">Total Leave Days</th>
+                    <th class="px-4 py-2 text-left">Total Leave Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in leave_summary_by_zone %}
+                <tr class="hover:bg-blue-50">
+                    <td class="px-4 py-2">{{ row.Name }}</td>
+                    <td class="px-4 py-2">{{ row.total_leave_days | round(1) }}</td>
+                    <td class="px-4 py-2">{{ row.total_leave_hours | round(1) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-gray-600">No leave data found for zones.</p>
+        {% endif %}
+    </div>
+
+    <!-- Leave Summary by Branch -->
+    <div class="bg-white shadow-xl rounded-2xl p-6 mt-8">
+        <h2 class="text-xl font-semibold text-indigo-700 mb-4">
+            Total Leave by Branch
+        </h2>
+        {% if leave_summary %}
+        <table class="min-w-full table-auto border-collapse">
+            <thead>
+                <tr class="bg-indigo-100 text-indigo-700">
+                    <th class="px-4 py-2 text-left">Branch</th>
+                    <th class="px-4 py-2 text-left">Total Leave Days</th>
+                    <th class="px-4 py-2 text-left">Total Leave Hours</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in leave_summary %}
+                <tr class="hover:bg-indigo-50">
+                    <td class="px-4 py-2">{{ row.Branch }}</td>
+                    <td class="px-4 py-2">{{ row.total_leave_days | round(1) }}</td>
+                    <td class="px-4 py-2">{{ row.total_leave_hours | round(1) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <p class="text-gray-600">No leave records found.</p>
+        {% endif %}
+    </div>
+    <br />
+
+    <!-- Leave Summary -->
+    <div class="bg-white shadow-xl rounded-2xl p-6 mb-6">
+        <h2 class="text-2xl font-semibold text-red-600 mb-4">
+            Employees on Leave Today ({{ total_leave }})
+        </h2>
+        {% if employees_on_leave_today %}
+        <div class="h-72 overflow-auto">
+            <table class="min-w-full table-auto border-collapse">
+                <thead>
+                    <tr class="bg-red-100">
+                        <th class="px-4 py-2 text-left text-red-600">Employee Name</th>
+                        <th class="px-4 py-2 text-left text-red-600">Branch</th>
+                        <th class="px-4 py-2 text-left text-red-600">Start Date</th>
+                        <th class="px-4 py-2 text-left text-red-600">End Date</th>
+                        <th class="px-4 py-2 text-left text-red-600">Reason</th>
+                        <th class="px-4 py-2 text-left text-red-600">Leave Days</th>
+                        <th class="px-4 py-2 text-left text-red-600">Leave Hours</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emp in employees_on_leave_today %}
+                    <tr class="hover:bg-red-50 transition-colors duration-200">
+                        <td class="px-4 py-2">{{ emp.UserName }}</td>
+                        <td class="px-4 py-2">{{ emp.Branch }}</td>
+                        <td class="px-4 py-2">{{ emp.start_date }}</td>
+                        <td class="px-4 py-2">{{ emp.end_date }}</td>
+                        <td class="px-4 py-2">{{ emp.reason }}</td>
+                        <td class="px-4 py-2">{{ emp.service_count }}</td>
+                        <td class="px-4 py-2">{{ emp.leave_hours }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-gray-600">No employees are on leave today.</p>
+        {% endif %}
+    </div>
+
+    <!-- Detailed Lists Section -->
+    <div class="max-w-7xl mx-auto py-4 px-4">
+        <!-- Sun Zones Table -->
+        <div class="bg-white shadow-xl rounded-2xl p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-indigo-600 mb-4">Sun Zones</h2>
+            <div class="h-72 overflow-auto">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead>
+                        <tr class="bg-indigo-100">
+                            <th class="px-4 py-2 text-left text-indigo-600">Zone Name</th>
+                            <th class="px-4 py-2 text-left text-indigo-600">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for zone in sun_zones %}
+                        <tr class="hover:bg-indigo-50 transition-colors duration-200">
+                            <td class="px-4 py-2">{{ zone.name }}</td>
+                            <td class="px-4 py-2">{{ zone.description }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Branches Table -->
+        <div class="bg-white shadow-xl rounded-2xl p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-green-600 mb-4">Branches</h2>
+            <div class="h-72 overflow-auto">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead>
+                        <tr class="bg-green-100">
+                            <th class="px-4 py-2 text-left text-green-600">Branch Name</th>
+                            <th class="px-4 py-2 text-left text-green-600">Branch Manager</th>
+                            <th class="px-4 py-2 text-left text-green-600">Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for branch in branches %}
+                        <tr class="hover:bg-green-50 transition-colors duration-200">
+                            <td class="px-4 py-2">{{ branch.Branch }}</td>
+                            <td class="px-4 py-2">{{ branch.BranchManagerName }}</td>
+                            <td class="px-4 py-2">{{ branch.Description }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Employees Table -->
+        <div class="bg-white shadow-xl rounded-2xl p-6 mb-6">
+            <h2 class="text-2xl font-semibold text-blue-600 mb-4">Employees</h2>
+            <div class="h-72 overflow-auto">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead>
+                        <tr class="bg-blue-100">
+                            <th class="px-4 py-2 text-left text-blue-600">Employee Name</th>
+                            <!-- <th class="px-4 py-2 text-left text-blue-600">Employee ID</th>  -->
+                            <th class="px-4 py-2 text-left text-blue-600">Age</th>
+                            <th class="px-4 py-2 text-left text-blue-600">Department</th>
+                            <th class="px-4 py-2 text-left text-blue-600">Salary</th>
+
+                            <th class="px-4 py-2 text-left text-blue-600">Joining Date</th>
+                            <th class="px-4 py-2 text-left text-blue-600">Status</th>
+                            <th class="px-4 py-2 text-left text-blue-600">Branch</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for employee in employees %}
+                        <tr class="hover:bg-blue-50 transition-colors duration-200">
+                            <td class="px-4 py-2">{{ employee.name }}</td>
+                            <!-- <td class="px-4 py-2">{{ employee.ID }}</td> -->
+                            <td class="px-4 py-2">{{ employee.age }}</td>
+                            <td class="px-4 py-2">{{ employee.department }}</td>
+                            <td class="px-4 py-2">{{ employee.salary }}</td>
+                            <td class="px-4 py-2">{{ employee.joining_date }}</td>
+                            <td class="px-4 py-2">{{ employee.status }}</td>
+                            <td class="px-4 py-2">{{ employee.branch }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <!-- <div class="bg-white shadow-xl rounded-2xl p-6">
+            <h2 class="text-2xl font-semibold text-pink-600 mb-4">Users</h2>
+            <div class="h-72 overflow-auto">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead>
+                        <tr class="bg-pink-100">
+                            <th class="px-4 py-2 text-left text-pink-600">Username</th>
+                            <th class="px-4 py-2 text-left text-pink-600">User ID</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr class="hover:bg-pink-50 transition-colors duration-200">
+                            <td class="px-4 py-2">{{ user.username }}</td>
+                            <td class="px-4 py-2">{{ user.id }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div> -->
+    </div>
+</div>
+{% endblock %}

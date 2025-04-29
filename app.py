@@ -4010,42 +4010,187 @@ def access_denied():
     return render_template('access_denied.html')
 
 
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     # Admin users are directed to the admin dashboard
+#     if current_user.is_admin:
+#         return render_dashboard(current_user.id)
+
+#     # Employees (role_default == 20) are directed to the employee dashboard
+#     if current_user.role_default == 20:
+#         with get_db_connection() as conn:
+#             employee = conn.execute(
+#                 "SELECT e.ID FROM employees e WHERE e.user_id = ?", (
+#                     current_user.id,)
+#             ).fetchone()
+
+#         if employee:
+#             return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+#         else:
+#             flash("Employee not found!", "danger")
+#             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
+
+#     # Users with role_default == 145 are directed to the SPM dashboard
+#     if current_user.role_default == 145:
+#         return redirect(url_for('spm_dashboard'))
+
+#     # Users with role_default == 150 are directed to the GM dashboard
+#     if current_user.role_default == 180:
+#         return redirect(url_for('gm_dashboard'))
+
+#     if current_user.role_default in [140, 35]:
+#         if current_user.branch:
+#             return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
+#         elif not current_user.branch:
+#             flash("Branch information is missing.", "danger")
+#             return render_template('access_denied.html')
+
+#     # If no conditions are met, deny access
+#     flash("Access denied: You do not have permission to view this page.", "danger")
+#     return redirect(url_for('dashboard'))
+
+
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     if current_user.is_admin:
+#         return render_dashboard(current_user.id)
+
+#     if current_user.role_default == 20:
+#         with get_db_connection() as conn:
+#             employee = conn.execute(
+#                 "SELECT e.ID FROM employees e WHERE e.user_id = ?", (
+#                     current_user.id,)
+#             ).fetchone()
+#         if employee:
+#             return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+#         else:
+#             flash("Employee not found!", "danger")
+#             return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
+
+#     if current_user.role_default == 145:
+#         return redirect(url_for('spm_dashboard'))
+
+#     if current_user.role_default == 180:
+#         # Make sure gm_dashboard() is defined with this name
+#         return redirect(url_for('gm_dashboard'))
+
+
+#     if current_user.role_default in [140, 35]:
+#         if current_user.branch:
+#             return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
+#         else:
+#             flash("Branch information is missing.", "danger")
+#             return render_template('access_denied.html')
+
+#     flash("Access denied: You do not have permission to view this page.", "danger")
+#     return redirect(url_for('dashboard'))
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    # Admin users are directed to the admin dashboard
-    if current_user.is_admin:
+    # Admin dashboard
+    if getattr(current_user, 'is_admin', False):
         return render_dashboard(current_user.id)
 
-    # Employees (role_default == 20) are directed to the employee dashboard
-    if current_user.role_default == 20:
+    role = getattr(current_user, 'role_default', None)
+
+    # Employee dashboard
+    if role == 20:
         with get_db_connection() as conn:
             employee = conn.execute(
-                "SELECT e.ID FROM employees e WHERE e.user_id = ?", (
-                    current_user.id,)
+                "SELECT e.ID FROM employees e WHERE e.user_id = ?",
+                (current_user.id,)
             ).fetchone()
-
         if employee:
             return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
         else:
             flash("Employee not found!", "danger")
-            return redirect(url_for('render_dashboard_employees', employee_id=current_user.id))
+            return render_template('access_denied.html')
 
-    # Users with role_default == 145 are directed to the SPM dashboard
-    if current_user.role_default == 145:
+    # SPM dashboard
+    if role == 145:
         return redirect(url_for('spm_dashboard'))
 
-    # Users with roles 40, 45, 60, or 65 are directed to the branch manager dashboard
-    if current_user.role_default in [140, 35, 180]:
-        if current_user.branch:
-            return redirect(url_for('render_dashboard_branch_manager', branch_name=current_user.branch))
-        elif not current_user.branch:
+    # GM dashboard
+    if role == 180:
+        return redirect(url_for('gm_dashboard'))
+
+    # Branch Manager dashboard
+    if role in [140, 35]:
+        branch = getattr(current_user, 'branch', None)
+        if branch:
+            return redirect(url_for('render_dashboard_branch_manager', branch_name=branch))
+        else:
             flash("Branch information is missing.", "danger")
             return render_template('access_denied.html')
 
-    # If no conditions are met, deny access
+    # Default fallback (no redirect to dashboard again!)
     flash("Access denied: You do not have permission to view this page.", "danger")
-    return redirect(url_for('dashboard'))
+    return render_template('access_denied.html')
+
+
+@app.route('/gm/dashboard')
+@login_required
+def gm_dashboard():
+    if current_user.role_default != 180:
+        flash("Access denied to GM dashboard.", "danger")
+        return render_template('access_denied.html')
+
+    today_date = date.today()
+    with get_db_connection() as conn:
+        sun_zones = conn.execute("SELECT * FROM zones").fetchall()
+        branches = conn.execute("SELECT * FROM branches").fetchall()
+        employees = conn.execute("SELECT * FROM employees").fetchall()
+        users = conn.execute("SELECT * FROM users").fetchall()
+
+        # Employees on leave today
+        employees_on_leave_today = conn.execute("""
+            SELECT u.ID, u.UserName, u.Branch, l.start_date, l.end_date, l.reason, l.service_count, l.leave_hours
+            FROM leaves l
+            JOIN users u ON l.employee_id = u.id
+            WHERE ? BETWEEN l.start_date AND l.end_date
+        """, (today_date,)).fetchall()
+        total_leave = len(employees_on_leave_today)
+
+        # Total leave days and hours grouped by branch
+        leave_summary = conn.execute("""
+            SELECT 
+                u.Branch,
+                SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
+                SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
+            FROM leaves l
+            JOIN users u ON l.employee_id = u.id
+            GROUP BY u.Branch
+        """).fetchall()
+
+        # Total leave days and hours grouped by zone
+        leave_summary_by_zone = conn.execute("""
+            SELECT 
+                z.Name,
+                SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
+                SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
+            FROM leaves l
+            JOIN users u ON l.employee_id = u.id
+            JOIN branches b ON u.branch = b.Branch
+            JOIN zone_branch zb ON b.ID = zb.branch_id
+            JOIN zones z ON zb.zone_id = z.ID
+            GROUP BY z.Name
+        """).fetchall()
+
+    return render_template(
+        'dashboard/gm_dashboard.html',
+        sun_zones=sun_zones,
+        branches=branches,
+        employees=employees,
+        users=users,
+        employees_on_leave_today=employees_on_leave_today,
+        total_leave=total_leave,
+        leave_summary=leave_summary,
+        leave_summary_by_zone=leave_summary_by_zone
+    )
 
 
 @app.route('/spm_dashboard')
