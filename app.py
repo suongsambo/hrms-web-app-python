@@ -10,13 +10,14 @@ import json
 import pyotp
 import requests
 import shutil
+import math
 import glob
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from config import Config
 from flask_socketio import SocketIO, emit, join_room, leave_room, send
 import time  # Make sure this is the standard time module
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from typing import Optional
 import eventlet
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -4050,83 +4051,152 @@ def dashboard():
 @app.route('/spm_dashboard')
 @login_required
 def spm_dashboard():
-    # Ensure that only users with role_default == 145 can access this page
+    today_date = date.today()
     if current_user.role_default != 145:
         flash("You do not have permission to view this page.", "danger")
         return redirect(url_for('dashboard'))
 
-    # Get the current user's zone_id
     zone_id = current_user.zone_id
-
     if zone_id is None:
         flash("Zone ID not found for the current user!", "danger")
         return redirect(url_for('dashboard'))
 
-    # Query the Zone and Branch based on the user's zone_id
     with get_db_connection() as conn:
-        # Get the zone based on the user's zone_id
+        # Get the zone
         zone = conn.execute(
-            "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
+            "SELECT * FROM zones WHERE ID = ?", (zone_id,)
+        ).fetchone()
         if zone is None:
             flash("Zone not found!", "danger")
             return redirect(url_for('dashboard'))
 
-        # Find branches in the current zone
+        # Get branches in the zone
         branches_in_zone = conn.execute(
-            "SELECT b.ID, b.Branch, b.ContactNumber FROM branches b JOIN zone_branch zb ON b.ID = zb.branch_id WHERE zb.zone_id = ?", (zone_id,)).fetchall()
+            "SELECT b.ID, b.Branch, b.ContactNumber, b.BranchManagerName FROM branches b JOIN zone_branch zb ON b.ID = zb.branch_id WHERE zb.zone_id = ?", (
+                zone_id,)
+        ).fetchall()
 
-    # If no branches are found, we can handle that too
-    if not branches_in_zone:
-        flash("No branches found in this zone.", "warning")
+        # Get total number of employees in the zone
+        total_employees_in_zone = conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM users
+            WHERE branch IN (
+                SELECT b.Branch
+                FROM branches b
+                JOIN zone_branch zb ON b.ID = zb.branch_id
+                WHERE zb.zone_id = ?
+            )
+            AND RoleDefault = 20
+            """, (zone_id,)
+        ).fetchone()[0]
 
-    # Prepare the data to send to the template
+        # Count employees on leave today in the zone
+        total_employees_on_leave_today = conn.execute(
+            """
+            SELECT COUNT(DISTINCT l.employee_id)
+            FROM leaves l
+            JOIN users u ON l.employee_id = u.id
+            WHERE u.branch IN (
+                SELECT b.Branch
+                FROM branches b
+                JOIN zone_branch zb ON b.ID = zb.branch_id
+                WHERE zb.zone_id = ?
+            )
+         
+            AND ? BETWEEN l.start_date AND l.end_date
+            """,
+            (zone_id, today_date)
+        ).fetchone()[0]
+
+        # Get list of employees on leave today in the zone
+        employees_on_leave_today = conn.execute(
+            """
+            SELECT u.ID, u.UserName, u.Branch, l.start_date, l.end_date, l.reason
+            FROM leaves l
+            JOIN users u ON l.employee_id = u.id
+            WHERE u.branch IN (
+                SELECT b.Branch
+                FROM branches b
+                JOIN zone_branch zb ON b.ID = zb.branch_id
+                WHERE zb.zone_id = ?
+            )
+            AND ? BETWEEN l.start_date AND l.end_date
+            """,
+            (zone_id, today_date)
+        ).fetchall()
+
     data = {
-        'message': "Welcome",
-        'zone': zone,  # Zone information for the current user
-        'branches': branches_in_zone  # Branches in the user's zone
+        'message': "Welcome, " + current_user.username,
+        'zone': zone,
+        'branches': branches_in_zone,
+        'total_employees_in_zone': total_employees_in_zone,
+        'total_leave': total_employees_on_leave_today,
+        'employees_on_leave_today': employees_on_leave_today
     }
 
-    # Render the spm_dashboard template with data
     return render_template('/dashboard/spm_dashboard.html', data=data)
 
 
 @app.route('/dashboard/branch_manager/<string:branch_name>')
 @login_required
 def render_dashboard_branch_manager(branch_name):
+    today = date.today()
 
     with get_db_connection() as conn:
-        # Fetch all employees data based on branch_name
+        # Fetch all employees in the branch
         employees = conn.execute(
-            "SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch, p.PositionName AS Position, d.Name AS Department "
-            "FROM employees e "
-            "LEFT JOIN positions p ON e.position_id = p.ID "
-            "LEFT JOIN departments d ON p.department_id = d.ID "
-            "WHERE e.Branch = ?",  # Fetch all employees in the given branch
+            """
+            SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch, 
+                   p.PositionName AS Position, 
+                   d.Name AS Department
+            FROM employees e
+            LEFT JOIN positions p ON e.position_id = p.ID
+            LEFT JOIN departments d ON p.department_id = d.ID
+            WHERE e.Branch = ?
+            """,
             (branch_name,)
-        ).fetchall()  # Fetch all employees in the branch
+        ).fetchall()
 
         if not employees:
             flash("No employees found in this branch!", "danger")
-            # Redirect to the main dashboard if no employees are found
             return redirect(url_for('dashboard'))
 
-        # Prepare employee data for rendering in the template
+        # Count employees in the branch
+        employee_count = len(employees)
+
+        # Count employees on leave today
+        employees_on_leave_today = conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM leaves l
+            JOIN employees e ON l.employee_id = e.ID
+            WHERE e.Branch = ?
+              AND ? BETWEEN l.start_date AND l.end_date
+              AND l.status = 'Approved'
+            """,
+            (branch_name, today)
+        ).fetchone()[0]
+
+        # Prepare employee data for rendering
         employee_data = [
             {
-                'ID': employee['ID'] if employee['ID'] is not None else '',
-                'Name': employee['Name'] if employee['Name'] is not None else '',
-                'Age': employee['Age'] if employee['Age'] is not None else '',
-                'Salary': employee['Salary'] if employee['Salary'] is not None else '',
-                'Branch': employee['Branch'] if employee['Branch'] is not None else '',
-                'Position': employee['Position'] if employee['Position'] is not None else '',
-                'Department': employee['Department'] if employee['Department'] is not None else ''
+                'ID': emp['ID'],
+                'Name': emp['Name'],
+                'Age': emp['Age'],
+                'Salary': emp['Salary'],
+                'Branch': emp['Branch'],
+                'Position': emp['Position'],
+                'Department': emp['Department']
             }
-            for employee in employees
+            for emp in employees
         ]
 
         return render_template(
             'employees/bm_dashboard.html',
-            employees=employee_data
+            employees=employee_data,
+            employees_in_branch=employee_count,
+            employees_on_leave_today=employees_on_leave_today
         )
 
 
@@ -4137,7 +4207,6 @@ def render_dashboard_employees(employee_id):
     end_date = request.args.get('end_date')
 
     with get_db_connection() as conn:
-        # Fetch the specific employee's data
         employee = conn.execute(
             """
             SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch,
@@ -4164,12 +4233,39 @@ def render_dashboard_employees(employee_id):
             'Department': employee['Department'] or ''
         }
 
-        # Get Payroll by employee ID and optional date range
         payroll_query = """
             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary
             FROM payroll p
             WHERE p.employee_id = ?
         """
+
+        leave_by_day_query = """
+            SELECT
+                DATE(l.start_date) AS leave_date,
+                SUM(l.service_count) AS leave_count
+            FROM leaves l
+            WHERE l.employee_id = ?
+            GROUP BY leave_date
+            ORDER BY leave_date
+        """
+        # leave_by_day_query
+        leave_by_day_params = [employee['ID']]
+        if start_date and end_date:
+            leave_by_day_query = """
+                SELECT
+                    DATE(l.start_date) AS leave_date,
+                    SUM(l.service_count) AS leave_count
+                FROM leaves l
+                WHERE l.employee_id = ?
+                AND l.start_date >= ? AND l.end_date <= ?
+                GROUP BY leave_date
+                ORDER BY leave_date
+            """
+            leave_by_day_params.extend([start_date, end_date])
+
+        leave_by_day = conn.execute(
+            leave_by_day_query, leave_by_day_params).fetchall()
+
         payroll_params = [employee['ID']]
         if start_date and end_date:
             payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
@@ -4178,14 +4274,10 @@ def render_dashboard_employees(employee_id):
         total_salary = conn.execute(payroll_query, payroll_params).fetchone()
         total_salary = total_salary["total_salary"] if total_salary else 0
 
-        # Get Leaves by employee ID and optional date range
         leaves_query = """
             SELECT
                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
-                COALESCE(
-                    SUM(l.leave_hours),
-                    0
-                ) AS total_leaves_hours
+                COALESCE(SUM(l.leave_hours), 0) AS total_leaves_hours
             FROM leaves l
             WHERE l.employee_id = ?
         """
@@ -4196,94 +4288,33 @@ def render_dashboard_employees(employee_id):
 
         leaves = conn.execute(leaves_query, leaves_params).fetchone()
 
-        # Ensure we handle cases where the query returns None
         total_leaves_days = leaves["total_leaves_days"] if leaves else 0
-        total_leaves_hours = "{:.0f} hours".format(
-            leaves["total_leaves_hours"]) if leaves else "0 hours"
+        # keep as number
+        total_leaves_hours = leaves["total_leaves_hours"] if leaves else 0
+        # Build lists to send to the template
+        leave_days = [row['leave_date'] for row in leave_by_day]
+        leave_counts = [row['leave_count'] for row in leave_by_day]
+
+        days, hours = divmod(total_leaves_hours, 8)
+        hours_to_days = days + (hours / 8)
+        cons_days = total_leaves_days + hours_to_days
+        formatted_value = math.trunc(cons_days)
+        mod_hours = round(hours / 8, 2)
+        total_leave_pretty = f"{int(hours_to_days)} Days | {int(mod_hours * 8)} hours"
+        # ---------------------------------
 
         return render_template(
             'employees/employee_dashboard.html',
             employee=employee_data,
             total_salary=total_salary,
             total_leaves_days=total_leaves_days,
-            total_leaves_hours=total_leaves_hours
+            total_leaves_hours="{:.0f} hours".format(total_leaves_hours),
+            total_leave_hours_to_day=hours_to_days,
+            total_leave_pretty=total_leave_pretty,
+            cons_days=formatted_value,
+            leave_days=leave_days,
+            leave_counts=leave_counts
         )
-
-# @app.route('/dashboard/employee/<int:employee_id>')
-# @login_required
-# def render_dashboard_employees(employee_id):
-#     # Get date filter from query params or set to current month
-#     start_date = request.args.get('start_date')
-#     end_date = request.args.get('end_date')
-
-#     if not start_date or not end_date:
-#         today = date.today()
-#         start_date = date(today.year, today.month, 1)
-#         # calculate end of current month
-#         next_month = today.replace(day=28) + timedelta(days=4)
-#         end_date = next_month - timedelta(days=next_month.day)
-#         # Convert to string format for SQL
-#         start_date = start_date.isoformat()
-#         end_date = end_date.isoformat()
-
-#     with get_db_connection() as conn:
-#         employee = conn.execute(
-#             """
-#             SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch,
-#                    p.PositionName AS Position, d.Name AS Department
-#             FROM employees e
-#             LEFT JOIN positions p ON e.position_id = p.ID
-#             LEFT JOIN departments d ON p.department_id = d.ID
-#             WHERE e.ID = ?
-#             """,
-#             (employee_id,)
-#         ).fetchone()
-
-#         if not employee:
-#             flash("Employee not found!", "danger")
-#             return redirect(url_for('dashboard', id=current_user.id))
-
-#         employee_data = {
-#             'ID': employee['ID'] or '',
-#             'Name': employee['Name'] or '',
-#             'Age': employee['Age'] or '',
-#             'Salary': employee['Salary'] or '',
-#             'Branch': employee['Branch'] or '',
-#             'Position': employee['Position'] or '',
-#             'Department': employee['Department'] or ''
-#         }
-
-#         payroll_query = """
-#             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary
-#             FROM payroll p
-#             WHERE p.employee_id = ? AND p.period_start_date >= ? AND p.period_end_date <= ?
-#         """
-#         total_salary = conn.execute(
-#             payroll_query, (employee['ID'], start_date, end_date)).fetchone()
-#         total_salary = total_salary["total_salary"] if total_salary else 0
-
-#         leaves_query = """
-#             SELECT
-#                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
-#                 COALESCE(SUM(l.leave_hours), 0) AS total_leaves_hours
-#             FROM leaves l
-#             WHERE l.employee_id = ? AND l.start_date >= ? AND l.end_date <= ?
-#         """
-#         leaves = conn.execute(
-#             leaves_query, (employee['ID'], start_date, end_date)).fetchone()
-#         total_leaves_days = leaves["total_leaves_days"] if leaves else 0
-#         total_leaves_hours = "{:.0f} hours".format(
-#             leaves["total_leaves_hours"]) if leaves else "0 hours"
-
-#         return render_template(
-#             'employees/employee_dashboard.html',
-#             employee=employee_data,
-#             total_salary=total_salary,
-#             total_leaves_days=total_leaves_days,
-#             total_leaves_hours=total_leaves_hours,
-#             start_date=start_date,
-#             end_date=end_date
-#         )
 
 
 def render_dashboard(user_id):
@@ -4462,8 +4493,10 @@ def add_employee():
     # Get branches, users, and positions from the database
     with get_db_connection() as conn:
         branches = conn.execute("SELECT * FROM branches").fetchall()
+
         users = conn.execute(
-            "SELECT id, UserName FROM users").fetchall()  # Fetch users
+            "SELECT id, UserName FROM users WHERE RoleDefault = 20"
+        ).fetchall()
         positions = conn.execute("SELECT * FROM positions").fetchall()
         departments = conn.execute("SELECT * FROM departments").fetchall()
 
