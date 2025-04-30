@@ -25,10 +25,14 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from typing import Union
 from flask_caching import Cache
 from db import init_db
+from flask_cors import CORS
 
 app = Flask(__name__)
 
 app.config.from_object(Config)
+CORS(app)
+CORS(app, resources={
+     r"/*": {"origins": ["http://127.0.0.1:5000",  "http://172.104.60.81"]}})
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -3577,6 +3581,7 @@ def health_check():
     return render_template('health_check.html', status=status)
 
 
+# flask_wtf
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']

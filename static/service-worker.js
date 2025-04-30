@@ -2,8 +2,6 @@ const CACHE_NAME = 'flask-pwa-cache-v1';
 const urlsToCache = [
   '/',
   '/static/manifest.json',
-  '/static/ios/512.png',
-  '/static/ios/1024.png'
 ];
 
 // Installing service worker and caching necessary files

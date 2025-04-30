@@ -1,31 +1,15 @@
-/* body {
-
-    margin: 0;
-    padding: 0;
-    font-family: 'Inter', sans-serif;
-    background-color: #f4f4f4;
-    box-sizing: border-box;
-
-    overflow: hidden;
-} */
-
-
-
 html, body {
     height: 100%;
     margin: 0;
     padding: 0;
     overflow: hidden;
-    /* overflow-x: auto; */
     box-sizing: border-box;
-    font-family: 'Inter', sans-serif;
-    /* background-color: darkgrey; */
+    /* font-family: 'Inter', sans-serif; */
+    font-family: "Roboto", sans-serif;
     background-color: #F3F4F6;
 }
 
 .container {
     min-height: 100vh;
     min-height: -webkit-fill-available;
-
-
 }
