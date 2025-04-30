@@ -1,0 +1,112 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version:  PROJECT\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-04-30 00:00+0000\n"
+"PO-Revision-Date: 2025-04-30 16:14+0700\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: km\n"
+"Language-Team: km <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+msgid "Home"
+msgstr "ទំព័រដើម"
+
+msgid "Users"
+msgstr "អ្នកប្រើប្រាស់"
+
+msgid "Add User"
+msgstr "បន្ថែមអ្នកប្រើប្រាស់"
+
+msgid "Roles"
+msgstr "តួនាទី"
+
+msgid "Manage Users"
+msgstr "គ្រប់គ្រងអ្នកប្រើប្រាស់"
+
+msgid "Force Reset Password"
+msgstr "កំណត់ពាក្យសម្ងាត់ឡើងវិញ"
+
+msgid "Departments"
+msgstr "នាយកដ្ឋាន"
+
+msgid "Add Position"
+msgstr "បន្ថែមមុខដំណែង"
+
+msgid "Manage Positions"
+msgstr "គ្រប់គ្រងមុខដំណែង"
+
+msgid "Add Department"
+msgstr "បន្ថែមនាយកដ្ឋាន"
+
+msgid "Manage Departments"
+msgstr "គ្រប់គ្រងនាយកដ្ឋាន"
+
+msgid "Backup"
+msgstr "បម្រុងទុក"
+
+msgid "Manage Backup"
+msgstr "គ្រប់គ្រងការបម្រុងទុក"
+
+msgid "Restore Local"
+msgstr "ស្ដារឡើងវិញពីក្នុងម៉ាស៊ីន"
+
+msgid "Zones"
+msgstr "តំបន់"
+
+msgid "Assign Branch"
+msgstr "កំណត់សាខាទៅតំបន់"
+
+msgid "Manage Zones"
+msgstr "គ្រប់គ្រងតំបន់"
+
+msgid "Branch"
+msgstr "សាខា"
+
+msgid "Add Branch"
+msgstr "បន្ថែមសាខា"
+
+msgid "Manage Branches"
+msgstr "គ្រប់គ្រងសាខា"
+
+msgid "Employees"
+msgstr "និយោជិត"
+
+msgid "Add Employee"
+msgstr "បន្ថែមនិយោជិត"
+
+msgid "Manage Employees"
+msgstr "គ្រប់គ្រងនិយោជិត"
+
+msgid "Add BankStatement"
+msgstr "បន្ថែមរបាយការណ៍ធនាគារ"
+
+msgid "Manage BankStatements"
+msgstr "គ្រប់គ្រងរបាយការណ៍ធនាគារ"
+
+msgid "Attendance"
+msgstr "វត្តមាន"
+
+msgid "Leave Manage"
+msgstr "គ្រប់គ្រងការឈប់សម្រាក"
+
+msgid "Holiday"
+msgstr "ថ្ងៃឈប់សម្រាក"
+
+msgid "Manage Holidays"
+msgstr "គ្រប់គ្រងថ្ងៃឈប់សម្រាក"
+
+msgid "Settings"
+msgstr "ការកំណត់"
+
+msgid "Profile"
+msgstr "ប្រវត្តិរូប"
+
+msgid "Security"
+msgstr "សុវត្ថិភាព"
+

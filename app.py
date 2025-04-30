@@ -26,6 +26,7 @@ from typing import Union
 from flask_caching import Cache
 from db import init_db
 from flask_cors import CORS
+from flask_babel import Babel, _
 
 app = Flask(__name__)
 
@@ -33,12 +34,33 @@ app.config.from_object(Config)
 CORS(app)
 CORS(app, resources={
      r"/*": {"origins": ["http://127.0.0.1:5000",  "http://172.104.60.81"]}})
+app.config['BABEL_DEFAULT_LOCALE'] = 'en'
+app.config['LANGUAGES'] = ['en', 'km']
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+babel = Babel(app)
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 cache = Cache(config={'CACHE_TYPE': 'simple'})
 eventlet.monkey_patch()
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+LANGUAGES = ['en', 'km']
+
+
+def get_locale():
+    lang = request.args.get('lang')
+    if lang in LANGUAGES:
+        return lang
+    return request.accept_languages.best_match(LANGUAGES)
+
+
+babel.init_app(app, locale_selector=get_locale)
+
+
+@app.context_processor
+def inject_locale():
+    return dict(get_locale=get_locale)
 
 
 def allowed_file(filename: str) -> bool:

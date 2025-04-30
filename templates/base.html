@@ -48,14 +48,13 @@
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
 
-
   <!-- Fond Roboto -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-    rel="stylesheet">
+    rel="stylesheet" />
 
-
+  <script src="{{ url_for('static', filename='js/lang.js') }}"></script>
 
   <script type="text/javascript">
     google.charts.load("current", { packages: ["corechart"] });
@@ -72,7 +71,7 @@
 
     var chart = new google.visualization.PieChart(document.getElementById("branchChart"));
     chart.draw(data, options);
-                                }
+                                  }
   </script>
 </head>
 
@@ -94,6 +93,19 @@
     </a>
 
     <div class="flex space-x-4 items-center">
+      <!-- <select id="lang-select">
+        <option value="en" {% if request.args.get('lang', 'en' )=='en' %}selected{% endif %}>English</option>
+        <option value="km" {% if request.args.get('lang', 'en' )=='km' %}selected{% endif %}>ភាសាខ្មែរ</option>
+      </select> -->
+
+      <select id="lang-select" name="lang"
+        class="bg-gray-800 text-white border border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition-all">
+        <option value="en" {% if request.args.get('lang', 'en' )=='en' %}selected{% endif %}>English</option>
+        <option value="km" {% if request.args.get('lang', 'en' )=='km' %}selected{% endif %}>ភាសាខ្មែរ</option>
+      </select>
+
+
+
       <!-- Branch Name Section -->
       <div class="text-white text-sm flex items-center gap-x-2">
         <i class="fas fa-building mr-1"></i>
@@ -168,47 +180,62 @@
   </div>
 </header>
 
+
+
+<script>
+  document.getElementById('lang-select').addEventListener('change', function () {
+    const selectedLang = this.value;
+    const url = new URL(window.location.href);
+    url.searchParams.set('lang', selectedLang);
+    window.location.href = url.toString();
+  });
+</script>
+
 <div x-data="{ activeMenu: '' }">
   <!-- Navigation Menu -->
   <nav class="flex space-x-6 text-white bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 p-1 shadow-lg">
     <a href="/dashboard"
       class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
       <span class="material-symbols-outlined">home</span>
-      <span class="ml-2">Home</span>
+      <span id="nav-home" class="ml-2">{{ _('Home') }}</span>
     </a>
 
     <!-- Users -->
     {% if current_user.is_admin == 1 %}
+
     <div class="relative z-10">
       <button @click="activeMenu = activeMenu === 'users' ? '' : 'users'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">groups</span>
-        <span class="ml-2">Users</span>
+        <span id="nav-users" class="ml-2">{{ _('Users') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
+
       <div x-show="activeMenu === 'users'" @click.away="activeMenu = ''"
         class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+
         <a href="/users/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">person_add</span>
-          <span>Add User</span>
+          <span>{{ _('Add User') }}</span>
         </a>
 
         <a href="/users/roles"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">admin_panel_settings</span>
-          <span>Roles</span>
+          <span>{{ _('Roles') }}</span>
         </a>
 
         <a href="/users"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">people</span>
-          <span>Manage Users</span>
+          <span>{{ _('Manage Users') }}</span>
         </a>
+
         <a href="/force_reset_password"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">lock_reset</span>
-          <span>Force Reset Password</span>
+          <span>{{ _('Force Reset Password') }}</span>
         </a>
       </div>
     </div>
@@ -217,30 +244,35 @@
       <button @click="activeMenu = activeMenu === 'departments' ? '' : 'departments'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">apartment</span>
-        <span class="ml-2">Departments</span>
+        <span class="ml-2">{{ _('Departments') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
+
       <div x-show="activeMenu === 'departments'" @click.away="activeMenu = ''"
         class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+
         <a href="/positions/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">add_business</span>
-          <span>Add Position</span>
+          <span>{{ _('Add Position') }}</span>
         </a>
+
         <a href="/positions"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">business</span>
-          <span>Manage Positions</span>
+          <span>{{ _('Manage Positions') }}</span>
         </a>
+
         <a href="/departments/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">add_business</span>
-          <span>Add Department</span>
+          <span>{{ _('Add Department') }}</span>
         </a>
+
         <a href="/departments"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">business</span>
-          <span>Manage Departments</span>
+          <span>{{ _('Manage Departments') }}</span>
         </a>
       </div>
     </div>
@@ -250,7 +282,7 @@
       <button @click="activeMenu = activeMenu === 'backup' ? '' : 'backup'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">save</span>
-        <span class="ml-2">Backup</span>
+        <span class="ml-2">{{ _('Backup') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'backup'" @click.away="activeMenu = ''"
@@ -258,13 +290,13 @@
         <a href="/backups"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">save</span>
-          <span>Manage Backup</span>
+          <span>{{ _('Manage Backup') }}</span>
         </a>
 
         <a href="/restore_local"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">restore</span>
-          <span>Restore Local</span>
+          <span>{{ _('Restore Local') }}</span>
         </a>
       </div>
     </div>
@@ -274,7 +306,7 @@
       <button @click="activeMenu = activeMenu === 'zones' ? '' : 'zones'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">location_pin</span>
-        <span class="ml-2">Zones</span>
+        <span class="ml-2">{{ _('Zones') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'zones'" @click.away="activeMenu = ''"
@@ -282,12 +314,12 @@
         <a href="/zone/create"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">map</span>
-          <span>Assign Branch</span>
+          <span>{{ _('Assign Branch') }}</span>
         </a>
         <a href="/zones"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">location_pin</span>
-          <span>Manage Zones</span>
+          <span>{{ _('Manage Zones') }}</span>
         </a>
       </div>
     </div>
@@ -297,7 +329,7 @@
       <button @click="activeMenu = activeMenu === 'branch' ? '' : 'branch'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">store</span>
-        <span class="ml-2">Branch</span>
+        <span class="ml-2">{{ _('Branch') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'branch'" @click.away="activeMenu = ''"
@@ -305,12 +337,12 @@
         <a href="/branches/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">add_business</span>
-          <span>Add Branch</span>
+          <span>{{ _('Add Branch') }}</span>
         </a>
         <a href="/branches"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">business</span>
-          <span>Manage Branches</span>
+          <span>{{ _('Manage Branches') }}</span>
         </a>
       </div>
     </div>
@@ -319,7 +351,7 @@
       <button @click="activeMenu = activeMenu === 'employees' ? '' : 'employees'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">person</span>
-        <span class="ml-2">Employees</span>
+        <span class="ml-2">{{ _('Employees') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'employees'" @click.away="activeMenu = ''"
@@ -327,24 +359,24 @@
         <a href="/employees/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">person_add</span>
-          <span>Add Employee</span>
+          <span>{{ _('Add Employee') }}</span>
         </a>
         <a href="/employees"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">people</span>
-          <span>Manage Employees</span>
+          <span>{{ _('Manage Employees') }}</span>
         </a>
 
         <a href="/bankstatement/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">attach_money</span>
-          <span>Add BankStatement</span>
+          <span>{{ _('Add BankStatement') }}</span>
         </a>
 
         <a href="/bankstatements"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">attach_money</span>
-          <span>Manage BankStatements</span>
+          <span>{{ _('Manage BankStatements') }}</span>
         </a>
       </div>
     </div>
@@ -354,7 +386,7 @@
       <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">event</span>
-        <span class="ml-2">Attendance</span>
+        <span class="ml-2">{{ _('Attendance') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
@@ -386,7 +418,7 @@
         <a href="/leaves"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
-          <span>Leave Manage</span>
+          <span>{{ _('Leave Manage') }}</span>
         </a>
       </div>
     </div>
@@ -396,7 +428,7 @@
       <button @click="activeMenu = activeMenu === 'holiday' ? '' : 'holiday'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">event</span>
-        <span class="ml-2">Holiday</span>
+        <span class="ml-2">{{ _('Holiday') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'holiday'" @click.away="activeMenu = ''"
@@ -409,7 +441,7 @@
         <a href="/holidays"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">event</span>
-          <span>Manage Holidays</span>
+          <span>{{ _('Manage Holidays') }}</span>
         </a>
       </div>
     </div>
@@ -674,7 +706,7 @@
       <button @click="activeMenu = activeMenu === 'settings' ? '' : 'settings'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">settings</span>
-        <span class="ml-2">Settings</span>
+        <span class="ml-2">{{ _('Settings') }}</span>
         <span class="ml-2">&#9662;</span>
       </button>
       <div x-show="activeMenu === 'settings'" @click.away="activeMenu = ''"
@@ -682,13 +714,13 @@
         <a href="{{ url_for('profile', user_id=current_user.id) }}"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">person</span>
-          <span>Profile</span>
+          <span>{{ _('Profile') }}</span>
         </a>
 
         <a href="/change_password"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">lock</span>
-          <span>Security</span>
+          <span>{{ _('Security') }}</span>
         </a>
       </div>
     </div>
@@ -777,15 +809,11 @@
 </div>
 
 <body class="flex flex-col h-[calc(100vh-300px)] over">
-  <div class="flex-1 flex h-[100vh] ">
-
-
-
-
+  <div class="flex-1 flex h-[100vh]">
     <!-- Sidebar -->
     {% if current_user.is_admin == 1 %}
     <div class="h-[calc(100vh-150px)] overflow-x-hidden overflow-y-scroll bg-[#48D2BB] m-0 p-0">
-      <ul class="menu bg-accent  w-75">
+      <ul class="menu bg-accent w-75">
         <!-- Section Name -->
         <li class="menu-title">
           <span>Main Menu</span>
@@ -807,11 +835,8 @@
           <span>Users Section</span>
         </li>
 
-
         <li class="menu-item-toggle">
           <details>
-
-
             <summary
               class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/users/add', '/users/roles', '/users', '/force_reset_password'] %} bg-indigo-600 text-white {% endif %}">
               <span class="material-symbols-outlined">groups</span>
@@ -1084,23 +1109,20 @@
           </details>
         </li>
 
-
         <!-- Attendance Section -->
         <li class="menu-title">
           <span>Holiday Section</span>
         </li>
 
-
         <!-- Holiday Section -->
         <li class="menu-item-toggle">
           <details>
-            <summary class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105
-      {% if request.path in ['/holidays'] %} bg-indigo-600 text-white {% endif %}">
+            <summary
+              class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/holidays'] %} bg-indigo-600 text-white {% endif %}">
               <span class="material-symbols-outlined">event</span>
               <span class="ml-2">Holiday</span>
             </summary>
             <ul class="hidden">
-
               <!-- Manage Holidays -->
               <li class="{% if request.path == '/holidays' %} bg-indigo-600 text-white {% endif %}">
                 <a href="/holidays"
@@ -1109,14 +1131,12 @@
                   <span class="ml-2">Manage Holidays</span>
                 </a>
               </li>
-
             </ul>
           </details>
         </li>
 
         {% endif %}
       </ul>
-
     </div>
     {% endif %}
     <!-- Main Content -->

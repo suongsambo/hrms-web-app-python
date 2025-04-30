@@ -52,3 +52,19 @@ pip install --force-reinstall MarkupSafe
 sudo chmod 777 /home/kpca/sites/hrs-management-web-app/database
 ls -l /home/kpca/sites/hrs-management-web-app/database
 sudo chmod 777 /home/kpca/sites/hrs-management-web-app/database
+
+# Only once per language
+
+pybabel init -i messages.pot -d translations -l km
+
+# Then translate in: translations/km/LC_MESSAGES/messages.po
+
+# Then compile:
+
+pybabel compile -d translations
+
+# Init
+
+pybabel extract -F babel.cfg -o messages.pot .
+pybabel init -i messages.pot -d translations -l en
+pybabel init -i messages.pot -d translations -l km
