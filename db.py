@@ -1,3 +1,5 @@
+from datetime import date
+import random
 import sqlite3
 import hashlib
 from flask import Flask
@@ -381,15 +383,15 @@ def init_db():
             )
         ''')
 
-        # Check if zone 'All' exists
-        zone_exists = conn.execute(
-            "SELECT 1 FROM zones WHERE name = 'All'").fetchone()
+        # # Check if zone 'All' exists
+        # zone_exists = conn.execute(
+        #     "SELECT 1 FROM zones WHERE name = 'All'").fetchone()
 
-        if not zone_exists:
-            conn.execute('''
-                INSERT INTO zones (name)
-                VALUES ('All')
-            ''')
+        # if not zone_exists:
+        #     conn.execute('''
+        #         INSERT INTO zones (name)
+        #         VALUES ('All')
+        #     ''')
 
         # Check if the user 'bo' exists
         user_exists = conn.execute(
@@ -452,18 +454,90 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('pm', hashed_password, 'pm@example.com', '010655037', 0, 140, 'SYS'))
 
-        # # Create SQM user
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'spm'").fetchone()
+        # TODO: SPM
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'SPM.KPCA'").fetchone()
 
-        # if not user_exists:
+        if not user_exists:
 
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
 
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('spm', hashed_password, 'spm@example.com', '010655037', 0, 145, 'SYS'))
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SPM.KPCA', hashed_password, 'SPM.KPCA@example.com', '010655037', 0, 145, 'SYS', 1))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'SPM.KKD'").fetchone()
+
+        if not user_exists:
+
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SPM.KKD', hashed_password, 'SPM.KKD@example.com', '010655037', 0, 145, 'KKD', 2))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'SPM.SAT'").fetchone()
+
+        if not user_exists:
+
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SPM.SAT', hashed_password, 'SPM.SAT@example.com', '010655037', 0, 145, 'SAT', 3))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'SPM.SAN'").fetchone()
+
+        if not user_exists:
+
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SPM.SAN', hashed_password, 'SPM.SAN@example.com', '010655037', 0, 145, 'SAN', 4))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'SPM.SNV'").fetchone()
+
+        if not user_exists:
+
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SPM.SNV', hashed_password, 'SPM.SNV@example.com', '010655037', 0, 145, 'SNV', 5))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'SPM.KPT'").fetchone()
+
+        if not user_exists:
+
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SPM.KPT', hashed_password, 'SPM.KPT@example.com', '010655037', 0, 145, 'KPT', 6))
+
+        user_exists = conn.execute(
+            "SELECT 1 FROM users WHERE UserName = 'SPM.BTB'").fetchone()
+
+        if not user_exists:
+
+            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+            conn.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            ''', ('SPM.BTB', hashed_password, 'SPM.BTB@example.com', '010655037', 0, 145, 'KPT', 7))
 
       # Create DC user
         user_exists = conn.execute(
@@ -504,6 +578,60 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('ccc', hashed_password, 'ccc@example.com', '010655037', 0, 35, 'SYS'))
 
+            cursor = conn.cursor()
+
+            branches = ['KPT', 'CHK', 'KTR', 'AKC']
+            today = date.today().isoformat()
+
+            for branch_name in branches:
+                # Ensure branch exists
+                cursor.execute(
+                    "SELECT ID FROM branches WHERE Branch = ?", (branch_name,))
+                branch = cursor.fetchone()
+
+                if not branch:
+                    cursor.execute('''
+                        INSERT INTO branches (
+                            Branch, Status, CreateDate, StartDate, Description,
+                            BranchManagerName, ContactNumber, Address, DistrictProvince,
+                            RegisterDate, LocalDescription, LocalAddress,
+                            LocalBranchManagerName, BranchProjectId, CapitalInjectionId,
+                            GroupID, MemberID
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        branch_name, 'Active', today, today, f'{branch_name} Branch Description',
+                        'Branch Manager', '0000000000', 'Branch Address', 'District, Province',
+                        today, 'Local Description', 'Local Address',
+                        'Local Manager', 'ProjectX', 'CapitalX', 'GroupX', 'MemberX'
+                    ))
+                    branch_id = cursor.lastrowid
+                else:
+                    branch_id = branch[0]
+
+                # Create unique username like ccc.KPT, ccc.CHK, etc.
+                username = f'ccc.{branch_name}'
+
+                # Check if user already exists
+                cursor.execute(
+                    "SELECT 1 FROM users WHERE UserName = ?", (username,))
+                user_exists = cursor.fetchone()
+
+                if not user_exists:
+                    hashed_password = hashlib.sha256(
+                        '1111'.encode()).hexdigest()
+                    cursor.execute('''
+                        INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        username,
+                        hashed_password,
+                        f'{username}@example.com',
+                        '010655037',
+                        0,
+                        35,
+                        branch_name
+                    ))
+
         # Create CS user
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'cs'").fetchone()
@@ -515,17 +643,6 @@ def init_db():
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('cs', hashed_password, 'cs@example.com', '010655037', 0, 165, 'SYS'))
-
-        # Create Project Consultant user
-        user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'hd'").fetchone()
-
-        if not user_exists:
-            hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-            conn.execute('''
-                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('hd', hashed_password, 'hd@example.com', '010655037', 0, 170, 'SYS'))
 
         # Create HRC user
         user_exists = conn.execute(
@@ -637,6 +754,147 @@ def init_db():
                     'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'
                 ))
                 print(f'Branch {branch} added successfully!')
+
+            # TODO: Zones
+            cursor = conn.cursor()
+
+            zones = {
+                "ZONE_KPCA": ["KPCA", "PNH", "CHC", "CBA", "PPN", "DKR"],
+                "ZONE_KKD": ["KKD", "SST", "KTL"],
+                "ZONE_SAT": ["SAT", "SVR", "PMR", "SNG", "KAD", "CHP"],
+                "ZONE_SAN": ["SAN", "BTI", "TTG", "TTY", "BSD", "PKB"],
+                "ZONE_SNV": ["SNV", "SAB", "PRN"],
+                "ZONE_KPT": ["KPT", "CHK", "KTR", "AKC"],
+                "ZONE_BTB": ["BTB", "BVL", "SSK"],
+            }
+
+            for zone_name, subzone_list in zones.items():
+                # Step 1: Insert zone if it doesn't exist
+                cursor.execute(
+                    "SELECT ID FROM zones WHERE name = ?", (zone_name,))
+                zone = cursor.fetchone()
+
+                if not zone:
+                    description = ", ".join(subzone_list)
+                    cursor.execute(
+                        "INSERT INTO zones (name, description) VALUES (?, ?)",
+                        (zone_name, description)
+                    )
+                    zone_id = cursor.lastrowid
+                else:
+                    zone_id = zone[0]
+
+                # Step 2: Link only existing branches
+                for branch_name in subzone_list:
+                    cursor.execute(
+                        "SELECT ID FROM branches WHERE Branch = ?", (branch_name,))
+                    branch = cursor.fetchone()
+                    if branch:
+                        branch_id = branch[0]
+                        cursor.execute(
+                            "SELECT 1 FROM zone_branch WHERE zone_id = ? AND branch_id = ?",
+                            (zone_id, branch_id)
+                        )
+                        if not cursor.fetchone():
+                            cursor.execute(
+                                "INSERT INTO zone_branch (zone_id, branch_id) VALUES (?, ?)",
+                                (zone_id, branch_id)
+                            )
+
+        # Define user details
+        users = [
+            {'username': 'user_kpt', 'email': 'user_kpt@example.com',
+                'branch': 'KPT', 'user_id': 23},
+            {'username': 'user_chk', 'email': 'user_chk@example.com',
+                'branch': 'CHK', 'user_id': 24},
+            {'username': 'user_ktr', 'email': 'user_ktr@example.com',
+                'branch': 'KTR', 'user_id': 25},
+            {'username': 'user_akc', 'email': 'user_akc@example.com',
+                'branch': 'AKC', 'user_id': 26}
+        ]
+
+        # Hash the password
+        hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+        # Create users and corresponding employees
+        for user in users:
+            # Check if user already exists
+            cursor.execute("SELECT 1 FROM users WHERE UserName = ?",
+                           (user['username'],))
+            if not cursor.fetchone():
+                # Insert new user
+                cursor.execute('''
+                    INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    user['username'],
+                    hashed_password,
+                    user['email'],
+                    '010655037',
+                    0,
+                    20,  # Adjust RoleDefault as needed
+                    user['branch']
+                ))
+
+            # Check if employee already exists
+            cursor.execute(
+                "SELECT 1 FROM employees WHERE email = ?", (user['email'],))
+            if not cursor.fetchone():
+                # Insert new employee
+                cursor.execute('''
+                    INSERT INTO employees (
+                        name, age, department, salary, position_id, branch, user_id, phone_number, email,
+                        joining_date, status
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    f"{user['username'].capitalize()}",
+                    random.randint(25, 40),  # Random age
+                    'Operations',                    # Fixed department
+                    1500,                            # Fixed salary; adjust as needed
+                    1,                               # Position ID; adjust as needed
+                    user['branch'],
+                    user['user_id'],
+                    '010655037',
+                    user['email'],
+                    date.today().isoformat(),
+                    'Active'
+                ))
+
+        # TODO PM
+        users = [
+            {'username': 'pm_user_kpt',
+                'email': 'pm_user_kpt@example.com', 'branch': 'KPT'},
+            {'username': 'pm_user_chk',
+                'email': 'pm_user_chk@example.com', 'branch': 'CHK'},
+            {'username': 'pm_user_ktr',
+                'email': 'pm_user_ktr@example.com', 'branch': 'KTR'},
+            {'username': 'pm_user_akc',
+                'email': 'pm_user_akc@example.com', 'branch': 'AKC'}
+        ]
+
+        # Hash the password
+        hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+        # Create users
+        for user in users:
+            # Check if user already exists
+            cursor.execute(
+                "SELECT 1 FROM users WHERE UserName = ?", (user['username'],))
+            if not cursor.fetchone():
+                # Insert new user
+                cursor.execute('''
+                    INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    user['username'],
+                    hashed_password,
+                    user['email'],
+                    '010655037',
+                    0,
+                    140,  # Adjust RoleDefault as needed
+                    user['branch']
+                ))
 
         employee_exists = conn.execute(
             "SELECT 1 FROM employees WHERE email = 'john@example.com'").fetchone()
