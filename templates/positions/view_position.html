@@ -1,5 +1,6 @@
 {% extends 'base.html' %} {% block title %}View Position{% endblock %} {% block
 content %}
+
 <body class="bg-gray-100">
   <div class="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-lg mt-12">
     <h1 class="text-3xl font-semibold text-center text-gray-800 mb-6">
@@ -61,11 +62,7 @@ content %}
     </div>
 
     <div class="mt-6 text-center">
-      <a
-        href="{{ url_for('get_all_positions') }}"
-        class="text-blue-500 hover:underline"
-        >Back to Positions</a
-      >
+      <a href="{{ url_for('positions.get_all_positions') }}" class="text-blue-500 hover:underline">Back to Positions</a>
     </div>
   </div>
 </body>

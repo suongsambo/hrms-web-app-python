@@ -311,7 +311,7 @@
       </button>
       <div x-show="activeMenu === 'zones'" @click.away="activeMenu = ''"
         class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
-        <a href="/zone/create"
+        <a href="/zones/create"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">map</span>
           <span>{{ _('Assign Branch') }}</span>
@@ -367,7 +367,7 @@
           <span>{{ _('Manage Employees') }}</span>
         </a>
 
-        <a href="/bankstatement/add"
+        <a href="/bankstatements/add"
           class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
           <span class="material-symbols-outlined">attach_money</span>
           <span>{{ _('Add BankStatement') }}</span>

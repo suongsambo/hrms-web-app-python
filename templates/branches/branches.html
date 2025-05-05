@@ -27,7 +27,7 @@ content %}
         </button>
 
         <!-- Add Branch Button -->
-        <a href="{{ url_for('add_branch') }}"
+        <a href="{{ url_for('branches.add_branch') }}"
           class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out">
           <span class="material-symbols-outlined">add_box</span>
           <span class="text-sm font-medium">Add Branch</span>
@@ -69,17 +69,17 @@ content %}
           </td>
           <td class="py-2 px-4 border border-gray-300 jstify-space-between">
             <div class="flex justify-center gap-x-2">
-              <a href="{{ url_for('edit_branch', id=branch['ID']) }}"
+              <a href="{{ url_for('branches.edit_branch', id=branch['ID']) }}"
                 class="text-blue-500 hover:text-blue-700 font-semibold transition-colors duration-300 flex items-center space-x-2">
                 <span class="material-symbols-outlined">edit</span>
                 <!-- <span class="text-sm">Edit</span> -->
               </a>
-              <a href="{{ url_for('view_branch', id=branch['ID']) }}"
+              <a href="{{ url_for('branches.view_branch', id=branch['ID']) }}"
                 class="text-green-500 hover:text-green-700 font-semibold transition-colors duration-300 flex items-center space-x-2">
                 <span class="material-symbols-outlined">visibility</span>
                 <!-- <span class="text-sm">View</span> -->
               </a>
-              <form action="{{ url_for('delete_branch', id=branch['ID']) }}" method="POST" class="inline">
+              <form action="{{ url_for('branches.delete_branch', id=branch['ID']) }}" method="POST" class="inline">
                 <button type="submit"
                   class="text-red-500 hover:text-red-700 font-semibold transition-colors duration-300 flex items-center space-x-2"
                   onclick="return confirm('Delete branch?')">

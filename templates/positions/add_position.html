@@ -7,39 +7,24 @@ content %}
     <form action="/positions/add" method="POST" class="space-y-4">
       <!-- Position Name -->
       <div>
-        <label for="position_name" class="block text-gray-700"
-          >Position Name</label
-        >
-        <input
-          type="text"
-          id="position_name"
-          name="position_name"
+        <label for="position_name" class="block text-gray-700">Position Name</label>
+        <input type="text" id="position_name" name="position_name"
           class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          required
-        />
+          required />
       </div>
 
       <!-- Description -->
       <div>
         <label for="description" class="block text-gray-700">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          rows="3"
-          class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        ></textarea>
+        <textarea id="description" name="description" rows="3"
+          class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
       </div>
 
       <!-- Department Dropdown -->
       <div>
-        <label for="department_id" class="block text-gray-700"
-          >Department</label
-        >
-        <select
-          id="department_id"
-          name="department_id"
-          class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
+        <label for="department_id" class="block text-gray-700">Department</label>
+        <select id="department_id" name="department_id"
+          class="w-full px-4 py-2 mt-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option value="">Select Department</option>
           {% for department in departments %}
           <option value="{{ department.ID }}">{{ department.Name }}</option>
@@ -49,17 +34,13 @@ content %}
 
       <!-- Submit Button -->
       <div class="grid grid-cols-2 gap-2">
-        <button
-          type="submit"
-          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center space-x-1 justify-center"
-        >
+        <button type="submit"
+          class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center space-x-1 justify-center">
           <i class="fas fa-plus"></i>
           <span>Add Position</span>
         </button>
-        <a
-          href="/positions"
-          class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded flex items-center space-x-1 justify-center"
-        >
+        <a href="/positions"
+          class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded flex items-center space-x-1 justify-center">
           <i class="fas fa-arrow-left"></i>
           <span>Back</span>
         </a>

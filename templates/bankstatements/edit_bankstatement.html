@@ -8,127 +8,62 @@ block content %}
 
   <form id="bankStatementForm" method="POST">
     <div class="mb-4">
-      <label for="employee_id" class="block text-sm font-medium text-gray-700"
-        >Employee ID</label
-      >
-      <input
-        type="text"
-        id="employee_id"
-        name="employee_id"
-        value="{{ bankstatement['employee_id'] }}"
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-      />
+      <label for="employee_id" class="block text-sm font-medium text-gray-700">Employee ID</label>
+      <input type="text" id="employee_id" name="employee_id" value="{{ bankstatement['employee_id'] }}"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
     </div>
 
     <div class="mb-4">
-      <label for="employee_name" class="block text-sm font-medium text-gray-700"
-        >Employee Name</label
-      >
-      <input
-        type="text"
-        id="employee_name"
-        name="employee_name"
-        value="{{ bankstatement['employee_name'] }}"
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-      />
+      <label for="employee_name" class="block text-sm font-medium text-gray-700">Employee Name</label>
+      <input type="text" id="employee_name" name="employee_name" value="{{ bankstatement['employee_name'] }}"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
     </div>
 
     <div class="mb-4">
-      <label
-        for="account_number"
-        class="block text-sm font-medium text-gray-700"
-        >Account Number</label
-      >
-      <input
-        type="text"
-        id="account_number"
-        name="account_number"
-        value="{{ bankstatement['account_number'] }}"
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-      />
+      <label for="account_number" class="block text-sm font-medium text-gray-700">Account Number</label>
+      <input type="text" id="account_number" name="account_number" value="{{ bankstatement['account_number'] }}"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
     </div>
 
     <div class="mb-4">
-      <label for="account_name" class="block text-sm font-medium text-gray-700"
-        >Account Name</label
-      >
-      <input
-        type="text"
-        id="account_name"
-        name="account_name"
-        value="{{ bankstatement['account_name'] }}"
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-      />
+      <label for="account_name" class="block text-sm font-medium text-gray-700">Account Name</label>
+      <input type="text" id="account_name" name="account_name" value="{{ bankstatement['account_name'] }}"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
     </div>
 
     <div class="mb-4">
-      <label for="bank_name" class="block text-sm font-medium text-gray-700"
-        >Bank Name</label
-      >
-      <input
-        type="text"
-        id="bank_name"
-        name="bank_name"
-        value="{{ bankstatement['bank_name'] }}"
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-      />
+      <label for="bank_name" class="block text-sm font-medium text-gray-700">Bank Name</label>
+      <input type="text" id="bank_name" name="bank_name" value="{{ bankstatement['bank_name'] }}"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
     </div>
 
     <div class="mb-4">
-      <label for="salary" class="block text-sm font-medium text-gray-700"
-        >Salary</label
-      >
-      <input
-        type="text"
-        id="salary"
-        name="salary"
-        value="{{ bankstatement['salary'] }}"
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-      />
+      <label for="salary" class="block text-sm font-medium text-gray-700">Salary</label>
+      <input type="text" id="salary" name="salary" value="{{ bankstatement['salary'] }}"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
     </div>
 
     <div class="mb-4">
-      <label
-        for="transaction_date"
-        class="block text-sm font-medium text-gray-700"
-        >Transaction Date</label
-      >
-      <input
-        type="date"
-        id="transaction_date"
-        name="transaction_date"
-        value="{{ bankstatement['transaction_date'] }}"
-        class="mt-1 block w-full p-2 border border-gray-300 rounded-md"
-      />
+      <label for="transaction_date" class="block text-sm font-medium text-gray-700">Transaction Date</label>
+      <input type="date" id="transaction_date" name="transaction_date" value="{{ bankstatement['transaction_date'] }}"
+        class="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
     </div>
 
     <div class="mb-4">
-      <label for="transaction_type" class="block text-gray-700"
-        >Transaction Type</label
-      >
-      <select
-        id="transaction_type"
-        name="transaction_type"
-        class="mt-2 p-2 w-full border border-gray-300 rounded-md"
-        required
-      >
+      <label for="transaction_type" class="block text-gray-700">Transaction Type</label>
+      <select id="transaction_type" name="transaction_type" class="mt-2 p-2 w-full border border-gray-300 rounded-md"
+        required>
         <option value="Credit">Credit</option>
         <option value="Debit">Debit</option>
       </select>
     </div>
 
     <div class="flex justify-center gap-x-4">
-      <button
-        type="submit"
-        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center"
-      >
+      <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex items-center">
         <span class="material-symbols-outlined mr-1">edit</span>
         Update Bank Statement
       </button>
-      <a
-        href="/bankstatements"
-        class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 flex items-center"
-      >
+      <a href="/bankstatements" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 flex items-center">
         <span class="material-symbols-outlined mr-1">cancel</span>
         Cancel
       </a>

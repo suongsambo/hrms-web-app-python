@@ -27,8 +27,21 @@ from flask_caching import Cache
 from db import init_db
 from flask_cors import CORS
 from flask_babel import Babel, _
+from routes.branches import branches_bp
+from routes.zones import zones_bp
+from routes.users import users_bp
+from routes.bankstatements import bankstatements_bp
+from routes.positions import positions_bp
+from routes.departments import departments_bp
 
 app = Flask(__name__)
+
+app.register_blueprint(branches_bp)
+app.register_blueprint(zones_bp)
+app.register_blueprint(users_bp)
+app.register_blueprint(bankstatements_bp)
+app.register_blueprint(positions_bp)
+app.register_blueprint(departments_bp)
 
 app.config.from_object(Config)
 CORS(app)
@@ -496,129 +509,129 @@ def filter_leaves_by_ids():
     return render_template('leaves.html', leaves=leaves)
 
 
-@app.route('/zones/add', methods=['GET', 'POST'])
-def add_zone():
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
+# @app.route('/zones/add', methods=['GET', 'POST'])
+# def add_zone():
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         description = request.form['description']
 
-        # Insert zone into the zones table
-        with get_db_connection() as conn:
-            conn.execute('''
-                INSERT INTO zones (Name, Description)
-                VALUES (?, ?)
-            ''', (name, description))
-            conn.commit()
+#         # Insert zone into the zones table
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO zones (Name, Description)
+#                 VALUES (?, ?)
+#             ''', (name, description))
+#             conn.commit()
 
-        flash('Zone added successfully!', 'success')
-        return redirect(url_for('list_zones'))
+#         flash('Zone added successfully!', 'success')
+#         return redirect(url_for('list_zones'))
 
-    return render_template('/zones/add_zone.html')
-
-
-@app.route('/zone/create', methods=['GET', 'POST'])
-def create_zone():
-    with get_db_connection() as conn:
-        branches = conn.execute('SELECT * FROM branches').fetchall()
-
-    if request.method == 'POST':
-        name = request.form.get('name')
-        description = request.form.get('description')
-        selected_branches = request.form.getlist(
-            'branches')  # Get multiple branch IDs
-
-        if not name:
-            flash('Zone name is required.', 'danger')
-            return render_template('zones/create_zone.html', branches=branches)
-
-        with get_db_connection() as conn:
-            cursor = conn.cursor()
-            cursor.execute(
-                'INSERT INTO zones (Name, Description) VALUES (?, ?)',
-                (name, description)
-            )
-            zone_id = cursor.lastrowid  # Get the last inserted zone ID
-
-            # Assign selected branches to the zone
-            for branch_id in selected_branches:
-                cursor.execute(
-                    'INSERT INTO zone_branch (zone_id, branch_id) VALUES (?, ?)',
-                    (zone_id, branch_id)
-                )
-
-            conn.commit()
-
-        flash('Zone created and branches assigned successfully!', 'success')
-        # Redirect to the zones list page
-        return redirect(url_for('list_zones'))
-
-    return render_template('zones/create_zone.html', branches=branches)
+#     return render_template('/zones/add_zone.html')
 
 
-@app.route('/zones')
-def list_zones():
-    with get_db_connection() as conn:
-        zones = conn.execute('SELECT * FROM zones').fetchall()
+# @app.route('/zone/create', methods=['GET', 'POST'])
+# def create_zone():
+#     with get_db_connection() as conn:
+#         branches = conn.execute('SELECT * FROM branches').fetchall()
 
-    return render_template('/zones/list_zones.html', zones=zones)
+#     if request.method == 'POST':
+#         name = request.form.get('name')
+#         description = request.form.get('description')
+#         selected_branches = request.form.getlist(
+#             'branches')  # Get multiple branch IDs
 
+#         if not name:
+#             flash('Zone name is required.', 'danger')
+#             return render_template('zones/create_zone.html', branches=branches)
 
-@app.route('/zones/edit/<int:zone_id>', methods=['GET', 'POST'])
-def edit_zone(zone_id):
-    with get_db_connection() as conn:
-        zone = conn.execute(
-            'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute(
+#                 'INSERT INTO zones (Name, Description) VALUES (?, ?)',
+#                 (name, description)
+#             )
+#             zone_id = cursor.lastrowid  # Get the last inserted zone ID
 
-    if request.method == 'POST':
-        name = request.form['name']
-        description = request.form['description']
+#             # Assign selected branches to the zone
+#             for branch_id in selected_branches:
+#                 cursor.execute(
+#                     'INSERT INTO zone_branch (zone_id, branch_id) VALUES (?, ?)',
+#                     (zone_id, branch_id)
+#                 )
 
-        # Update zone in the zones table
-        with get_db_connection() as conn:
-            conn.execute('''
-                UPDATE zones
-                SET Name = ?, Description = ?
-                WHERE ID = ?
-            ''', (name, description, zone_id))
-            conn.commit()
+#             conn.commit()
 
-        flash('Zone updated successfully!', 'success')
-        return redirect(url_for('list_zones'))
+#         flash('Zone created and branches assigned successfully!', 'success')
+#         # Redirect to the zones list page
+#         return redirect(url_for('list_zones'))
 
-    return render_template('/zones/edit_zone.html', zone=zone)
-
-
-@app.route('/zones/delete/<int:zone_id>', methods=['POST'])
-def delete_zone(zone_id):
-    with get_db_connection() as conn:
-        conn.execute('DELETE FROM zones WHERE ID = ?', (zone_id,))
-        conn.commit()
-
-    flash('Zone deleted successfully!', 'success')
-    return redirect(url_for('list_zones'))
+#     return render_template('zones/create_zone.html', branches=branches)
 
 
-@app.route('/zone/<int:zone_id>/assign_branch', methods=['GET', 'POST'])
-def assign_branch_to_zone(zone_id):
-    with get_db_connection() as conn:
-        zone = conn.execute(
-            'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
-        branches = conn.execute('SELECT * FROM branches').fetchall()
+# @app.route('/zones')
+# def list_zones():
+#     with get_db_connection() as conn:
+#         zones = conn.execute('SELECT * FROM zones').fetchall()
 
-    if request.method == 'POST':
-        branch_id = request.form['branch_id']
+#     return render_template('/zones/list_zones.html', zones=zones)
 
-        with get_db_connection() as conn:
-            conn.execute('''
-                INSERT INTO zone_branch (zone_id, branch_id)
-                VALUES (?, ?)
-            ''', (zone_id, branch_id))
-            conn.commit()
 
-        flash('Branch assigned to zone successfully!', 'success')
-        return redirect(url_for('list_zones'))
+# @app.route('/zones/edit/<int:zone_id>', methods=['GET', 'POST'])
+# def edit_zone(zone_id):
+#     with get_db_connection() as conn:
+#         zone = conn.execute(
+#             'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
 
-    return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         description = request.form['description']
+
+#         # Update zone in the zones table
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE zones
+#                 SET Name = ?, Description = ?
+#                 WHERE ID = ?
+#             ''', (name, description, zone_id))
+#             conn.commit()
+
+#         flash('Zone updated successfully!', 'success')
+#         return redirect(url_for('list_zones'))
+
+#     return render_template('/zones/edit_zone.html', zone=zone)
+
+
+# @app.route('/zones/delete/<int:zone_id>', methods=['POST'])
+# def delete_zone(zone_id):
+#     with get_db_connection() as conn:
+#         conn.execute('DELETE FROM zones WHERE ID = ?', (zone_id,))
+#         conn.commit()
+
+#     flash('Zone deleted successfully!', 'success')
+#     return redirect(url_for('list_zones'))
+
+
+# @app.route('/zone/<int:zone_id>/assign_branch', methods=['GET', 'POST'])
+# def assign_branch_to_zone(zone_id):
+#     with get_db_connection() as conn:
+#         zone = conn.execute(
+#             'SELECT * FROM zones WHERE ID = ?', (zone_id,)).fetchone()
+#         branches = conn.execute('SELECT * FROM branches').fetchall()
+
+#     if request.method == 'POST':
+#         branch_id = request.form['branch_id']
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO zone_branch (zone_id, branch_id)
+#                 VALUES (?, ?)
+#             ''', (zone_id, branch_id))
+#             conn.commit()
+
+#         flash('Branch assigned to zone successfully!', 'success')
+#         return redirect(url_for('list_zones'))
+
+#     return render_template('/zones/assign_branch_to_zone.html', zone=zone, branches=branches)
 
 
 @app.route('/locations/add', methods=['GET', 'POST'])
@@ -883,285 +896,285 @@ def privacy_policy():
 # Route to create a bank statement
 
 
-@app.route('/bankstatement/add', methods=['GET', 'POST'])
-def create_bankstatement():
-    if request.method == 'GET':
-        # For GET requests, render the form and get the employees for the dropdown
-        with get_db_connection() as conn:
-            employees = conn.execute(
-                'SELECT id, name FROM employees').fetchall()
-        return render_template('/bankstatements/add_bankstatement.html', employees=employees)
-
-    # Handle POST request to get form data and insert into database
-    employee_id = request.form.get('employee_id')
-    employee_name = request.form.get('employee_name')
-    account_name = request.form.get('account_name')
-    account_number = request.form.get('account_number')
-    bank_name = request.form.get('bank_name')
-    salary = request.form.get('salary')
-    transaction_date = request.form.get('transaction_date')
-    transaction_type = request.form.get('transaction_type')
-
-    # Insert data into database
-    with get_db_connection() as conn:
-        conn.execute('''
-            INSERT INTO bankstatement(employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type)
-            VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type))
-        conn.commit()
-
-    flash('Bank statement created successfully', 'success')
-    return redirect(url_for('get_all_bankstatements'))
-
-# Route to view all bank statements
-
-
-@app.route('/bankstatements')
-def get_all_bankstatements():
-    with get_db_connection() as conn:
-        bankstatements = conn.execute('SELECT * FROM bankstatement').fetchall()
-    return render_template('/bankstatements/view_bankstatements.html', bankstatements=bankstatements)
-
-# Route to view a single bank statement
-
-
-@app.route('/bankstatement/view/<int:id>')
-def view_bankstatement(id):
-    with get_db_connection() as conn:
-        bankstatement = conn.execute(
-            'SELECT * FROM bankstatement WHERE id = ?', (id,)).fetchone()
-    return render_template('/bankstatements/view_bankstatement.html', bankstatement=bankstatement)
-
-# Route to update a bank statement
-
-
-@app.route('/bankstatement/edit/<int:id>', methods=['GET', 'POST'])
-def update_bankstatement(id):
-    with get_db_connection() as conn:
-        bankstatement = conn.execute(
-            'SELECT * FROM bankstatement WHERE id = ?', (id,)).fetchone()
-
-    if request.method == 'POST':
-        # Get form data
-        employee_id = request.form.get('employee_id')
-        employee_name = request.form.get('employee_name')
-        account_name = request.form.get('account_name')
-        account_number = request.form.get('account_number')
-        bank_name = request.form.get('bank_name')
-        salary = request.form.get('salary')
-        transaction_date = request.form.get('transaction_date')
-        transaction_type = request.form.get('transaction_type')
-
-        # Update the bank statement in the database
-        with get_db_connection() as conn:
-            conn.execute('''
-                UPDATE bankstatement
-                SET employee_id= ?, employee_name= ?, account_name= ?, account_number= ?, bank_name= ?, salary= ?, transaction_date= ?, transaction_type= ?
-                WHERE id= ?
-            ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type, id))
-            conn.commit()
-
-        flash('Bank statement updated successfully', 'success')
-        return redirect(url_for('get_all_bankstatements'))
-
-    return render_template('/bankstatements/edit_bankstatement.html', bankstatement=bankstatement)
-
-# Route to delete a bank statement
-
-
-@app.route('/bankstatement/delete/<int:id>', methods=['POST'])
-def delete_bankstatement(id):
-    with get_db_connection() as conn:
-        conn.execute('DELETE FROM bankstatement WHERE id = ?', (id,))
-        conn.commit()
-
-    flash('Bank statement deleted successfully', 'success')
-    return redirect(url_for('get_all_bankstatements'))
-
-
-# Create department
-@app.route('/departments/add', methods=['GET', 'POST'])
-def create_department():
-    if request.method != 'POST':
-        # For GET requests, render the form
-        return render_template('/departments/add_department.html')
-    # Use request.form.get() for form data
-    name = request.form.get('name')
-    description = request.form.get('description')
-
-    # Validate the form data
-    if not name:
-        flash('Department name is required', 'error')
-        return redirect(url_for('create_department'))
-
-    # Insert the data into the database
-    with get_db_connection() as conn:
-        conn.execute('''
-                INSERT INTO departments(Name, Description)
-                VALUES(?, ?)
-            ''', (name, description))
-        conn.commit()
-
-    flash('Department created successfully', 'success')
-    return redirect(url_for('get_all_departments'))
+# @app.route('/bankstatement/add', methods=['GET', 'POST'])
+# def create_bankstatement():
+#     if request.method == 'GET':
+#         # For GET requests, render the form and get the employees for the dropdown
+#         with get_db_connection() as conn:
+#             employees = conn.execute(
+#                 'SELECT id, name FROM employees').fetchall()
+#         return render_template('/bankstatements/add_bankstatement.html', employees=employees)
+
+#     # Handle POST request to get form data and insert into database
+#     employee_id = request.form.get('employee_id')
+#     employee_name = request.form.get('employee_name')
+#     account_name = request.form.get('account_name')
+#     account_number = request.form.get('account_number')
+#     bank_name = request.form.get('bank_name')
+#     salary = request.form.get('salary')
+#     transaction_date = request.form.get('transaction_date')
+#     transaction_type = request.form.get('transaction_type')
+
+#     # Insert data into database
+#     with get_db_connection() as conn:
+#         conn.execute('''
+#             INSERT INTO bankstatement(employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type)
+#             VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+#         ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type))
+#         conn.commit()
+
+#     flash('Bank statement created successfully', 'success')
+#     return redirect(url_for('get_all_bankstatements'))
+
+# # Route to view all bank statements
+
+
+# @app.route('/bankstatements')
+# def get_all_bankstatements():
+#     with get_db_connection() as conn:
+#         bankstatements = conn.execute('SELECT * FROM bankstatement').fetchall()
+#     return render_template('/bankstatements/view_bankstatements.html', bankstatements=bankstatements)
+
+# # Route to view a single bank statement
+
+
+# @app.route('/bankstatement/view/<int:id>')
+# def view_bankstatement(id):
+#     with get_db_connection() as conn:
+#         bankstatement = conn.execute(
+#             'SELECT * FROM bankstatement WHERE id = ?', (id,)).fetchone()
+#     return render_template('/bankstatements/view_bankstatement.html', bankstatement=bankstatement)
+
+# # Route to update a bank statement
+
+
+# @app.route('/bankstatement/edit/<int:id>', methods=['GET', 'POST'])
+# def update_bankstatement(id):
+#     with get_db_connection() as conn:
+#         bankstatement = conn.execute(
+#             'SELECT * FROM bankstatement WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         # Get form data
+#         employee_id = request.form.get('employee_id')
+#         employee_name = request.form.get('employee_name')
+#         account_name = request.form.get('account_name')
+#         account_number = request.form.get('account_number')
+#         bank_name = request.form.get('bank_name')
+#         salary = request.form.get('salary')
+#         transaction_date = request.form.get('transaction_date')
+#         transaction_type = request.form.get('transaction_type')
+
+#         # Update the bank statement in the database
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE bankstatement
+#                 SET employee_id= ?, employee_name= ?, account_name= ?, account_number= ?, bank_name= ?, salary= ?, transaction_date= ?, transaction_type= ?
+#                 WHERE id= ?
+#             ''', (employee_id, employee_name, account_name, account_number, bank_name, salary, transaction_date, transaction_type, id))
+#             conn.commit()
+
+#         flash('Bank statement updated successfully', 'success')
+#         return redirect(url_for('get_all_bankstatements'))
+
+#     return render_template('/bankstatements/edit_bankstatement.html', bankstatement=bankstatement)
+
+# # Route to delete a bank statement
+
+
+# @app.route('/bankstatement/delete/<int:id>', methods=['POST'])
+# def delete_bankstatement(id):
+#     with get_db_connection() as conn:
+#         conn.execute('DELETE FROM bankstatement WHERE id = ?', (id,))
+#         conn.commit()
+
+#     flash('Bank statement deleted successfully', 'success')
+#     return redirect(url_for('get_all_bankstatements'))
+
+
+# # Create department
+# @app.route('/departments/add', methods=['GET', 'POST'])
+# def create_department():
+#     if request.method != 'POST':
+#         # For GET requests, render the form
+#         return render_template('/departments/add_department.html')
+#     # Use request.form.get() for form data
+#     name = request.form.get('name')
+#     description = request.form.get('description')
+
+#     # Validate the form data
+#     if not name:
+#         flash('Department name is required', 'error')
+#         return redirect(url_for('create_department'))
+
+#     # Insert the data into the database
+#     with get_db_connection() as conn:
+#         conn.execute('''
+#                 INSERT INTO departments(Name, Description)
+#                 VALUES(?, ?)
+#             ''', (name, description))
+#         conn.commit()
+
+#     flash('Department created successfully', 'success')
+#     return redirect(url_for('get_all_departments'))
 
 
-@app.route('/departments')
-def get_all_departments():
-    with get_db_connection() as conn:
-        departments = conn.execute('SELECT * FROM departments').fetchall()
-    return render_template('/departments/departments.html', departments=departments)
+# @app.route('/departments')
+# def get_all_departments():
+#     with get_db_connection() as conn:
+#         departments = conn.execute('SELECT * FROM departments').fetchall()
+#     return render_template('/departments/departments.html', departments=departments)
 
-
-@app.route('/departments/view/<int:id>')
-def view_department(id):
-    with get_db_connection() as conn:
-        department = conn.execute(
-            'SELECT * FROM departments WHERE id = ?', (id,)).fetchone()
-    return render_template('/departments/view_department.html', department=department)
-
-# Route to update a department
+
+# @app.route('/departments/view/<int:id>')
+# def view_department(id):
+#     with get_db_connection() as conn:
+#         department = conn.execute(
+#             'SELECT * FROM departments WHERE id = ?', (id,)).fetchone()
+#     return render_template('/departments/view_department.html', department=department)
+
+# # Route to update a department
 
 
-@app.route('/department/edit/<int:id>', methods=['GET', 'POST'])
-def update_department(id):
-    with get_db_connection() as conn:
-        department = conn.execute(
-            'SELECT * FROM departments WHERE id = ?', (id,)).fetchone()
-
-    if request.method == 'POST':
-        name = request.form.get('name')
-        description = request.form.get('description')
-
-        if not name:
-            flash('Department name is required', 'error')
-            return redirect(url_for('edit_department', id=id))
-
-        with get_db_connection() as conn:
-            conn.execute('''
-                UPDATE departments
-                SET Name= ?, Description= ?
-                WHERE id= ?
-            ''', (name, description, id))
-            conn.commit()
-
-        flash('Department updated successfully', 'success')
-        return redirect(url_for('get_all_departments'))
-
-    return render_template('/departments/edit_department.html', department=department)
-
-# Route to delete a department
-
-
-@app.route('/departments/delete/<int:id>', methods=['POST'])
-def delete_department(id):
-    with get_db_connection() as conn:
-        conn.execute('DELETE FROM departments WHERE id = ?', (id,))
-        conn.commit()
-
-    flash('Department deleted successfully', 'success')
-    return redirect(url_for('get_all_departments'))
-
-
-# Route to create a new position
-@app.route('/positions/add', methods=['GET', 'POST'])
-def create_position():
-    departments = []
-    with get_db_connection() as conn:
-        departments = conn.execute('SELECT * FROM departments').fetchall()
-
-    if request.method == 'POST':
-        position_name = request.form.get('position_name')
-        description = request.form.get('description')
-        department_id = request.form.get('department_id')
-
-        # Validate the form data
-        if not position_name:
-            flash('Position name is required', 'error')
-            return redirect(url_for('create_position'))
-
-        # Insert the new position into the database
-        with get_db_connection() as conn:
-            conn.execute('''
-                INSERT INTO positions(PositionName, Description, department_id)
-                VALUES(?, ?, ?)
-            ''', (position_name, description, department_id))
-            conn.commit()
-
-        flash('Position created successfully', 'success')
-        return redirect(url_for('get_all_positions'))
-
-    return render_template('/positions/add_position.html', departments=departments)
-
-# Route to get all positions
-
-
-@app.route('/positions')
-def get_all_positions():
-    with get_db_connection() as conn:
-        positions = conn.execute('SELECT * FROM positions').fetchall()
-    return render_template('/positions/positions.html', positions=positions)
-
-# Route to view a single position
-
-
-@app.route('/positions/view/<int:id>')
-def view_position(id):
-    with get_db_connection() as conn:
-        position = conn.execute(
-            'SELECT * FROM positions WHERE ID = ?', (id,)).fetchone()
-        employees = conn.execute('''
-            SELECT e.id, e.name, e.branch
-            FROM employees e
-            JOIN positions p ON p.ID=e.position_id
-            WHERE p.ID= ?
-        ''', (id,)).fetchall()
-    return render_template('/positions/view_position.html', position=position, employees=employees)
-
-# Route to update a position
-
-
-@app.route('/positions/edit/<int:id>', methods=['GET', 'POST'])
-def update_position(id):
-    with get_db_connection() as conn:
-        position = conn.execute(
-            'SELECT * FROM positions WHERE ID = ?', (id,)).fetchone()
-        departments = conn.execute('SELECT * FROM departments').fetchall()
-
-    if request.method == 'POST':
-        position_name = request.form.get('position_name')
-        description = request.form.get('description')
-        department_id = request.form.get('department_id')
-
-        if not position_name:
-            flash('Position name is required', 'error')
-            return redirect(url_for('update_position', id=id))
-
-        # Update the position in the database
-        with get_db_connection() as conn:
-            conn.execute('''
-                UPDATE positions
-                SET PositionName= ?, Description= ?, department_id= ?
-                WHERE ID= ?
-            ''', (position_name, description, department_id, id))
-            conn.commit()
-
-        flash('Position updated successfully', 'success')
-        return redirect(url_for('get_all_positions'))
-
-    return render_template('/positions/edit_position.html', position=position, departments=departments)
-
-# Route to delete a position
-
-
-@app.route('/positions/delete/<int:id>', methods=['POST'])
-def delete_position(id):
-    with get_db_connection() as conn:
-        conn.execute('DELETE FROM positions WHERE ID = ?', (id,))
-        conn.commit()
-
-    flash('Position deleted successfully', 'success')
-    return redirect(url_for('get_all_positions'))
+# @app.route('/department/edit/<int:id>', methods=['GET', 'POST'])
+# def update_department(id):
+#     with get_db_connection() as conn:
+#         department = conn.execute(
+#             'SELECT * FROM departments WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         name = request.form.get('name')
+#         description = request.form.get('description')
+
+#         if not name:
+#             flash('Department name is required', 'error')
+#             return redirect(url_for('edit_department', id=id))
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE departments
+#                 SET Name= ?, Description= ?
+#                 WHERE id= ?
+#             ''', (name, description, id))
+#             conn.commit()
+
+#         flash('Department updated successfully', 'success')
+#         return redirect(url_for('get_all_departments'))
+
+#     return render_template('/departments/edit_department.html', department=department)
+
+# # Route to delete a department
+
+
+# @app.route('/departments/delete/<int:id>', methods=['POST'])
+# def delete_department(id):
+#     with get_db_connection() as conn:
+#         conn.execute('DELETE FROM departments WHERE id = ?', (id,))
+#         conn.commit()
+
+#     flash('Department deleted successfully', 'success')
+#     return redirect(url_for('get_all_departments'))
+
+
+# # Route to create a new position
+# @app.route('/positions/add', methods=['GET', 'POST'])
+# def create_position():
+#     departments = []
+#     with get_db_connection() as conn:
+#         departments = conn.execute('SELECT * FROM departments').fetchall()
+
+#     if request.method == 'POST':
+#         position_name = request.form.get('position_name')
+#         description = request.form.get('description')
+#         department_id = request.form.get('department_id')
+
+#         # Validate the form data
+#         if not position_name:
+#             flash('Position name is required', 'error')
+#             return redirect(url_for('create_position'))
+
+#         # Insert the new position into the database
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO positions(PositionName, Description, department_id)
+#                 VALUES(?, ?, ?)
+#             ''', (position_name, description, department_id))
+#             conn.commit()
+
+#         flash('Position created successfully', 'success')
+#         return redirect(url_for('get_all_positions'))
+
+#     return render_template('/positions/add_position.html', departments=departments)
+
+# # Route to get all positions
+
+
+# @app.route('/positions')
+# def get_all_positions():
+#     with get_db_connection() as conn:
+#         positions = conn.execute('SELECT * FROM positions').fetchall()
+#     return render_template('/positions/positions.html', positions=positions)
+
+# # Route to view a single position
+
+
+# @app.route('/positions/view/<int:id>')
+# def view_position(id):
+#     with get_db_connection() as conn:
+#         position = conn.execute(
+#             'SELECT * FROM positions WHERE ID = ?', (id,)).fetchone()
+#         employees = conn.execute('''
+#             SELECT e.id, e.name, e.branch
+#             FROM employees e
+#             JOIN positions p ON p.ID=e.position_id
+#             WHERE p.ID= ?
+#         ''', (id,)).fetchall()
+#     return render_template('/positions/view_position.html', position=position, employees=employees)
+
+# # Route to update a position
+
+
+# @app.route('/positions/edit/<int:id>', methods=['GET', 'POST'])
+# def update_position(id):
+#     with get_db_connection() as conn:
+#         position = conn.execute(
+#             'SELECT * FROM positions WHERE ID = ?', (id,)).fetchone()
+#         departments = conn.execute('SELECT * FROM departments').fetchall()
+
+#     if request.method == 'POST':
+#         position_name = request.form.get('position_name')
+#         description = request.form.get('description')
+#         department_id = request.form.get('department_id')
+
+#         if not position_name:
+#             flash('Position name is required', 'error')
+#             return redirect(url_for('update_position', id=id))
+
+#         # Update the position in the database
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE positions
+#                 SET PositionName= ?, Description= ?, department_id= ?
+#                 WHERE ID= ?
+#             ''', (position_name, description, department_id, id))
+#             conn.commit()
+
+#         flash('Position updated successfully', 'success')
+#         return redirect(url_for('get_all_positions'))
+
+#     return render_template('/positions/edit_position.html', position=position, departments=departments)
+
+# # Route to delete a position
+
+
+# @app.route('/positions/delete/<int:id>', methods=['POST'])
+# def delete_position(id):
+#     with get_db_connection() as conn:
+#         conn.execute('DELETE FROM positions WHERE ID = ?', (id,))
+#         conn.commit()
+
+#     flash('Position deleted successfully', 'success')
+#     return redirect(url_for('get_all_positions'))
 
 
 # Get department by ID
@@ -3604,81 +3617,161 @@ def health_check():
 
 
 # flask_wtf
+# @app.route('/login', methods=['POST'])
+# def login():
+#     username = request.form['username']
+#     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
+
+#     # Get the user's IP address and user agent (browser/device info)
+#     ip_address = request.remote_addr
+#     user_agent = request.user_agent.string
+
+#     # Optionally get the geolocation (City, Region, Country) based on IP address
+#     city, region, country = get_geolocation(ip_address)
+
+#     with get_db_connection() as conn:
+#         conn.row_factory = sqlite3.Row  # Fetch rows as dictionaries
+#         user = conn.execute('''
+#             SELECT ID, UserName, Password, Email, Branch, IsAdmin,
+#                    COALESCE(RoleDefault, 1) AS RoleDefault, ZoneID, Active
+#             FROM users
+#             WHERE UserName= ? AND Password= ?
+#         ''', (username, password)).fetchone()
+
+#     if user:
+#         user = dict(user)  # Convert row to dictionary for easy access
+#         print("Fetched User Data:", user)  # Debugging print statement
+
+#         if not user.get('Active', 0):  # Assuming 0 = inactive, 1 = active
+#             flash("Your account is inactive. Please contact the administrator.", "error")
+#             # or a custom error page
+#             return redirect(url_for('login'), code=302)
+
+#         # Find employee ID associated with the user
+#         with get_db_connection() as conn:
+#             employee = conn.execute('''
+#                 SELECT id FROM employees
+#                 WHERE user_id= ?
+#             ''', (user['ID'],)).fetchone()
+#             employee_id = employee['id'] if employee else None
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO login_logs(user_id, ip_address, city, region, country, user_agent)
+#                 VALUES(?, ?, ?, ?, ?, ?)
+#             ''', (user['ID'], ip_address, city, region, country, user_agent))
+
+#             # Add user to online_users table or update if already exists
+#             conn.execute('''
+#                 INSERT OR REPLACE INTO online_users(user_id, login_time, last_active_time)
+#                 VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+#             ''', (user['ID'],))
+#             conn.commit()
+
+#         # Create the user object and log the user in with Flask-Login
+#         user_obj = User(
+#             id=user['ID'],
+#             username=user['UserName'],
+#             password=user['Password'],
+#             email=user['Email'],
+#             branch=user['Branch'],
+#             is_admin=user['IsAdmin'],
+#             role_default=user['RoleDefault'],
+#             image_data=user.get('Image', None),
+#             employee_id=employee_id,
+#             zone_id=user['ZoneID']
+#         )
+
+#         print("Logged in user:", user_obj)  # Debugging print
+#         login_user(user_obj)  # Store the user session with Flask-Login
+
+#         # # If forced to change password
+#         # if user['Force_Password_Change']:
+#         #     flash("Please change your password before proceeding.", "warning")
+#         #     return redirect(url_for('change_password'))
+
+#         # flash(
+#         #     f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
+#         return redirect(url_for('dashboard'))
+
+#     else:
+#         flash("Invalid username or password", 'error')
+#         return render_template('404.html'), 404
+
+
+@app.route('/inactive')
+def inactive_user():
+    return render_template('inactive_user.html')
+
+
 @app.route('/login', methods=['POST'])
 def login():
     username = request.form['username']
     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
 
-    # Get the user's IP address and user agent (browser/device info)
     ip_address = request.remote_addr
     user_agent = request.user_agent.string
-
-    # Optionally get the geolocation (City, Region, Country) based on IP address
     city, region, country = get_geolocation(ip_address)
 
     with get_db_connection() as conn:
-        conn.row_factory = sqlite3.Row  # Fetch rows as dictionaries
+        conn.row_factory = sqlite3.Row
         user = conn.execute('''
             SELECT ID, UserName, Password, Email, Branch, IsAdmin,
-                   COALESCE(RoleDefault, 1) AS RoleDefault, ZoneID
+                   COALESCE(RoleDefault, 1) AS RoleDefault, ZoneID, Active
             FROM users
-            WHERE UserName= ? AND Password= ?
+            WHERE UserName = ? AND Password = ?
         ''', (username, password)).fetchone()
 
-    if user:
-        user = dict(user)  # Convert row to dictionary for easy access
-        print("Fetched User Data:", user)  # Debugging print statement
-
-        # Find employee ID associated with the user
-        with get_db_connection() as conn:
-            employee = conn.execute('''
-                SELECT id FROM employees
-                WHERE user_id= ?
-            ''', (user['ID'],)).fetchone()
-            employee_id = employee['id'] if employee else None
-
-        with get_db_connection() as conn:
-            conn.execute('''
-                INSERT INTO login_logs(user_id, ip_address, city, region, country, user_agent)
-                VALUES(?, ?, ?, ?, ?, ?)
-            ''', (user['ID'], ip_address, city, region, country, user_agent))
-
-            # Add user to online_users table or update if already exists
-            conn.execute('''
-                INSERT OR REPLACE INTO online_users(user_id, login_time, last_active_time)
-                VALUES(?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-            ''', (user['ID'],))
-            conn.commit()
-
-        # Create the user object and log the user in with Flask-Login
-        user_obj = User(
-            id=user['ID'],
-            username=user['UserName'],
-            password=user['Password'],
-            email=user['Email'],
-            branch=user['Branch'],
-            is_admin=user['IsAdmin'],
-            role_default=user['RoleDefault'],
-            image_data=user.get('Image', None),
-            employee_id=employee_id,
-            zone_id=user['ZoneID']
-        )
-
-        print("Logged in user:", user_obj)  # Debugging print
-        login_user(user_obj)  # Store the user session with Flask-Login
-
-        # # If forced to change password
-        # if user['Force_Password_Change']:
-        #     flash("Please change your password before proceeding.", "warning")
-        #     return redirect(url_for('change_password'))
-
-        # flash(
-        #     f"Logged in from {city}, {region}, {country} using {user_agent}", 'success')
-        return redirect(url_for('dashboard'))
-
-    else:
+    if not user:
         flash("Invalid username or password", 'error')
         return render_template('404.html'), 404
+
+    user = dict(user)
+    print("Fetched User Data:", user)
+
+    # Check if the user is inactive
+    if user.get('Active', 0) != 1:
+        flash("Your account is inactive. Please contact the administrator.", "error")
+        return redirect(url_for('inactive_user'))
+
+    # Get employee ID if exists
+    with get_db_connection() as conn:
+        employee = conn.execute('''
+            SELECT id FROM employees WHERE user_id = ?
+        ''', (user['ID'],)).fetchone()
+        employee_id = employee['id'] if employee else None
+
+        # Log login
+        conn.execute('''
+            INSERT INTO login_logs(user_id, ip_address, city, region, country, user_agent)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ''', (user['ID'], ip_address, city, region, country, user_agent))
+
+        # Add to online_users
+        conn.execute('''
+            INSERT OR REPLACE INTO online_users(user_id, login_time, last_active_time)
+            VALUES (?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        ''', (user['ID'],))
+        conn.commit()
+
+    # Login user
+    user_obj = User(
+        id=user['ID'],
+        username=user['UserName'],
+        password=user['Password'],
+        email=user['Email'],
+        branch=user['Branch'],
+        is_admin=user['IsAdmin'],
+        role_default=user['RoleDefault'],
+        image_data=user.get('Image', None),
+        employee_id=employee_id,
+        zone_id=user['ZoneID']
+    )
+
+    print("Logged in user:", user_obj)
+    login_user(user_obj)
+
+    return redirect(url_for('dashboard'))
 
 
 @app.route('/logout', methods=['POST'])
@@ -3801,12 +3894,93 @@ def force_reset_password():
     )
 
 
-@app.route('/users/', methods=['GET'])
+# @app.route('/users/', methods=['GET'])
+# @login_required
+# def users():
+#     with get_db_connection() as conn:
+#         users = conn.execute("SELECT * FROM users").fetchall()
+#     return render_template('/users/users.html', users=users)
+
+
+# @app.route('/users', methods=['GET'])
+# @login_required
+# def users():
+#     filter_value = request.args.get('active', 'all')
+
+#     query = "SELECT * FROM users"
+#     params = ()
+
+#     if filter_value == '1':
+#         query += " WHERE Active = ?"
+#         params = (1,)
+#     elif filter_value == '0':
+#         query += " WHERE Active = ?"
+#         params = (0,)
+
+#     with get_db_connection() as conn:
+#         users = conn.execute(query, params).fetchall()
+
+#     return render_template('users/users.html', users=users, active_filter=filter_value)
+
+
+@app.route('/users', methods=['GET'])
 @login_required
 def users():
+    filter_value = request.args.get('active', 'all')
+
+    # Use the helper functions to get users
+    if filter_value == '1':  # Active users
+        users = get_active_users()
+    elif filter_value == '0':  # Inactive users
+        users = get_inactive_users()
+    else:  # Default to show all users
+        users = get_all_users()
+
+    return render_template('users/users.html', users=users, active_filter=filter_value)
+
+# Helper function to get all users
+
+
+def get_all_users():
     with get_db_connection() as conn:
-        users = conn.execute("SELECT * FROM users").fetchall()
-    return render_template('/users/users.html', users=users)
+        return conn.execute("SELECT * FROM users").fetchall()
+
+# Helper function to get active users
+
+
+def get_active_users():
+    with get_db_connection() as conn:
+        return conn.execute("SELECT * FROM users WHERE Active = 1").fetchall()
+
+# Helper function to get inactive users
+
+
+def get_inactive_users():
+    with get_db_connection() as conn:
+        return conn.execute("SELECT * FROM users WHERE Active = 0").fetchall()
+
+
+@app.route('/users/update_status/<int:user_id>', methods=['POST'])
+@login_required
+def update_user_status(user_id):
+    # Get the new active status from the form or query parameters
+    new_status = request.form.get('active_status')
+
+    # Validating the status input (should be 0 or 1)
+    if new_status not in ['0', '1']:
+        return "Invalid status", 400
+
+    # Update the user active status in the database
+    with get_db_connection() as conn:
+        conn.execute("""
+            UPDATE users
+            SET Active = ?
+            WHERE id = ?
+        """, (new_status, user_id))
+        conn.commit()
+
+    # Redirect to the user list after the update
+    return redirect(url_for('users'))
 
 
 @app.route('/users/add', methods=['GET', 'POST'])
@@ -4865,101 +5039,101 @@ def view_employee(id):
         return "Employee not found", 404
 
 
-@app.route('/branches')
-@login_required
-def list_branches():
-    conn = get_db_connection()
-    branches = conn.execute('SELECT * FROM branches').fetchall()
-    conn.close()
-    return render_template('/branches/branches.html', branches=branches)
+# @app.route('/branches')
+# @login_required
+# def list_branches():
+#     conn = get_db_connection()
+#     branches = conn.execute('SELECT * FROM branches').fetchall()
+#     conn.close()
+#     return render_template('/branches/branches.html', branches=branches)
 
 
-@app.route('/branches/add', methods=['GET', 'POST'])
-@login_required
-def add_branch():
-    if request.method == 'POST':
-        description = request.form['description']
-        branch = request.form['branch']
-        branch_manager = request.form['branch_manager']
-        contact_number = request.form['contact_number']
-        address = request.form['address']
-        register_date = request.form['register_date']
-        local_description = request.form['local_description']
-        local_address = request.form['local_address']
-        local_branch_manager = request.form['local_branch_manager']
-        with get_db_connection() as conn:
-            conn.execute('''
-                INSERT INTO branches(Description, Branch, BranchManagerName, ContactNumber, Address,
-                                      RegisterDate, LocalDescription, LocalAddress, LocalBranchManagerName)
-                VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''',
-                         (description, branch, branch_manager, contact_number, address,
-                          register_date, local_description, local_address, local_branch_manager,
-                          ))
-            conn.commit()
-        return redirect(url_for('list_branches'))
-    return render_template('/branches/add_branch.html')
+# @app.route('/branches/add', methods=['GET', 'POST'])
+# @login_required
+# def add_branch():
+#     if request.method == 'POST':
+#         description = request.form['description']
+#         branch = request.form['branch']
+#         branch_manager = request.form['branch_manager']
+#         contact_number = request.form['contact_number']
+#         address = request.form['address']
+#         register_date = request.form['register_date']
+#         local_description = request.form['local_description']
+#         local_address = request.form['local_address']
+#         local_branch_manager = request.form['local_branch_manager']
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 INSERT INTO branches(Description, Branch, BranchManagerName, ContactNumber, Address,
+#                                       RegisterDate, LocalDescription, LocalAddress, LocalBranchManagerName)
+#                 VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+#                          (description, branch, branch_manager, contact_number, address,
+#                           register_date, local_description, local_address, local_branch_manager,
+#                           ))
+#             conn.commit()
+#         return redirect(url_for('list_branches'))
+#     return render_template('/branches/add_branch.html')
 
-# Route to update a branch
-
-
-@app.route('/branches/edit/<int:id>', methods=['GET', 'POST'])
-@login_required
-def edit_branch(id):
-    conn = get_db_connection()
-    branch = conn.execute(
-        'SELECT * FROM branches WHERE ID = ?', (id,)).fetchone()
-    if request.method == 'POST':
-        status = request.form['status']
-        branch_manager = request.form['branch_manager']
-        address = request.form['address']
-        description = request.form['description']
-        branch_name = request.form['branch']
-        contact_number = request.form['contact_number']
-        conn.execute('''
-            UPDATE branches
-            SET Status= ?, BranchManagerName= ?, Address= ?, Description= ?, Branch= ?, ContactNumber= ?, UpdatedAt=CURRENT_TIMESTAMP
-            WHERE ID= ?''',
-                     (status, branch_manager, address, description, branch_name, contact_number, id))
-        conn.commit()
-        conn.close()
-        return redirect(url_for('list_branches'))
-
-    conn.close()
-    return render_template('/branches/edit_branch.html', branch=branch)
-
-# Route to delete a branch
+# # Route to update a branch
 
 
-@app.route('/branches/delete/<int:id>', methods=['POST'])
-@login_required
-def delete_branch(id):
-    with get_db_connection() as conn:
-        conn.execute('DELETE FROM branches WHERE ID = ?', (id,))
-        conn.commit()
-    return redirect(url_for('list_branches'))
+# @app.route('/branches/edit/<int:id>', methods=['GET', 'POST'])
+# @login_required
+# def edit_branch(id):
+#     conn = get_db_connection()
+#     branch = conn.execute(
+#         'SELECT * FROM branches WHERE ID = ?', (id,)).fetchone()
+#     if request.method == 'POST':
+#         status = request.form['status']
+#         branch_manager = request.form['branch_manager']
+#         address = request.form['address']
+#         description = request.form['description']
+#         branch_name = request.form['branch']
+#         contact_number = request.form['contact_number']
+#         conn.execute('''
+#             UPDATE branches
+#             SET Status= ?, BranchManagerName= ?, Address= ?, Description= ?, Branch= ?, ContactNumber= ?, UpdatedAt=CURRENT_TIMESTAMP
+#             WHERE ID= ?''',
+#                      (status, branch_manager, address, description, branch_name, contact_number, id))
+#         conn.commit()
+#         conn.close()
+#         return redirect(url_for('list_branches'))
+
+#     conn.close()
+#     return render_template('/branches/edit_branch.html', branch=branch)
+
+# # Route to delete a branch
 
 
-@app.route('/branches/<int:id>')
-@login_required
-def view_branch(id):
-    with get_db_connection() as conn:
-        branch = conn.execute(
-            "SELECT * FROM branches WHERE ID = ?", (id,)).fetchone()
-    if branch:
-        return render_template('/branches/view_branch.html', branch=branch)
-    else:
-        return "Branch not found", 404
+# @app.route('/branches/delete/<int:id>', methods=['POST'])
+# @login_required
+# def delete_branch(id):
+#     with get_db_connection() as conn:
+#         conn.execute('DELETE FROM branches WHERE ID = ?', (id,))
+#         conn.commit()
+#     return redirect(url_for('list_branches'))
 
 
-@app.route('/branches/search', methods=['GET'])
-@login_required
-def search_branches():
-    query = request.args.get('query', '')
-    with get_db_connection() as conn:
-        branches = conn.execute(
-            "SELECT * FROM branches WHERE Branch LIKE ?", (f'%{query}%',)
-        ).fetchall()
-    return render_template('/branches/branches.html', branches=branches)
+# @app.route('/branches/<int:id>')
+# @login_required
+# def view_branch(id):
+#     with get_db_connection() as conn:
+#         branch = conn.execute(
+#             "SELECT * FROM branches WHERE ID = ?", (id,)).fetchone()
+#     if branch:
+#         return render_template('/branches/view_branch.html', branch=branch)
+#     else:
+#         return "Branch not found", 404
+
+
+# @app.route('/branches/search', methods=['GET'])
+# @login_required
+# def search_branches():
+#     query = request.args.get('query', '')
+#     with get_db_connection() as conn:
+#         branches = conn.execute(
+#             "SELECT * FROM branches WHERE Branch LIKE ?", (f'%{query}%',)
+#         ).fetchall()
+#     return render_template('/branches/branches.html', branches=branches)
 
 
 if __name__ == "__main__":

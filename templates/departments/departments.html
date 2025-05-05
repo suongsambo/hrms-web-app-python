@@ -86,29 +86,23 @@ content %}
 
     <div class="flex items-center justify-start gap-x-4 mb-6">
       <!-- Add Department Button -->
-      <a
-        href="/departments/add"
+      <a href="/departments/add"
         class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        tabindex="0"
-      >
+        tabindex="0">
         <i class="fas fa-plus mr-2"></i> Add Department
       </a>
 
       <!-- Print Button -->
-      <button
-        onclick="printDepartments()"
+      <button onclick="printDepartments()"
         class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-        tabindex="0"
-      >
+        tabindex="0">
         <i class="fas fa-print mr-2"></i> Print Departments
       </button>
 
       <!-- Refresh Button -->
-      <button
-        onclick="window.location.reload()"
+      <button onclick="window.location.reload()"
         class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        tabindex="0"
-      >
+        tabindex="0">
         <i class="fas fa-sync-alt mr-2"></i> Refresh
       </button>
     </div>
@@ -116,10 +110,7 @@ content %}
     <!-- Check if there are any departments -->
     {% if departments %}
     <div class="overflow-x-auto bg-white rounded-lg shadow-lg">
-      <table
-        id="departments-table"
-        class="min-w-full table-auto border-collapse bg-white shadow-md rounded-lg"
-      >
+      <table id="departments-table" class="min-w-full table-auto border-collapse bg-white shadow-md rounded-lg">
         <thead class="bg-gray-200">
           <tr>
             <th class="px-4 py-2 text-left text-gray-700">ID</th>
@@ -137,35 +128,21 @@ content %}
             <td class="px-4 py-2">{{ department['Description'] }}</td>
             <td class="px-4 py-2">
               <!-- View Button -->
-              <a
-                href="/departments/view/{{ department['id'] }}"
-                class="text-green-500 hover:text-green-700 mr-2"
-                tabindex="0"
-              >
+              <a href="/departments/view/{{ department['id'] }}" class="text-green-500 hover:text-green-700 mr-2"
+                tabindex="0">
                 <i class="fas fa-eye mr-1"></i> View
               </a>
 
               <!-- Edit Button -->
-              <a
-                href="/department/edit/{{ department['id'] }}"
-                class="text-blue-500 hover:text-blue-700 mr-2"
-                tabindex="0"
-              >
+              <a href="/departments/edit/{{ department['id'] }}" class="text-blue-500 hover:text-blue-700 mr-2"
+                tabindex="0">
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
 
               <!-- Delete Button -->
-              <form
-                action="/departments/delete/{{ department['id'] }}"
-                method="POST"
-                class="inline"
-                onsubmit="return confirm('Are you sure you want to delete this department?');"
-              >
-                <button
-                  type="submit"
-                  class="text-red-500 hover:text-red-700"
-                  tabindex="0"
-                >
+              <form action="/departments/delete/{{ department['id'] }}" method="POST" class="inline"
+                onsubmit="return confirm('Are you sure you want to delete this department?');">
+                <button type="submit" class="text-red-500 hover:text-red-700" tabindex="0">
                   <i class="fas fa-trash-alt mr-1"></i> Delete
                 </button>
               </form>

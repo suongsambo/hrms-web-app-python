@@ -1,70 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Zone</title>
-    <link
-      rel="stylesheet"
-      href="{{ url_for('static', filename='styles.css') }}"
-    />
-    <!-- You can include a CSS framework like Bootstrap for better styling -->
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-      integrity="sha384-KyZXEJb3QxP6p-2yF5sNIk76l+cwMxo5l9tV4yzkp5T6LZshbZt+qfmwAPeVbCiw"
-      crossorigin="anonymous"
-    />
-  </head>
-  <body>
-    <div class="container mt-5">
-      <h2>Add a New Zone</h2>
-      <!-- Display flash messages if any -->
-      {% with messages = get_flashed_messages(with_categories=true) %} {% if
-      messages %}
-      <div class="alert alert-success" role="alert">{{ messages[0][1] }}</div>
-      {% endif %} {% endwith %}
 
-      <!-- Zone Add Form -->
-      <form method="POST">
-        <div class="mb-3">
-          <label for="name" class="form-label">Zone Name</label>
-          <input
-            type="text"
-            class="form-control"
-            id="name"
-            name="name"
-            required
-          />
-        </div>
-        <div class="mb-3">
-          <label for="description" class="form-label">Zone Description</label>
-          <textarea
-            class="form-control"
-            id="description"
-            name="description"
-            rows="4"
-          ></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">Add Zone</button>
-      </form>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Zone</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
+  <!-- You can include a CSS framework like Bootstrap for better styling -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-KyZXEJb3QxP6p-2yF5sNIk76l+cwMxo5l9tV4yzkp5T6LZshbZt+qfmwAPeVbCiw" crossorigin="anonymous" />
+</head>
 
-      <hr />
-      <a href="{{ url_for('list_zones') }}" class="btn btn-secondary"
-        >Back to Zones List</a
-      >
-    </div>
+<body>
+  <div class="container mt-5">
+    <h2>Add a New Zone</h2>
+    <!-- Display flash messages if any -->
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <div class="alert alert-success" role="alert">{{ messages[0][1] }}</div>
+    {% endif %} {% endwith %}
 
-    <!-- Bootstrap JS (Optional) -->
-    <script
-      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
-      integrity="sha384-oBqDVmMz4fnFO9gyb6W4P5kC8JfC5//6kD4ppfljwp7S+Fe0kr5m0pC5sm4V5E2g"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
-      integrity="sha384-pzjw8f+ua7Kw1TIq0g6rVo7fGf3nKx4M4kW0eS3r2gtI9i1s+6fFw2t4oOgk4t3O"
-      crossorigin="anonymous"
-    ></script>
-  </body>
+    <!-- Zone Add Form -->
+    <form method="POST">
+      <div class="mb-3">
+        <label for="name" class="form-label">Zone Name</label>
+        <input type="text" class="form-control" id="name" name="name" required />
+      </div>
+      <div class="mb-3">
+        <label for="description" class="form-label">Zone Description</label>
+        <textarea class="form-control" id="description" name="description" rows="4"></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Add Zone</button>
+    </form>
+
+    <hr />
+    <a href="{{ url_for('zones.list_zones') }}" class="btn btn-secondary">Back to Zones List</a>
+  </div>
+
+  <!-- Bootstrap JS (Optional) -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"
+    integrity="sha384-oBqDVmMz4fnFO9gyb6W4P5kC8JfC5//6kD4ppfljwp7S+Fe0kr5m0pC5sm4V5E2g"
+    crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"
+    integrity="sha384-pzjw8f+ua7Kw1TIq0g6rVo7fGf3nKx4M4kW0eS3r2gtI9i1s+6fFw2t4oOgk4t3O"
+    crossorigin="anonymous"></script>
+</body>
+
 </html>
