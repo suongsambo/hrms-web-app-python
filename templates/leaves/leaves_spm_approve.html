@@ -6,7 +6,7 @@ content %}
   <!-- Main Content -->
   <div class="container mx-auto mt-8 px-4">
 
-    <!-- Branch Filter -->
+    <!-- Branch Filter
     <form method="GET" action="{{ url_for('leaves_by_branch_and_spm') }}" class="mb-3">
       <label for="branch_name" class="block text-gray-700 font-medium mb-2">Filter by Branch:</label>
       <select name="branch_name" id="branch_name" class="w-52 p-2 border border-gray-300 rounded-md"
@@ -14,6 +14,22 @@ content %}
         <option value="">All Branches</option>
         {% for branch in branches_in_zone %}
         <option value="{{ branch.Branch }}" {% if branch_name==branch.Branch %}selected{% endif %}>{{ branch.Branch }}
+        </option>
+        {% endfor %}
+      </select>
+    </form>
+ -->
+
+
+    <!-- Branch Selection Form -->
+    <form method="get" action="{{ url_for('leaves_by_branch_and_spm') }}" class="mb-4">
+      <label for="branch_name" class="text-sm text-gray-600">Select Branch:</label>
+      <select name="branch_name" id="branch_name" onchange="this.form.submit()"
+        class="ml-2 p-2 border rounded-md text-gray-700">
+        <option value="All" {% if branch_name=='All' %}selected{% endif %}>All Branches</option>
+        {% for branch in branches_in_zone %}
+        <option value="{{ branch.Branch }}" {% if branch_name==branch.Branch %}selected{% endif %}>
+          {{ branch.Branch }}
         </option>
         {% endfor %}
       </select>

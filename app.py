@@ -1529,15 +1529,214 @@ def leaves_by_branch_and_ccc_category(branch_name):
     return render_template('leaves/leaves_ccc_verify.html', leaves=leaves, branch_name=branch_name)
 
 
+# @app.route('/leaves/spm', methods=['GET'])
+# def leaves_by_branch_and_spm():
+#     # Ensure user is authenticated and has the correct role
+#     if not current_user.is_authenticated or current_user.role_default != 145:
+#         return redirect(url_for('access_denied'))
+
+#     # Get the branch name from the query string
+#     branch_name = request.args.get('branch_name')
+#     zone_id = current_user.zone_id  # Get the user's zone ID
+
+#     if zone_id is None:
+#         flash("Zone ID not found for the current user!", "danger")
+#         return redirect(url_for('dashboard'))
+
+#     try:
+#         with get_db_connection() as conn:
+#             # Get the user's zone
+#             zone = conn.execute(
+#                 "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
+#             if zone is None:
+#                 flash("Zone not found!", "danger")
+#                 return redirect(url_for('dashboard'))
+
+#             # Find branches in the current zone
+#             branches_in_zone = conn.execute(
+#                 "SELECT b.ID, b.Branch FROM branches b "
+#                 "JOIN zone_branch zb ON b.ID = zb.branch_id WHERE zb.zone_id = ?", (
+#                     zone_id,)
+#             ).fetchall()
+
+#             # If no branch_name is provided, use the first branch in the list
+#             if not branch_name:
+#                 if branches_in_zone:  # If there are any branches in the zone
+#                     # Set to the first branch
+#                     branch_name = branches_in_zone[0]["Branch"]
+#                 else:
+#                     branch_name = "All branches"  # Fallback if no branches exist
+
+#             # Get the branch IDs in the zone
+#             branch_ids = [branch["ID"] for branch in branches_in_zone]
+
+#             # Prepare the leave query
+#             if branch_name != "All branches":  # If branch_name is provided
+#                 query = '''
+#                     SELECT
+#                         l.id,
+#                         e.name AS employee_name,
+#                         e.branch AS branch_name,
+#                         l.leave_type,
+#                         l.start_date,
+#                         l.end_date,
+#                         l.reason,
+#                         l.status,
+#                         l.type_of_leave,
+#                         l.verified_by,
+#                         l.approved_by,
+#                         l.leave_hours,
+#                         l.service_count,
+#                         l.requested_by
+#                     FROM leaves l
+#                     LEFT JOIN employees e ON l.employee_id = e.id
+#                     WHERE (e.branch = ? AND (l.category = 'M' OR l.category = 'L')) OR l.type_of_leave = 'T'
+#                 '''
+#                 params = (branch_name,)
+#             else:  # If no branch_name is provided, use all branches in the zone
+#                 query = '''
+#                     SELECT
+#                         l.id,
+#                         e.name AS employee_name,
+#                         e.branch AS branch_name,
+#                         l.leave_type,
+#                         l.start_date,
+#                         l.end_date,
+#                         l.reason,
+#                         l.status,
+#                         l.type_of_leave,
+#                         l.verified_by,
+#                         l.approved_by,
+#                         l.leave_hours,
+#                         l.service_count,
+#                         l.requested_by
+#                     FROM leaves l
+#                     LEFT JOIN employees e ON l.employee_id = e.id
+#                     WHERE (e.branch = ? AND (l.category = 'M' OR l.category = 'L')) OR l.type_of_leave = 'T'
+#                 '''.format(', '.join('?' for _ in branch_ids))  # Dynamically create placeholders
+#                 params = tuple(branch_ids)
+
+#             # Execute the query
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template(
+#         'leaves/leaves_spm_approve.html',
+#         leaves=leaves,
+#         branch_name=branch_name,
+#         branches_in_zone=branches_in_zone,
+#         zone=zone
+#     )
+
+
+# @app.route('/leaves/spm', methods=['GET'])
+# def leaves_by_branch_and_spm():
+#     # Ensure user is authenticated and has the correct role
+#     if not current_user.is_authenticated or current_user.role_default != 145:
+#         return redirect(url_for('access_denied'))
+
+#     # Get selected branch name from query string
+#     branch_name = request.args.get('branch_name')
+#     zone_id = current_user.zone_id
+
+#     if zone_id is None:
+#         flash("Zone ID not found for the current user!", "danger")
+#         return redirect(url_for('dashboard'))
+
+#     try:
+#         with get_db_connection() as conn:
+#             # Fetch the zone
+#             zone = conn.execute(
+#                 "SELECT * FROM zones WHERE ID = ?", (zone_id,)
+#             ).fetchone()
+
+#             if not zone:
+#                 flash("Zone not found!", "danger")
+#                 return redirect(url_for('dashboard'))
+
+#             # Get branches in the zone
+#             branches_in_zone = conn.execute(
+#                 "SELECT b.ID, b.Branch FROM branches b "
+#                 "JOIN zone_branch zb ON b.ID = zb.branch_id "
+#                 "WHERE zb.zone_id = ?", (zone_id,)
+#             ).fetchall()
+
+#             branch_ids = [branch["ID"] for branch in branches_in_zone]
+
+#             # Handle default case: no branch selected => get all
+#             if not branch_name or branch_name == "All":
+#                 query = f'''
+#                     SELECT
+#                         l.id,
+#                         e.name AS employee_name,
+#                         e.branch AS branch_name,
+#                         l.leave_type,
+#                         l.start_date,
+#                         l.end_date,
+#                         l.reason,
+#                         l.status,
+#                         l.type_of_leave,
+#                         l.verified_by,
+#                         l.approved_by,
+#                         l.leave_hours,
+#                         l.service_count,
+#                         l.requested_by
+#                     FROM leaves l
+#                     LEFT JOIN employees e ON l.employee_id = e.id
+#                     WHERE e.branch IN ({','.join(['?'] * len(branch_ids))})
+#                     AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
+#                 '''
+#                 params = tuple(branch_ids)
+#                 branch_name = "All"
+#             else:
+#                 # Filter by specific branch name
+#                 query = '''
+#                     SELECT
+#                         l.id,
+#                         e.name AS employee_name,
+#                         e.branch AS branch_name,
+#                         l.leave_type,
+#                         l.start_date,
+#                         l.end_date,
+#                         l.reason,
+#                         l.status,
+#                         l.type_of_leave,
+#                         l.verified_by,
+#                         l.approved_by,
+#                         l.leave_hours,
+#                         l.service_count,
+#                         l.requested_by
+#                     FROM leaves l
+#                     LEFT JOIN employees e ON l.employee_id = e.id
+#                     WHERE e.branch = ?
+#                     AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
+#                 '''
+#                 params = (branch_name,)
+
+#             # Fetch leave data
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template(
+#         'leaves/leaves_spm_approve.html',
+#         leaves=leaves,
+#         branch_name=branch_name,
+#         branches_in_zone=branches_in_zone,
+#         zone=zone
+#     )
+
+
 @app.route('/leaves/spm', methods=['GET'])
 def leaves_by_branch_and_spm():
-    # Ensure user is authenticated and has the correct role
     if not current_user.is_authenticated or current_user.role_default != 145:
         return redirect(url_for('access_denied'))
 
-    # Get the branch name from the query string
     branch_name = request.args.get('branch_name')
-    zone_id = current_user.zone_id  # Get the user's zone ID
+    zone_id = current_user.zone_id
 
     if zone_id is None:
         flash("Zone ID not found for the current user!", "danger")
@@ -1545,33 +1744,46 @@ def leaves_by_branch_and_spm():
 
     try:
         with get_db_connection() as conn:
-            # Get the user's zone
             zone = conn.execute(
                 "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
-            if zone is None:
+            if not zone:
                 flash("Zone not found!", "danger")
                 return redirect(url_for('dashboard'))
 
-            # Find branches in the current zone
             branches_in_zone = conn.execute(
                 "SELECT b.ID, b.Branch FROM branches b "
-                "JOIN zone_branch zb ON b.ID = zb.branch_id WHERE zb.zone_id = ?", (
-                    zone_id,)
+                "JOIN zone_branch zb ON b.ID = zb.branch_id WHERE zb.zone_id = ?",
+                (zone_id,)
             ).fetchall()
 
-            # If no branch_name is provided, use the first branch in the list
-            if not branch_name:
-                if branches_in_zone:  # If there are any branches in the zone
-                    # Set to the first branch
-                    branch_name = branches_in_zone[0]["Branch"]
-                else:
-                    branch_name = "All branches"  # Fallback if no branches exist
+            branch_names = [branch["Branch"] for branch in branches_in_zone]
 
-            # Get the branch IDs in the zone
-            branch_ids = [branch["ID"] for branch in branches_in_zone]
-
-            # Prepare the leave query
-            if branch_name != "All branches":  # If branch_name is provided
+            if not branch_name or branch_name == "All":
+                placeholders = ', '.join(['?'] * len(branch_names))
+                query = f'''
+                    SELECT
+                        l.id,
+                        e.name AS employee_name,
+                        e.branch AS branch_name,
+                        l.leave_type,
+                        l.start_date,
+                        l.end_date,
+                        l.reason,
+                        l.status,
+                        l.type_of_leave,
+                        l.verified_by,
+                        l.approved_by,
+                        l.leave_hours,
+                        l.service_count,
+                        l.requested_by
+                    FROM leaves l
+                    LEFT JOIN employees e ON l.employee_id = e.id
+                    WHERE e.branch IN ({placeholders})
+                    AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
+                '''
+                params = tuple(branch_names)
+                branch_name = "All"
+            else:
                 query = '''
                     SELECT
                         l.id,
@@ -1590,33 +1802,11 @@ def leaves_by_branch_and_spm():
                         l.requested_by
                     FROM leaves l
                     LEFT JOIN employees e ON l.employee_id = e.id
-                    WHERE (e.branch = ? AND (l.category = 'M' OR l.category = 'L')) OR l.type_of_leave = 'T'
+                    WHERE e.branch = ?
+                    AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
                 '''
                 params = (branch_name,)
-            else:  # If no branch_name is provided, use all branches in the zone
-                query = '''
-                    SELECT
-                        l.id,
-                        e.name AS employee_name,
-                        e.branch AS branch_name,
-                        l.leave_type,
-                        l.start_date,
-                        l.end_date,
-                        l.reason,
-                        l.status,
-                        l.type_of_leave,
-                        l.verified_by,
-                        l.approved_by,
-                        l.leave_hours,
-                        l.service_count,
-                        l.requested_by
-                    FROM leaves l
-                    LEFT JOIN employees e ON l.employee_id = e.id
-                    WHERE (e.branch = ? AND (l.category = 'M' OR l.category = 'L')) OR l.type_of_leave = 'T'
-                '''.format(', '.join('?' for _ in branch_ids))  # Dynamically create placeholders
-                params = tuple(branch_ids)
 
-            # Execute the query
             leaves = conn.execute(query, params).fetchall()
 
     except sqlite3.DatabaseError as e:
@@ -4333,6 +4523,67 @@ def dashboard():
     return render_template('access_denied.html')
 
 
+# @app.route('/gm/dashboard')
+# @login_required
+# def gm_dashboard():
+#     if current_user.role_default != 180:
+#         flash("Access denied to GM dashboard.", "danger")
+#         return render_template('access_denied.html')
+
+#     today_date = date.today()
+#     with get_db_connection() as conn:
+#         sun_zones = conn.execute("SELECT * FROM zones").fetchall()
+#         branches = conn.execute("SELECT * FROM branches").fetchall()
+#         employees = conn.execute("SELECT * FROM employees").fetchall()
+#         users = conn.execute("SELECT * FROM users").fetchall()
+
+#         # Employees on leave today
+#         employees_on_leave_today = conn.execute("""
+#             SELECT u.ID, u.UserName, u.Branch, l.start_date, l.end_date, l.reason, l.service_count, l.leave_hours
+#             FROM leaves l
+#             JOIN users u ON l.employee_id = u.id
+#             WHERE ? BETWEEN l.start_date AND l.end_date
+#         """, (today_date,)).fetchall()
+#         total_leave = len(employees_on_leave_today)
+
+#         # Total leave days and hours grouped by branch
+#         leave_summary = conn.execute("""
+#             SELECT
+#                 u.Branch,
+#                 SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
+#                 SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
+#             FROM leaves l
+#             JOIN users u ON l.employee_id = u.id
+#             GROUP BY u.Branch
+#         """).fetchall()
+
+#         # Total leave days and hours grouped by zone
+#         leave_summary_by_zone = conn.execute("""
+#             SELECT
+#                 z.Name,
+#                 SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
+#                 SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
+#             FROM leaves l
+#             JOIN users u ON l.employee_id = u.id
+#             JOIN branches b ON u.branch = b.Branch
+#             JOIN zone_branch zb ON b.ID = zb.branch_id
+#             JOIN zones z ON zb.zone_id = z.ID
+#             GROUP BY z.Name
+#         """).fetchall()
+
+#     return render_template(
+#         'dashboard/gm_dashboard.html',
+#         sun_zones=sun_zones,
+#         branches=branches,
+#         employees=employees,
+#         users=users,
+#         employees_on_leave_today=employees_on_leave_today,
+#         total_leave=total_leave,
+#         leave_summary=leave_summary,
+#         leave_summary_by_zone=leave_summary_by_zone
+#     )
+
+
 @app.route('/gm/dashboard')
 @login_required
 def gm_dashboard():
@@ -4341,6 +4592,7 @@ def gm_dashboard():
         return render_template('access_denied.html')
 
     today_date = date.today()
+
     with get_db_connection() as conn:
         sun_zones = conn.execute("SELECT * FROM zones").fetchall()
         branches = conn.execute("SELECT * FROM branches").fetchall()
@@ -4349,36 +4601,53 @@ def gm_dashboard():
 
         # Employees on leave today
         employees_on_leave_today = conn.execute("""
-            SELECT u.ID, u.UserName, u.Branch, l.start_date, l.end_date, l.reason, l.service_count, l.leave_hours
-            FROM leaves l
-            JOIN users u ON l.employee_id = u.id
-            WHERE ? BETWEEN l.start_date AND l.end_date
-        """, (today_date,)).fetchall()
+                SELECT 
+                    u.ID AS user_id,
+                    u.UserName AS username,
+                    l.requested_by AS employee_name,
+                    l.branch AS employee_branch,
+                    b.Branch AS branch_name,
+                    l.start_date,
+                    l.end_date,
+                    l.reason,
+                    l.service_count,
+                    l.leave_hours
+                FROM leaves l
+                JOIN users u ON l.id = u.id
+                JOIN employees e ON u.id = e.id
+                JOIN branches b ON u.branch = b.Branch
+                WHERE l.start_date IS NOT NULL AND l.end_date IS NOT NULL
+                AND ? BETWEEN l.start_date AND l.end_date
+            """, (today_date,)).fetchall()
         total_leave = len(employees_on_leave_today)
 
-        # Total leave days and hours grouped by branch
-        leave_summary = conn.execute("""
+        # total_leave = len(employees_on_leave_today)
+
+        # # Leave summary by branch
+        leave_summary_by_branch = conn.execute("""
             SELECT 
-                u.Branch,
-                SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
-                SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
-            FROM leaves l
-            JOIN users u ON l.employee_id = u.id
-            GROUP BY u.Branch
+                branch AS branch_name,
+                SUM(service_count) AS total_leave_days,
+                SUM(leave_hours) AS total_leave_hours
+            FROM leaves
+            GROUP BY branch
         """).fetchall()
 
-        # Total leave days and hours grouped by zone
         leave_summary_by_zone = conn.execute("""
-            SELECT 
-                z.Name,
-                SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
-                SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
-            FROM leaves l
-            JOIN users u ON l.employee_id = u.id
-            JOIN branches b ON u.branch = b.Branch
-            JOIN zone_branch zb ON b.ID = zb.branch_id
-            JOIN zones z ON zb.zone_id = z.ID
-            GROUP BY z.Name
+           SELECT 
+            z.Name AS zone_name,
+            COUNT(DISTINCT l.employee_id) AS employee_count,
+            SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
+            SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
+        FROM zones z
+        LEFT JOIN zone_branch zb ON z.ID = zb.zone_id
+        LEFT JOIN branches b ON zb.branch_id = b.ID
+        LEFT JOIN users u ON u.branch = b.ID  -- Make sure this is branch ID
+        LEFT JOIN leaves l 
+            ON l.employee_id = u.id 
+            AND l.start_date IS NOT NULL 
+            AND l.end_date IS NOT NULL
+        GROUP BY z.Name;
         """).fetchall()
 
     return render_template(
@@ -4389,7 +4658,7 @@ def gm_dashboard():
         users=users,
         employees_on_leave_today=employees_on_leave_today,
         total_leave=total_leave,
-        leave_summary=leave_summary,
+        leave_summary=leave_summary_by_branch,
         leave_summary_by_zone=leave_summary_by_zone
     )
 
