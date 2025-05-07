@@ -1,11 +1,18 @@
 
 
 # from flask import Flask, request, render_template, redirect, url_for
+from werkzeug.security import generate_password_hash
+from flask_login import login_required
+from flask import request, redirect, url_for, render_template, flash
+from io import TextIOWrapper
 import base64
 from flask import Flask, Response, render_template, flash, redirect, url_for, request, session, send_from_directory, jsonify, send_file
 import sqlite3
 import hashlib
 import os
+import io
+from io import StringIO, TextIOWrapper
+import csv
 import json
 import pyotp
 import requests
@@ -1278,7 +1285,8 @@ def filter_leaves_by_branch_name(branch_name):
             l.approved_by,
             l.leave_hours,
             l.service_count,
-            l.requested_by
+            l.requested_by,
+            l.requested_by_roles
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
         WHERE e.branch = ?
@@ -1287,6 +1295,7 @@ def filter_leaves_by_branch_name(branch_name):
             OR (l.category = 'M' AND l.verified_by IS NULL)
             OR l.category IS NULL
             OR l.type_of_leave = 'H'
+            OR l.requested_by_roles = 35 
         )
     '''
 
@@ -1582,6 +1591,7 @@ def add_many_leave(branch):
         requested_by = request.form['requested_by']
         type_of_leave = request.form.get('type_of_leave', 'D')
         user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form.getlist('requested_by_roles')
 
         branch = user_branch
 
@@ -1616,11 +1626,12 @@ def add_many_leave(branch):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch,  excluded_days, final_end_date)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date, requested_by_roles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
-                reason, service_count, type_of_leave, requested_by, category, branch,  excluded_days, final_end_date
+                reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date_obj.date(
+                ), ','.join(requested_by_roles)
             ))
 
             leave_id = cursor.lastrowid
@@ -3372,7 +3383,200 @@ def get_all_users():
     with get_db_connection() as conn:
         return conn.execute("SELECT * FROM users").fetchall()
 
-# Helper function to get active users
+
+@app.route('/users/export', methods=['GET'])
+@login_required
+def export_users_csv():
+    filter_value = request.args.get('active', 'all')
+
+    # Retrieve users based on the filter
+    if filter_value == '1':
+        users = get_active_users()
+    elif filter_value == '0':
+        users = get_inactive_users()
+    else:
+        users = get_all_users()
+
+    # Remove 'Password' field from each user dictionary
+    for user in users:
+        user_dict = dict(user)
+        user_dict.pop('Password', None)
+        users[users.index(user)] = user_dict
+
+    # Create a CSV in memory
+    si = StringIO()
+    writer = csv.writer(si)
+
+    # Write headers
+    if users:
+        writer.writerow(users[0].keys())
+        for user in users:
+            writer.writerow(user.values())
+    else:
+        writer.writerow(["No data found"])
+
+    # Generate a timestamped filename
+    timestamp = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+    filename = f"users_export_{timestamp}.csv"
+
+    # Prepare the response
+    output = si.getvalue()
+    response = Response(output, mimetype='text/csv')
+    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+    return response
+
+
+# @app.route('/users/export', methods=['GET'])
+# @login_required
+# def export_users_csv():
+#     filter_value = request.args.get('active', 'all')
+
+#     # Filter users using the same logic
+#     if filter_value == '1':
+#         users = get_active_users()
+#     elif filter_value == '0':
+#         users = get_inactive_users()
+#     else:
+#         users = get_all_users()
+
+#     # Use StringIO to write CSV in memory
+#     si = StringIO()
+#     writer = csv.writer(si)
+
+#     # Write headers
+#     if users:
+#         writer.writerow(users[0].keys())  # Column headers based on row keys
+#     else:
+#         writer.writerow(["No data found"])
+
+#     # Write data rows
+#     for user in users:
+#         writer.writerow(user)
+
+#     # Prepare response
+#     output = si.getvalue()
+#     response = Response(output, mimetype='text/csv')
+#     now = datetime.now()
+#     filename = f"users_export_{now.strftime('%m-%d-%Y_%H-%M-%S')}.csv"
+#     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+#     return response
+
+
+@app.route('/users/import', methods=['GET', 'POST'])
+@login_required
+def import_users_csv():
+    if request.method == 'POST':
+        file = request.files.get('file')
+
+        if not file or not file.filename.endswith('.csv'):
+            flash('Please upload a valid CSV file.', 'danger')
+            return redirect(request.url)
+
+        try:
+            stream = TextIOWrapper(file.stream, encoding='utf-8')
+            csv_reader = csv.DictReader(stream)
+
+            with get_db_connection() as conn:
+                cursor = conn.cursor()
+                inserted = 0
+                skipped = 0
+
+                for row in csv_reader:
+                    # Validate required fields
+                    if not row.get('UserName') or not row.get('Email'):
+                        skipped += 1
+                        continue  # Skip rows with missing critical data
+
+                    try:
+                        # Hash the password '1111' before inserting
+                        hashed_password = hashlib.sha256(
+                            '1111'.encode()).hexdigest()
+
+                        cursor.execute('''
+                            INSERT INTO users (
+                                UserName, Email, FirstNameKh, LastNameKh, FirstNameEn, LastNameEn, Branch,
+                                IsAdmin, DisplayName, LoginName, StartDate, EndDate, Mobile1, Mobile2,
+                                Active, Menu, Language, Status, Note, RequestRole, RoleDefault,
+                                AcceptedTerms, ImageUrl, Image, Signature, FingerPrint, ZoneID, Force_Password_Change, Password
+                            ) VALUES (
+                                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                            )
+                        ''', (
+                            row['UserName'],
+                            row['Email'],
+                            row.get('FirstNameKh'),
+                            row.get('LastNameKh'),
+                            row.get('FirstNameEn'),
+                            row.get('LastNameEn'),
+                            row.get('Branch'),
+                            int(row.get('IsAdmin', 0) or 0),
+                            row.get('DisplayName'),
+                            row.get('LoginName'),
+                            row.get('StartDate'),
+                            row.get('EndDate'),
+                            row.get('Mobile1'),
+                            row.get('Mobile2'),
+                            int(row.get('Active', 1) or 1),
+                            row.get('Menu'),
+                            row.get('Language', 'en'),
+                            row.get('Status'),
+                            row.get('Note'),
+                            row.get('RequestRole'),
+                            int(row.get('RoleDefault', 0) or 0),
+                            int(row.get('AcceptedTerms', 0) or 0),
+                            row.get('ImageUrl'),
+                            row.get('Image'),
+                            row.get('Signature'),
+                            row.get('FingerPrint'),
+                            row.get('ZoneID'),
+                            int(row.get('Force_Password_Change', 0) or 0),
+                            hashed_password  # Store hashed password
+                        ))
+                        inserted += 1
+
+                    except Exception as e:
+                        app.logger.warning(f"Skipped row due to error: {e}")
+                        skipped += 1
+
+                conn.commit()
+
+            flash(
+                f'{inserted} users imported successfully. {skipped} rows skipped.', 'success')
+            return redirect(url_for('users'))
+
+        except Exception as e:
+            app.logger.error(f"Import error: {e}")
+            flash('There was an error importing the CSV.', 'danger')
+            return redirect(request.url)
+
+    return render_template('users/import_users.html')
+
+
+@app.route('/users/import/template')
+@login_required
+def download_csv_template():
+    headers = [
+        "UserName", "Email", "FirstNameKh", "LastNameKh", "FirstNameEn", "LastNameEn", "Branch",
+        "IsAdmin", "DisplayName", "LoginName", "StartDate", "EndDate", "Mobile1", "Mobile2",
+        "Active", "Menu", "Language", "Status", "Note", "RequestRole", "RoleDefault",
+        "AcceptedTerms", "ImageUrl", "Image", "Signature", "FingerPrint", "ZoneID", "Force_Password_Change"
+    ]
+
+    sample_row = [
+        "jdoe", "jdoe@example.com", "ចន", "ដូ", "John", "Doe", "KPT",
+        0, "John D.", "jdoe", "2025-01-01", "2025-12-31", "012345678", "098765432",
+        1, "default", "en", "active", "Sample user", "user", 0,
+        1, "", "", "", "", 1, 0
+    ]
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(headers)
+    writer.writerow(sample_row)
+
+    response = Response(output.getvalue(), mimetype='text/csv')
+    response.headers['Content-Disposition'] = 'attachment; filename=import_users_template.csv'
+    return response
 
 
 def get_active_users():

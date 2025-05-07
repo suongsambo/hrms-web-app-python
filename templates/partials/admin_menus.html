@@ -9,18 +9,24 @@
 
     <div x-show="activeMenu === 'users'" @click.away="activeMenu = ''"
         class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
-
         <a href="/users/add"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
             <span class="material-symbols-outlined">person_add</span>
             <span>{{ _('Add User') }}</span>
         </a>
 
-        <a href="/users/roles"
+        <!-- <a href="{{ url_for('download_csv_template') }}"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">admin_panel_settings</span>
-            <span>{{ _('Roles') }}</span>
+            <span class="material-symbols-outlined">download</span>
+            <span>{{ _('Template CSV') }}</span>
         </a>
+
+
+        <a href="/users/import"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">import_export</span>
+            <span>{{ _('Import Users') }}</span>
+        </a> -->
 
         <a href="/users"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
@@ -33,6 +39,13 @@
             <span class="material-symbols-outlined">lock_reset</span>
             <span>{{ _('Force Reset Password') }}</span>
         </a>
+
+        <a href="/users/roles"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+            <span>{{ _('Roles') }}</span>
+        </a>
+
     </div>
 </div>
 

@@ -317,6 +317,7 @@ def init_db():
                 service_count INTEGER,
                 leave_hours REAL,
                 requested_by TEXT,
+                requested_by_roles INTEGER,
                 verified_by TEXT,
                 approved_by TEXT,
                 type_of_leave TEXT,
