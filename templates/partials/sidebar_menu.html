@@ -1,0 +1,326 @@
+<div class="h-[calc(100vh-150px)] overflow-x-hidden overflow-y-scroll bg-[#48D2BB] m-0 p-0">
+    <ul class="menu bg-accent w-75">
+        <!-- Section Name -->
+        <li class="menu-title">
+            <span>Main Menu</span>
+        </li>
+
+        <!-- Home Link -->
+        <li
+            class="{% if request.path == '/dashboard' %} bg-indigo-600 text-white {% else %} hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 {% endif %}">
+            <a href="/dashboard"
+                class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                <span class="material-symbols-outlined">home</span>
+                <span class="ml-2">Dashboard</span>
+            </a>
+        </li>
+
+        <!-- Users Section (If admin) -->
+        {% if current_user.is_admin == 1 %}
+        <li class="menu-title">
+            <span>Users Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/users/add', '/users/roles', '/users', '/force_reset_password'] %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">groups</span>
+                    <span class="ml-2">Users</span>
+                </summary>
+                <ul class="hidden">
+                    <li class="{% if request.path == '/users/add' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/users/add"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">person_add</span>
+                            <span class="ml-2">Add User</span>
+                        </a>
+                    </li>
+
+                    <li class="{% if request.path == '/users/roles' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/users/roles"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">admin_panel_settings</span>
+                            <span class="ml-2">Roles</span>
+                        </a>
+                    </li>
+
+                    <li class="{% if request.path == '/users' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/users"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">people</span>
+                            <span class="ml-2">Manage Users</span>
+                        </a>
+                    </li>
+
+                    <li class="{% if request.path == '/force_reset_password' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/force_reset_password"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">lock_reset</span>
+                            <span class="ml-2">Force Reset Password</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <!-- Departments Section -->
+        <li class="menu-title">
+            <span>Departments Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/positions/add', '/positions', '/departments/add', '/departments'] %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">apartment</span>
+                    <span class="ml-2">Departments</span>
+                </summary>
+                <ul class="hidden">
+                    <!-- Add Position -->
+                    <li class="{% if request.path == '/positions/add' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/positions/add"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">add_business</span>
+                            <span class="ml-2">Add Position</span>
+                        </a>
+                    </li>
+
+                    <!-- Manage Positions -->
+                    <li class="{% if request.path == '/positions' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/positions"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">business</span>
+                            <span class="ml-2">Manage Positions</span>
+                        </a>
+                    </li>
+
+                    <!-- Add Department -->
+                    <li class="{% if request.path == '/departments/add' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/departments/add"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">add_business</span>
+                            <span class="ml-2">Add Department</span>
+                        </a>
+                    </li>
+
+                    <!-- Manage Departments -->
+                    <li class="{% if request.path == '/departments' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/departments"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">business</span>
+                            <span class="ml-2">Manage Departments</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <!-- Backup Section -->
+        <li class="menu-title">
+            <span>Backup Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/backups', '/restore_local'] %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">save</span>
+                    <span class="ml-2">Backup</span>
+                </summary>
+                <ul class="hidden">
+                    <!-- Manage Backup -->
+                    <li class="{% if request.path == '/backups' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/backups"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">save</span>
+                            <span class="ml-2">Manage Backup</span>
+                        </a>
+                    </li>
+
+                    <!-- Restore Local -->
+                    <li class="{% if request.path == '/restore_local' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/restore_local"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">restore</span>
+                            <span class="ml-2">Restore Local</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <!-- Zones Section -->
+        <li class="menu-title">
+            <span>Zones Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/zone/create', '/zones'] %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">location_pin</span>
+                    <span class="ml-2">Zones</span>
+                </summary>
+                <ul class="hidden">
+                    <!-- Assign Branch -->
+                    <li class="{% if request.path == '/zone/create' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/zone/create"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">map</span>
+                            <span class="ml-2">Assign Branch</span>
+                        </a>
+                    </li>
+
+                    <!-- Manage Zones -->
+                    <li class="{% if request.path == '/zones' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/zones"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">location_pin</span>
+                            <span class="ml-2">Manage Zones</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <!-- Branch Section -->
+        <li class="menu-title">
+            <span>Branch Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/branches/add', '/branches'] %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">store</span>
+                    <span class="ml-2">Branch</span>
+                </summary>
+                <ul class="hidden">
+                    <!-- Add Branch -->
+                    <li class="{% if request.path == '/branches/add' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/branches/add"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">add_business</span>
+                            <span class="ml-2">Add Branch</span>
+                        </a>
+                    </li>
+
+                    <!-- Manage Branches -->
+                    <li class="{% if request.path == '/branches' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/branches"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">business</span>
+                            <span class="ml-2">Manage Branches</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <!-- Employees Section -->
+        <li class="menu-title">
+            <span>Employees Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/employees/add', '/employees', '/bankstatement/add', '/bankstatements'] %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">person</span>
+                    <span class="ml-2">Employees</span>
+                </summary>
+                <ul class="hidden">
+                    <!-- Add Employee -->
+                    <li class="{% if request.path == '/employees/add' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/employees/add"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">person_add</span>
+                            <span class="ml-2">Add Employee</span>
+                        </a>
+                    </li>
+
+                    <!-- Manage Employees -->
+                    <li class="{% if request.path == '/employees' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/employees"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">people</span>
+                            <span class="ml-2">Manage Employees</span>
+                        </a>
+                    </li>
+
+                    <!-- Add BankStatement -->
+                    <li class="{% if request.path == '/bankstatement/add' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/bankstatement/add"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">attach_money</span>
+                            <span class="ml-2">Add BankStatement</span>
+                        </a>
+                    </li>
+
+                    <!-- Manage BankStatements -->
+                    <li class="{% if request.path == '/bankstatements' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/bankstatements"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">attach_money</span>
+                            <span class="ml-2">Manage BankStatements</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <!-- Attendance Section -->
+        <li class="menu-title">
+            <span>Attendance Section</span>
+        </li>
+
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path == '/leaves' %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">event</span>
+                    <span class="ml-2">Attendance</span>
+                </summary>
+                <ul class="hidden">
+                    <!-- Manage Leaves -->
+                    <li class="{% if request.path == '/leaves' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/leaves"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">event</span>
+                            <span class="ml-2">Leave Manage</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        <!-- Attendance Section -->
+        <li class="menu-title">
+            <span>Holiday Section</span>
+        </li>
+
+        <!-- Holiday Section -->
+        <li class="menu-item-toggle">
+            <details>
+                <summary
+                    class="flex items-center cursor-pointer p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105 {% if request.path in ['/holidays'] %} bg-indigo-600 text-white {% endif %}">
+                    <span class="material-symbols-outlined">event</span>
+                    <span class="ml-2">Holiday</span>
+                </summary>
+                <ul class="hidden">
+                    <!-- Manage Holidays -->
+                    <li class="{% if request.path == '/holidays' %} bg-indigo-600 text-white {% endif %}">
+                        <a href="/holidays"
+                            class="flex items-center p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+                            <span class="material-symbols-outlined">event</span>
+                            <span class="ml-2">Manage Holidays</span>
+                        </a>
+                    </li>
+                </ul>
+            </details>
+        </li>
+
+        {% endif %}
+    </ul>
+</div>

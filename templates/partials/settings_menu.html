@@ -1,0 +1,22 @@
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'settings' ? '' : 'settings'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="ml-2">{{ _('Settings') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'settings'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[200px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="{{ url_for('profile', user_id=current_user.id) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">person</span>
+            <span>{{ _('Profile') }}</span>
+        </a>
+
+        <a href="/change_password"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">lock</span>
+            <span>{{ _('Security') }}</span>
+        </a>
+    </div>
+</div>

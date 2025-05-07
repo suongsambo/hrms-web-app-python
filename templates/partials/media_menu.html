@@ -1,0 +1,50 @@
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'media' ? '' : 'media'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">image</span>
+        <span class="ml-2">Media</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'media'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/file"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">image</span>
+            <span>Add Media</span>
+        </a>
+        <a href="/upload_files"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">image</span>
+            <span>Add Multiple</span>
+        </a>
+
+        <a href="/files"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">image</span>
+            <span>Manage Media</span>
+        </a>
+    </div>
+</div>
+
+
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'locations' ? '' : 'locations'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">location_on</span>
+        <span class="ml-2">Locations</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'locations'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/locations/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_location</span>
+            <span>Add Location</span>
+        </a>
+        <a href="/locations"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">location_on</span>
+            <span>Manage Locations</span>
+        </a>
+    </div>
+</div>

@@ -1,0 +1,243 @@
+<!-- Users -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'users' ? '' : 'users'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">groups</span>
+        <span id="nav-users" class="ml-2">{{ _('Users') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+
+    <div x-show="activeMenu === 'users'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+
+        <a href="/users/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">person_add</span>
+            <span>{{ _('Add User') }}</span>
+        </a>
+
+        <a href="/users/roles"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">admin_panel_settings</span>
+            <span>{{ _('Roles') }}</span>
+        </a>
+
+        <a href="/users"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">people</span>
+            <span>{{ _('Manage Users') }}</span>
+        </a>
+
+        <a href="/force_reset_password"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">lock_reset</span>
+            <span>{{ _('Force Reset Password') }}</span>
+        </a>
+    </div>
+</div>
+
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'departments' ? '' : 'departments'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">apartment</span>
+        <span class="ml-2">{{ _('Departments') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+
+    <div x-show="activeMenu === 'departments'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+
+        <a href="/positions/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_business</span>
+            <span>{{ _('Add Position') }}</span>
+        </a>
+
+        <a href="/positions"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">business</span>
+            <span>{{ _('Manage Positions') }}</span>
+        </a>
+
+        <a href="/departments/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_business</span>
+            <span>{{ _('Add Department') }}</span>
+        </a>
+
+        <a href="/departments"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">business</span>
+            <span>{{ _('Manage Departments') }}</span>
+        </a>
+    </div>
+</div>
+
+<!-- Menu Backup -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'backup' ? '' : 'backup'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">save</span>
+        <span class="ml-2">{{ _('Backup') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'backup'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/backups"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">save</span>
+            <span>{{ _('Manage Backup') }}</span>
+        </a>
+
+        <a href="/restore_local"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">restore</span>
+            <span>{{ _('Restore Local') }}</span>
+        </a>
+    </div>
+</div>
+
+<!-- Menu Zones -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'zones' ? '' : 'zones'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">location_pin</span>
+        <span class="ml-2">{{ _('Zones') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'zones'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/zones/create"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">map</span>
+            <span>{{ _('Assign Branch') }}</span>
+        </a>
+        <a href="/zones"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">location_pin</span>
+            <span>{{ _('Manage Zones') }}</span>
+        </a>
+    </div>
+</div>
+
+<!-- Menu Branch -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'branch' ? '' : 'branch'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">store</span>
+        <span class="ml-2">{{ _('Branch') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'branch'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/branches/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_business</span>
+            <span>{{ _('Add Branch') }}</span>
+        </a>
+        <a href="/branches"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">business</span>
+            <span>{{ _('Manage Branches') }}</span>
+        </a>
+    </div>
+</div>
+
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'employees' ? '' : 'employees'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">person</span>
+        <span class="ml-2">{{ _('Employees') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'employees'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[270px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/employees/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">person_add</span>
+            <span>{{ _('Add Employee') }}</span>
+        </a>
+        <a href="/employees"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">people</span>
+            <span>{{ _('Manage Employees') }}</span>
+        </a>
+
+        <a href="/bankstatements/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">attach_money</span>
+            <span>{{ _('Add BankStatement') }}</span>
+        </a>
+
+        <a href="/bankstatements"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">attach_money</span>
+            <span>{{ _('Manage BankStatements') }}</span>
+        </a>
+    </div>
+</div>
+
+<!-- Attendance -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">{{ _('Attendance') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <!-- <a href="{{ url_for('checkin', user_id=current_user.id) }}"
+              class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Check In</span>
+            </a>
+    
+            <a href="{{ url_for('checkout', user_id=current_user.id) }}"
+              class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+              <span class="material-symbols-outlined">check_circle</span>
+              <span>Check Out</span>
+            </a>
+    
+            <a href="{{ url_for('worked_time', user_id=current_user.id) }}"
+              class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+              <span class="material-symbols-outlined">timer</span>
+              <span>Work Time</span>
+            </a> -->
+        <!-- 
+        <a href="/leave/add"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Add Leave</span>
+        </a> -->
+
+        <a href="/leaves"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">event</span>
+            <span>{{ _('Leave Manage') }}</span>
+        </a>
+    </div>
+</div>
+
+<!-- Holiday -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'holiday' ? '' : 'holiday'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">{{ _('Holiday') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'holiday'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <!-- <a href="/add_holiday"
+          class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+          <span class="material-symbols-outlined">event</span>
+          <span>Add Holiday</span>
+        </a> -->
+        <a href="/holidays"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">event</span>
+            <span>{{ _('Manage Holidays') }}</span>
+        </a>
+    </div>
+</div>

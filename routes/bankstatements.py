@@ -1,10 +1,8 @@
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash
-from typing import Union
 import sqlite3
 from flask import Flask
 from config import Config
-from flask import Blueprint, render_template, request, redirect, url_for
 from flask_login import login_required
 app = Flask(__name__)
 app.config.from_object(Config)

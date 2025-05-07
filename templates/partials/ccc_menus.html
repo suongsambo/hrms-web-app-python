@@ -1,0 +1,38 @@
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span class="ml-2">Attendance</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <!-- <a href="/leave/add"
+        class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">event</span>
+        <span>Add Leave</span>
+      </a> -->
+        <a href="/leave_hours/add/{{ current_user.branch }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_task</span>
+            <span>Add Leave Hours</span>
+        </a>
+
+        <a href="/leave_many/add/{{ current_user.branch }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_task</span>
+            <span>Add Leave Days</span>
+        </a>
+
+        <a href="/leaves"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">event</span>
+            <span>Leave Manage</span>
+        </a>
+        <a href="{{ url_for('leaves_by_branch_and_ccc_category', branch_name=current_user.branch) }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">filter_alt</span>
+            <span>Leave Approval</span>
+        </a>
+    </div>
+</div>
