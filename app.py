@@ -1,7 +1,9 @@
 
 
 # from flask import Flask, request, render_template, redirect, url_for
-from werkzeug.security import generate_password_hash
+from flask_login import current_user
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for
 from flask_login import login_required
 from flask import request, redirect, url_for, render_template, flash
 from io import TextIOWrapper
@@ -1062,6 +1064,73 @@ def filter_leaves_by_employee_id(employee_id):
         return f"Database error: {e}", 500
 
 
+# TODO CCC DASHBOARD
+@app.route('/leaves/ccc/dashboard/<string:branch_name>', methods=['GET'])
+def leaves_by_branch_and_ccc_dashboard(branch_name):
+    if not current_user.is_authenticated or current_user.role_default != 35:
+        return redirect(url_for('access_denied'))
+
+    if branch_name:
+        query = '''
+            SELECT
+                l.id,
+                e.name AS employee_name,
+                l.branch AS branch_name,
+                l.leave_type,
+                l.start_date,
+                l.end_date,
+                l.reason,
+                l.status,
+                l.type_of_leave,
+                l.verified_by,
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE l.branch = ? AND (
+
+                l.type_of_leave = 'H' OR
+                l.requested_by_roles = 35)
+        '''
+        params = (branch_name,)
+    else:
+        query = '''
+            SELECT
+                l.id,
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type,
+                l.start_date,
+                l.end_date,
+                l.reason,
+                l.status,
+                l.type_of_leave,
+                l.verified_by,
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE
+
+                l.type_of_leave = 'H' OR
+                l.requested_by_roles = 35
+        '''
+        params = ()
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+            print(leaves, 'leave')
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template('leaves/leaves_ccc_dashboard.html', leaves=leaves, branch_name=branch_name)
+
+
 @app.route('/leaves/ccc/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_ccc_category(branch_name):
     if not current_user.is_authenticated or current_user.role_default != 35:
@@ -1160,8 +1229,8 @@ def leaves_by_branch_and_spm():
                 query = f'''
                     SELECT
                         l.id,
-                        e.name AS employee_name,
-                        e.branch AS branch_name,
+                        l.requested_by AS employee_name,
+                        l.branch AS branch_name,
                         l.leave_type,
                         l.start_date,
                         l.end_date,
@@ -1175,7 +1244,7 @@ def leaves_by_branch_and_spm():
                         l.requested_by
                     FROM leaves l
                     LEFT JOIN employees e ON l.employee_id = e.id
-                    WHERE e.branch IN ({placeholders})
+                    WHERE l.branch IN ({placeholders})
                     AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
                 '''
                 params = tuple(branch_names)
@@ -1184,8 +1253,8 @@ def leaves_by_branch_and_spm():
                 query = '''
                     SELECT
                         l.id,
-                        e.name AS employee_name,
-                        e.branch AS branch_name,
+                        l.requested_by AS employee_name,
+                        l.branch AS branch_name,
                         l.leave_type,
                         l.start_date,
                         l.end_date,
@@ -1199,7 +1268,7 @@ def leaves_by_branch_and_spm():
                         l.requested_by
                     FROM leaves l
                     LEFT JOIN employees e ON l.employee_id = e.id
-                    WHERE e.branch = ?
+                    WHERE l.branch = ?
                     AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
                 '''
                 params = (branch_name,)
@@ -1271,10 +1340,10 @@ def filter_leaves_by_branch_name(branch_name):
     app.logger.debug(f"Filtering by branch: {branch_name}")
 
     query = '''
-        SELECT
+       SELECT
             l.id,
-            e.name AS employee_name,
-            e.branch AS branch_name,
+            l.requested_by AS employee_name,
+            l.branch AS branch_name,
             l.leave_type,
             l.start_date,
             l.end_date,
@@ -1289,14 +1358,21 @@ def filter_leaves_by_branch_name(branch_name):
             l.requested_by_roles
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE e.branch = ?
-        AND (
-            (l.category = 'S' AND l.verified_by IS NOT NULL)
-            OR (l.category = 'M' AND l.verified_by IS NULL)
-            OR l.category IS NULL
-            OR l.type_of_leave = 'H'
-            OR l.requested_by_roles = 35 
-        )
+        WHERE
+            (
+                (l.branch = ? AND l.category != 'L')
+                OR (
+                    l.category = 'S' AND l.verified_by IS NOT NULL
+                )
+                OR (
+                    l.category = 'M' AND (l.verified_by IS NULL OR l.requested_by_roles = 35)
+                )
+                OR l.category IS NULL
+                OR l.type_of_leave = 'H'
+                OR (l.category IS NOT NULL AND l.category != 'L')
+            )
+        ORDER BY l.start_date DESC;
+
     '''
 
     params = (branch_name,)
@@ -1643,8 +1719,10 @@ def add_many_leave(branch):
                 ''', (user_id, leave_id))
 
             conn.commit()
-
-        return redirect(url_for('view_leaves'))
+        if current_user.role_default == 35:
+            return redirect(url_for('leaves_by_branch_and_ccc_dashboard', branch_name=current_user.branch))
+        else:
+            return redirect(url_for('view_leaves'))
 
     return render_template(
         'leaves/leave_many.html',
@@ -1924,34 +2002,36 @@ def edit_leave_spm_approve(id):
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
-        status = request.form['status']
 
-        # Calculate service count (difference between start_date and end_date)
+        # Calculate service count
         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
         service_count = (end_date_obj - start_date_obj).days + 1
-        # Determine leave category, status, and set the appropriate fields
-        if 3 <= service_count <= 5:
-            category = "M"
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
             status = "Approved"
             approved_by = current_user.username  # Automatically set current user
-            # Automatically set current user as verified_by
-            verified_by = request.form.get('verified_by', None)
-        elif service_count >= 6:
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Verified"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
             category = "L"
             status = request.form['status']
             approved_by = request.form.get('approved_by', None)
-            # Automatically set current user as verified_by if service_count >= 6
-            verified_by = current_user.username
+            verified_by = request.form.get('verified_by', None)
 
         # Update the leave in the database
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?,  reason= ?, status= ?, category= ?, approved_by= ?, verified_by= ?
-                WHERE id= ?
-            ''', (leave_type, reason, status,  category,
-                  approved_by, verified_by, id))
+                SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ?
+                WHERE id = ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
 
         return redirect(url_for('view_leaves'))
 
@@ -2036,9 +2116,9 @@ def edit_leave_pm(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type= ?,  reason= ?, status= ?, category= ?, approved_by= ?, verified_by= ?
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
                 WHERE id= ?
-            ''', (leave_type, reason, status,  category, approved_by, verified_by, id))
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
 
         return redirect(url_for('view_leaves'))
 
@@ -3382,6 +3462,7 @@ def users():
 def get_all_users():
     with get_db_connection() as conn:
         return conn.execute("SELECT * FROM users").fetchall()
+# archive
 
 
 @app.route('/users/export', methods=['GET'])
