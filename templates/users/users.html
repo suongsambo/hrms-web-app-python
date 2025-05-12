@@ -4,11 +4,6 @@
 <div class="container mx-auto py-1 ">
   <div class="grid grid-cols-1 gap-2 p-1 ">
     <!-- <div class="flex justify-start">
-     
-      <h3 class="text-2xl font-bold mb-1 text-gray-800 hover:text-blue-500 transition-colors duration-300">
-        Users List
-      </h3>
-
     </div> -->
     <div class="flex justify-start  gap-2">
 
@@ -32,7 +27,7 @@
       <a href="{{ url_for('download_csv_template') }}"
         onclick="return confirm('Are you sure you want to download the CSV template?');"
         class="inline-flex items-center px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white font-semibold rounded-lg shadow-sm transition duration-200">
-        📄 Download CSV Template
+        📄 CSV Template
       </a>
 
 
@@ -78,76 +73,6 @@
 
     </div>
   </div>
-
-
-
-  <!-- <script>
-    function printTable() {
-      let table = document.querySelector("#user-table").cloneNode(true);
-      // Hide columns Active, Menu, Language, Status, Note, RequestRole, RoleDefault, Actions, DisplayName, LoginName, IsAdmin
-      let columnsToHide = [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23];
-      table.querySelectorAll("thead tr th").forEach((th, index) => {
-        if (columnsToHide.includes(index)) {
-          th.style.display = "none";
-        }
-      });
-
-      table.querySelectorAll("tbody tr").forEach((tr) => {
-        tr.querySelectorAll("td").forEach((td, index) => {
-          if (columnsToHide.includes(index)) {
-            td.style.display = "none";
-          }
-        });
-      });
-
-      // Add a header with company name and location
-      let date = new Date();
-      let header = document.createElement("div");
-      header.classList.add("text-center", "mb-4");
-      header.innerHTML = `
-            <h1 class="text-3xl font-bold">KPCC</h1>
-            <p>Port Phillip, Victoria, Australia</p>
-            <p>${date.toLocaleDateString()}</p>
-        `;
-
-      // Add a footer with note
-      let footer = document.createElement("p");
-      footer.classList.add("text-center", "mt-4");
-      footer.innerHTML = `
-            Note: Data export from system HRMS.
-        `;
-
-      // Open a new window and print
-      let newWin = window.open("", "", "width=800,height=600");
-      newWin.document.write(`
-            <html>
-                <head>
-                    <title>Print Users</title>
-                    <style>
-                        body { padding: 24px; font-family: Arial, sans-serif; }
-                        table { width: 100%; border-collapse: collapse; }
-                        th, td { border: 1px solid #ddd; padding: 8px; }
-                        th { background-color: #f4f4f4; text-align: left; }
-                        tr:nth-child(even) { background-color: #f9f9f9; }
-                    </style>
-                </head>
-                <body>
-                    ${header.outerHTML}
-                    ${table.outerHTML}
-                    ${footer.outerHTML}
-                    <script>window.onload = function() { window.print(); window.close(); }<\/script>
-                </body>
-            </html>
-        `);
-      newWin.document.close();
-    }
-
-
-  </script>
- -->
-
-
-
 
   <script>
     function printTable() {

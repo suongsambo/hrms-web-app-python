@@ -4,6 +4,7 @@
 from flask_login import current_user
 from datetime import datetime
 from flask import Flask, render_template, request, redirect, url_for
+from werkzeug.security import generate_password_hash
 from flask_login import login_required
 from flask import request, redirect, url_for, render_template, flash
 from io import TextIOWrapper
@@ -3008,16 +3009,252 @@ def send_telegram_message(message):
     return True
 
 
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         mobile1 = request.form['mobile1']
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         # Check if username or email already exists in the database
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute(
+#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
+#             existing_user = cursor.fetchone()
+
+#             if existing_user:
+#                 flash('Username or Email already exists. Try again.', 'danger')
+#                 return render_template('register.html')
+
+#         # Insert user data into the database
+#         with get_db_connection() as conn:
+#             try:
+#                 conn.execute('''
+#                     INSERT INTO users(UserName, Password, Email, Mobile1)
+#                     VALUES(?, ?, ?, ?)
+#                 ''', (username, hashed_password, email, mobile1))
+#                 conn.commit()
+
+#                 # Generate OTP and store it in session
+#                 session["otp"] = pyotp.TOTP(pyotp.random_base32()).now()
+
+#                 # Send OTP and mobile number to the user's Telegram account
+#                 otp_message = f"Verification Code: {session['otp']}\nYour mobile number: {mobile1}\nYour email: {email}"
+#                 if send_telegram_message(otp_message):
+#                     flash(
+#                         "Registration successful! Check your Telegram for OTP.", "info")
+#                 else:
+#                     flash(
+#                         "Failed to send OTP via Telegram. Please try again.", "danger")
+
+#                 # Redirect to OTP verification page
+#                 return redirect(url_for('verify_otp'))
+
+#             except sqlite3.IntegrityError:
+#                 flash("Username or Email already exists. Try again.", "danger")
+#                 return render_template('register.html')
+
+#     return render_template('register.html')
+
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         mobile1 = request.form['mobile1']
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute(
+#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
+#             existing_user = cursor.fetchone()
+
+#             if existing_user:
+#                 flash('Username or Email already exists. Try again.', 'danger')
+#                 return render_template('register.html')
+
+#         with get_db_connection() as conn:
+#             try:
+#                 conn.execute('''
+#                     INSERT INTO users(UserName, Password, Email, Mobile1)
+#                     VALUES(?, ?, ?, ?)
+#                 ''', (username, hashed_password, email, mobile1))
+#                 conn.commit()
+#                 flash("Registration successful!", "success")
+#                 # Redirect to login or wherever appropriate
+#                 return redirect(url_for('inactive_user'))
+#             except sqlite3.IntegrityError:
+#                 flash("Username or Email already exists. Try again.", "danger")
+#                 return render_template('register.html')
+
+#     return render_template('register.html')
+
+
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         mobile1 = request.form['mobile1']
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute(
+#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
+#             existing_user = cursor.fetchone()
+
+#             if existing_user:
+#                 flash('Username or Email already exists. Try again.', 'danger')
+#                 return render_template('register.html')
+
+#         with get_db_connection() as conn:
+#             try:
+#                 conn.execute('''
+#                     INSERT INTO users(UserName, Password, Email, Mobile1, Active)
+#                     VALUES(?, ?, ?, ?, ?)
+#                 ''', (username, hashed_password, email, mobile1, 0))  # Set Active to 0
+#                 conn.commit()
+#                 flash("Registration successful! Awaiting activation.", "success")
+#                 # Adjust this route as needed
+#                 return redirect(url_for('inactive_user'))
+#             except sqlite3.IntegrityError:
+#                 flash("Username or Email already exists. Try again.", "danger")
+#                 return render_template('register.html')
+
+#     return render_template('register.html')
+
+
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         mobile1 = request.form['mobile1']
+#         first_name_kh = request.form['first_name_kh']
+#         last_name_kh = request.form['last_name_kh']
+#         first_name_en = request.form['first_name_en']
+#         last_name_en = request.form['last_name_en']
+#         branch = request.form['branch']
+#         language = request.form.get('language', 'en')  # Default to 'en'
+#         role_default = request.form.get('role_default', 0)
+
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute(
+#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
+#             existing_user = cursor.fetchone()
+
+#             if existing_user:
+#                 flash('Username or Email already exists. Try again.', 'danger')
+#                 return render_template('register.html')
+
+#         with get_db_connection() as conn:
+#             try:
+#                 conn.execute('''
+#                     INSERT INTO users(
+#                         UserName, Password, Email, Mobile1, Active,
+#                         FirstNameKh, LastNameKh, FirstNameEn, LastNameEn,
+#                         Branch, Language, RoleDefault
+#                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#                 ''', (
+#                     username, hashed_password, email, mobile1, 0,
+#                     first_name_kh, last_name_kh, first_name_en, last_name_en,
+#                     branch, language, role_default
+#                 ))
+#                 conn.commit()
+#                 flash("Registration successful! Awaiting activation.", "success")
+#                 return redirect(url_for('inactive_user'))
+#             except sqlite3.IntegrityError:
+#                 flash("Username or Email already exists. Try again.", "danger")
+#                 return render_template('register.html')
+
+#     return render_template('register.html')
+
+
+# @app.route('/register', methods=['GET', 'POST'])
+# def register():
+#     if request.method == 'POST':
+#         username = request.form['username']
+#         password = request.form['password']
+#         email = request.form['email']
+#         mobile1 = request.form['mobile1']
+#         first_name_kh = request.form['first_name_kh']
+#         last_name_kh = request.form['last_name_kh']
+#         first_name_en = request.form['first_name_en']
+#         last_name_en = request.form['last_name_en']
+#         branch = request.form['branch']
+#         language = request.form.get('language', 'en')
+#         role_default = request.form.get('role_default', 0)
+
+#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute(
+#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
+#             existing_user = cursor.fetchone()
+
+#             if existing_user:
+#                 flash('Username or Email already exists. Try again.', 'danger')
+#                 branches = conn.execute(
+#                     'SELECT Branch FROM branches').fetchall()
+#                 return render_template('register.html', branches=branches)
+
+#         with get_db_connection() as conn:
+#             try:
+#                 conn.execute('''
+#                     INSERT INTO users(
+#                         UserName, Password, Email, Mobile1, Active,
+#                         FirstNameKh, LastNameKh, FirstNameEn, LastNameEn,
+#                         Branch, Language, RoleDefault
+#                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#                 ''', (
+#                     username, hashed_password, email, mobile1, 0,
+#                     first_name_kh, last_name_kh, first_name_en, last_name_en,
+#                     branch, language, role_default
+#                 ))
+#                 conn.commit()
+#                 flash("Registration successful! Awaiting activation.", "success")
+#                 return redirect(url_for('inactive_user'))
+#             except sqlite3.IntegrityError:
+#                 flash("Username or Email already exists. Try again.", "danger")
+#                 branches = conn.execute(
+#                     'SELECT Branch FROM branches').fetchall()
+#                 return render_template('register.html', branches=branches)
+
+#     # GET method: load branch list
+#     with get_db_connection() as conn:
+#         branches = conn.execute('SELECT Name FROM branches').fetchall()
+#     return render_template('register.html', branches=branches)
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = request.form['password']
+        # Default to 1111 if empty
+        password = request.form['password'] or '1111'
         email = request.form['email']
         mobile1 = request.form['mobile1']
+        first_name_kh = request.form['first_name_kh']
+        last_name_kh = request.form['last_name_kh']
+        first_name_en = request.form['first_name_en']
+        last_name_en = request.form['last_name_en']
+        branch = request.form['branch']
+        language = request.form.get('language', 'en')
+        role_default = request.form.get('role_default', 0)
+
         hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
-        # Check if username or email already exists in the database
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
@@ -3026,37 +3263,35 @@ def register():
 
             if existing_user:
                 flash('Username or Email already exists. Try again.', 'danger')
-                return render_template('register.html')
+                branches = conn.execute(
+                    'SELECT Branch FROM branches').fetchall()
+                return render_template('register.html', branches=branches)
 
-        # Insert user data into the database
         with get_db_connection() as conn:
             try:
                 conn.execute('''
-                    INSERT INTO users(UserName, Password, Email, Mobile1)
-                    VALUES(?, ?, ?, ?)
-                ''', (username, hashed_password, email, mobile1))
+                    INSERT INTO users(
+                        UserName, Password, Email, Mobile1, Active,
+                        FirstNameKh, LastNameKh, FirstNameEn, LastNameEn,
+                        Branch, Language, RoleDefault
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    username, hashed_password, email, mobile1, 0,
+                    first_name_kh, last_name_kh, first_name_en, last_name_en,
+                    branch, language, role_default
+                ))
                 conn.commit()
-
-                # Generate OTP and store it in session
-                session["otp"] = pyotp.TOTP(pyotp.random_base32()).now()
-
-                # Send OTP and mobile number to the user's Telegram account
-                otp_message = f"Verification Code: {session['otp']}\nYour mobile number: {mobile1}\nYour email: {email}"
-                if send_telegram_message(otp_message):
-                    flash(
-                        "Registration successful! Check your Telegram for OTP.", "info")
-                else:
-                    flash(
-                        "Failed to send OTP via Telegram. Please try again.", "danger")
-
-                # Redirect to OTP verification page
-                return redirect(url_for('verify_otp'))
-
+                flash("Registration successful! Awaiting activation.", "success")
+                return redirect(url_for('inactive_user'))
             except sqlite3.IntegrityError:
                 flash("Username or Email already exists. Try again.", "danger")
-                return render_template('register.html')
+                branches = conn.execute(
+                    'SELECT Branch FROM branches').fetchall()
+                return render_template('register.html', branches=branches)
 
-    return render_template('register.html')
+    with get_db_connection() as conn:
+        branches = conn.execute('SELECT Branch FROM branches').fetchall()
+    return render_template('register.html', branches=branches)
 
 
 @app.route("/verify", methods=["GET", "POST"])
@@ -3087,11 +3322,8 @@ def test_telegram():
 def unauthorized():
     return render_template('unauthorized.html'), 401
 
-
 # def allowed_file(filename):
 #     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
-
-# File upload route with Flash messages
 
 
 @app.route('/file', methods=['GET', 'POST'])
