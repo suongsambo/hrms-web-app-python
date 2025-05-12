@@ -76,14 +76,16 @@
 </div>
 
 <body class="flex flex-col h-[calc(100vh-300px)] over">
-  <div class="flex-1 flex h-[100vh]">
+  <div class="flex-2 flex h-[100vh]">
     <!-- Sidebar -->
 
     <!-- Main Content -->
-    <div class="flex-1 p-0 h-[calc(100vh-148px)] overflow-x-auto overflow-y-scroll">
+    <div class="flex-1 p-0 h-[calc(100vh-148px)] overflow-x-auto overflow-y-scroll ">
       <main>{% block content %}{% endblock %}</main>
     </div>
   </div>
+
+
 
   <script>
     // Get elements for notification button and dropdown
