@@ -1,34 +1,27 @@
-
-
-# from flask import Flask, request, render_template, redirect, url_for
-from flask_login import current_user
-from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for
-from werkzeug.security import generate_password_hash
-from flask_login import login_required
-from flask import request, redirect, url_for, render_template, flash
-from io import TextIOWrapper
+from flask import (
+    Flask, render_template, request, redirect, url_for, flash,
+    Response, session, send_from_directory, jsonify, send_file
+)
+from flask_login import (
+    login_required, LoginManager, login_user,
+    logout_user, current_user
+)
 import base64
-from flask import Flask, Response, render_template, flash, redirect, url_for, request, session, send_from_directory, jsonify, send_file
 import sqlite3
 import hashlib
 import os
-import io
 from io import StringIO, TextIOWrapper
 import csv
 import json
-import pyotp
 import requests
 import shutil
 import math
 import glob
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.utils import secure_filename
 from config import Config
 from flask_socketio import SocketIO, emit, join_room, leave_room, send
-import time  # Make sure this is the standard time module
+import time
 from datetime import datetime, timedelta, date
-from typing import Optional
 import eventlet
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
@@ -36,16 +29,26 @@ from typing import Union
 from flask_caching import Cache
 from db import init_db
 from flask_cors import CORS
-from flask_babel import Babel, _
+# from flask_babel import Babel, _
+from flask_babel import Babel
+# Blueprints
 from routes.branches import branches_bp
 from routes.zones import zones_bp
 from routes.users import users_bp
 from routes.bankstatements import bankstatements_bp
 from routes.positions import positions_bp
 from routes.departments import departments_bp
+# utils
+from utils.holidays import get_holidays
+
+# models
+from models.user import User
+from models.users.user_loader import load_user
+
 
 app = Flask(__name__)
-
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 app.register_blueprint(branches_bp)
 app.register_blueprint(zones_bp)
 app.register_blueprint(users_bp)
@@ -69,6 +72,11 @@ eventlet.monkey_patch()
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 LANGUAGES = ['en', 'km']
+
+
+# get holidays
+year = datetime.now().year
+holidays = get_holidays(year)
 
 
 def get_locale():
@@ -96,30 +104,6 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
 
-class User(UserMixin):
-    def __init__(self, id: int, username: str, password: str, email: str,
-                 branch: Optional[str] = None, employee_id: Optional[int] = None, is_admin: bool = False,
-                 role_default: Optional[int] = 0, image_data: Optional[bytes] = None,
-                 zone_id: Optional[int] = None):
-        self.id = id
-        self.username = username
-        self.password = password
-        self.email = email
-        self.branch = branch
-        self.employee_id = employee_id
-        self.is_admin = is_admin
-        self.role_default = role_default
-        self.image_data = image_data
-        self.zone_id = zone_id
-
-    def get_id(self):
-        """Override get_id method to work with Flask-Login."""
-        return str(self.id)
-
-    def __repr__(self):
-        return f"<User(id={self.id}, username={self.username}, email={self.email})>"
-
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
@@ -138,35 +122,14 @@ def clear_cache():
 
 
 @login_manager.user_loader
-def load_user(user_id):
-    with get_db_connection() as conn:
-        user_data = conn.execute(
-            'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
-        if user_data:
-            # Fetch the employee ID associated with the user
-            employee = conn.execute(
-                'SELECT id FROM employees WHERE user_id = ?', (user_id,)).fetchone()
-            employee_id = employee['id'] if employee else None
-
-            return User(
-                id=user_data['ID'],
-                username=user_data['UserName'],
-                password=user_data['Password'],
-                email=user_data['Email'],
-                branch=user_data['Branch'],
-                is_admin=user_data['IsAdmin'],
-                role_default=user_data['RoleDefault'],
-                image_data=user_data['Image'],
-                employee_id=employee_id,
-                zone_id=user_data['ZoneID']
-            )
-        return None
+def load_user_loader(user_id):
+    return load_user(user_id)
 
 
 @socketio.on("message")
 def handle_message(msg):
     print(f"Message: {msg}")
-    send(msg, broadcast=True)  # Broadcast message to all clients
+    send(msg, broadcast=True)
 
 
 def get_db_connection():
@@ -186,57 +149,6 @@ def clear_pycache(directory='.'):
 
 
 clear_pycache()
-
-
-def get_holidays(year: int):
-    holidays = [
-        {"label": datetime(year, 1, 1).strftime('%Y-%m-%d'),
-         "value": "ទិវាចូលឆ្នាំសាកល"},
-        {"label": datetime(year, 2, 7).strftime('%Y-%m-%d'),
-         "value": "ទិវាជ័យជម្នះលើរបបប្រល័យពូជសាសន៍"},
-        {"label": datetime(year, 3, 8).strftime('%Y-%m-%d'),
-         "value": "ទិវាអន្តរជាតិនារី"},
-        {"label": datetime(year, 5, 1).strftime('%Y-%m-%d'),
-         "value": "ទិវាពលកម្មអន្តរជាតិ"},
-        {"label": datetime(year, 4, 14).strftime('%Y-%m-%d'),
-         "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
-        {"label": datetime(year, 4, 15).strftime('%Y-%m-%d'),
-         "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
-        {"label": datetime(year, 4, 16).strftime('%Y-%m-%d'),
-         "value": "ពិធីបុណ្យចូលឆ្នាំថ្មីប្រពៃណីជាតិ"},
-        {"label": datetime(year, 5, 1).strftime('%Y-%m-%d'),
-         "value": "ទិវាពលកម្មអន្តរជាតិ"},
-        {"label": datetime(year, 5, 14).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី"},
-        {"label": datetime(year, 5, 15).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីច្រត់ព្រះនង្គ័ល"},
-        {"label": datetime(year, 6, 18).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យចម្រើនព្រះជន្ម សម្តេចព្រះមហាក្សត្រី ព្រះវររាជមាតា នរោត្តម មុនិនាថ​ សីហនុ"},
-        {"label": datetime(year, 9, 24).strftime('%Y-%m-%d'),
-         "value": "ទិវាប្រកាសរដ្ឋធម្មនុញ្ញ"},
-        {"label": datetime(year, 9, 21).strftime('%Y-%m-%d'),
-         "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
-        {"label": datetime(year, 9, 22).strftime('%Y-%m-%d'),
-         "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
-        {"label": datetime(year, 9, 23).strftime('%Y-%m-%d'),
-         "value": "ពិធីបុណ្យភ្ផុំបិណ្ឌ"},
-        {"label": datetime(year, 10, 15).strftime(
-            '%Y-%m-%d'), "value": "ទិវាប្រារព្ឋពិធីគោរពព្រះវិញ្ញាណក្ខន្ឋ ព្រះករុណា ព្រះបាទសម្តេចព្រះ នរោត្តម សីហនុ ព្រះមហាវីរក្សត្រ ព្រះវររាជបិតាឯករាជ្យ បូរណភាពទឹកដី និងឯកភាពជាតិខ្មែរ  'ព្រះបរមរតនកោដ្ឋ'"},
-        {"label": datetime(year, 10, 29).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីគ្រងព្រះបរមរាជសម្បត្តិ របស់ ព្រះករុណា ព្រះបាទសម្តេចព្រះបរមនាថ នរោត្តម សីហមុនី ព្រះមហាក្សត្រនៃព្រះរាជាណាចក្រកម្ពុជា"},
-        {"label": datetime(year, 11, 9).strftime('%Y-%m-%d'),
-         "value": "ពិធីបុណ្យឯករាជ្យជាតិ"},
-        {"label": datetime(year, 11, 4).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
-        {"label": datetime(year, 11, 5).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
-        {"label": datetime(year, 11, 6).strftime(
-            '%Y-%m-%d'), "value": "ព្រះរាជពិធីបុណ្យអុំទូក បណ្តែតប្រទីប និងសំពះព្រះខែអកអំបុក"},
-        {"label": datetime(year, 12, 29).strftime(
-            '%Y-%m-%d'), "value": "ទិវាសន្តិភាពនៅកម្ពុជា"},
-
-    ]
-    return holidays
 
 
 def get_holiday_labels(year: int):
@@ -287,7 +199,6 @@ def show_holidays():
     holidays = get_holidays(datetime.now().year)
     holiday_labels = get_holiday_labels(datetime.now().year)
     return render_template('holidays/holidays.html', holidays=holidays, holiday_labels=holiday_labels)
-
 
 # TODO: Backup database to a file Automatically
 
@@ -3059,184 +2970,6 @@ def send_telegram_message(message):
 
 #     return render_template('register.html')
 
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         email = request.form['email']
-#         mobile1 = request.form['mobile1']
-#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             cursor.execute(
-#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
-#             existing_user = cursor.fetchone()
-
-#             if existing_user:
-#                 flash('Username or Email already exists. Try again.', 'danger')
-#                 return render_template('register.html')
-
-#         with get_db_connection() as conn:
-#             try:
-#                 conn.execute('''
-#                     INSERT INTO users(UserName, Password, Email, Mobile1)
-#                     VALUES(?, ?, ?, ?)
-#                 ''', (username, hashed_password, email, mobile1))
-#                 conn.commit()
-#                 flash("Registration successful!", "success")
-#                 # Redirect to login or wherever appropriate
-#                 return redirect(url_for('inactive_user'))
-#             except sqlite3.IntegrityError:
-#                 flash("Username or Email already exists. Try again.", "danger")
-#                 return render_template('register.html')
-
-#     return render_template('register.html')
-
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         email = request.form['email']
-#         mobile1 = request.form['mobile1']
-#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             cursor.execute(
-#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
-#             existing_user = cursor.fetchone()
-
-#             if existing_user:
-#                 flash('Username or Email already exists. Try again.', 'danger')
-#                 return render_template('register.html')
-
-#         with get_db_connection() as conn:
-#             try:
-#                 conn.execute('''
-#                     INSERT INTO users(UserName, Password, Email, Mobile1, Active)
-#                     VALUES(?, ?, ?, ?, ?)
-#                 ''', (username, hashed_password, email, mobile1, 0))  # Set Active to 0
-#                 conn.commit()
-#                 flash("Registration successful! Awaiting activation.", "success")
-#                 # Adjust this route as needed
-#                 return redirect(url_for('inactive_user'))
-#             except sqlite3.IntegrityError:
-#                 flash("Username or Email already exists. Try again.", "danger")
-#                 return render_template('register.html')
-
-#     return render_template('register.html')
-
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         email = request.form['email']
-#         mobile1 = request.form['mobile1']
-#         first_name_kh = request.form['first_name_kh']
-#         last_name_kh = request.form['last_name_kh']
-#         first_name_en = request.form['first_name_en']
-#         last_name_en = request.form['last_name_en']
-#         branch = request.form['branch']
-#         language = request.form.get('language', 'en')  # Default to 'en'
-#         role_default = request.form.get('role_default', 0)
-
-#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             cursor.execute(
-#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
-#             existing_user = cursor.fetchone()
-
-#             if existing_user:
-#                 flash('Username or Email already exists. Try again.', 'danger')
-#                 return render_template('register.html')
-
-#         with get_db_connection() as conn:
-#             try:
-#                 conn.execute('''
-#                     INSERT INTO users(
-#                         UserName, Password, Email, Mobile1, Active,
-#                         FirstNameKh, LastNameKh, FirstNameEn, LastNameEn,
-#                         Branch, Language, RoleDefault
-#                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#                 ''', (
-#                     username, hashed_password, email, mobile1, 0,
-#                     first_name_kh, last_name_kh, first_name_en, last_name_en,
-#                     branch, language, role_default
-#                 ))
-#                 conn.commit()
-#                 flash("Registration successful! Awaiting activation.", "success")
-#                 return redirect(url_for('inactive_user'))
-#             except sqlite3.IntegrityError:
-#                 flash("Username or Email already exists. Try again.", "danger")
-#                 return render_template('register.html')
-
-#     return render_template('register.html')
-
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         username = request.form['username']
-#         password = request.form['password']
-#         email = request.form['email']
-#         mobile1 = request.form['mobile1']
-#         first_name_kh = request.form['first_name_kh']
-#         last_name_kh = request.form['last_name_kh']
-#         first_name_en = request.form['first_name_en']
-#         last_name_en = request.form['last_name_en']
-#         branch = request.form['branch']
-#         language = request.form.get('language', 'en')
-#         role_default = request.form.get('role_default', 0)
-
-#         hashed_password = hashlib.sha256(password.encode()).hexdigest()
-
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             cursor.execute(
-#                 'SELECT * FROM users WHERE UserName = ? OR Email = ?', (username, email))
-#             existing_user = cursor.fetchone()
-
-#             if existing_user:
-#                 flash('Username or Email already exists. Try again.', 'danger')
-#                 branches = conn.execute(
-#                     'SELECT Branch FROM branches').fetchall()
-#                 return render_template('register.html', branches=branches)
-
-#         with get_db_connection() as conn:
-#             try:
-#                 conn.execute('''
-#                     INSERT INTO users(
-#                         UserName, Password, Email, Mobile1, Active,
-#                         FirstNameKh, LastNameKh, FirstNameEn, LastNameEn,
-#                         Branch, Language, RoleDefault
-#                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#                 ''', (
-#                     username, hashed_password, email, mobile1, 0,
-#                     first_name_kh, last_name_kh, first_name_en, last_name_en,
-#                     branch, language, role_default
-#                 ))
-#                 conn.commit()
-#                 flash("Registration successful! Awaiting activation.", "success")
-#                 return redirect(url_for('inactive_user'))
-#             except sqlite3.IntegrityError:
-#                 flash("Username or Email already exists. Try again.", "danger")
-#                 branches = conn.execute(
-#                     'SELECT Branch FROM branches').fetchall()
-#                 return render_template('register.html', branches=branches)
-
-#     # GET method: load branch list
-#     with get_db_connection() as conn:
-#         branches = conn.execute('SELECT Name FROM branches').fetchall()
-#     return render_template('register.html', branches=branches)
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -3737,42 +3470,6 @@ def export_users_csv():
     response = Response(output, mimetype='text/csv')
     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
     return response
-
-
-# @app.route('/users/export', methods=['GET'])
-# @login_required
-# def export_users_csv():
-#     filter_value = request.args.get('active', 'all')
-
-#     # Filter users using the same logic
-#     if filter_value == '1':
-#         users = get_active_users()
-#     elif filter_value == '0':
-#         users = get_inactive_users()
-#     else:
-#         users = get_all_users()
-
-#     # Use StringIO to write CSV in memory
-#     si = StringIO()
-#     writer = csv.writer(si)
-
-#     # Write headers
-#     if users:
-#         writer.writerow(users[0].keys())  # Column headers based on row keys
-#     else:
-#         writer.writerow(["No data found"])
-
-#     # Write data rows
-#     for user in users:
-#         writer.writerow(user)
-
-#     # Prepare response
-#     output = si.getvalue()
-#     response = Response(output, mimetype='text/csv')
-#     now = datetime.now()
-#     filename = f"users_export_{now.strftime('%m-%d-%Y_%H-%M-%S')}.csv"
-#     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-#     return response
 
 
 @app.route('/users/import', methods=['GET', 'POST'])

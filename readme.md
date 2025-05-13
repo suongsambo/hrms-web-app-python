@@ -68,3 +68,12 @@ pybabel compile -d translations
 pybabel extract -F babel.cfg -o messages.pot .
 pybabel init -i messages.pot -d translations -l en
 pybabel init -i messages.pot -d translations -l km
+
+# View installed packages
+
+pipdeptree
+
+# Check for vulnerabilities
+
+pip install pip-audit
+pip-audit
