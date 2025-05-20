@@ -19,6 +19,8 @@ migrations/
 *.pot
 *.pyc
 .idea
+.pytest_cache
+.vscode
 LearnDjango/__pycache__/
 /LearnDjango/settings.py
 LearnDjango/__pycache__/settings.cpython-36.pyc

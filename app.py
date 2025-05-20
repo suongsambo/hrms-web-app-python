@@ -45,7 +45,6 @@ from utils.holidays import get_holidays
 from models.user import User
 from models.users.user_loader import load_user
 
-
 app = Flask(__name__)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
@@ -72,7 +71,6 @@ eventlet.monkey_patch()
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 LANGUAGES = ['en', 'km']
-
 
 # get holidays
 year = datetime.now().year
@@ -137,8 +135,9 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
-
 # Remove temp file
+
+
 def clear_pycache(directory='.'):
     for root, dirs, files in os.walk(directory):
         for dir_name in dirs:

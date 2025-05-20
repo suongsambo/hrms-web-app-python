@@ -77,3 +77,11 @@ pipdeptree
 
 pip install pip-audit
 pip-audit
+
+# Install tests
+
+pip install pytest
+
+# Run tests
+
+pytest test_utils.py
