@@ -3,84 +3,167 @@ content %}
 
 <body class="bg-gray-50 font-sans text-gray-900">
   <!-- Container -->
-  <div class="max-w-4xl mx-auto p-8">
-    <!-- Header -->
-    <h1 class="text-3xl font-semibold text-center text-indigo-600 mb-8">
-      User Profile
-    </h1>
+  <div class="max-w-7xl mx-auto p-2">
 
-    <!-- User Details -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-      <h2 class="text-2xl font-bold text-indigo-600 mb-4">User Information</h2>
-      <div class="space-y-4">
-        <p class="flex items-center">
-          <i class="fas fa-user mr-2 text-indigo-500"></i>
-          <strong class="text-indigo-500">Username:</strong> {{ user.username }}
-        </p>
-        <p class="flex items-center">
-          <i class="fas fa-envelope mr-2 text-indigo-500"></i>
-          <strong class="text-indigo-500">Email:</strong> {{ user.email }}
-        </p>
-        <p class="flex items-center">
-          <i class="fas fa-mobile-alt mr-2 text-indigo-500"></i>
-          <strong class="text-indigo-500">Mobile:</strong> {{ user.mobile1 }}
-        </p>
-        <p class="flex items-center">
-          <i class="fas fa-user-circle mr-2 text-indigo-500"></i>
-          <strong class="text-indigo-500">Full Name:</strong>
-          {{ user['FirstNameEn'] }} {{ user['LastNameEn'] }}
-        </p>
-        <p class="flex items-center">
-          <i class="fas fa-user-circle mr-2 text-indigo-500"></i>
-          <strong class="text-indigo-500">Full Name (Khmer):</strong>
-          {{ user['FirstNameKh'] }} {{ user['LastNameKh'] }}
-        </p>
-        <p class="flex items-center">
-          <i class="fas fa-building mr-2 text-indigo-500"></i>
-          <strong class="text-indigo-500">Branch:</strong> {{ user.branch }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Profile Image -->
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <h2 class="text-2xl font-bold text-indigo-600 mb-4">Profile Image</h2>
+    <div class="bg-gradient-to-r from-indigo-100 via-indigo-200 to-indigo-300 p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold text-indigo-700 mb-4">Profile Image</h2>
       <div class="flex justify-center">
         {% if user.image %}
         <img src="{{ url_for('get_user_image', user_id=user.id) }}" alt="User Profile Image"
-          class="w-48 h-48 rounded-full object-cover shadow-md" />
-
+          class="w-48 h-48 rounded-full object-cover shadow-lg border-4 border-indigo-600 transition-transform duration-300 transform hover:scale-110" />
         {% else %}
         <p class="text-center text-gray-500">No image found for this user.</p>
         {% endif %}
       </div>
     </div>
-    </br>
+    <!-- <br> -->
 
+    <div class="bg-white p-6 rounded-lg shadow-md border border-gray-100 mb-2">
+      <div class="flex items-center justify-between border-b pb-2 mb-4">
+        <h2 class="text-2xl font-semibold text-indigo-600">
+          User Information
+        </h2>
+        <button onclick="toggleDetails('user-info-details')"
+          class="text-sm text-indigo-600 hover:text-indigo-800 font-medium flex items-center space-x-1 transition">
+          <svg id="arrow-user-info-details" xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5 transform transition-transform duration-300" fill="none" viewBox="0 0 24 24"
+            stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+          <span>Toggle Details</span>
+        </button>
+      </div>
 
-
-    <div class="bg-white p-6 rounded-lg shadow-md min-h-[300px]">
-      <h2 class="text-2xl font-bold text-indigo-600 mb-4">Signature Image</h2>
-      <div class="flex justify-center">
-        {% if user.image %}
-        <div class="relative w-full max-w-md">
-          <!-- Image with modern styling -->
+      <div id="user-info-details"
+        class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700 transition-all duration-300 ease-in-out">
+        <p><i class="fas fa-user text-indigo-500 mr-2"></i><strong>Username:</strong> {{ user.username }}</p>
+        <p><i class="fas fa-envelope text-indigo-500 mr-2"></i><strong>Email:</strong> {{ user.email }}</p>
+        <p><i class="fas fa-mobile-alt text-indigo-500 mr-2"></i><strong>Mobile:</strong> {{ user.mobile1 }}</p>
+        <p><i class="fas fa-user-circle text-indigo-500 mr-2"></i><strong>Full Name:</strong> {{ user['FirstNameEn'] }}
+          {{ user['LastNameEn'] }}</p>
+        <p><i class="fas fa-user-circle text-indigo-500 mr-2"></i><strong>Full Name (Khmer):</strong> {{
+          user['FirstNameKh'] }} {{ user['LastNameKh'] }}</p>
+        <p><i class="fas fa-info-circle text-indigo-500 mr-2"></i><strong>RoleDefault:</strong> {{ user['RoleDefault']
+          }}</p>
+        <p><i class="fas fa-info-circle text-indigo-500 mr-2"></i><strong>AcceptedTerms:</strong> {{
+          user['AcceptedTerms'] }}</p>
+        <p><i class="fas fa-signature text-indigo-500 mr-2"></i><span class="text-lg font-semibold">Signature:</span>
+        </p>
+        <p>
+          {% if user.image %}
+        <div class="relative w-48 max-w-md">
+          <!-- Signature Image with Modern Styling -->
           <img src="{{ url_for('get_user_signature', user_id=user.id) }}" alt="User Signature"
-            class="w-full h-auto object-cover rounded-lg shadow-xl transition-transform duration-300 transform hover:scale-105" />
+            class="w-full h-auto object-cover rounded-lg shadow-xl transition-transform duration-300 transform hover:scale-105 border-4 border-purple-600" />
         </div>
         {% else %}
         <p class="text-center text-gray-500">No signature found for this user.</p>
         {% endif %}
+        </p>
       </div>
     </div>
-    </br>
 
+    <!-- Employee Information -->
 
+    {% if employees %}
+    <div class="grid grid-cols-1 gap-6">
 
+      {% for emp in employees %}
+      <div class="bg-white rounded-lg shadow p-6 ring-1 ring-gray-200">
+        <h2 class="text-2xl font-semibold text-indigo-600">
+          Employee Information
+        </h2>
+        <hr class="my-4">
+        <!-- Header with Name & Status -->
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-xl font-semibold text-gray-800">{{ emp['name'] }}</h3>
+          <div class="flex gap-2 items-center">
+            <span
+              class="text-sm px-3 py-1 rounded-full {{ 'bg-green-100 text-green-800' if emp['status'] == 'Active' else 'bg-red-100 text-red-800' }}">
+              {{ emp['status'] }}
+            </span>
+            <button onclick="toggleDetails('details-{{ emp['id'] }}')"
+              class="text-sm text-blue-600 hover:underline focus:outline-none">
+              Toggle Details
+            </button>
+          </div>
+        </div>
 
+        <!-- Basic Info -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+          <div><strong>ID:</strong> {{ emp['id'] }}</div>
+          <div><strong>Department:</strong> {{ emp['department'] }}</div>
+          <div><strong>Salary:</strong> <span class="text-green-600 font-semibold">${{ emp['salary'] }}</span></div>
+          <div><strong>Position:</strong> {{ emp['position'] }}</div>
+          <div><strong>Joining Date:</strong> {{ emp['joining_date'] }}</div>
+          <div><strong>Branch:</strong> {{ emp['branch'] }}</div>
+        </div>
 
+        <!-- Hidden Expanded Info -->
+        <div id="details-{{ emp['id'] }}" class="mt-4 hidden transition-all duration-300 ease-in-out">
+          <hr class="my-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
+            <div><strong>User ID:</strong> {{ emp['user_id'] }}</div>
+            <div><strong>Phone:</strong> {{ emp['phone_number'] }}</div>
+            <div><strong>Email:</strong> {{ emp['email'] }}</div>
+            <div><strong>Address:</strong> {{ emp['address'] }}</div>
+            <div><strong>Emergency Contact:</strong> {{ emp['emergency_contact_name'] }}</div>
+            <div><strong>Emergency Phone:</strong> {{ emp['emergency_contact_phone'] }}</div>
+            <div><strong>Height:</strong> {{ emp['employees_height'] }}</div>
+            <div><strong>Ethnicity:</strong> {{ emp['ethnicity'] }}</div>
+            <div><strong>Nationality:</strong> {{ emp['nationality'] }}</div>
+            <div><strong>Religion:</strong> {{ emp['religion'] }}</div>
+            <div><strong>Family Status:</strong> {{ emp['family_status'] }}</div>
+            <div><strong>Place of Birth:</strong> {{ emp['place_of_birth'] }}</div>
+            <div><strong>Permanent Address:</strong> {{ emp['permanent_address'] }}</div>
+            <div><strong>Village:</strong> {{ emp['village'] }}</div>
+            <div><strong>Commune:</strong> {{ emp['commune'] }}</div>
+            <div><strong>District:</strong> {{ emp['district'] }}</div>
+            <div><strong>Province:</strong> {{ emp['province'] }}</div>
+            <div><strong>Home Number:</strong> {{ emp['home_number'] }}</div>
+            <div><strong>Street Number:</strong> {{ emp['street_number'] }}</div>
+            <div><strong>Group Name:</strong> {{ emp['group_name'] }}</div>
+            <div><strong>Personal Phone:</strong> {{ emp['personal_phone_number'] }}</div>
+            <div><strong>Level of Culture:</strong> {{ emp['level_of_culture'] }}</div>
+            <div><strong>Skill:</strong> {{ emp['skill'] }}</div>
+            <div><strong>Educational Institution:</strong> {{ emp['name_of_educational_institution'] }}</div>
+            <div><strong>Languages:</strong> {{ emp['knowledge_of_foreign_languages'] }}</div>
+            <div><strong>Current Function:</strong> {{ emp['current_function'] }}</div>
+            <div><strong>ID Card Number:</strong> {{ emp['id_card_number'] }}</div>
+            <div><strong>Work At:</strong> {{ emp['work_at'] }}</div>
+            <div><strong>Employment ID:</strong> {{ emp['employment_id'] }}</div>
+            <div><strong>Employment Date:</strong> {{ emp['employment_date'] }}</div>
+            <div><strong>Khmer Nationality ID:</strong> {{ emp['khmer_nationality_identity_card'] }}</div>
+            <div><strong>Passing Test Date:</strong> {{ emp['passing_test_date'] }}</div>
+            <div><strong>Residence Book/Family Book:</strong> {{ emp['residence_book_or_family_book'] }}</div>
+            <div><strong>Made On:</strong> {{ emp['made_on'] }}</div>
+            <div><strong>Number of Children:</strong> {{ emp['have_a_number_of_children'] }}</div>
+            <div><strong>Father's Name:</strong> {{ emp['father_name'] }}</div>
+            <div><strong>Mother's Name:</strong> {{ emp['mother_name'] }}</div>
+            <div><strong>Father's Status:</strong> {{ emp['father_status'] }}</div>
+            <div><strong>Father's Occupation:</strong> {{ emp['father_occupation'] }}</div>
+            <div><strong>Mother's Occupation:</strong> {{ emp['mother_occupation'] }}</div>
+            <div><strong>Mother's Status:</strong> {{ emp['mother_status'] }}</div>
+            <div><strong>Father's Address:</strong> {{ emp['father_permanent_address'] }}</div>
+            <div><strong>Mother's Address:</strong> {{ emp['mother_permanent_address'] }}</div>
+            <div><strong>Parents' Village:</strong> {{ emp['parents_village'] }}</div>
+            <div><strong>Parents' Commune:</strong> {{ emp['parents_commune'] }}</div>
+            <div><strong>Parents' District:</strong> {{ emp['parents_district'] }}</div>
+            <div><strong>Parents' Province:</strong> {{ emp['parents_province'] }}</div>
+            <div><strong>Parents' Home Number:</strong> {{ emp['parents_home_number'] }}</div>
+            <div><strong>Parents' Street Number:</strong> {{ emp['parents_street_number'] }}</div>
+            <div><strong>Parents' Group:</strong> {{ emp['parents_group'] }}</div>
+            <div><strong>Parents' Phone:</strong> {{ emp['parents_phone'] }}</div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="text-gray-500 mt-4">No employees found.</p>
+    {% endif %}
 
-
+    <br>
 
     <div class="profile-info">
 
@@ -104,6 +187,15 @@ content %}
         <button>Change Profile Image</button>
       </a>
     </div>
+
   </div>
+  <script>
+    function toggleDetails(id) {
+      const el = document.getElementById(id);
+      const arrow = document.getElementById(`arrow-${id.split('-')[1]}`);
+      el.classList.toggle('hidden');
+      arrow.classList.toggle('rotate-180');
+    }
+  </script>
 </body>
 {% endblock %}
