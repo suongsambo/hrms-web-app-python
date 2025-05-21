@@ -3518,7 +3518,25 @@ def users():
 
 def get_all_users():
     with get_db_connection() as conn:
-        return conn.execute("SELECT * FROM users").fetchall()
+        return conn.execute("""
+            SELECT
+                ID,
+                UserName,
+                Email,
+                FirstNameKh,
+                LastNameKh,
+                FirstNameEn,
+                LastNameEn,
+                Branch,
+                IsAdmin,
+                Active,
+                RequestRole,
+                RoleDefault,
+                AcceptedTerms,
+                ZoneID
+            FROM users
+        """).fetchall()
+
 # archive
 
 
