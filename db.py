@@ -384,16 +384,6 @@ def init_db():
             )
         ''')
 
-        # # Check if zone 'All' exists
-        # zone_exists = conn.execute(
-        #     "SELECT 1 FROM zones WHERE name = 'All'").fetchone()
-
-        # if not zone_exists:
-        #     conn.execute('''
-        #         INSERT INTO zones (name)
-        #         VALUES ('All')
-        #     ''')
-
         # Check if the user 'bo' exists
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'bo'").fetchone()
@@ -406,139 +396,6 @@ def init_db():
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, Branch)
                 VALUES (?, ?, ?, ?, ?, ?)
             ''', ('bo', hashed_password, 'bo@example.com', '1234567890', 1, 'SYS'))
-
-        # Create John Doe user
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'doe'").fetchone()
-        # if not user_exists:
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('doe', hashed_password, 'john_doe@example.com', '010655037', 0, 20, 'SYS'))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'son'").fetchone()
-
-        # # Create John Doe user
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'hqs'").fetchone()
-        # if not user_exists:
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('hqs', hashed_password, 'hqs@example.com', '010655037', 0, 20, 'HQ'))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'son'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('son', hashed_password, 'son@example.com', '010655037', 0, 20, 'SYS'))
-
-        # # Create John Doe user
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'pm'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('pm', hashed_password, 'pm@example.com', '010655037', 0, 140, 'SYS'))
-
-        # TODO: SPM
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'SPM.KPCA'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SPM.KPCA', hashed_password, 'SPM.KPCA@example.com', '010655037', 0, 145, 'SYS', 1))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'SPM.KKD'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SPM.KKD', hashed_password, 'SPM.KKD@example.com', '010655037', 0, 145, 'KKD', 2))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'SPM.SAT'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SPM.SAT', hashed_password, 'SPM.SAT@example.com', '010655037', 0, 145, 'SAT', 3))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'SPM.SAN'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SPM.SAN', hashed_password, 'SPM.SAN@example.com', '010655037', 0, 145, 'SAN', 4))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'SPM.SNV'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SPM.SNV', hashed_password, 'SPM.SNV@example.com', '010655037', 0, 145, 'SNV', 5))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'SPM.KPT'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SPM.KPT', hashed_password, 'SPM.KPT@example.com', '010655037', 0, 145, 'KPT', 6))
-
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'SPM.BTB'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch, ZoneID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SPM.BTB', hashed_password, 'SPM.BTB@example.com', '010655037', 0, 145, 'KPT', 7))
 
         users = [
             ('SPM.KPCA', 'SPM.KPCA@example.com', 'SYS', 1),
@@ -577,7 +434,7 @@ def init_db():
 
         # Create gm user
         user_exists = conn.execute(
-            "SELECT 1 FROM users WHERE UserName = 'gm'").fetchone()
+            "SELECT 1 FROM users WHERE UserName = 'General.Manager'").fetchone()
 
         if not user_exists:
 
@@ -586,20 +443,7 @@ def init_db():
             conn.execute('''
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', ('gm', hashed_password, 'gm@example.com', '010655037', 0, 180, 'SYS'))
-
-        # Create CCA user
-        # user_exists = conn.execute(
-        #     "SELECT 1 FROM users WHERE UserName = 'ccc'").fetchone()
-
-        # if not user_exists:
-
-        #     hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
-
-        #     conn.execute('''
-        #         INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('ccc', hashed_password, 'ccc@example.com', '010655037', 0, 35, 'SYS'))
+            ''', ('General.Manager', hashed_password, 'generalmanager@example.com', '010655037', 0, 180, 'SYS'))
 
             cursor = conn.cursor()
 
@@ -918,102 +762,6 @@ def init_db():
                     140,  # Adjust RoleDefault as needed
                     user['branch']
                 ))
-
-        # employee_exists = conn.execute(
-        #     "SELECT 1 FROM employees WHERE email = 'john@example.com'").fetchone()
-
-        # if not employee_exists:
-        #     conn.execute('''
-        #         INSERT INTO employees (
-        #             name, age, department, salary, position_id, branch, user_id, phone_number, email,
-        #             joining_date, status
-        #         )
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', (
-        #         'John Doe',
-        #         30,
-        #         'HR',
-        #         1000,
-        #         1,
-        #         'SYS',
-        #         2,
-        #         '010655037',
-        #         'john@example.com',
-        #         '2025-02-28',
-        #         'Active'
-        #     ))
-
-        # employee_exists = conn.execute(
-        #     "SELECT 1 FROM employees WHERE email = 'john@example.com'").fetchone()
-
-        # if not employee_exists:
-        #     conn.execute('''
-        #         INSERT INTO employees (
-        #             name, age, department, salary, position_id, branch, user_id, phone_number, email,
-        #             joining_date, status
-        #         )
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', (
-        #         'John Doe',
-        #         30,
-        #         'HR',
-        #         1000,
-        #         1,
-        #         'SYS',
-        #         2,
-        #         '010655037',
-        #         'john@example.com',
-        #         '2025-02-28',
-        #         'Active'
-        #     ))
-
-        # employee_exists = conn.execute(
-        #     "SELECT 1 FROM employees WHERE email = 'kimminson@example.com'").fetchone()
-
-        # if not employee_exists:
-        #     conn.execute('''
-        #         INSERT INTO employees (
-        #             name, age, department, salary, position_id, branch, user_id, phone_number, email,
-        #             joining_date, status
-        #         )
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', (
-        #         'Kimmin Son',
-        #         30,
-        #         'HR',
-        #         1000,
-        #         1,
-        #         'SYS',
-        #         4,
-        #         '010655037',
-        #         'kimminson@example.com',
-        #         '2025-02-28',
-        #         'Active'
-        #     ))
-
-        # employee_exists = conn.execute(
-        #     "SELECT 1 FROM employees WHERE email = 'hqs@example.com'").fetchone()
-
-        # if not employee_exists:
-        #     conn.execute('''
-        #         INSERT INTO employees (
-        #             name, age, department, salary, position_id, branch, user_id, phone_number, email,
-        #             joining_date, status
-        #         )
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', (
-        #         'HQ Staff',
-        #         30,
-        #         'HR',
-        #         1000,
-        #         1,
-        #         'HQ',
-        #         3,
-        #         '010655037',
-        #         'hqs@example.com',
-        #         '2025-02-28',
-        #         'Active'
-        #     ))
 
     conn.commit()
     conn.close()

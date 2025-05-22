@@ -55,7 +55,6 @@ app.register_blueprint(users_bp)
 app.register_blueprint(bankstatements_bp)
 app.register_blueprint(positions_bp)
 app.register_blueprint(departments_bp)
-
 app.config.from_object(Config)
 CORS(app)
 CORS(app, resources={
@@ -64,7 +63,6 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'en'
 app.config['LANGUAGES'] = ['en', 'km']
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 babel = Babel(app)
-
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -101,7 +99,6 @@ def allowed_file(filename: str) -> bool:
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
-
 
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -1406,6 +1403,7 @@ def add_leave_hours(branch):
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
+        branch = request.form['branch']
         requested_by = request.form['requested_by']
         user_ids = request.form.getlist('user_ids')
 
@@ -3512,8 +3510,6 @@ def users():
         users = get_all_users()
 
     return render_template('users/users.html', users=users, active_filter=filter_value)
-
-# Helper function to get all users
 
 
 def get_all_users():
