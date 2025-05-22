@@ -11,7 +11,7 @@ import sqlite3
 import hashlib
 import os
 import io
-from io import StringIO, TextIOWrapper
+from io import StringIO, BytesIO, TextIOWrapper
 import csv
 import json
 import requests
@@ -3526,6 +3526,11 @@ def get_all_users():
                 Branch,
                 IsAdmin,
                 Active,
+                Menu,
+                Language,
+                Mobile1,
+                Status,
+                Note,
                 RequestRole,
                 RoleDefault,
                 AcceptedTerms,
@@ -3534,6 +3539,48 @@ def get_all_users():
         """).fetchall()
 
 # archive
+
+
+# @app.route('/users/export', methods=['GET'])
+# @login_required
+# def export_users_csv():
+#     filter_value = request.args.get('active', 'all')
+
+#     # Retrieve users based on the filter
+#     if filter_value == '1':
+#         users = get_active_users()
+#     elif filter_value == '0':
+#         users = get_inactive_users()
+#     else:
+#         users = get_all_users()
+
+#     # Remove 'Password' field from each user dictionary
+#     for user in users:
+#         user_dict = dict(user)
+#         user_dict.pop('Password', None)
+#         users[users.index(user)] = user_dict
+
+#     # Create a CSV in memory
+#     si = StringIO()
+#     writer = csv.writer(si)
+
+#     # Write headers
+#     if users:
+#         writer.writerow(users[0].keys())
+#         for user in users:
+#             writer.writerow(user.values())
+#     else:
+#         writer.writerow(["No data found"])
+
+#     # Generate a timestamped filename
+#     timestamp = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
+#     filename = f"users_export_{timestamp}.csv"
+
+#     # Prepare the response
+#     output = si.getvalue()
+#     response = Response(output, mimetype='text/csv')
+#     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
+#     return response
 
 
 @app.route('/users/export', methods=['GET'])
@@ -3550,32 +3597,37 @@ def export_users_csv():
         users = get_all_users()
 
     # Remove 'Password' field from each user dictionary
+    cleaned_users = []
     for user in users:
         user_dict = dict(user)
         user_dict.pop('Password', None)
-        users[users.index(user)] = user_dict
+        cleaned_users.append(user_dict)
 
-    # Create a CSV in memory
-    si = StringIO()
-    writer = csv.writer(si)
+    # Create a CSV in memory with UTF-8 encoding
+    output = BytesIO()
+    wrapper = TextIOWrapper(output, encoding='utf-8-sig', newline='')
+    writer = csv.writer(wrapper)
 
-    # Write headers
-    if users:
-        writer.writerow(users[0].keys())
-        for user in users:
+    # Write headers and data
+    if cleaned_users:
+        writer.writerow(cleaned_users[0].keys())
+        for user in cleaned_users:
             writer.writerow(user.values())
     else:
         writer.writerow(["No data found"])
+
+    # Flush and get byte value
+    wrapper.flush()
+    output.seek(0)
 
     # Generate a timestamped filename
     timestamp = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
     filename = f"users_export_{timestamp}.csv"
 
-    # Prepare the response
-    output = si.getvalue()
-    response = Response(output, mimetype='text/csv')
-    response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-    return response
+    # Return response with correct headers
+    return Response(output.read(),
+                    mimetype='text/csv',
+                    headers={"Content-Disposition": f"attachment;filename={filename}"})
 
 
 @app.route('/users/import', methods=['GET', 'POST'])
