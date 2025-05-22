@@ -1,0 +1,113 @@
+{% extends 'base.html' %} {% block content %}
+<div
+  class="max-w-3xl mx-auto mt-12 px-6 py-8 bg-white rounded-2xl shadow-xl ring-1 ring-gray-200"
+>
+  <h2 class="text-3xl font-bold text-gray-800 mb-8">Edit User Information</h2>
+
+  <form method="POST" class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div>
+        <label
+          for="first_name_kh"
+          class="block text-sm font-medium text-gray-700"
+        >
+          First Name (Khmer) <span class="text-red-500">*</span>
+        </label>
+
+        <input
+          type="text"
+          id="first_name_kh"
+          name="first_name_kh"
+          value="{{ user.FirstNameKh }}"
+          required
+          class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <div>
+        <label
+          for="first_name_kh"
+          class="block text-sm font-medium text-gray-700"
+        >
+          First Name (Khmer) <span class="text-red-500">*</span>
+        </label>
+
+        <input
+          type="text"
+          id="last_name_kh"
+          name="last_name_kh"
+          value="{{ user.LastNameKh }}"
+          required
+          class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <div>
+        <label
+          for="first_name_en"
+          class="block text-sm font-medium text-gray-700"
+        >
+          First Name (English) <span class="text-red-500">*</span>
+        </label>
+
+        <input
+          type="text"
+          id="first_name_en"
+          name="first_name_en"
+          value="{{ user.FirstNameEn }}"
+          required
+          class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <div>
+        <label
+          for="last_name_en"
+          class="block text-sm font-medium text-gray-700"
+        >
+          Last Name (English) <span class="text-red-500">*</span>
+        </label>
+
+        <input
+          type="text"
+          id="last_name_en"
+          name="last_name_en"
+          value="{{ user.LastNameEn }}"
+          required
+          class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+
+      <div class="md:col-span-2">
+        <label for="mobile1" class="block text-sm font-medium text-gray-700">
+          Mobile Number <span class="text-red-500">*</span>
+        </label>
+
+        <input
+          type="text"
+          id="mobile1"
+          name="mobile1"
+          value="{{ user.Mobile1 }}"
+          required
+          class="mt-1 w-full px-4 py-2 border border-gray-300 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        />
+      </div>
+    </div>
+
+    <div class="flex justify-end space-x-4 pt-4">
+      <a
+        href="{{ url_for('profile', user_id=current_user.id) }}"
+        class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 transition"
+      >
+        <i class="fas fa-times mr-2"></i> Cancel
+      </a>
+      <button
+        type="submit"
+        class="inline-flex items-center px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 shadow transition"
+      >
+        <i class="fas fa-save mr-2"></i> Update
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

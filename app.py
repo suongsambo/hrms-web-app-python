@@ -3941,6 +3941,37 @@ def edit_user(id):
     return render_template('/users/edit_user.html', user=user, branches=branches)
 
 
+@app.route('/users/owner/edit/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_user_owner(id):
+    # if current_user.is_admin == 0:
+    #     flash("You don't have permission to view this page.", "danger")
+    #     return redirect(url_for('dashboard'))
+
+    with get_db_connection() as conn:
+        user = conn.execute(
+            "SELECT * FROM users WHERE ID = ?", (id,)).fetchone()
+        branches = conn.execute("SELECT * FROM branches").fetchall()
+
+    if request.method == 'POST':
+        first_name_kh = request.form['first_name_kh']
+        last_name_kh = request.form['last_name_kh']
+        first_name_en = request.form['first_name_en']
+        last_name_en = request.form['last_name_en']
+        mobile1 = request.form['mobile1']
+
+        with get_db_connection() as conn:
+            conn.execute("""
+                UPDATE users
+                SET FirstNameKh = ?, LastNameKh = ?, FirstNameEn = ?, LastNameEn = ?, Mobile1 = ?, UpdatedAt = CURRENT_TIMESTAMP
+                WHERE ID = ?
+            """, (first_name_kh, last_name_kh, first_name_en, last_name_en, mobile1, id))
+            conn.commit()
+        return redirect(url_for('profile', user_id=current_user.id))
+
+    return render_template('/users/edit_user_owner.html', user=user, branches=branches)
+
+
 @app.route('/users/delete/<int:id>', methods=['POST'])
 @login_required
 def delete_user(id):

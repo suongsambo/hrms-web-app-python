@@ -3,10 +3,21 @@ content %}
 
 <body class="bg-gray-50 font-sans text-gray-900">
   <!-- Container -->
-  <div class="max-w-7xl mx-auto p-2">
 
+  <div class="max-w-7xl mx-auto p-2">
     <div class="bg-gradient-to-r from-indigo-100 via-indigo-200 to-indigo-300 p-6 rounded-lg shadow-md">
       <h2 class="text-2xl font-bold text-indigo-700 mb-4">Profile Image</h2>
+      <a href="{{ url_for('edit_user_owner', id=user.ID) }}"
+        class="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl shadow hover:bg-blue-700 transition duration-300 ease-in-out">
+        <!-- Pencil Icon -->
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"
+          xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M16.862 3.487a2.25 2.25 0 013.182 3.182L7.125 19.587l-4.125.938.938-4.125L16.862 3.487z"></path>
+        </svg>
+        Edit Profile
+      </a>
+
       <div class="flex justify-center">
         {% if user.image %}
         <img src="{{ url_for('get_user_image', user_id=user.id) }}" alt="User Profile Image"
