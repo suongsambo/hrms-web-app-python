@@ -2,6 +2,7 @@ from flask import (
     Flask, render_template, request, redirect, url_for, flash,
     Response, session, send_from_directory, jsonify, send_file
 )
+
 from flask_login import (
     login_required, LoginManager, login_user,
     logout_user, current_user
@@ -30,6 +31,8 @@ from typing import Union
 from flask_caching import Cache
 from db import init_db
 from flask_cors import CORS
+from limiter_config import limiter
+from flask_limiter.errors import RateLimitExceeded
 # from flask_babel import Babel, _
 from flask_babel import Babel
 # Blueprints
@@ -57,12 +60,23 @@ app.register_blueprint(positions_bp)
 app.register_blueprint(departments_bp)
 app.config.from_object(Config)
 CORS(app)
+# Update session cookie settings for security
+app.secret_key = 'kpca_2023_admin_app'  # Use a strong, random secret!
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SECURE=True,
+    SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)
+)
+
+
 CORS(app, resources={
      r"/*": {"origins": ["http://127.0.0.1:5000",  "http://172.104.60.81"]}})
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
 app.config['LANGUAGES'] = ['en', 'km']
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 babel = Babel(app)
+
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode="eventlet")
 cache = Cache(config={'CACHE_TYPE': 'simple'})
@@ -70,6 +84,12 @@ eventlet.monkey_patch()
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 LANGUAGES = ['en', 'km']
+
+
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
+
 
 # get holidays
 year = datetime.now().year
@@ -2155,8 +2175,8 @@ def edit_leave(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type = ?, reason = ?, status = ?, 
-                    verified_by = ?, 
+                SET leave_type = ?, reason = ?, status = ?,
+                    verified_by = ?,
                     start_date = ?, end_date = ?
                 WHERE id = ?
             ''', (
@@ -2197,8 +2217,8 @@ def edit_leave_hours_pm(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type = ?, reason = ?, status = ?, 
-                    approved_by = ?, 
+                SET leave_type = ?, reason = ?, status = ?,
+                    approved_by = ?,
                     start_date = ?, end_date = ?
                 WHERE id = ?
             ''', (
@@ -3306,7 +3326,18 @@ def inactive_user():
     return render_template('inactive_user.html')
 
 
+@app.errorhandler(RateLimitExceeded)
+def handle_ratelimit(e):
+    return jsonify({"error": "Too many requests. Please try again later."}), 429
+
+
+@app.route('/session-info', methods=['GET'])
+def session_info():
+    return jsonify(dict(session))
+
+
 @app.route('/login', methods=['POST'])
+@limiter.limit("5 per minute")
 def login():
     username = request.form['username']
     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
@@ -3356,6 +3387,16 @@ def login():
         ''', (user['ID'],))
         conn.commit()
 
+        # ✅ Set session variables (persistent session)
+        session['user_id'] = user['ID']
+        session['username'] = user['UserName']
+        session['email'] = user['Email']
+        session['employee_id'] = employee_id
+        session['role'] = user['RoleDefault']
+        session['zone_id'] = user['ZoneID']
+        session['is_admin'] = user['IsAdmin']
+        session.permanent = True  # ensure timeout is applied
+
     # Login user
     user_obj = User(
         id=user['ID'],
@@ -3378,6 +3419,7 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
+    session.clear()
     # Remove the user from the online_users table if logged in
     if current_user.is_authenticated:
         with get_db_connection() as conn:
@@ -3496,17 +3538,42 @@ def force_reset_password():
     )
 
 
+# @app.route('/users', methods=['GET'])
+# @login_required
+# def users():
+#      if session.get('user_id') is None or session.get('is_admin') != 1:
+#         flash("You must be an administrator to access this page.", "warning")
+#         return render_template('access_denied.html')
+
+#     filter_value = request.args.get('active', 'all')
+
+#     # Use the helper functions to get users
+#     if filter_value == '1':  # Active users
+#         users = get_active_users()
+#     elif filter_value == '0':  # Inactive users
+#         users = get_inactive_users()
+#     else:  # Default to show all users
+#         users = get_all_users()
+
+#     return render_template('users/users.html', users=users, active_filter=filter_value)
+
 @app.route('/users', methods=['GET'])
 @login_required
 def users():
+    # Ensure the user is logged in and is_admin == 1
+    if session.get('user_id') is None or session.get('is_admin') != 1:
+        flash("You must be an administrator to access this page.", "warning")
+        return render_template('access_denied.html')
+
+    # Grab the filter parameter (defaults to 'all')
     filter_value = request.args.get('active', 'all')
 
-    # Use the helper functions to get users
-    if filter_value == '1':  # Active users
+    # Fetch users based on the filter
+    if filter_value == '1':          # Active users
         users = get_active_users()
-    elif filter_value == '0':  # Inactive users
+    elif filter_value == '0':        # Inactive users
         users = get_inactive_users()
-    else:  # Default to show all users
+    else:                            # All users
         users = get_all_users()
 
     return render_template('users/users.html', users=users, active_filter=filter_value)
@@ -3537,50 +3604,6 @@ def get_all_users():
                 ZoneID
             FROM users
         """).fetchall()
-
-# archive
-
-
-# @app.route('/users/export', methods=['GET'])
-# @login_required
-# def export_users_csv():
-#     filter_value = request.args.get('active', 'all')
-
-#     # Retrieve users based on the filter
-#     if filter_value == '1':
-#         users = get_active_users()
-#     elif filter_value == '0':
-#         users = get_inactive_users()
-#     else:
-#         users = get_all_users()
-
-#     # Remove 'Password' field from each user dictionary
-#     for user in users:
-#         user_dict = dict(user)
-#         user_dict.pop('Password', None)
-#         users[users.index(user)] = user_dict
-
-#     # Create a CSV in memory
-#     si = StringIO()
-#     writer = csv.writer(si)
-
-#     # Write headers
-#     if users:
-#         writer.writerow(users[0].keys())
-#         for user in users:
-#             writer.writerow(user.values())
-#     else:
-#         writer.writerow(["No data found"])
-
-#     # Generate a timestamped filename
-#     timestamp = datetime.now().strftime("%m-%d-%Y_%H-%M-%S")
-#     filename = f"users_export_{timestamp}.csv"
-
-#     # Prepare the response
-#     output = si.getvalue()
-#     response = Response(output, mimetype='text/csv')
-#     response.headers["Content-Disposition"] = f"attachment; filename={filename}"
-#     return response
 
 
 @app.route('/users/export', methods=['GET'])
@@ -3784,6 +3807,10 @@ def update_user_status(user_id):
 
 @app.route('/users/add', methods=['GET', 'POST'])
 def add_user() -> Union[str, 'Response']:
+    if session.get('user_id') is None or session.get('is_admin') != 1:
+        flash("You must be an administrator to access this page.", "warning")
+        return render_template('access_denied.html')
+
     if current_user.is_admin == 0:
         flash("You don't have permission to view this page.", "danger")
         return redirect(url_for('dashboard'))
@@ -4046,6 +4073,9 @@ def access_denied():
 @app.route('/dashboard')
 @login_required
 def dashboard():
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
     # Admin dashboard
     if getattr(current_user, 'is_admin', False):
         return render_dashboard(current_user.id)

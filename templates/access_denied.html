@@ -21,6 +21,10 @@
         padding: 20px;
         font-size: 1.5rem;
       }
+      .undraw-img {
+        max-width: 300px;
+        margin-bottom: 30px;
+      }
       .btn {
         margin-top: 20px;
       }
@@ -28,6 +32,13 @@
   </head>
   <body>
     <div class="container">
+      <!-- Undraw illustration (place your SVG in static/images/access_denied.svg) -->
+      <img
+        src="{{ url_for('static', filename='images/undraw_access-denied_krem.svg') }}"
+        alt="Access Denied Illustration"
+        class="undraw-img"
+      />
+
       <div class="alert alert-danger" role="alert">
         <strong>Access Denied!</strong> {{ message }}
       </div>
