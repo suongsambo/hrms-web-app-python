@@ -3335,7 +3335,7 @@ def session_info():
 
 
 @app.route('/login', methods=['POST'])
-# @limiter.limit("5 per minute")
+@limiter.limit("5 per minute")
 def login():
     username = request.form['username']
     password = hashlib.sha256(request.form['password'].encode()).hexdigest()

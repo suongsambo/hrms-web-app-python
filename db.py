@@ -2,7 +2,7 @@ from datetime import date
 import random
 import sqlite3
 import hashlib
-from flask import Flask
+from flask import Flask, session
 from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -396,6 +396,17 @@ def init_db():
                 INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, Branch)
                 VALUES (?, ?, ?, ?, ?, ?)
             ''', ('bo', hashed_password, 'bo@example.com', '1234567890', 1, 'SYS'))
+
+            user = conn.execute(
+                "SELECT * FROM users WHERE UserName = 'bo'").fetchone()
+            # session['user_id'] = user['ID']
+            # session['username'] = user['UserName']
+            # session['email'] = user['Email']
+            # session['employee_id'] = None
+            # session['role'] = user['RoleDefault']
+            # session['zone_id'] = user['ZoneID']
+            # session['is_admin'] = user['IsAdmin']
+            # session.permanent = True  # ensure timeout is applied
 
         users = [
             ('SPM.KPCA', 'SPM.KPCA@example.com', 'SYS', 1),
