@@ -68,8 +68,6 @@ app.config.update(
     SESSION_COOKIE_SAMESITE='Lax',
     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)
 )
-
-
 CORS(app, resources={
      r"/*": {"origins": ["http://127.0.0.1:5000",  "http://172.104.60.81"]}})
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
