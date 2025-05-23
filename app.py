@@ -61,13 +61,13 @@ app.register_blueprint(departments_bp)
 app.config.from_object(Config)
 CORS(app)
 # Update session cookie settings for security
-app.secret_key = 'kpca_2023_admin_app'  # Use a strong, random secret!
-app.config.update(
-    SESSION_COOKIE_HTTPONLY=True,
-    SESSION_COOKIE_SECURE=True,
-    SESSION_COOKIE_SAMESITE='Lax',
-    PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)
-)
+# app.secret_key = 'kpca_2023_admin_app'  # Use a strong, random secret!
+# app.config.update(
+#     SESSION_COOKIE_HTTPONLY=True,
+#     SESSION_COOKIE_SECURE=True,
+#     SESSION_COOKIE_SAMESITE='Lax',
+#     PERMANENT_SESSION_LIFETIME=timedelta(minutes=30)
+# )
 CORS(app, resources={
      r"/*": {"origins": ["http://127.0.0.1:5000",  "http://172.104.60.81"]}})
 app.config['BABEL_DEFAULT_LOCALE'] = 'en'
@@ -84,9 +84,9 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 LANGUAGES = ['en', 'km']
 
 
-@app.before_request
-def make_session_permanent():
-    session.permanent = True
+# @app.before_request
+# def make_session_permanent():
+#     session.permanent = True
 
 
 # get holidays
@@ -3386,14 +3386,14 @@ def login():
         conn.commit()
 
         # ✅ Set session variables (persistent session)
-        session['user_id'] = user['ID']
-        session['username'] = user['UserName']
-        session['email'] = user['Email']
-        session['employee_id'] = employee_id
-        session['role'] = user['RoleDefault']
-        session['zone_id'] = user['ZoneID']
-        session['is_admin'] = user['IsAdmin']
-        session.permanent = True  # ensure timeout is applied
+        # session['user_id'] = user['ID']
+        # session['username'] = user['UserName']
+        # session['email'] = user['Email']
+        # session['employee_id'] = employee_id
+        # session['role'] = user['RoleDefault']
+        # session['zone_id'] = user['ZoneID']
+        # session['is_admin'] = user['IsAdmin']
+        # session.permanent = True  # ensure timeout is applied
 
     # Login user
     user_obj = User(
@@ -3417,7 +3417,7 @@ def login():
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    session.clear()
+    # session.clear()
     # Remove the user from the online_users table if logged in
     if current_user.is_authenticated:
         with get_db_connection() as conn:
@@ -3559,9 +3559,9 @@ def force_reset_password():
 @login_required
 def users():
     # Ensure the user is logged in and is_admin == 1
-    if session.get('user_id') is None or session.get('is_admin') != 1:
-        flash("You must be an administrator to access this page.", "warning")
-        return render_template('access_denied.html')
+    # if session.get('user_id') is None or session.get('is_admin') != 1:
+    #     flash("You must be an administrator to access this page.", "warning")
+    #     return render_template('access_denied.html')
 
     # Grab the filter parameter (defaults to 'all')
     filter_value = request.args.get('active', 'all')
@@ -3805,9 +3805,9 @@ def update_user_status(user_id):
 
 @app.route('/users/add', methods=['GET', 'POST'])
 def add_user() -> Union[str, 'Response']:
-    if session.get('user_id') is None or session.get('is_admin') != 1:
-        flash("You must be an administrator to access this page.", "warning")
-        return render_template('access_denied.html')
+    # if session.get('user_id') is None or session.get('is_admin') != 1:
+    #     flash("You must be an administrator to access this page.", "warning")
+    #     return render_template('access_denied.html')
 
     if current_user.is_admin == 0:
         flash("You don't have permission to view this page.", "danger")
