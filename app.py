@@ -1411,7 +1411,7 @@ def add_leave_hours(branch):
     with get_db_connection() as conn:
         employees = conn.execute('SELECT id, name FROM employees').fetchall()
         users = conn.execute(
-            'SELECT id, username FROM users WHERE RoleDefault IN (35,140) AND branch = ?',
+            'SELECT id, username FROM users WHERE RoleDefault IN (35,140) AND branch = ? AND Active = 1',
             (user_branch,)
         ).fetchall()
 
@@ -1654,6 +1654,7 @@ def add_many_leave(branch):
                         u.RoleDefault = 145
                         AND u.ZoneID IS NOT NULL
                         AND u.branch IS NOT NULL
+                        AND Active = 1
                         AND u.ZoneID = ?
                 ''', (zone_id,)).fetchall()
 
@@ -1661,21 +1662,18 @@ def add_many_leave(branch):
                 print("Branch is NOT in zone_branch ❌")
         else:
             print("Branch not found.")
-
         employees = conn.execute(
             'SELECT id, name, branch FROM employees').fetchall()
-
         users = conn.execute(
-            'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ?', (
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (35,140) AND branch = ? AND Active = 1', (
                 user_branch,)
         ).fetchall()
-
         users2 = conn.execute(
-            'SELECT id, username, branch FROM users WHERE RoleDefault IN (140) AND branch = ?', (
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (140) AND branch = ? AND Active = 1', (
                 user_branch,)
         ).fetchall()
         users4 = conn.execute(
-            'SELECT id, username, branch FROM users WHERE RoleDefault = 180'
+            'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
         ).fetchall()
 
     if request.method == 'POST':
