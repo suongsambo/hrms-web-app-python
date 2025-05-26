@@ -124,49 +124,54 @@ content %}
           </select>
         </div>
 
-        <!-- Start Date with Icon -->
-        <div class="relative">
-          <label
-            for="start_date"
-            class="block text-sm font-medium text-gray-700"
-            >​សំណើសុំឈប់សម្រាកពីម៉ោង</label
-          >
+        <!-- Grid Container for Start and End Date -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Start Date with Icon -->
           <div class="relative">
-            <input
-              type="text"
-              id="start_date"
-              name="start_date"
-              required
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-            <!-- Calendar Icon -->
-            <span
-              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+            <label
+              for="start_date"
+              class="block text-sm font-medium text-gray-700"
+              >សំណើសុំឈប់សម្រាកពីម៉ោង</label
             >
-              <i class="fas fa-calendar-alt"></i>
-            </span>
+            <div class="relative">
+              <input
+                type="text"
+                id="start_date"
+                name="start_date"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+              <!-- Calendar Icon -->
+              <span
+                class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+              >
+                <i class="fas fa-calendar-alt"></i>
+              </span>
+            </div>
           </div>
-        </div>
 
-        <!-- End Date with Icon -->
-        <div class="relative">
-          <label for="end_date" class="block text-sm font-medium text-gray-700"
-            >រហូតដល់ម៉ោង</label
-          >
+          <!-- End Date with Icon -->
           <div class="relative">
-            <input
-              type="text"
-              id="end_date"
-              name="end_date"
-              required
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            />
-            <!-- Calendar Icon -->
-            <span
-              class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+            <label
+              for="end_date"
+              class="block text-sm font-medium text-gray-700"
+              >រហូតដល់ម៉ោង</label
             >
-              <i class="fas fa-calendar-alt"></i>
-            </span>
+            <div class="relative">
+              <input
+                type="text"
+                id="end_date"
+                name="end_date"
+                required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+              <!-- Calendar Icon -->
+              <span
+                class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none"
+              >
+                <i class="fas fa-calendar-alt"></i>
+              </span>
+            </div>
           </div>
         </div>
 
