@@ -1258,6 +1258,8 @@ def leaves_by_gm():
 @login_required
 def filter_leaves_by_branch_name(branch_name):
     # Check if user is role 140 and has a branch assigned
+    # if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
+    #     return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
     if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
 
@@ -1267,7 +1269,9 @@ def filter_leaves_by_branch_name(branch_name):
     app.logger.debug(f"Filtering by branch: {branch_name}")
 
     query = '''
-       SELECT
+   
+
+        SELECT
             l.id,
             l.requested_by AS employee_name,
             l.branch AS branch_name,
@@ -1285,20 +1289,23 @@ def filter_leaves_by_branch_name(branch_name):
             l.requested_by_roles
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE
-            (
-                (l.branch = ? AND l.category != 'L')
+        WHERE (
+            l.branch = ? AND (
+                l.category != 'L'
+                OR l.category IS NULL
+                OR l.type_of_leave = 'H'
                 OR (
                     l.category = 'S' AND l.verified_by IS NOT NULL
                 )
                 OR (
-                    l.category = 'M' AND (l.verified_by IS NULL OR l.requested_by_roles = 35)
+                    l.category = 'M' AND (
+                        l.verified_by IS NULL OR l.requested_by_roles = 35
+                    )
                 )
-                OR l.category IS NULL
-                OR l.type_of_leave = 'H'
-                OR (l.category IS NOT NULL AND l.category != 'L')
             )
+        )
         ORDER BY l.start_date DESC;
+
 
     '''
 
@@ -4734,7 +4741,7 @@ def add_employee():
         branches = conn.execute("SELECT * FROM branches").fetchall()
 
         users = conn.execute(
-            "SELECT id, UserName FROM users WHERE RoleDefault = 20"
+            "SELECT id, UserName FROM users"
         ).fetchall()
         positions = conn.execute("SELECT * FROM positions").fetchall()
         departments = conn.execute("SELECT * FROM departments").fetchall()
