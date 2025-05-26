@@ -6,7 +6,6 @@
     <!-- <div class="flex justify-start">
     </div> -->
     <div class="flex justify-start  gap-2">
-
       <form method="get" action="{{ url_for('users') }}"
         class="inline-flex items-center space-x-2 bg-white p-2 rounded-lg shadow border border-gray-200">
         <label for="filter" class="text-sm font-medium text-gray-700">Filter:</label>
@@ -17,7 +16,6 @@
           <option value="0" {% if active_filter=='0' %}selected{% endif %}>Inactive</option>
         </select>
       </form>
-
 
       <a href="{{ url_for('import_users_csv') }}"
         class="inline-flex items-center px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-white font-semibold rounded-lg shadow-sm transition duration-200">
@@ -30,7 +28,6 @@
         📄 CSV Template
       </a>
 
-
       <a href="{{ url_for('export_users_csv', active=active_filter) }}"
         onclick="return confirm('Are you sure you want to export {{ users|length }} users?');"
         class="inline-flex items-center px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white font-semibold rounded-lg shadow-sm transition duration-200">
@@ -38,15 +35,12 @@
         <span class="ml-1 text-xs">Download</span>
       </a>
 
-
       <!-- Print Button -->
       <button type="button" onclick="printTable()"
         class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out">
         <span class="material-symbols-outlined">print</span>
         <span class="text-xs">Print</span>
       </button>
-
-
 
       <!-- Add Branch Button -->
       <a href="{{ url_for('add_user') }}"
@@ -60,19 +54,105 @@
         <span class="text-sm font-semibold">Reset Password</span>
       </a>
 
-
-
       <!-- Refresh Button -->
       <button type="button" onclick="window.location.reload()"
         class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out">
         <span class="material-symbols-outlined">autorenew</span>
         <span class="text-xs">Refresh</span>
       </button>
-
-
-
     </div>
   </div>
+
+  <div class="overflow-x-auto">
+    <div class="overflow-x-auto">
+      <table id="user-table" class="min-w-full text-sm text-left border-collapse nowrap" style="width:100%">
+        <thead class="bg-gray-200 text-gray-700">
+          <tr>
+            <th class="py-2 px-4 text-left">ID</th>
+            <th class="py-2 px-4 text-left">Username</th>
+            <th class="py-2 px-4 text-left">Email</th>
+            <th class="py-2 px-4 text-left">FirstNameKh</th>
+            <th class="py-2 px-4 text-left">LastNameKh</th>
+            <th class="py-2 px-4 text-left">FirstNameEn</th>
+            <th class="py-2 px-4 text-left">LastNameEn</th>
+            <th class="py-2 px-4 text-left">Branch</th>
+            <th class="py-2 px-4 text-left">IsAdmin</th>
+
+            <th class="py-2 px-4 text-left">Mobile1</th>
+
+            <th class="py-2 px-4 text-left">Menu</th>
+            <th class="py-2 px-4 text-left">Language</th>
+            <th class="py-2 px-4 text-left">Status</th>
+            <th class="py-2 px-4 text-left">Note</th>
+            <th class="py-2 px-4 text-left">RequestRole</th>
+            <th class="py-2 px-4 text-left">RoleDefault</th>
+            <th class="py-2 px-4 text-left">ZoneID</th>
+            <th class="py-2 px-4 text-left">Active</th>
+            <th class="py-2 px-4 text-center w-40">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr class="border-b">
+            <td class="py-2 px-4">{{ user.id }}</td>
+            <td class="py-2 px-4">{{ user.username }}</td>
+            <td class="py-2 px-4">{{ user.email }}</td>
+            <td class="py-2 px-4">{{ user.FirstNameKh }}</td>
+            <td class="py-2 px-4">{{ user.LastNameKh }}</td>
+            <td class="py-2 px-4">{{ user.FirstNameEn }}</td>
+            <td class="py-2 px-4">{{ user.LastNameEn }}</td>
+            <td class="py-2 px-4">{{ user.branch }}</td>
+            <td class="py-2 px-4">{{ user.IsAdmin }}</td>
+            <td class="py-2 px-4">{{ user.Mobile1 }}</td>
+            <!-- <td class="py-2 px-4">{{ user.Active }}</td> -->
+            <td class="py-2 px-4">{{ user.Menu }}</td>
+            <td class="py-2 px-4">{{ user.Language }}</td>
+            <td class="py-2 px-4">{{ user.Status }}</td>
+            <td class="py-2 px-4">{{ user.Note }}</td>
+            <td class="py-2 px-4">{{ user.RequestRole }}</td>
+            <td class="py-2 px-4">{{ user.RoleDefault }}</td>
+            <td class="py-2 px-4">{{ user.ZoneID }}</td>
+            <td class="py-2 px-4">
+              <form action="{{ url_for('update_user_status', user_id=user.id) }}" method="POST"
+                onsubmit="return confirmAction()">
+                {% if user.active == 1 %}
+                <button type="submit" name="active_status" value="0"
+                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 text-sm rounded">
+                  Deactivate
+                </button>
+                {% else %}
+                <button type="submit" name="active_status" value="1"
+                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 text-sm rounded">
+                  Activate
+                </button>
+                {% endif %}
+              </form>
+            </td>
+
+            <td class="py-2 px-4 text-center w-40">
+              <div class="flex justify-center gap-x-2">
+                <a href="{{ url_for('edit_user', id=user.id) }}" class="text-blue-500 hover:underline">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <a href="{{ url_for('view_user', id=user.id) }}" class="text-green-500 hover:underline">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <form class="inline-block" action="{{ url_for('delete_user', id=user.id) }}" method="POST">
+                  <button type="submit" class="text-red-500 hover:underline"
+                    onclick="return confirm('Are you sure you want to delete this user?')">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+</div>
 
   <script>
     function printTable() {
@@ -145,107 +225,6 @@
       };
     }
   </script>
-
-
-
-  <div class="overflow-x-auto">
-    <div class="overflow-x-auto">
-      <table id="user-table" class="min-w-full text-sm text-left border-collapse nowrap" style="width:100%">
-        <thead class="bg-gray-200 text-gray-700">
-          <tr>
-            <th class="py-2 px-4 text-left">ID</th>
-            <th class="py-2 px-4 text-left">Username</th>
-            <th class="py-2 px-4 text-left">Email</th>
-            <th class="py-2 px-4 text-left">FirstNameKh</th>
-            <th class="py-2 px-4 text-left">LastNameKh</th>
-            <th class="py-2 px-4 text-left">FirstNameEn</th>
-            <th class="py-2 px-4 text-left">LastNameEn</th>
-            <th class="py-2 px-4 text-left">Branch</th>
-            <th class="py-2 px-4 text-left">IsAdmin</th>
-
-            <th class="py-2 px-4 text-left">Mobile1</th>
-
-            <th class="py-2 px-4 text-left">Menu</th>
-            <th class="py-2 px-4 text-left">Language</th>
-            <th class="py-2 px-4 text-left">Status</th>
-            <th class="py-2 px-4 text-left">Note</th>
-            <th class="py-2 px-4 text-left">RequestRole</th>
-            <th class="py-2 px-4 text-left">RoleDefault</th>
-            <th class="py-2 px-4 text-left">ZoneID</th>
-            <th class="py-2 px-4 text-left">Active</th>
-            <th class="py-2 px-4 text-center w-40">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for user in users %}
-          <tr class="border-b">
-            <td class="py-2 px-4">{{ user.id }}</td>
-            <td class="py-2 px-4">{{ user.username }}</td>
-            <td class="py-2 px-4">{{ user.email }}</td>
-            <td class="py-2 px-4">{{ user.FirstNameKh }}</td>
-            <td class="py-2 px-4">{{ user.LastNameKh }}</td>
-            <td class="py-2 px-4">{{ user.FirstNameEn }}</td>
-            <td class="py-2 px-4">{{ user.LastNameEn }}</td>
-            <td class="py-2 px-4">{{ user.branch }}</td>
-            <td class="py-2 px-4">{{ user.IsAdmin }}</td>
-
-            <td class="py-2 px-4">{{ user.Mobile1 }}</td>
-            <!-- <td class="py-2 px-4">{{ user.Active }}</td> -->
-
-
-            <td class="py-2 px-4">{{ user.Menu }}</td>
-            <td class="py-2 px-4">{{ user.Language }}</td>
-            <td class="py-2 px-4">{{ user.Status }}</td>
-            <td class="py-2 px-4">{{ user.Note }}</td>
-
-            <td class="py-2 px-4">{{ user.RequestRole }}</td>
-            <td class="py-2 px-4">{{ user.RoleDefault }}</td>
-            <td class="py-2 px-4">{{ user.ZoneID }}</td>
-
-
-            <td class="py-2 px-4">
-              <form action="{{ url_for('update_user_status', user_id=user.id) }}" method="POST"
-                onsubmit="return confirmAction()">
-                {% if user.active == 1 %}
-                <button type="submit" name="active_status" value="0"
-                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 text-sm rounded">
-                  Deactivate
-                </button>
-                {% else %}
-                <button type="submit" name="active_status" value="1"
-                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 text-sm rounded">
-                  Activate
-                </button>
-                {% endif %}
-              </form>
-            </td>
-
-
-            <td class="py-2 px-4 text-center w-40">
-              <div class="flex justify-center gap-x-2">
-                <a href="{{ url_for('edit_user', id=user.id) }}" class="text-blue-500 hover:underline">
-                  <i class="fas fa-edit"></i>
-                </a>
-                <a href="{{ url_for('view_user', id=user.id) }}" class="text-green-500 hover:underline">
-                  <i class="fas fa-eye"></i>
-                </a>
-                <form class="inline-block" action="{{ url_for('delete_user', id=user.id) }}" method="POST">
-                  <button type="submit" class="text-red-500 hover:underline"
-                    onclick="return confirm('Are you sure you want to delete this user?')">
-                    <i class="fas fa-trash"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-
-  </div>
-</div>
-</div>
 
 
 <script>

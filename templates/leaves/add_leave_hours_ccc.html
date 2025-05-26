@@ -44,7 +44,7 @@ content %}
       </div>
       <form
         method="POST"
-        action="{{ url_for('add_leave_hours', branch=branch) }}"
+        action="{{ url_for('add_leave_hours_ccc', branch=branch) }}"
         class="space-y-6"
       >
         <!-- Employee selection -->
@@ -62,6 +62,18 @@ content %}
         </div>
 
         <div>
+          <label for="verified_by" class="hidden">Verified By</label>
+          <input
+            type="text"
+            id="verified_by"
+            name="verified_by"
+            value="Not required"
+            hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          />
+        </div>
+
+        <!-- <div>
           <label for="branch" class="hidden">Branch</label>
           <input
             type="text"
@@ -71,7 +83,7 @@ content %}
             hidden
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
           />
-        </div>
+        </div> -->
 
         <div>
           <label for="employee_id" class="hidden">Employee</label>
@@ -226,7 +238,7 @@ content %}
             <span>Submit</span>
           </button>
           <a
-            href="{{ url_for('view_leaves') }}"
+            href="{{ url_for('leaves_by_branch_and_ccc_dashboard', branch_name=branch) }}"
             class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center"
           >
             <i class="fas fa-arrow-left mr-2"></i> Back
@@ -239,7 +251,8 @@ content %}
   <script>
     function closeModal() {
       document.getElementById("leaveModal").classList.add("hidden");
-      window.location.href = "{{ url_for('view_leaves') }}"; // Redirect after closing the modal
+      window.location.href =
+        "{{ url_for('leaves_by_branch_and_ccc_dashboard', branch_name=branch) }}";
     }
 
     document.addEventListener("DOMContentLoaded", function () {

@@ -1,13 +1,11 @@
-{% extends 'base.html' %}
-{% block content %}
+{% extends 'base.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
-
   <!-- Cards Section -->
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-
     <!-- Total Employees Card -->
     <div
-      class="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
+      class="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-lg font-medium opacity-80">Total Employees</h3>
@@ -19,7 +17,8 @@
 
     <!-- Employees on Leave Today Card -->
     <div
-      class="bg-gradient-to-r from-orange-400 to-orange-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
+      class="bg-gradient-to-r from-orange-400 to-orange-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-lg font-medium opacity-80">On Leave Today</h3>
@@ -31,7 +30,8 @@
 
     <!-- Total Payroll Card -->
     <div
-      class="bg-gradient-to-r from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
+      class="bg-gradient-to-r from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
+    >
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-lg font-medium opacity-80">Total Payroll</h3>
@@ -40,14 +40,14 @@
         <i class="fas fa-dollar-sign text-5xl opacity-30"></i>
       </div>
     </div>
-
   </div>
 
   <!-- User Information and Online Users Section -->
   <div class="grid grid-cols-1 gap-8">
-
     <!-- User Information Card -->
-    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
+    <div
+      class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
+    >
       <div class="flex items-center space-x-4 mb-6">
         <i class="fas fa-user-circle text-5xl text-blue-600"></i>
         <h3 class="text-2xl font-bold text-gray-800">Your Profile</h3>
@@ -57,19 +57,21 @@
         <li><strong>Zone ID:</strong> {{ current_user.zone_id }}</li>
         <li><strong>Email:</strong> {{ current_user.email }}</li>
         <li><strong>Branch:</strong> {{ current_user.branch }}</li>
-        <li><strong>Role:</strong>
-          {% if current_user.role_default == 20 %}Employee{% else %}{{ current_user.role_default }}{% endif %}
+        <li>
+          <strong>Role:</strong>
+          {% if current_user.role_default == 20 %}Employee{% else %}{{
+          current_user.role_default }}{% endif %}
         </li>
-        <li><strong>Admin:</strong>
+        <li>
+          <strong>Admin:</strong>
           {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif %}
         </li>
       </ul>
     </div>
-
   </div>
 
   <!-- Employee List Section -->
-  {% if employees %}
+  <!-- {% if employees %}
   <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 mt-10 overflow-x-auto">
     <h3 class="text-2xl font-bold text-gray-800 mb-6">Employees List</h3>
     <table class="w-full text-sm text-gray-700">
@@ -101,9 +103,6 @@
   <div class="bg-red-100 text-red-700 px-6 py-5 rounded-2xl mt-10 text-center">
     <p class="font-medium">No employees found in this branch.</p>
   </div>
-  {% endif %}
-
-
-
+  {% endif %} -->
 </div>
 {% endblock %}
