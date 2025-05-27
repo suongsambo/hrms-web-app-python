@@ -1,3 +1,5 @@
+from flask import render_template, request
+from flask import request, render_template
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
     Response, session, send_from_directory, jsonify, send_file
@@ -87,6 +89,207 @@ LANGUAGES = ['en', 'km']
 # @app.before_request
 # def make_session_permanent():
 #     session.permanent = True
+
+
+# def get_all_users_related_to_leaves(leaves):
+#     user_ids = set()
+
+#     for leave in leaves:
+#         if leave.requested_by:
+#             user_ids.add(leave.requested_by)
+#         if leave.verified_by:
+#             user_ids.add(leave.verified_by)
+#         if leave.approved_by:
+#             user_ids.add(leave.approved_by)
+
+#     users = User.query.filter(User.id.in_(user_ids)).all()
+#     return users
+
+
+# @app.route('/print-leaves')
+# def print_leaves():
+#     # Get list of leave IDs from query parameters
+#     ids = request.args.getlist('ids')
+#     if not ids:
+#         return "No leave IDs provided.", 400
+
+#     try:
+#         ids = list(map(int, ids))
+#     except ValueError:
+#         return "Invalid leave ID provided.", 400
+
+#     placeholders = ','.join(['?'] * len(ids))
+
+#     with get_db_connection() as conn:
+#         # Fetch leaves with all fields
+#         leaves = conn.execute(
+#             f'''
+#             SELECT
+#                 id,
+#                 employee_id,
+#                 leave_type,
+#                 start_date,
+#                 end_date,
+#                 reason,
+#                 start_date_obj,
+#                 end_date_obj,
+#                 excluded_days,
+#                 final_end_date,
+#                 service_count,
+#                 leave_hours,
+#                 requested_by,
+#                 requested_by_roles,
+#                 verified_by,
+#                 approved_by,
+#                 type_of_leave,
+#                 status,
+#                 spm_status,
+#                 dd_status,
+#                 manager_status,
+#                 branch,
+#                 category
+#             FROM leaves
+#             WHERE id IN ({placeholders})
+#             ''',
+#             ids
+#         ).fetchall()
+
+#         if not leaves:
+#             return "No leaves found for the provided IDs.", 404
+
+#         # Collect user identifiers from requested_by, verified_by, approved_by
+#         user_ids = set()
+#         for leave in leaves:
+#             for field in ['requested_by', 'verified_by', 'approved_by']:
+#                 val = leave[field]
+#                 if val is not None:
+#                     try:
+#                         user_ids.add(int(val))
+#                     except ValueError:
+#                         pass
+
+#         user_ids = list(user_ids)
+
+#         if user_ids:
+#             user_placeholders = ','.join(['?'] * len(user_ids))
+#             users_raw = conn.execute(
+#                 f'''
+#                 SELECT * FROM users
+#                 WHERE id IN ({user_placeholders})
+#                 ''',
+#                 user_ids
+#             ).fetchall()
+
+#             # Convert binary signatures to base64 strings
+#             users = []
+#             for user in users_raw:
+#                 user_dict = dict(user)
+#                 sig = user_dict.get('Signature')
+#                 if sig is not None:
+#                     user_dict['Signature'] = base64.b64encode(
+#                         sig).decode('utf-8')
+#                 users.append(user_dict)
+#         else:
+#             users = []
+
+#     # Pass leaves and users to the template
+#     return render_template(
+#         'leave_print_template.html',
+#         leaves=leaves,
+#         users=users
+#     )
+
+
+@app.route('/print-leaves')
+def print_leaves():
+    ids = request.args.getlist('ids')
+
+    if not ids:
+        return "No leave IDs provided.", 400
+
+    try:
+        ids = list(map(int, ids))
+    except ValueError:
+        return "Invalid leave ID provided.", 400
+
+    placeholders = ','.join(['?'] * len(ids))
+
+    with get_db_connection() as conn:
+        # Fetch leave data
+        leaves = conn.execute(
+            f'''
+            SELECT
+                id,
+                employee_id,
+                leave_type,
+                start_date,
+                end_date,
+                reason,
+                start_date_obj,
+                end_date_obj,
+                excluded_days,
+                final_end_date,
+                service_count,
+                leave_hours,
+                requested_by,
+                requested_by_roles,
+                verified_by,
+                approved_by,
+                type_of_leave,
+                status,
+                spm_status,
+                dd_status,
+                manager_status,
+                branch,
+                category
+            FROM leaves
+            WHERE id IN ({placeholders})
+            ''',
+            ids
+        ).fetchall()
+
+        if not leaves:
+            return "No leaves found for the provided IDs.", 404
+
+        usernames = set()
+
+        for leave in leaves:
+            for field in ['requested_by', 'verified_by', 'approved_by']:
+                val = leave[field]
+                if val:  # non-empty string
+                    usernames.add(val)
+
+        # Fetch user records by username
+        users = {}
+        if usernames:
+            placeholders = ','.join(['?'] * len(usernames))
+            users_raw = conn.execute(
+                f'''
+                SELECT ID, UserName, Email, Signature
+                FROM users
+                WHERE UserName IN ({placeholders})
+                ''',
+                list(usernames)
+            ).fetchall()
+
+            for user in users_raw:
+                user_dict = dict(user)
+
+                sig = user_dict.get('Signature')
+                print(sig, 'sig')
+                if sig:
+                    user_dict['Signature'] = base64.b64encode(
+                        sig).decode('utf-8')
+                else:
+                    user_dict['Signature'] = None
+                # Key by username so it’s easy to lookup in template
+                users[user_dict['UserName']] = user_dict
+
+    return render_template(
+        'leave_print_template.html',
+        leaves=leaves,
+        users=users
+    )
 
 
 # get holidays
@@ -1051,11 +1254,12 @@ def leaves_by_branch_and_ccc_dashboard(branch_name):
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query, params).fetchall()
+            users = conn.execute("SELECT * FROM users").fetchall()
             print(leaves, 'leave')
     except sqlite3.DatabaseError as e:
         return f"Database error: {e}", 500
 
-    return render_template('leaves/leaves_ccc_dashboard.html', leaves=leaves, branch_name=branch_name)
+    return render_template('leaves/leaves_ccc_dashboard.html', leaves=leaves or [], branch_name=branch_name or '', users=users or [])
 
 
 @app.route('/leaves/ccc/<string:branch_name>', methods=['GET'])

@@ -1,171 +1,286 @@
 {% extends 'base.html' %} {% block title %}CCC Owner Data{% endblock %} {% block
 content %}
 <div class="bg-gray-100 text-gray-800">
-    <!-- Main Content -->
-    <div class="container mx-auto mt-8 px-4">
-        <!-- Leaves Table -->
-        <div class="overflow-x-auto bg-white shadow-lg rounded-md border border-gray-300">
-            <table id="leaveTable" class="min-w-full text-sm text-left border-collapse">
-                <thead class="bg-gray-200 text-gray-700">
-                    <tr>
+  <!-- Main Content -->
 
-                        <th class="px-6 py-3 border-b">Branch</th>
-                        <th class="px-6 py-3 border-b">LeaveType</th>
-                        <th class="px-10 py-3 border-b">StartDate</th>
-                        <th class="px-10 py-3 border-b">EndDate</th>
-                        <th class="px-6 py-3 border-b">LeaveHours</th>
-                        <th class="px-6 py-3 border-b">ServiceCount</th>
-                        <th class="px-6 py-3 border-b">TypeOfLeave</th>
-                        <th class="px-6 py-3 border-b">VerifiedBy</th>
-                        <th class="px-6 py-3 border-b">ApprovedBy</th>
-                        <th class="px-6 py-3 border-b">RequestedBy</th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                            Reason
-                        </th>
-                        <th
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
-                            Status
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-600">
-                    {% for leave in leaves %}
-                    <tr class="border-t">
-                        <!-- <td class="px-6 py-3 border-b">{{ leave.employee_name }}</td> -->
-                        <td class="px-6 py-3 border-b">{{ leave.branch_name }}</td>
-                        <td class="px-6 py-3 border-b">{{ leave.leave_type }}</td>
-                        <!-- Formatted Start Date -->
-                        <td class="px-10 py-3 border-b leave-start-date" data-start="{{ leave.start_date }}"
-                            style="min-width: 180px"></td>
-                        <!-- Formatted End Date -->
-                        <td class="px-10 py-3 border-b leave-end-date" data-end="{{ leave.end_date }}"
-                            style="min-width: 180px"></td>
-                        <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td>
-                        <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
-                        <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
-                        <td class="px-6 py-3 border-b">
-                            {% if leave.verified_by is none %}
-                            <span class="text-blue-500">Pending</span>
-                            {% else %} {{ leave.verified_by }} {% endif %}
-                        </td>
-                        <td class="px-6 py-3 border-b">
-                            {% if leave.approved_by is none %}
-                            <span class="text-blue-500">Pending</span>
-                            {% else %} {{ leave.approved_by }} {% endif %}
-                        </td>
-                        <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
-                            <b>{{ leave.reason }}</b>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
-                            <span
-                                class="{% if leave.status is not none and leave.status == 'Approved' %}text-green-500{% elif leave.status is not none and leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
-                                <b>{{ leave.status }}</b>
-                            </span>
-                        </td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td colspan="13" class="px-6 py-3 text-center text-gray-500 border-b">
-                            No leaves found.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+  <div class="container mx-auto mt-8 px-4">
+    <!-- Leaves Table -->
+    <div class="my-4">
+      <button
+        onclick="printSelectedLeaves()"
+        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center"
+      >
+        <i class="fas fa-print mr-2"></i> Print Selected
+      </button>
     </div>
 
-    <!-- Initialize DataTable -->
-    <script>
-        $(document).ready(function () {
-            $("#leaveTable").DataTable({
-                paging: true, // Enables pagination
-                searching: true, // Enables the search box
-                ordering: true, // Enables sorting
-                responsive: true, // Makes the table responsive for smaller screens
-                pageLength: 14, // Number of rows per page
-                order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
-                scrollX: true, // Enable horizontal scrolling
-                scrollCollapse: true,
-                paging: true,
-                searching: true,
-                ordering: true,
-                responsive: false,
-                order: [[3, "asc"]],
-                fixedColumns: {
-                    leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
-                    rightColumns: 1, // Fix last 2 columns (like Reason and Status)
-                },
+    <div
+      class="overflow-x-auto bg-white shadow-lg rounded-md border border-gray-300"
+    >
+      <table
+        id="leaveTable"
+        class="min-w-full text-sm text-left border-collapse"
+      >
+        <thead class="bg-gray-200 text-gray-700">
+          <tr>
+            <th class="px-4 py-3 border-b">Select</th>
+            <!-- existing headers -->
 
-                drawCallback: function () {
-                    formatLeaveDatesAndHours();
-                },
-            });
+            <th class="px-6 py-3 border-b">Branch</th>
+            <th class="px-6 py-3 border-b">LeaveType</th>
+            <th class="px-10 py-3 border-b">StartDate</th>
+            <th class="px-10 py-3 border-b">EndDate</th>
+            <th class="px-6 py-3 border-b">LeaveHours</th>
+            <th class="px-6 py-3 border-b">ServiceCount</th>
+            <th class="px-6 py-3 border-b">TypeOfLeave</th>
+            <th class="px-6 py-3 border-b">VerifiedBy</th>
+            <th class="px-6 py-3 border-b">ApprovedBy</th>
+            <th class="px-6 py-3 border-b">RequestedBy</th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b"
+            >
+              Reason
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b"
+            >
+              Status
+            </th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-600">
+          {% for leave in leaves %}
 
-            function formatLeaveDatesAndHours() {
-                $(".leave-start-date").each(function () {
-                    var startDate = $(this).data("start");
-                    var formattedStartDate =
-                        moment(startDate).format("MM-DD-YYYY hh:mm A");
-                    $(this).text(formattedStartDate);
-                });
+          <tr class="border-t">
+            <td class="px-4 py-3 border-b text-center">
+              <input
+                type="checkbox"
+                class="leave-checkbox"
+                value="{{ leave.id }}"
+              />
+            </td>
+            <!-- <td class="px-6 py-3 border-b">{{ leave.employee_name }}</td> -->
+            <td class="px-6 py-3 border-b">{{ leave.branch_name }}</td>
+            <td class="px-6 py-3 border-b">{{ leave.leave_type }}</td>
+            <!-- Formatted Start Date -->
+            <td
+              class="px-10 py-3 border-b leave-start-date"
+              data-start="{{ leave.start_date }}"
+              style="min-width: 180px"
+            ></td>
+            <!-- Formatted End Date -->
+            <td
+              class="px-10 py-3 border-b leave-end-date"
+              data-end="{{ leave.end_date }}"
+              style="min-width: 180px"
+            ></td>
+            <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td>
+            <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
+            <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
+            <td class="px-6 py-3 border-b">
+              {% if leave.verified_by is none %}
+              <span class="text-blue-500">Pending</span>
+              {% else %} {{ leave.verified_by }} {% endif %}
+            </td>
+            <td class="px-6 py-3 border-b">
+              {% if leave.approved_by is none %}
+              <span class="text-blue-500">Pending</span>
+              {% else %} {{ leave.approved_by }} {% endif %}
+            </td>
+            <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b"
+            >
+              <b>{{ leave.reason }}</b>
+            </td>
+            <td
+              class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b"
+            >
+              <span
+                class="{% if leave.status is not none and leave.status == 'Approved' %}text-green-500{% elif leave.status is not none and leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}"
+              >
+                <b>{{ leave.status }}</b>
+              </span>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td
+              colspan="13"
+              class="px-6 py-3 text-center text-gray-500 border-b"
+            >
+              No leaves found.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-                $(".leave-end-date").each(function () {
-                    var endDate = $(this).data("end");
-                    var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
-                    $(this).text(formattedEndDate);
-                });
+  <!-- Initialize DataTable -->
+  <script>
+    $(document).ready(function () {
+      $("#leaveTable").DataTable({
+        paging: true, // Enables pagination
+        searching: true, // Enables the search box
+        ordering: true, // Enables sorting
+        responsive: true, // Makes the table responsive for smaller screens
+        pageLength: 14, // Number of rows per page
+        order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
+        scrollX: true, // Enable horizontal scrolling
+        scrollCollapse: true,
+        paging: true,
+        searching: true,
+        ordering: true,
+        responsive: false,
+        order: [[3, "asc"]],
+        fixedColumns: {
+          leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
+          rightColumns: 1, // Fix last 2 columns (like Reason and Status)
+        },
 
-                $(".leave-hours").each(function () {
-                    var startDate = $(this).data("start");
-                    var endDate = $(this).data("end");
+        drawCallback: function () {
+          formatLeaveDatesAndHours();
+        },
+      });
 
-                    var startTime = moment(startDate);
-                    var endTime = moment(endDate);
+      function formatLeaveDatesAndHours() {
+        $(".leave-start-date").each(function () {
+          var startDate = $(this).data("start");
+          var formattedStartDate =
+            moment(startDate).format("MM-DD-YYYY hh:mm A");
+          $(this).text(formattedStartDate);
+        });
 
-                    if (startTime.isValid() && endTime.isValid()) {
-                        var duration = moment.duration(endTime.diff(startTime));
-                        var totalHours = duration.asHours();
+        $(".leave-end-date").each(function () {
+          var endDate = $(this).data("end");
+          var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
+          $(this).text(formattedEndDate);
+        });
 
-                        // Subtract lunch overlap
-                        var lunchStart = moment(startDate).hour(12).minute(0).second(0);
-                        var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
+        $(".leave-hours").each(function () {
+          var startDate = $(this).data("start");
+          var endDate = $(this).data("end");
 
-                        var overlapStart = moment.max(startTime, lunchStart);
-                        var overlapEnd = moment.min(endTime, lunchEnd);
+          var startTime = moment(startDate);
+          var endTime = moment(endDate);
 
-                        if (overlapEnd.isAfter(overlapStart)) {
-                            var lunchOverlap = moment
-                                .duration(overlapEnd.diff(overlapStart))
-                                .asHours();
-                            totalHours -= lunchOverlap;
-                        }
+          if (startTime.isValid() && endTime.isValid()) {
+            var duration = moment.duration(endTime.diff(startTime));
+            var totalHours = duration.asHours();
 
-                        totalHours = Math.max(totalHours, 0);
-                        var displayHours = totalHours.toFixed(1) + " H";
+            // Subtract lunch overlap
+            var lunchStart = moment(startDate).hour(12).minute(0).second(0);
+            var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
 
-                        $(this).text(displayHours);
-                    } else {
-                        $(this).text("Invalid dates");
-                    }
-                });
+            var overlapStart = moment.max(startTime, lunchStart);
+            var overlapEnd = moment.min(endTime, lunchEnd);
+
+            if (overlapEnd.isAfter(overlapStart)) {
+              var lunchOverlap = moment
+                .duration(overlapEnd.diff(overlapStart))
+                .asHours();
+              totalHours -= lunchOverlap;
             }
 
-            // Format the Start and End Dates using Moment.js
-            $(".leave-start-date").each(function () {
-                var startDate = $(this).data("start");
-                var formattedStartDate = moment(startDate).format("MM-DD-YYYY");
-                $(this).text(formattedStartDate);
-            });
+            totalHours = Math.max(totalHours, 0);
+            var displayHours = totalHours.toFixed(1) + " H";
 
-            $(".leave-end-date").each(function () {
-                var endDate = $(this).data("end");
-                var formattedEndDate = moment(endDate).format("MM-DD-YYYY");
-                $(this).text(formattedEndDate);
-            });
+            $(this).text(displayHours);
+          } else {
+            $(this).text("Invalid dates");
+          }
         });
-    </script>
+      }
+
+      // Format the Start and End Dates using Moment.js
+      $(".leave-start-date").each(function () {
+        var startDate = $(this).data("start");
+        var formattedStartDate = moment(startDate).format("MM-DD-YYYY");
+        $(this).text(formattedStartDate);
+      });
+
+      $(".leave-end-date").each(function () {
+        var endDate = $(this).data("end");
+        var formattedEndDate = moment(endDate).format("MM-DD-YYYY");
+        $(this).text(formattedEndDate);
+      });
+    });
+  </script>
+
+  <script>
+    function printSelectedLeaves() {
+      let selectedIDs = [];
+      $(".leave-checkbox:checked").each(function () {
+        selectedIDs.push($(this).val());
+      });
+
+      if (selectedIDs.length === 0) {
+        alert("Please select at least one leave to print.");
+        return;
+      }
+
+      // Open the print page
+      const url =
+        "/print-leaves?" + selectedIDs.map((id) => `ids=${id}`).join("&");
+      window.open(url, "_blank");
+    }
+  </script>
 </div>
 {% endblock %}
+
+<!-- function printSelectedLeaves() {
+      let selectedIDs = [];
+      $(".leave-checkbox:checked").each(function () {
+        selectedIDs.push($(this).val());
+      });
+
+      if (selectedIDs.length === 0) {
+        alert("Please select at least one leave to print.");
+        return;
+      }
+
+     
+      let printWindow = window.open("", "_blank");
+      let content = `<html><head><title>Print Leaves</title>
+                        <style>
+                            table { width: 100%; border-collapse: collapse; }
+                            th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+                            th { background: #f0f0f0; }
+                        </style>
+                        </head><body>`;
+      content += `<h2>Selected Leave Details</h2>`;
+      content += `<table><thead><tr>
+                        <th>Branch</th>
+                        <th>LeaveType</th>
+                        <th>StartDate</th>
+                        <th>EndDate</th>
+                        <th>LeaveHours</th>
+                        <th>ServiceCount</th>
+                        <th>TypeOfLeave</th>
+                        <th>VerifiedBy</th>
+                        <th>ApprovedBy</th>
+                        <th>RequestedBy</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr></thead><tbody>`;
+
+      $("#leaveTable tbody tr").each(function () {
+        let checkbox = $(this).find(".leave-checkbox");
+        if (checkbox.prop("checked")) {
+          let rowHtml = $(this).clone(); // Clone to preserve the formatting
+          rowHtml.find("td:first-child").remove(); // Remove checkbox cell
+          content += "<tr>" + rowHtml.html() + "</tr>";
+        }
+      });
+
+      content += `</tbody></table>`;
+      content += `</body></html>`;
+
+      printWindow.document.write(content);
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    } -->
