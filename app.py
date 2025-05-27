@@ -205,7 +205,7 @@ LANGUAGES = ['en', 'km']
 def generate_qr_for_leave(leave_id):
     # Data encoded in the QR (e.g., a verification URL or just the leave ID)
     # You can use a URL or more detail here
-    data = f"https://172.104.60.81/print-leaves?ids={leave_id}"
+    data = f"http://172.104.60.81/print-leaves?ids={leave_id}"
 
     img = qrcode.make(data)
     img_io = BytesIO()
