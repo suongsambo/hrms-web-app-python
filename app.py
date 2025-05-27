@@ -50,6 +50,7 @@ from utils.holidays import get_holidays
 # models
 from models.user import User
 from models.users.user_loader import load_user
+import qrcode
 
 app = Flask(__name__)
 login_manager = LoginManager(app)
@@ -198,6 +199,20 @@ LANGUAGES = ['en', 'km']
 #         leaves=leaves,
 #         users=users
 #     )
+
+
+@app.route('/qr/<int:leave_id>')
+def generate_qr_for_leave(leave_id):
+    # Data encoded in the QR (e.g., a verification URL or just the leave ID)
+    # You can use a URL or more detail here
+    data = f"https://172.104.60.81/print-leaves?ids={leave_id}"
+
+    img = qrcode.make(data)
+    img_io = BytesIO()
+    img.save(img_io, 'PNG')
+    img_io.seek(0)
+
+    return send_file(img_io, mimetype='image/png')
 
 
 @app.route('/print-leaves')

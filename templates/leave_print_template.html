@@ -1,182 +1,173 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth" style="scroll-behavior: smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Print Leave Details</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
-  </head>
-  <body class="bg-gray-100 text-gray-800 p-4 print:p-0">
-    <div class="container bg-white mx-auto p-6 print:p-4 text-gray-800">
-      <h2 class="text-2xl font-bold text-center mb-2 print:text-3xl">
-        ពាក្យសុំច្បាប់ឈប់សម្រាក
-      </h2>
-      <h4 class="text-xl font-bold text-center mb-4 print:text-2xl">
-        APPLICATION FORM FOR LEAVE
-      </h4>
 
-      {% for leave in leaves %}
-      <div class="mb-10 print:mb-6 break-inside-avoid">
-        <h3 class="text-lg font-semibold text-center mb-4">
-          ច្បាប់សំរាកលម្អិតសម្រាប់ (Leave Details for): {{ leave.requested_by or
-          leave.employee_id }}
-        </h3>
+<head>
+  <meta charset="UTF-8" />
+  <title>Print Leave Details</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
 
-        <!-- Employee Information Section -->
-        <section
-          class="bg-white p-4 mb-6 print:mb-4 rounded"
-          style="font-size: 12px"
-        >
-          <h3 class="text-md font-bold mb-2">
-            ព័ត៌មានបុគ្គលិក (Employee Information)
-          </h3>
-          <hr class="border-gray-300 mb-3" />
-          <div class="grid grid-cols-2 gap-2 leading-relaxed">
-            <p>
-              <strong>គោត្តនាម និងនាម (Name):</strong> {{ leave.requested_by or
-              'N/A' }}
-            </p>
-            <p>
-              <strong>បម្រើការងារនៅ (Duty Station):</strong> {{ leave.branch or
-              'N/A' }}
-            </p>
-          </div>
-        </section>
-
-        <!-- Leave Time Section -->
-        <section class="bg-white p-0 mb-2 rounded" style="font-size: 12px">
-          <h4 class="text-md font-bold mb-2">
-            ពត៌មានរយៈពេលនៃការឈប់សម្រាក (Leave Time Information)
-          </h4>
-          <hr class="border-gray-300 mb-3" />
-          <div class="grid grid-cols-2 gap-2 leading-relaxed">
-            <p>
-              <strong>ប្រភេទនៃការឈប់សម្រាក (Types of Leave):</strong> {{
-              leave.leave_type }}
-            </p>
-            <p>
-              <strong>សំណើសុំឈប់សម្រាកពីថ្ងៃទី (From Date):</strong> {{
-              leave.start_date }}
-            </p>
-            <p>
-              <strong>រហូតដល់ថ្ងៃទី (To Date):</strong> {{ leave.end_date }}
-            </p>
-            <p>
-              <strong>មូលហេតុនៃការសុំឈប់សម្រាក (Reason for Leave):</strong> {{
-              leave.reason }}
-            </p>
-            <p>
-              <strong>ស្នើដោយ (Requested by):</strong> {{ leave.requested_by or
-              'N/A' }}
-            </p>
-            <p><strong>ប្រភេទ (Type):</strong> {{ leave.type_of_leave }}</p>
-
-            {% if leave.type_of_leave != 'H' %}
-            <p>
-              <strong>ការសុំឈប់សម្រាកសរុបគិតជាថ្ងៃ (Total Leave Day):</strong>
-              {{ leave.service_count or 0 }} {{ "Day" if leave.service_count ==
-              1 else "Days" }}
-            </p>
-            {% endif %} {% if leave.type_of_leave != 'D' %}
-            <p>
-              <strong>ការសុំឈប់សម្រាកសរុបគិតជាម៉ោង (Leave Hours):</strong>
-              {{ leave.leave_hours or 0 }} {{ "Hour" if leave.leave_hours == 1
-              else "Hours" }}
-            </p>
-            {% endif %}
-          </div>
-        </section>
-      </div>
-      {% endfor %}
-
-      <!-- User Information Section -->
-      <div class="text-md p-0 bg-white" style="font-size: 12px">
-        <h4 class="text-md font-bold mb-2">
-          ពត៌មានអ្នកស្នើសុំ និង អ្នកអនុម័ត (Requester and Approver Information)
-        </h4>
-        <hr class="border-gray-300 mb-3" />
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {% for leave in leaves %}
-          <!-- Requested By -->
-          <div class="p-2 rounded shadow-none justify-center">
-            <h4 class="font-semibold text-gray-600 mb-1">
-              ស្នើដោយ (Requested by):
-            </h4>
-            {% set user_req = users.get(leave.requested_by) %}
-            <div class="flex flex-col items-start">
-              {% if user_req and user_req.Signature %}
-              <img
-                src="data:image/png;base64,{{ user_req.Signature }}"
-                alt="Signature"
-                class="mb-2"
-                width="150"
-              />
-              {% else %}
-              <p class="text-gray-400 italic mb-2">No Signature</p>
-              {% endif %}
-
-              <label class="font-semibold text-gray-600"
-                >ឈ្មោះ (Name) : {{ user_req and user_req.UserName or 'N/A'
-                }}</label
-              >
-            </div>
-          </div>
-
-          <!-- Verified By -->
-          <div class="p-2 rounded shadow-none">
-            <h4 class="font-semibold text-gray-600 mb-1">
-              ពិនិត្យដោយ (Verified by):
-            </h4>
-            {% set user_ver = users.get(leave.verified_by) %}
-            <div class="flex flex-col items-start">
-              {% if user_ver and user_ver.Signature %}
-              <img
-                src="data:image/png;base64,{{ user_ver.Signature }}"
-                alt="Signature"
-                class="mb-2"
-                width="150"
-              />
-              {% else %}
-              <p class="text-gray-400 italic mb-2">No Signature</p>
-              {% endif %}
-
-              <label class="font-semibold text-gray-600"
-                >ឈ្មោះ (Name) : {{ user_ver and user_ver.UserName or 'N/A'
-                }}</label
-              >
-            </div>
-          </div>
-
-          <!-- Approved By -->
-          <div class="p-2 rounded shadow-none">
-            <h4 class="font-semibold text-gray-600 mb-1">
-              អនុញ្ញាតដោយ (Approved by):
-            </h4>
-            {% set user_app = users.get(leave.approved_by) %}
-            <div class="flex flex-col items-start">
-              {% if user_app and user_app.Signature %}
-              <img
-                src="data:image/png;base64,{{ user_app.Signature }}"
-                alt="Signature"
-                class="mb-2"
-                width="150"
-              />
-              {% else %}
-              <p class="text-gray-400 italic mb-2">No Signature</p>
-              {% endif %}
-
-              <label class="font-semibold text-gray-600"
-                >ឈ្មោះ (Name) : {{ user_app and user_app.UserName or 'N/A'
-                }}</label
-              >
-            </div>
-          </div>
-          {% endfor %}
+<body class="bg-gray-100 text-gray-800 p-4 print:p-0">
+  <div class="container bg-white mx-auto p-6 print:p-4 text-gray-800">
+    <h2 class="text-2xl font-bold text-center m-0 p-0 print:text-3xl font-fimaly">
+      ពាក្យសុំច្បាប់ឈប់សម្រាក
+    </h2>
+    <h4 class="text-xl font-bold text-center m-0 p-0 print:text-2xl">
+      APPLICATION FORM FOR LEAVE
+    </h4>
+    <div class="flex justify-end">
+      <div>
+        {% for leave in leaves %}
+        <p class="text-xs font-semibold text-gray-700 text-right">Scan to print</p>
+        <div class="leave-entry flex items-center gap-4 bg-white p-0 rounded-lg">
+          <img src="{{ url_for('generate_qr_for_leave', leave_id=leave.id) }}" alt="QR Code for Leave {{ leave.id }}"
+            class="w-20 h-20 rounded border border-gray-200" />
         </div>
+        {% endfor %}
       </div>
     </div>
-  </body>
+
+
+
+    {% for leave in leaves %}
+    <div class="mb-1 print:mb-6 break-inside-avoid">
+
+      <!-- Employee Information Section -->
+      <section class="bg-white p-0 mb-6 print:mb-4 rounded" style="font-size: 12px">
+        <h3 class="text-md font-bold mb-2">
+          ព័ត៌មានបុគ្គលិក (Employee Information)
+        </h3>
+        <hr class="border-gray-300 mb-3" />
+        <div class="grid grid-cols-2 gap-2 leading-relaxed">
+          <p>
+            <strong>គោត្តនាម និងនាម (Name):</strong> {{ leave.requested_by or
+            'N/A' }}
+          </p>
+          <p>
+            <strong>បម្រើការងារនៅ (Duty Station):</strong> {{ leave.branch or
+            'N/A' }}
+          </p>
+        </div>
+      </section>
+
+      <!-- Leave Time Section -->
+      <section class="bg-white p-0 mb-2 rounded" style="font-size: 12px">
+        <h4 class="text-md font-bold mb-2">
+          ពត៌មានរយៈពេលនៃការឈប់សម្រាក (Leave Time Information)
+        </h4>
+        <hr class="border-gray-300 mb-3" />
+        <div class="grid grid-cols-2 gap-2 leading-relaxed">
+          <p>
+            <strong>ប្រភេទនៃការឈប់សម្រាក (Types of Leave):</strong> {{
+            leave.leave_type }}
+          </p>
+          <p>
+            <strong>សំណើសុំឈប់សម្រាកពីថ្ងៃទី (From Date):</strong> {{
+            leave.start_date }}
+          </p>
+          <p>
+            <strong>រហូតដល់ថ្ងៃទី (To Date):</strong> {{ leave.end_date }}
+          </p>
+          <p>
+            <strong>មូលហេតុនៃការសុំឈប់សម្រាក (Reason for Leave):</strong> {{
+            leave.reason }}
+          </p>
+          <p>
+            <strong>ស្នើដោយ (Requested by):</strong> {{ leave.requested_by or
+            'N/A' }}
+          </p>
+          <p><strong>ប្រភេទ (Type):</strong> {{ leave.type_of_leave }}</p>
+
+          {% if leave.type_of_leave != 'H' %}
+          <p>
+            <strong>ការសុំឈប់សម្រាកសរុបគិតជាថ្ងៃ (Total Leave Day):</strong>
+            {{ leave.service_count or 0 }} {{ "Day" if leave.service_count ==
+            1 else "Days" }}
+          </p>
+          {% endif %} {% if leave.type_of_leave != 'D' %}
+          <p>
+            <strong>ការសុំឈប់សម្រាកសរុបគិតជាម៉ោង (Leave Hours):</strong>
+            {{ leave.leave_hours or 0 }} {{ "Hour" if leave.leave_hours == 1
+            else "Hours" }}
+          </p>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+    {% endfor %}
+
+    <!-- User Information Section -->
+    <div class="text-md pt-2 bg-white" style="font-size: 12px">
+      <h4 class="text-md font-bold mb-2">
+        ពត៌មានអ្នកស្នើសុំ និង អ្នកអនុម័ត (Requester and Approver Information)
+      </h4>
+      <hr class="border-gray-300 mb-3" />
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {% for leave in leaves %}
+        <!-- Requested By -->
+        <div class="p-2 rounded shadow-none justify-center">
+          <h4 class="font-semibold text-gray-600 mb-1">
+            ស្នើដោយ (Requested by):
+          </h4>
+          {% set user_req = users.get(leave.requested_by) %}
+          <div class="flex flex-col items-start">
+            {% if user_req and user_req.Signature %}
+            <img src="data:image/png;base64,{{ user_req.Signature }}" alt="Signature" class="mb-2" width="150" />
+            {% else %}
+            <p class="text-gray-400 italic mb-2">No Signature</p>
+            {% endif %}
+
+            <label class="font-semibold text-gray-600">ឈ្មោះ (Name) : {{ user_req and user_req.UserName or 'N/A'
+              }}</label>
+          </div>
+        </div>
+
+        <!-- Verified By -->
+        <div class="p-2 rounded shadow-none">
+          <h4 class="font-semibold text-gray-600 mb-1">
+            ពិនិត្យដោយ (Verified by):
+          </h4>
+          {% set user_ver = users.get(leave.verified_by) %}
+          <div class="flex flex-col items-start">
+            {% if user_ver and user_ver.Signature %}
+            <img src="data:image/png;base64,{{ user_ver.Signature }}" alt="Signature" class="mb-2" width="150" />
+            {% else %}
+            <p class="text-gray-400 italic mb-2">No Signature</p>
+            {% endif %}
+
+            <label class="font-semibold text-gray-600">ឈ្មោះ (Name) : {{ user_ver and user_ver.UserName or 'N/A'
+              }}</label>
+          </div>
+        </div>
+
+        <!-- Approved By -->
+        <div class="p-2 rounded shadow-none">
+          <h4 class="font-semibold text-gray-600 mb-1">
+            អនុញ្ញាតដោយ (Approved by):
+          </h4>
+          {% set user_app = users.get(leave.approved_by) %}
+          <div class="flex flex-col items-start">
+            {% if user_app and user_app.Signature %}
+            <img src="data:image/png;base64,{{ user_app.Signature }}" alt="Signature" class="mb-2" width="150" />
+            {% else %}
+            <p class="text-gray-400 italic mb-2">No Signature</p>
+            {% endif %}
+
+            <label class="font-semibold text-gray-600">ឈ្មោះ (Name) : {{ user_app and user_app.UserName or 'N/A'
+              }}</label>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+
+
+
+
+
+  </div>
+</body>
+
 </html>
