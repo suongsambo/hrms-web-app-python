@@ -1,32 +1,52 @@
 {% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
 content %}
-<div class="container mx-auto py-8">
-  <!-- Title -->
-  <!-- <h2 class="text-3xl font-extrabold text-gray-800 mb-6">Employee List</h2> -->
+<div class="container mx-auto py-4">
 
   <!-- Action Buttons -->
-  <div class="flex justify-end items-center mb-4 gap-x-4">
+
+
+  <div class="flex justify-start items-center mb-2 gap-x-2">
+    <!-- Add Employee Button -->
+    <a href="{{ url_for('add_employee') }}"
+      class="bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-2 rounded flex items-center space-x-1 transition duration-300 transform hover:scale-105">
+      <span class="material-symbols-outlined text-base">add_box</span>
+      <span>Add</span>
+    </a>
+
     <!-- Print Button -->
     <button type="button" onclick="printTable()"
-      class="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center space-x-2 transition duration-300 transform hover:scale-105">
-      <span class="material-symbols-outlined">print</span>
-      <span class="text-sm">Print</span>
+      class="bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded flex items-center space-x-1 transition duration-300 transform hover:scale-105">
+      <span class="material-symbols-outlined text-base">print</span>
+      <span>Print</span>
     </button>
+
+
+
+
+
+    <!-- Import Employees Button -->
+    <a href="{{ url_for('import_employees') }}"
+      class="bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded flex items-center space-x-1 transition duration-300 transform hover:scale-105">
+      <span class="material-symbols-outlined text-base">file_upload</span>
+      <span>Import</span>
+    </a>
+
+    <!-- Download Template Button -->
+    <a href="{{ url_for('download_import_template') }}"
+      class="bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-2 rounded flex items-center space-x-1 transition duration-300 transform hover:scale-105">
+      <span class="material-symbols-outlined text-base">file_download</span>
+      <span>Template</span>
+    </a>
+
 
     <!-- Refresh Button -->
     <button type="button" onclick="window.location.reload()"
-      class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg flex items-center space-x-2 transition duration-300 transform hover:scale-105">
-      <span class="material-symbols-outlined">autorenew</span>
-      <span class="text-sm">Refresh</span>
+      class="bg-blue-500 hover:bg-blue-600 text-white text-xs py-1 px-2 rounded flex items-center space-x-1 transition duration-300 transform hover:scale-105">
+      <span class="material-symbols-outlined text-base">autorenew</span>
+      <span>Refresh</span>
     </button>
-
-    <!-- Add Employee Button -->
-    <a href="{{ url_for('add_employee') }}"
-      class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg flex items-center space-x-2 transition duration-300 transform hover:scale-105">
-      <span class="material-symbols-outlined">add_box</span>
-      <span class="text-sm font-semibold">Add Employee</span>
-    </a>
   </div>
+
 
   <!-- Employee Table -->
 
@@ -51,6 +71,52 @@ content %}
             <th class="py-3 px-6 text-left">Address</th>
             <th class="py-3 px-6 text-left">EmergencyContactName</th>
             <th class="py-3 px-6 text-left">EmergencyContactPhone</th>
+            <th class="py-3 px-6 text-left">Employees Height</th>
+            <th class="py-3 px-6 text-left">Ethnicity</th>
+            <th class="py-3 px-6 text-left">Nationality</th>
+            <th class="py-3 px-6 text-left">Religion</th>
+            <th class="py-3 px-6 text-left">Family Status</th>
+            <th class="py-3 px-6 text-left">Place of Birth</th>
+            <th class="py-3 px-6 text-left">Permanent Address</th>
+            <th class="py-3 px-6 text-left">Village</th>
+            <th class="py-3 px-6 text-left">Commune</th>
+            <th class="py-3 px-6 text-left">District</th>
+            <th class="py-3 px-6 text-left">Province</th>
+            <th class="py-3 px-6 text-left">Home Number</th>
+            <th class="py-3 px-6 text-left">Street Number</th>
+            <th class="py-3 px-6 text-left">Group Name</th>
+            <th class="py-3 px-6 text-left">Personal Phone Number</th>
+            <th class="py-3 px-6 text-left">Level of Culture</th>
+            <th class="py-3 px-6 text-left">Skill</th>
+            <th class="py-3 px-6 text-left">Educational Institution</th>
+            <th class="py-3 px-6 text-left">Foreign Languages</th>
+            <th class="py-3 px-6 text-left">Current Function</th>
+            <th class="py-3 px-6 text-left">ID Card Number</th>
+            <th class="py-3 px-6 text-left">Work At</th>
+            <th class="py-3 px-6 text-left">Employment ID</th>
+            <th class="py-3 px-6 text-left">Employment Date</th>
+            <th class="py-3 px-6 text-left">Khmer Nationality ID Card</th>
+            <th class="py-3 px-6 text-left">Passing Test Date</th>
+            <th class="py-3 px-6 text-left">Residence Book/Family Book</th>
+            <th class="py-3 px-6 text-left">Made On</th>
+            <th class="py-3 px-6 text-left">Number of Children</th>
+            <th class="py-3 px-6 text-left">Father Name</th>
+            <th class="py-3 px-6 text-left">Mother Name</th>
+            <th class="py-3 px-6 text-left">Father Status</th>
+            <th class="py-3 px-6 text-left">Father Occupation</th>
+            <th class="py-3 px-6 text-left">Mother Occupation</th>
+            <th class="py-3 px-6 text-left">Mother Status</th>
+            <th class="py-3 px-6 text-left">Father Permanent Address</th>
+            <th class="py-3 px-6 text-left">Mother Permanent Address</th>
+            <th class="py-3 px-6 text-left">Parents Village</th>
+            <th class="py-3 px-6 text-left">Parents Commune</th>
+            <th class="py-3 px-6 text-left">Parents District</th>
+            <th class="py-3 px-6 text-left">Parents Province</th>
+            <th class="py-3 px-6 text-left">Parents Home Number</th>
+            <th class="py-3 px-6 text-left">Parents Street Number</th>
+            <th class="py-3 px-6 text-left">Parents Group</th>
+            <th class="py-3 px-6 text-left">Parents Phone</th>
+
             <th class="py-3 px-6 text-center">Actions</th>
           </tr>
         </thead>
@@ -74,6 +140,52 @@ content %}
             <td class="py-3 px-6">{{ employee.address }}</td>
             <td class="py-3 px-6">{{ employee.emergency_contact_name }}</td>
             <td class="py-3 px-6">{{ employee.emergency_contact_phone }}</td>
+            <td class="py-3 px-6">{{ employee.employees_height }}</td>
+            <td class="py-3 px-6">{{ employee.ethnicity }}</td>
+            <td class="py-3 px-6">{{ employee.nationality }}</td>
+            <td class="py-3 px-6">{{ employee.religion }}</td>
+            <td class="py-3 px-6">{{ employee.family_status }}</td>
+            <td class="py-3 px-6">{{ employee.place_of_birth }}</td>
+            <td class="py-3 px-6">{{ employee.permanent_address }}</td>
+            <td class="py-3 px-6">{{ employee.village }}</td>
+            <td class="py-3 px-6">{{ employee.commune }}</td>
+            <td class="py-3 px-6">{{ employee.district }}</td>
+            <td class="py-3 px-6">{{ employee.province }}</td>
+            <td class="py-3 px-6">{{ employee.home_number }}</td>
+            <td class="py-3 px-6">{{ employee.street_number }}</td>
+            <td class="py-3 px-6">{{ employee.group_name }}</td>
+            <td class="py-3 px-6">{{ employee.personal_phone_number }}</td>
+            <td class="py-3 px-6">{{ employee.level_of_culture }}</td>
+            <td class="py-3 px-6">{{ employee.skill }}</td>
+            <td class="py-3 px-6">{{ employee.name_of_educational_institution }}</td>
+            <td class="py-3 px-6">{{ employee.knowledge_of_foreign_languages }}</td>
+            <td class="py-3 px-6">{{ employee.current_function }}</td>
+            <td class="py-3 px-6">{{ employee.id_card_number }}</td>
+            <td class="py-3 px-6">{{ employee.work_at }}</td>
+            <td class="py-3 px-6">{{ employee.employment_id }}</td>
+            <td class="py-3 px-6">{{ employee.employment_date }}</td>
+            <td class="py-3 px-6">{{ employee.khmer_nationality_identity_card }}</td>
+            <td class="py-3 px-6">{{ employee.passing_test_date }}</td>
+            <td class="py-3 px-6">{{ employee.residence_book_or_family_book }}</td>
+            <td class="py-3 px-6">{{ employee.made_on }}</td>
+            <td class="py-3 px-6">{{ employee.have_a_number_of_children }}</td>
+            <td class="py-3 px-6">{{ employee.father_name }}</td>
+            <td class="py-3 px-6">{{ employee.mother_name }}</td>
+            <td class="py-3 px-6">{{ employee.father_status }}</td>
+            <td class="py-3 px-6">{{ employee.father_occupation }}</td>
+            <td class="py-3 px-6">{{ employee.mother_occupation }}</td>
+            <td class="py-3 px-6">{{ employee.mother_status }}</td>
+            <td class="py-3 px-6">{{ employee.father_permanent_address }}</td>
+            <td class="py-3 px-6">{{ employee.mother_permanent_address }}</td>
+            <td class="py-3 px-6">{{ employee.parents_village }}</td>
+            <td class="py-3 px-6">{{ employee.parents_commune }}</td>
+            <td class="py-3 px-6">{{ employee.parents_district }}</td>
+            <td class="py-3 px-6">{{ employee.parents_province }}</td>
+            <td class="py-3 px-6">{{ employee.parents_home_number }}</td>
+            <td class="py-3 px-6">{{ employee.parents_street_number }}</td>
+            <td class="py-3 px-6">{{ employee.parents_group }}</td>
+            <td class="py-3 px-6">{{ employee.parents_phone }}</td>
+
             <td class="py-3 px-6 text-center">
               <div class="flex justify-center gap-x-3">
                 <a href="{{ url_for('edit_employee', id=employee.id) }}"

@@ -14,6 +14,7 @@ import sqlite3
 import hashlib
 import os
 import io
+import pandas as pd
 from io import StringIO, BytesIO, TextIOWrapper
 import csv
 import json
@@ -85,6 +86,11 @@ eventlet.monkey_patch()
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 LANGUAGES = ['en', 'km']
+ALLOWED_EXCEL = {'xlsx', 'xls'}
+
+
+def allowed_excel(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXCEL
 
 
 # @app.before_request
@@ -4833,6 +4839,160 @@ def search_employees():
     return render_template('/employees/employees.html', employees=employees)
 
 
+@app.route('/employees/import', methods=['GET', 'POST'])
+@login_required
+def import_employees():
+    if request.method == 'POST':
+        f = request.files.get('excel_file')
+        if not f or f.filename == '':
+            flash('Please choose an Excel file.', 'error')
+            return redirect(request.url)
+
+        if not allowed_excel(f.filename):
+            flash('Supported formats: .xlsx or .xls', 'error')
+            return redirect(request.url)
+
+        try:
+            df = pd.read_excel(f)
+        except Exception as e:
+            flash(f'Could not read file: {e}', 'error')
+            return redirect(request.url)
+
+        required = [
+            'name', 'age', 'department', 'salary', 'position_id', 'joining_date', 'status', 'branch', 'user_id',
+            'phone_number', 'email', 'address', 'emergency_contact_name', 'emergency_contact_phone',
+            'employees_height', 'ethnicity', 'nationality', 'religion', 'family_status', 'place_of_birth',
+            'permanent_address', 'village', 'commune', 'district', 'province', 'home_number', 'street_number',
+            'group_name', 'personal_phone_number', 'level_of_culture', 'skill', 'name_of_educational_institution',
+            'knowledge_of_foreign_languages', 'current_function', 'id_card_number', 'work_at', 'employment_id',
+            'employment_date', 'khmer_nationality_identity_card', 'passing_test_date', 'residence_book_or_family_book',
+            'made_on', 'have_a_number_of_children', 'father_name', 'mother_name', 'father_status', 'father_occupation',
+            'mother_occupation', 'mother_status', 'father_permanent_address', 'mother_permanent_address',
+            'parents_village', 'parents_commune', 'parents_district', 'parents_province', 'parents_home_number',
+            'parents_street_number', 'parents_group', 'parents_phone'
+        ]
+
+        missing = [c for c in required if c not in df.columns]
+        if missing:
+            flash(f'Missing columns: {", ".join(missing)}', 'error')
+            return redirect(request.url)
+
+        inserted, skipped = 0, 0
+        with get_db_connection() as conn:
+            for _, row in df.iterrows():
+                if pd.isna(row['name']) or pd.isna(row['department']):
+                    skipped += 1
+                    continue
+
+                jd = row['joining_date']
+                if isinstance(jd, (pd.Timestamp, datetime)):
+                    jd = jd.date()
+
+                conn.execute("""
+                    INSERT INTO employees (
+                        name, age, department, salary, position_id, joining_date, status, branch, user_id,
+                        phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+                        employees_height, ethnicity, nationality, religion, family_status, place_of_birth,
+                        permanent_address, village, commune, district, province, home_number, street_number,
+                        group_name, personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+                        knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id,
+                        employment_date, khmer_nationality_identity_card, passing_test_date, residence_book_or_family_book,
+                        made_on, have_a_number_of_children, father_name, mother_name, father_status, father_occupation,
+                        mother_occupation, mother_status, father_permanent_address, mother_permanent_address,
+                        parents_village, parents_commune, parents_district, parents_province, parents_home_number,
+                        parents_street_number, parents_group, parents_phone
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, tuple(row[col] for col in required))
+                inserted += 1
+            conn.commit()
+
+        flash(f'Imported {inserted} employees ({skipped} skipped).', 'success')
+        return redirect(url_for('list_employees'))
+
+    return render_template('employees/import.html')
+
+
+@app.route('/employees/import/template')
+@login_required
+def download_import_template():
+    data = [
+        {
+            "name": "Suong Sambo",
+            "age": 29,
+            "department": "ITD",
+            "salary": 850.00,
+            "position_id": 1,
+            "joining_date": "2022-03-15",
+            "status": "Active",
+            "branch": "Phnom Penh",
+            "user_id": 1,
+            "phone_number": "012345678",
+            "email": "suong.sambo@example.com",
+            "address": "House 15, St. 310, Phnom Penh",
+            "emergency_contact_name": "Chanthy Dara",
+            "emergency_contact_phone": "097654321",
+            "employees_height": "175 cm",
+            "ethnicity": "Khmer",
+            "nationality": "Cambodian",
+            "religion": "Buddhism",
+            "family_status": "single",
+            "place_of_birth": "Phnom Penh",
+            "permanent_address": "Phnom Penh Cambodia",
+            "village": "Prek Luong",
+            "commune": "Svay Por",
+            "district": "Phnom Penh",
+            "province": "Phnom Penh",
+            "home_number": "12A",
+            "street_number": "310",
+            "group_name": "Group 5",
+            "personal_phone_number": "092112233",
+            "level_of_culture": "bachelor_degree",
+            "skill": "Accounting",
+            "name_of_educational_institution": "Royal University of Law and Economics",
+            "knowledge_of_foreign_languages": "English, Chinese",
+            "current_function": "Senior Accountant",
+            "id_card_number": "0203001234567",
+            "work_at": "Phnom Penh Office",
+            "employment_id": "EMP123456",
+            "employment_date": "2022-03-01",
+            "khmer_nationality_identity_card": "123456789",
+            "passing_test_date": "2022-02-15",
+            "residence_book_or_family_book": "Family Book No. 123",
+            "made_on": "2022-03-10",
+            "have_a_number_of_children": 0,
+            "father_name": "Sok Vanna",
+            "mother_name": "Vanny Nary",
+            "father_status": "Alive",
+            "father_occupation": "Teacher",
+            "mother_occupation": "Farmer",
+            "mother_status": "Alive",
+            "father_permanent_address": "Phnom Penh Province",
+            "mother_permanent_address": "Phnom Penh Province",
+            "parents_village": "Prek Luong",
+            "parents_commune": "Svay Por",
+            "parents_district": "Phnom Penh",
+            "parents_province": "Phnom Penh",
+            "parents_home_number": "12A",
+            "parents_street_number": "310",
+            "parents_group": "Group 5",
+            "parents_phone": "093876543"
+        }
+
+
+    ]
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    df.to_excel(output, index=False, engine='openpyxl')
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="employee_import_template.xlsx",
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
+
 @app.route('/employees/add', methods=['GET', 'POST'])
 @login_required
 def add_employee():
@@ -4985,16 +5145,56 @@ def add_employee():
     return render_template('employees/add_employee.html', branches=branches, users=users, positions=positions, departments=departments)
 
 
+# @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
+# @login_required
+# def edit_employee(id):
+#     with get_db_connection() as conn:
+#         employee = conn.execute(
+#             "SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
+#         branches = conn.execute("SELECT * FROM branches").fetchall()
+#         positions = conn.execute("SELECT * FROM positions").fetchall()
+
+#     if request.method == 'POST':
+#         name = request.form['name']
+#         age = request.form['age']
+#         department = request.form['department']
+#         salary = request.form['salary']
+#         position_id = request.form['position_id']
+#         joining_date = request.form['joining_date']
+#         status = request.form['status']
+#         branch = request.form['branch']
+#         phone_number = request.form['phone_number']
+#         email = request.form['email']
+#         address = request.form['address']
+#         emergency_contact_name = request.form['emergency_contact_name']
+#         emergency_contact_phone = request.form['emergency_contact_phone']
+
+#         with get_db_connection() as conn:
+#             conn.execute(
+#                 """UPDATE employees SET name = ?, age = ?, department = ?, salary = ?, position_id = ?, joining_date = ?,
+#                    status = ?, branch = ?, phone_number = ?, email = ?, address = ?, emergency_contact_name = ?, emergency_contact_phone = ?
+#                    WHERE id = ?""",
+#                 (name, age, department, salary, position_id, joining_date, status, branch,
+#                  phone_number, email, address, emergency_contact_name, emergency_contact_phone, id)
+#             )
+#             conn.commit()
+#         return redirect(url_for('list_employees'))
+
+#     return render_template('/employees/edit_employee.html', employee=employee, branches=branches, positions=positions)
+
+
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_employee(id):
     with get_db_connection() as conn:
         employee = conn.execute(
-            "SELECT * FROM employees WHERE id = ?", (id,)).fetchone()
+            "SELECT * FROM employees WHERE id = ?", (id,)
+        ).fetchone()
         branches = conn.execute("SELECT * FROM branches").fetchall()
         positions = conn.execute("SELECT * FROM positions").fetchall()
 
     if request.method == 'POST':
+        # Existing fields
         name = request.form['name']
         age = request.form['age']
         department = request.form['department']
@@ -5009,15 +5209,98 @@ def edit_employee(id):
         emergency_contact_name = request.form['emergency_contact_name']
         emergency_contact_phone = request.form['emergency_contact_phone']
 
+        # New optional fields
+        employees_height = request.form.get('employees_height')
+        ethnicity = request.form.get('ethnicity')
+        nationality = request.form.get('nationality')
+        religion = request.form.get('religion')
+        family_status = request.form.get('family_status')
+        place_of_birth = request.form.get('place_of_birth')
+        permanent_address = request.form.get('permanent_address')
+        village = request.form.get('village')
+        commune = request.form.get('commune')
+        district = request.form.get('district')
+        province = request.form.get('province')
+        home_number = request.form.get('home_number')
+        street_number = request.form.get('street_number')
+        group_name = request.form.get('group_name')
+        personal_phone_number = request.form.get('personal_phone_number')
+        level_of_culture = request.form.get('level_of_culture')
+        skill = request.form.get('skill')
+        name_of_educational_institution = request.form.get(
+            'name_of_educational_institution')
+        knowledge_of_foreign_languages = request.form.get(
+            'knowledge_of_foreign_languages')
+        current_function = request.form.get('current_function')
+        id_card_number = request.form.get('id_card_number')
+        work_at = request.form.get('work_at')
+        employment_id = request.form.get('employment_id')
+        employment_date = request.form.get('employment_date')
+        khmer_nationality_identity_card = request.form.get(
+            'khmer_nationality_identity_card')
+        passing_test_date = request.form.get('passing_test_date')
+        residence_book_or_family_book = request.form.get(
+            'residence_book_or_family_book')
+        made_on = request.form.get('made_on')
+        have_a_number_of_children = request.form.get(
+            'have_a_number_of_children')
+        father_name = request.form.get('father_name')
+        mother_name = request.form.get('mother_name')
+        father_status = request.form.get('father_status')
+        father_occupation = request.form.get('father_occupation')
+        mother_occupation = request.form.get('mother_occupation')
+        mother_status = request.form.get('mother_status')
+        father_permanent_address = request.form.get('father_permanent_address')
+        mother_permanent_address = request.form.get('mother_permanent_address')
+        parents_village = request.form.get('parents_village')
+        parents_commune = request.form.get('parents_commune')
+        parents_district = request.form.get('parents_district')
+        parents_province = request.form.get('parents_province')
+        parents_home_number = request.form.get('parents_home_number')
+        parents_street_number = request.form.get('parents_street_number')
+        parents_group = request.form.get('parents_group')
+        parents_phone = request.form.get('parents_phone')
+
+        # Convert have_a_number_of_children to int if not None and not empty
+        if have_a_number_of_children:
+            try:
+                have_a_number_of_children = int(have_a_number_of_children)
+            except ValueError:
+                have_a_number_of_children = None
+        else:
+            have_a_number_of_children = None
+
         with get_db_connection() as conn:
             conn.execute(
-                """UPDATE employees SET name = ?, age = ?, department = ?, salary = ?, position_id = ?, joining_date = ?,
-                   status = ?, branch = ?, phone_number = ?, email = ?, address = ?, emergency_contact_name = ?, emergency_contact_phone = ?
-                   WHERE id = ?""",
-                (name, age, department, salary, position_id, joining_date, status, branch,
-                 phone_number, email, address, emergency_contact_name, emergency_contact_phone, id)
+                """
+                UPDATE employees SET
+                    name = ?, age = ?, department = ?, salary = ?, position_id = ?, joining_date = ?,
+                    status = ?, branch = ?, phone_number = ?, email = ?, address = ?, emergency_contact_name = ?, emergency_contact_phone = ?,
+                    employees_height = ?, ethnicity = ?, nationality = ?, religion = ?, family_status = ?, place_of_birth = ?, permanent_address = ?,
+                    village = ?, commune = ?, district = ?, province = ?, home_number = ?, street_number = ?, group_name = ?, personal_phone_number = ?,
+                    level_of_culture = ?, skill = ?, name_of_educational_institution = ?, knowledge_of_foreign_languages = ?, current_function = ?,
+                    id_card_number = ?, work_at = ?, employment_id = ?, employment_date = ?, khmer_nationality_identity_card = ?,
+                    passing_test_date = ?, residence_book_or_family_book = ?, made_on = ?, have_a_number_of_children = ?, father_name = ?,
+                    mother_name = ?, father_status = ?, father_occupation = ?, mother_occupation = ?, mother_status = ?,
+                    father_permanent_address = ?, mother_permanent_address = ?, parents_village = ?, parents_commune = ?, parents_district = ?,
+                    parents_province = ?, parents_home_number = ?, parents_street_number = ?, parents_group = ?, parents_phone = ?
+                WHERE id = ?
+                """,
+                (name, age, department, salary, position_id, joining_date,
+                 status, branch, phone_number, email, address,
+                 emergency_contact_name, emergency_contact_phone,
+                 employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address,
+                 village, commune, district, province, home_number, street_number, group_name, personal_phone_number,
+                 level_of_culture, skill, name_of_educational_institution, knowledge_of_foreign_languages, current_function,
+                 id_card_number, work_at, employment_id, employment_date, khmer_nationality_identity_card,
+                 passing_test_date, residence_book_or_family_book, made_on, have_a_number_of_children, father_name,
+                 mother_name, father_status, father_occupation, mother_occupation, mother_status,
+                 father_permanent_address, mother_permanent_address, parents_village, parents_commune, parents_district,
+                 parents_province, parents_home_number, parents_street_number, parents_group, parents_phone,
+                 id)
             )
             conn.commit()
+
         return redirect(url_for('list_employees'))
 
     return render_template('/employees/edit_employee.html', employee=employee, branches=branches, positions=positions)

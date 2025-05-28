@@ -39,9 +39,11 @@ markdown-it-py==3.0.0
 MarkupSafe==3.0.2
 mdurl==0.1.2
 msgpack==1.1.0
+numpy==2.2.6
 ordered-set==4.1.0
 packageurl-python==0.16.0
 packaging==24.2
+pandas==2.2.3
 pillow==11.1.0
 pip-api==0.0.34
 pip-requirements-parser==32.0.1
@@ -57,6 +59,7 @@ PyJWT==2.10.1
 pyotp==2.9.0
 pyparsing==3.2.3
 pytest==8.3.5
+python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python-engineio==4.11.2
 python-socketio==5.12.1
@@ -65,9 +68,11 @@ qrcode==8.2
 requests==2.32.3
 rich==13.9.4
 simple-websocket==1.1.0
+six==1.17.0
 sortedcontainers==2.4.0
 toml==0.10.2
 typing_extensions==4.13.2
+tzdata==2025.2
 tzlocal==5.3.1
 urllib3==2.3.0
 Werkzeug==3.1.3

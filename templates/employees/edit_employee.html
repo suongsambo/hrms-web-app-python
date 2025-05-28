@@ -1,237 +1,528 @@
-{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}Edit Employee{% endblock %} {% block
 content %}
+<div class="max-w-7xl mx-auto py-2 px-6">
+  <div class="bg-white shadow-lg rounded-lg p-8">
 
-<div class="container mx-auto py-8">
-  <h2 class="text-2xl font-bold mb-6">Edit Employee</h2>
-  <form method="POST" class="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-    <div class="grid grid-cols-2 gap-4">
-      <div>
-        <label for="name" class="block text-gray-700 text-sm font-bold mb-2"
-          >Name:</label
-        >
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value="{{ employee['name'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
 
-      <div>
-        <label for="age" class="block text-gray-700 text-sm font-bold mb-2"
-          >Age:</label
-        >
-        <input
-          type="number"
-          id="age"
-          name="age"
-          value="{{ employee['age'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <div>
-        <label
-          for="department"
-          class="block text-gray-700 text-sm font-bold mb-2"
-          >Department:</label
-        >
-        <input
-          type="text"
-          id="department"
-          name="department"
-          value="{{ employee['department'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <div>
-        <label for="salary" class="block text-gray-700 text-sm font-bold mb-2"
-          >Salary:</label
-        >
-        <input
-          type="number"
-          id="salary"
-          name="salary"
-          step="0.01"
-          value="{{ employee['salary'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <!-- Position Field -->
-      <div>
-        <label for="position" class="block text-sm font-medium text-gray-700">
-          Position:
-        </label>
-        <div class="mt-2 relative">
-          <select
-            id="position"
-            name="position_id"
-            required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="" disabled selected>Select a Position</option>
-            {% for position in positions %}
-            <option value="{{ position.id }}">
-              {{ position.Description }}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label
-          for="joining_date"
-          class="block text-gray-700 text-sm font-bold mb-2"
-          >Joining Date:</label
-        >
-        <input
-          type="date"
-          id="joining_date"
-          name="joining_date"
-          value="{{ employee['joining_date'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <div>
-        <label for="status" class="block text-gray-700 text-sm font-bold mb-2"
-          >Status:</label
-        >
-        <select
-          id="status"
-          name="status"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        >
-          <option value="Active">Active</option>
-          <option value="Inactive">Inactive</option>
-          <option value="On Leave">On Leave</option>
-        </select>
-      </div>
-
-      <!-- Branch Field -->
-      <div>
-        <label for="branch" class="block text-sm font-medium text-gray-700"
-          >Branch:</label
-        >
-        <div class="mt-2 relative">
-          <select
-            id="branch"
-            name="branch"
-            required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          >
-            <option value="" disabled selected>Select a Branch</option>
-            {% for branch in branches %}
-            <option value="{{ branch['Branch'] }}">
-              {{ branch['Branch'] }}
-            </option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-      <div>
-        <label
-          for="phone_number"
-          class="block text-gray-700 text-sm font-bold mb-2"
-          >Phone Number:</label
-        >
-        <input
-          type="text"
-          id="phone_number"
-          name="phone_number"
-          value="{{ employee['phone_number'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <div>
-        <label for="email" class="block text-gray-700 text-sm font-bold mb-2"
-          >Email:</label
-        >
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value="{{ employee['email'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <div>
-        <label for="address" class="block text-gray-700 text-sm font-bold mb-2"
-          >Address:</label
-        >
-        <input
-          type="text"
-          id="address"
-          name="address"
-          value="{{ employee['address'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <div>
-        <label
-          for="emergency_contact_name"
-          class="block text-gray-700 text-sm font-bold mb-2"
-          >Emergency Contact Name:</label
-        >
-        <input
-          type="text"
-          id="emergency_contact_name"
-          name="emergency_contact_name"
-          value="{{ employee['emergency_contact_name'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
-
-      <div>
-        <label
-          for="emergency_contact_phone"
-          class="block text-gray-700 text-sm font-bold mb-2"
-          >Emergency Contact Phone:</label
-        >
-        <input
-          type="text"
-          id="emergency_contact_phone"
-          name="emergency_contact_phone"
-          value="{{ employee['emergency_contact_phone'] }}"
-          required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-      </div>
+    <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-4">
+      <h2 class="text-lg font-semibold uppercase tracking-wide"> Edit Employee</h2>
     </div>
 
-    <div class="flex justify-between mt-6">
-      <button
-        type="submit"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Update Employee
-      </button>
-      <a
-        href="{{ url_for('list_employees') }}"
-        class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-      >
-        Cancel
-      </a>
-    </div>
-  </form>
+    <form method="POST" class="space-y-6">
+
+      <fieldset class="border border-gray-300 p-4 rounded-lg mb-6">
+        <legend class="text-lg font-semibold text-gray-800 px-2">Main Employee Information</legend>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <!-- Name -->
+          <div>
+            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+            <input type="text" id="name" name="name" value="{{ employee['name'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Age -->
+          <div>
+            <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
+            <input type="number" id="age" name="age" value="{{ employee['age'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Department -->
+          <div>
+            <label for="department" class="block text-sm font-medium text-gray-700">Department</label>
+            <input type="text" id="department" name="department" value="{{ employee['department'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Salary -->
+          <div>
+            <label for="salary" class="block text-sm font-medium text-gray-700">Salary</label>
+            <input type="number" step="0.01" id="salary" name="salary" value="{{ employee['salary'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Position -->
+          <div>
+            <label for="position" class="block text-sm font-medium text-gray-700">Position</label>
+            <select id="position" name="position_id" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <option value="" disabled selected>Select a Position</option>
+              {% for position in positions %}
+              <option value="{{ position.id }}">
+                {{ position.PositionName }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Joining Date -->
+          <div>
+            <label for="joining_date" class="block text-sm font-medium text-gray-700">Joining Date</label>
+            <input type="date" id="joining_date" name="joining_date" value="{{ employee['joining_date'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Status -->
+          <div>
+            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+            <select id="status" name="status" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="On Leave">On Leave</option>
+            </select>
+          </div>
+
+          <!-- Branch -->
+          <div>
+            <label for="branch" class="block text-sm font-medium text-gray-700">Branch</label>
+            <select id="branch" name="branch" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <option value="" disabled selected>Select a Branch</option>
+              {% for branch in branches %}
+              <option value="{{ branch['Branch'] }}">
+                {{ branch['Branch'] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Phone Number -->
+          <div>
+            <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number</label>
+            <input type="text" id="phone_number" name="phone_number" value="{{ employee['phone_number'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input type="email" id="email" name="email" value="{{ employee['email'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Address -->
+          <div>
+            <label for="address" class="block text-sm font-medium text-gray-700">Address</label>
+            <input type="text" id="address" name="address" value="{{ employee['address'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Emergency Contact Name -->
+          <div>
+            <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">Emergency Contact
+              Name</label>
+            <input type="text" id="emergency_contact_name" name="emergency_contact_name"
+              value="{{ employee['emergency_contact_name'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Emergency Contact Phone -->
+          <div>
+            <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700">Emergency Contact
+              Phone</label>
+            <input type="text" id="emergency_contact_phone" name="emergency_contact_phone"
+              value="{{ employee['emergency_contact_phone'] }}" required
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+
+          <!-- Employee Height -->
+          <div>
+            <label for="employees_height" class="block text-sm font-medium text-gray-700">Height (cm)</label>
+            <input type="number" step="0.01" id="employees_height" name="employees_height"
+              value="{{ employee['employees_height'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Ethnicity -->
+          <div>
+            <label for="ethnicity" class="block text-sm font-medium text-gray-700">Ethnicity</label>
+            <input type="text" id="ethnicity" name="ethnicity" value="{{ employee['ethnicity'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Family Status -->
+          <div>
+            <label for="family_status" class="block text-sm font-medium text-gray-700">Family Status</label>
+            <select id="family_status" name="family_status"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <option value="" {% if not employee['family_status'] %}selected{% endif %}>Select status</option>
+              <option value="single" {% if employee['family_status']=='single' %}selected{% endif %}>Single</option>
+              <option value="married" {% if employee['family_status']=='married' %}selected{% endif %}>Married</option>
+              <option value="other" {% if employee['family_status']=='other' %}selected{% endif %}>Other</option>
+            </select>
+          </div>
+
+          <!-- Level of Culture -->
+          <div>
+            <label for="level_of_culture" class="block text-sm font-medium text-gray-700">Level of Culture</label>
+            <select id="level_of_culture" name="level_of_culture"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+              <option value="" {% if not employee['level_of_culture'] %}selected{% endif %}>Select education level
+              </option>
+              <option value="diploma_degree" {% if employee['level_of_culture']=='diploma_degree' %}selected{% endif %}>
+                Diploma Degree</option>
+              <option value="bachelor_degree" {% if employee['level_of_culture']=='bachelor_degree' %}selected{% endif
+                %}>
+                Bachelor Degree</option>
+              <option value="master_degree" {% if employee['level_of_culture']=='master_degree' %}selected{% endif %}>
+                Master Degree</option>
+              <option value="doctor" {% if employee['level_of_culture']=='doctor' %}selected{% endif %}>Doctor</option>
+            </select>
+          </div>
+
+          <!-- Nationality -->
+          <div>
+            <label for="nationality" class="block text-sm font-medium text-gray-700">Nationality</label>
+            <input type="text" id="nationality" name="nationality" value="{{ employee['nationality'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Religion -->
+          <div>
+            <label for="religion" class="block text-sm font-medium text-gray-700">Religion</label>
+            <input type="text" id="religion" name="religion" value="{{ employee['religion'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <!-- Place of Birth -->
+          <div>
+            <label for="place_of_birth" class="block text-sm font-medium text-gray-700">Place of Birth</label>
+            <input type="text" id="place_of_birth" name="place_of_birth" value="{{ employee['place_of_birth'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+
+
+
+        </div>
+
+      </fieldset>
+
+
+
+      <!-- Address Info -->
+      <fieldset class="border border-gray-300 rounded p-4 space-y-4">
+        <legend class="text-lg font-semibold text-gray-700">Address Information</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <!-- Permanent Address -->
+          <div>
+            <label for="permanent_address" class="block text-sm font-medium text-gray-700">Permanent Address</label>
+            <input type="text" id="permanent_address" name="permanent_address"
+              value="{{ employee['permanent_address'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+          <div>
+            <label for="village" class="block text-sm font-medium text-gray-700">Village</label>
+            <input type="text" name="village" id="village" value="{{ employee['village'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="commune" class="block text-sm font-medium text-gray-700">Commune</label>
+            <input type="text" name="commune" id="commune" value="{{ employee['commune'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="district" class="block text-sm font-medium text-gray-700">District</label>
+            <input type="text" name="district" id="district" value="{{ employee['district'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="province" class="block text-sm font-medium text-gray-700">Province</label>
+            <input type="text" name="province" id="province" value="{{ employee['province'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="home_number" class="block text-sm font-medium text-gray-700">Home Number</label>
+            <input type="text" name="home_number" id="home_number" value="{{ employee['home_number'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="street_number" class="block text-sm font-medium text-gray-700">Street Number</label>
+            <input type="text" name="street_number" id="street_number" value="{{ employee['street_number'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="group_name" class="block text-sm font-medium text-gray-700">Group Name</label>
+            <input type="text" name="group_name" id="group_name" value="{{ employee['group_name'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="personal_phone_number" class="block text-sm font-medium text-gray-700">Personal Phone
+              Number</label>
+            <input type="tel" name="personal_phone_number" id="personal_phone_number"
+              value="{{ employee['personal_phone_number'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+
+      <!-- Education and Skills -->
+      <fieldset class="border border-gray-300 rounded p-4 space-y-4">
+        <legend class="text-lg font-semibold text-gray-700">Education & Skills</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="level_of_culture" class="block text-sm font-medium text-gray-700">Level of Culture</label>
+            <input type="text" name="level_of_culture" id="level_of_culture" value="{{ employee['level_of_culture'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="skill" class="block text-sm font-medium text-gray-700">Skill</label>
+            <input type="text" name="skill" id="skill" value="{{ employee['skill'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="name_of_educational_institution" class="block text-sm font-medium text-gray-700">Educational
+              Institution</label>
+            <input type="text" name="name_of_educational_institution" id="name_of_educational_institution"
+              value="{{ employee['name_of_educational_institution'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="knowledge_of_foreign_languages" class="block text-sm font-medium text-gray-700">Knowledge of
+              Foreign Languages</label>
+            <input type="text" name="knowledge_of_foreign_languages" id="knowledge_of_foreign_languages"
+              value="{{ employee['knowledge_of_foreign_languages'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Work and ID Info -->
+      <fieldset class="border border-gray-300 rounded p-4 space-y-4">
+        <legend class="text-lg font-semibold text-gray-700">Work & Identification</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="current_function" class="block text-sm font-medium text-gray-700">Current Function</label>
+            <input type="text" name="current_function" id="current_function" value="{{ employee['current_function'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="id_card_number" class="block text-sm font-medium text-gray-700">ID Card Number</label>
+            <input type="text" name="id_card_number" id="id_card_number" value="{{ employee['id_card_number'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="work_at" class="block text-sm font-medium text-gray-700">Work At</label>
+            <input type="text" name="work_at" id="work_at" value="{{ employee['work_at'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="employment_id" class="block text-sm font-medium text-gray-700">Employment ID</label>
+            <input type="text" name="employment_id" id="employment_id" value="{{ employee['employment_id'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="employment_date" class="block text-sm font-medium text-gray-700">Employment Date</label>
+            <input type="date" name="employment_date" id="employment_date" value="{{ employee['employment_date'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="khmer_nationality_identity_card" class="block text-sm font-medium text-gray-700">Khmer
+              Nationality Identity Card</label>
+            <input type="text" name="khmer_nationality_identity_card" id="khmer_nationality_identity_card"
+              value="{{ employee['khmer_nationality_identity_card'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="passing_test_date" class="block text-sm font-medium text-gray-700">Passing Test Date</label>
+            <input type="date" name="passing_test_date" id="passing_test_date"
+              value="{{ employee['passing_test_date'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="residence_book_or_family_book" class="block text-sm font-medium text-gray-700">Residence/Family
+              Book</label>
+            <input type="text" name="residence_book_or_family_book" id="residence_book_or_family_book"
+              value="{{ employee['residence_book_or_family_book'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="made_on" class="block text-sm font-medium text-gray-700">Made On</label>
+            <input type="date" name="made_on" id="made_on" value="{{ employee['made_on'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Family Info -->
+      <fieldset class="border border-gray-300 rounded p-4 space-y-4">
+        <legend class="text-lg font-semibold text-gray-700">Family Information</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="have_a_number_of_children" class="block text-sm font-medium text-gray-700">Number of
+              Children</label>
+            <input type="number" min="0" name="have_a_number_of_children" id="have_a_number_of_children"
+              value="{{ employee['have_a_number_of_children'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="father_name" class="block text-sm font-medium text-gray-700">Father's Name</label>
+            <input type="text" name="father_name" id="father_name" value="{{ employee['father_name'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="mother_name" class="block text-sm font-medium text-gray-700">Mother's Name</label>
+            <input type="text" name="mother_name" id="mother_name" value="{{ employee['mother_name'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div>
+            <label for="father_status" class="block text-sm font-medium text-gray-700">Father's Status</label>
+            <input type="text" name="father_status" id="father_status" value="{{ employee['father_status'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="father_occupation" class="block text-sm font-medium text-gray-700">Father's Occupation</label>
+            <input type="text" name="father_occupation" id="father_occupation"
+              value="{{ employee['father_occupation'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="mother_occupation" class="block text-sm font-medium text-gray-700">Mother's Occupation</label>
+            <input type="text" name="mother_occupation" id="mother_occupation"
+              value="{{ employee['mother_occupation'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="mother_status" class="block text-sm font-medium text-gray-700">Mother's Status</label>
+            <input type="text" name="mother_status" id="mother_status" value="{{ employee['mother_status'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="father_permanent_address" class="block text-sm font-medium text-gray-700">Father's Permanent
+              Address</label>
+            <input type="text" name="father_permanent_address" id="father_permanent_address"
+              value="{{ employee['father_permanent_address'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="mother_permanent_address" class="block text-sm font-medium text-gray-700">Mother's Permanent
+              Address</label>
+            <input type="text" name="mother_permanent_address" id="mother_permanent_address"
+              value="{{ employee['mother_permanent_address'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Parents Address & Contact -->
+      <fieldset class="border border-gray-300 rounded p-4 space-y-4">
+        <legend class="text-lg font-semibold text-gray-700">Parents' Address & Contact</legend>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="parents_village" class="block text-sm font-medium text-gray-700">Village</label>
+            <input type="text" name="parents_village" id="parents_village" value="{{ employee['parents_village'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="parents_commune" class="block text-sm font-medium text-gray-700">Commune</label>
+            <input type="text" name="parents_commune" id="parents_commune" value="{{ employee['parents_commune'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="parents_district" class="block text-sm font-medium text-gray-700">District</label>
+            <input type="text" name="parents_district" id="parents_district" value="{{ employee['parents_district'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="parents_province" class="block text-sm font-medium text-gray-700">Province</label>
+            <input type="text" name="parents_province" id="parents_province" value="{{ employee['parents_province'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="parents_home_number" class="block text-sm font-medium text-gray-700">Home Number</label>
+            <input type="text" name="parents_home_number" id="parents_home_number"
+              value="{{ employee['parents_home_number'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="parents_street_number" class="block text-sm font-medium text-gray-700">Street Number</label>
+            <input type="text" name="parents_street_number" id="parents_street_number"
+              value="{{ employee['parents_street_number'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label for="parents_group" class="block text-sm font-medium text-gray-700">Group</label>
+            <input type="text" name="parents_group" id="parents_group" value="{{ employee['parents_group'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+
+          <div>
+            <label for="parents_phone" class="block text-sm font-medium text-gray-700">Phone Number</label>
+            <input type="tel" name="parents_phone" id="parents_phone" value="{{ employee['parents_phone'] }}"
+              class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Form Actions -->
+      <div class="flex justify-start gap-2 mt-4">
+        <button type="submit"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-3 py-1.5 rounded-md shadow-sm transition duration-200 flex items-center">
+          <i class="fas fa-save mr-1 text-xs"></i> Update
+        </button>
+        <a href="{{ url_for('list_employees') }}"
+          class="bg-gray-600 hover:bg-gray-700 text-white font-medium text-sm px-3 py-1.5 rounded-md shadow-sm transition duration-200 flex items-center">
+          <i class="fas fa-times mr-1 text-xs"></i> Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
 </div>
-
 {% endblock %}

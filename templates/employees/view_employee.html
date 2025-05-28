@@ -1,93 +1,125 @@
-{% extends 'base.html' %} {% block title %}Employees{% endblock %} {% block
-content %}
+{% extends 'base.html' %}
 
-<div class="container mx-auto py-8">
-  <div class="container mx-auto p-8">
-    <div class="bg-white shadow-md rounded-lg overflow-hidden">
-      <!-- Header -->
-      <div class="bg-blue-600 text-white p-4">
-        <h1 class="text-2xl font-semibold">Employee Details</h1>
+{% block title %}Employees{% endblock %}
+
+{% block content %}
+<div class="container mx-auto py-2">
+  <div class="max-w-6xl mx-auto p-6 bg-white shadow-lg rounded-xl">
+
+    <!-- Header -->
+
+    <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-4">
+      <h2 class="text-lg font-semibold uppercase tracking-wide">Personal Information</h2>
+    </div>
+
+    <!-- Employee Info Grid -->
+    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Personal Information -->
+      <div class="bg-gray-50 p-4 rounded-lg shadow-sm border">
+        <h2 class="text-xl font-semibold mb-3 border-b pb-2">Personal Information</h2>
+        <ul class="text-gray-700 space-y-2 text-sm">
+          <li><strong>Name:</strong> {{ employee.name }}</li>
+          <li><strong>Email:</strong> {{ employee.email }}</li>
+          <li><strong>Phone:</strong> {{ employee.phone_number }}</li>
+          <li><strong>Personal Phone:</strong> {{ employee.personal_phone_number }}</li>
+          <li><strong>Address:</strong> {{ employee.address }}</li>
+          <li><strong>Permanent Address:</strong> {{ employee.permanent_address }}</li>
+          <li><strong>Age:</strong> {{ employee.age }}</li>
+          <li><strong>Height:</strong> {{ employee.employees_height }}</li>
+          <li><strong>Ethnicity:</strong> {{ employee.ethnicity }}</li>
+          <li><strong>Nationality:</strong> {{ employee.nationality }}</li>
+          <li><strong>Religion:</strong> {{ employee.religion }}</li>
+          <li><strong>Family Status:</strong> {{ employee.family_status }}</li>
+          <li><strong>Place of Birth:</strong> {{ employee.place_of_birth }}</li>
+          <li><strong>Number of Children:</strong> {{ employee.have_a_number_of_children }}</li>
+        </ul>
       </div>
 
-      <!-- Content Section -->
-      <div class="p-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="bg-gray-50 p-4 rounded-md shadow-sm">
-            <h2 class="text-xl font-semibold mb-2">Personal Information</h2>
-            <ul>
-              <li class="mb-2"><strong>Name:</strong> {{ employee.name }}</li>
-              <li class="mb-2"><strong>Email:</strong> {{ employee.email }}</li>
-              <li class="mb-2">
-                <strong>Phone:</strong> {{ employee.phone_number }}
-              </li>
-              <li class="mb-2">
-                <strong>Address:</strong> {{ employee.address }}
-              </li>
-              <li class="mb-2"><strong>Age:</strong> {{ employee.age }}</li>
-            </ul>
-          </div>
+      <!-- Job Information -->
+      <div class="bg-gray-50 p-4 rounded-lg shadow-sm border">
+        <h2 class="text-xl font-semibold mb-3 border-b pb-2">Job Information</h2>
+        <ul class="text-gray-700 space-y-2 text-sm">
+          <li><strong>Position:</strong> {{ employee.position }}</li>
+          <li><strong>Department:</strong> {{ employee.department }}</li>
+          <li><strong>Salary:</strong> ${{ employee.salary }}</li>
+          <li><strong>Employment ID:</strong> {{ employee.employment_id }}</li>
+          <li><strong>Work At:</strong> {{ employee.work_at }}</li>
+          <li><strong>Start Date:</strong> {{ employee.employment_date if employee.employment_date else 'N/A' }}</li>
+          <li><strong>Status:</strong> {{ employee.status }}</li>
+          <li><strong>Branch:</strong> {{ employee.branch }}</li>
+          <li><strong>Emergency Contact Name:</strong> {{ employee.emergency_contact_name }}</li>
+          <li><strong>Emergency Contact Phone:</strong> {{ employee.emergency_contact_phone }}</li>
+          <li><strong>ID Card Number:</strong> {{ employee.id_card_number }}</li>
+          <li><strong>Khmer Nationality ID:</strong> {{ employee.khmer_nationality_identity_card }}</li>
+          <li><strong>Passing Test Date:</strong> {{ employee.passing_test_date }}</li>
+          <li><strong>Residence Book / Family Book:</strong> {{ employee.residence_book_or_family_book }}</li>
+          <li><strong>Issued On:</strong> {{ employee.made_on }}</li>
+        </ul>
+      </div>
 
-          <div class="bg-gray-50 p-4 rounded-md shadow-sm">
-            <h2 class="text-xl font-semibold mb-2">Job Information</h2>
-            <ul>
-              <li class="mb-2">
-                <strong>Position:</strong> {{ employee.position }}
-              </li>
-              <li class="mb-2">
-                <strong>Department:</strong> {{ employee.department }}
-              </li>
-              <li class="mb-2">
-                <strong>Salary:</strong> ${{ employee.salary }}
-              </li>
-              <li class="mb-2">
-                <strong>Start Date:</strong> {{ employee.start_date }}
-              </li>
-              <li class="mb-2">
-                <strong>Status:</strong> {{ employee.status }}
-              </li>
-              <li class="mb-2">
-                <strong>Branch:</strong> {{ employee.branch }}
-              </li>
-              <li class="mb-2">
-                <strong>Emergency Contact Name:</strong> {{
-                employee.emergency_contact_name }}
-              </li>
-              <li class="mb-2">
-                <strong>Emergency Contact Phone:</strong> {{
-                employee.emergency_contact_phone }}
-              </li>
-            </ul>
-          </div>
-        </div>
-        <!-- Action Buttons -->
-        <div class="flex justify-end mt-6 space-x-4">
-          <a
-            href="{{ url_for('list_employees') }}"
-            class="text-blue-500 hover:underline mr-2 transition-transform transform hover:scale-105 bg-gray-200 rounded-md px-4 py-2"
-            >Back</a
-          >
-          <a
-            href="{{ url_for('edit_employee', id=employee.id) }}"
-            class="text-blue-500 hover:underline mr-2 transition-transform transform hover:scale-105 bg-gray-200 rounded-md px-4 py-2"
-            >Edit</a
-          >
-          <form
-            action="{{ url_for('delete_employee', id=employee.id) }}"
-            method="POST"
-            class="inline"
-            onsubmit="return confirm('Are you sure you want to delete this employee?')"
-          >
-            <button
-              type="submit"
-              class="bg-red-500 text-white px-6 py-2 rounded-md hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </form>
-        </div>
+      <!-- Education and Skills -->
+      <div class="bg-gray-50 p-4 rounded-lg shadow-sm border">
+        <h2 class="text-xl font-semibold mb-3 border-b pb-2">Education & Skills</h2>
+        <ul class="text-gray-700 space-y-2 text-sm">
+          <li><strong>Education Level:</strong> {{ employee.level_of_culture }}</li>
+          <li><strong>Institution:</strong> {{ employee.name_of_educational_institution }}</li>
+          <li><strong>Skills:</strong> {{ employee.skill }}</li>
+          <li><strong>Foreign Languages:</strong> {{ employee.knowledge_of_foreign_languages }}</li>
+          <li><strong>Current Function:</strong> {{ employee.current_function }}</li>
+        </ul>
+      </div>
+
+      <!-- Location & Family -->
+      <div class="bg-gray-50 p-4 rounded-lg shadow-sm border">
+        <h2 class="text-xl font-semibold mb-3 border-b pb-2">Family & Address Details</h2>
+        <ul class="text-gray-700 space-y-2 text-sm">
+          <li><strong>Village:</strong> {{ employee.village }}</li>
+          <li><strong>Commune:</strong> {{ employee.commune }}</li>
+          <li><strong>District:</strong> {{ employee.district }}</li>
+          <li><strong>Province:</strong> {{ employee.province }}</li>
+          <li><strong>Home No.:</strong> {{ employee.home_number }}</li>
+          <li><strong>Street No.:</strong> {{ employee.street_number }}</li>
+          <li><strong>Group:</strong> {{ employee.group_name }}</li>
+        </ul>
+      </div>
+
+      <!-- Parents Info -->
+      <div class="bg-gray-50 p-4 rounded-lg shadow-sm border md:col-span-2">
+        <h2 class="text-xl font-semibold mb-3 border-b pb-2">Parent Information</h2>
+        <ul class="text-gray-700 space-y-2 text-sm">
+          <li><strong>Father Name:</strong> {{ employee.father_name }}</li>
+          <li><strong>Father Status:</strong> {{ employee.father_status }}</li>
+          <li><strong>Father Occupation:</strong> {{ employee.father_occupation }}</li>
+          <li><strong>Father Permanent Address:</strong> {{ employee.father_permanent_address }}</li>
+          <li><strong>Mother Name:</strong> {{ employee.mother_name }}</li>
+          <li><strong>Mother Status:</strong> {{ employee.mother_status }}</li>
+          <li><strong>Mother Occupation:</strong> {{ employee.mother_occupation }}</li>
+          <li><strong>Mother Permanent Address:</strong> {{ employee.mother_permanent_address }}</li>
+          <li><strong>Parents Village:</strong> {{ employee.parents_village }}</li>
+          <li><strong>Parents Commune:</strong> {{ employee.parents_commune }}</li>
+          <li><strong>Parents District:</strong> {{ employee.parents_district }}</li>
+          <li><strong>Parents Province:</strong> {{ employee.parents_province }}</li>
+          <li><strong>Parents Home No.:</strong> {{ employee.parents_home_number }}</li>
+          <li><strong>Parents Street No.:</strong> {{ employee.parents_street_number }}</li>
+          <li><strong>Parents Group:</strong> {{ employee.parents_group }}</li>
+          <li><strong>Parents Phone:</strong> {{ employee.parents_phone }}</li>
+        </ul>
       </div>
     </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-end items-center px-6 pb-6 space-x-4">
+      <a href="{{ url_for('list_employees') }}"
+        class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm transition duration-200 flex items-center">
+        <i class="fas fa-arrow-left mr-2"></i> Back
+      </a>
+      <a href="{{ url_for('edit_employee', id=employee.id) }}"
+        class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm transition duration-200 flex items-center">
+        <i class="fas fa-edit mr-2"></i> Edit
+      </a>
+    </div>
+
   </div>
 </div>
-
 {% endblock %}

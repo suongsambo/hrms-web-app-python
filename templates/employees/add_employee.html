@@ -1,13 +1,12 @@
 {% extends 'base.html' %} {% block title %} Add Employee {% endblock %} {% block
 content %}
 <div class="max-w-7xl mx-auto bg-white p-4 rounded-lg shadow-lg">
-
   <form action="{{ url_for('add_employee') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
-
-    <h3 class="text-xl font-semibold text-gray-800 mb-4">
-      Employee Information
-    </h3>
-
+    <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-4">
+      <h2 class="text-lg font-semibold uppercase tracking-wide">
+        Add Employee
+      </h2>
+    </div>
 
     <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
       🧑‍💼 Employment Information
@@ -20,7 +19,7 @@ content %}
         <label for="name" class="block text-sm font-medium text-gray-700">Name:</label>
         <div class="mt-2 relative">
           <input type="text" id="name" name="name" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -29,7 +28,7 @@ content %}
         <label for="age" class="block text-sm font-medium text-gray-700">Age:</label>
         <div class="mt-2 relative">
           <input type="number" id="age" name="age" required min="18" max="99"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -37,7 +36,7 @@ content %}
         <label for="department" class="block text-sm font-medium text-gray-700">Department:</label>
         <div class="mt-2 relative">
           <select id="department" name="department" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected>Select a Department</option>
             {% for department in departments %}
             <option value="{{ department.id}}">{{ department.Name }}</option>
@@ -46,13 +45,12 @@ content %}
         </div>
       </div>
 
-
       <!-- Position Field -->
       <div>
         <label for="position" class="block text-sm font-medium text-gray-700">Position:</label>
         <div class="mt-2 relative">
           <select id="position" name="position_id" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected>Select a Position</option>
             {% for position in positions %}
             <option value="{{ position.id }}">
@@ -68,7 +66,7 @@ content %}
         <label for="joining_date" class="block text-sm font-medium text-gray-700">Joining Date:</label>
         <div class="mt-2 relative">
           <input type="date" id="joining_date" name="joining_date" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -77,7 +75,7 @@ content %}
         <label for="status" class="block text-sm font-medium text-gray-700">Status:</label>
         <div class="mt-2 relative">
           <select id="status" name="status" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected>Select a Status</option>
             <option value="Active">Active</option>
             <option value="Inactive">Inactive</option>
@@ -91,7 +89,7 @@ content %}
         <label for="branch" class="block text-sm font-medium text-gray-700">Branch:</label>
         <div class="mt-2 relative">
           <select id="branch" name="branch" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected>Select a Branch</option>
             {% for branch in branches %}
             <option value="{{ branch['Branch'] }}">
@@ -107,7 +105,7 @@ content %}
         <label for="user_id" class="block text-sm font-medium text-gray-700">User ID:</label>
         <div class="mt-2 relative">
           <select id="user_id" name="user_id" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected>Select a User</option>
             {% for user in users %}
             <option value="{{ user.id }}">
@@ -123,7 +121,7 @@ content %}
         <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number:</label>
         <div class="mt-2 relative">
           <input type="text" id="phone_number" name="phone_number" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -132,7 +130,7 @@ content %}
         <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
         <div class="mt-2 relative">
           <input type="email" id="email" name="email" required
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -141,13 +139,11 @@ content %}
         <label for="address" class="block text-sm font-medium text-gray-700">Address:</label>
         <div class="mt-2 relative">
           <textarea id="address" name="address"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             rows="3"></textarea>
         </div>
       </div>
     </div>
-
-
 
     <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
       🚨 Emergency & Personal Information
@@ -162,7 +158,7 @@ content %}
           Name:</label>
         <div class="mt-2 relative">
           <input type="text" id="emergency_contact_name" name="emergency_contact_name"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -172,7 +168,7 @@ content %}
           Phone:</label>
         <div class="mt-2 relative">
           <input type="text" id="emergency_contact_phone" name="emergency_contact_phone"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -181,7 +177,7 @@ content %}
         <label for="salary" class="block text-sm font-medium text-gray-700">Salary:</label>
         <div class="mt-2 relative">
           <input type="number" id="salary" name="salary" step="0.01"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -190,7 +186,7 @@ content %}
         <label for="employees_height" class="block text-sm font-medium text-gray-700">Height:</label>
         <div class="mt-2 relative">
           <input type="number" id="employees_height" name="employees_height" step="0.01"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -233,8 +229,6 @@ content %}
         </div>
       </div>
 
-
-
       <!-- Religion Field as Select -->
       <div>
         <label for="religion" class="block text-sm font-medium text-gray-700">Religion:</label>
@@ -259,7 +253,7 @@ content %}
         <label for="family_status" class="block text-sm font-medium text-gray-700">Family Status:</label>
         <div class="mt-2 relative">
           <select id="family_status" name="family_status"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected>Select a Family Status</option>
             <option value="single">Single</option>
             <option value="married">Married</option>
@@ -273,7 +267,7 @@ content %}
         <label for="place_of_birth" class="block text-sm font-medium text-gray-700">Place of Birth:</label>
         <div class="mt-2 relative">
           <input type="text" id="place_of_birth" name="place_of_birth"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -282,7 +276,7 @@ content %}
         <label for="permanent_address" class="block text-sm font-medium text-gray-700">Permanent Address:</label>
         <div class="mt-2 relative">
           <input type="text" id="permanent_address" name="permanent_address"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -291,7 +285,7 @@ content %}
         <label for="village" class="block text-sm font-medium text-gray-700">Village:</label>
         <div class="mt-2 relative">
           <input type="text" id="village" name="village"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -300,7 +294,7 @@ content %}
         <label for="commune" class="block text-sm font-medium text-gray-700">Commune:</label>
         <div class="mt-2 relative">
           <input type="text" id="commune" name="commune"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -309,7 +303,7 @@ content %}
         <label for="district" class="block text-sm font-medium text-gray-700">District:</label>
         <div class="mt-2 relative">
           <input type="text" id="district" name="district"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -318,7 +312,7 @@ content %}
         <label for="province" class="block text-sm font-medium text-gray-700">Province:</label>
         <div class="mt-2 relative">
           <input type="text" id="province" name="province"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -327,7 +321,7 @@ content %}
         <label for="home_number" class="block text-sm font-medium text-gray-700">Home Number:</label>
         <div class="mt-2 relative">
           <input type="text" id="home_number" name="home_number"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -336,7 +330,7 @@ content %}
         <label for="street_number" class="block text-sm font-medium text-gray-700">Street Number:</label>
         <div class="mt-2 relative">
           <input type="text" id="street_number" name="street_number"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -345,18 +339,16 @@ content %}
         <label for="group_name" class="block text-sm font-medium text-gray-700">Group Name:</label>
         <div class="mt-2 relative">
           <input type="text" id="group_name" name="group_name"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
     </div>
-
 
     <!-- TODO: three -->
 
     <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
       📄 Personal & Employment Details
     </h2>
-
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
       <!-- Personal Phone Number Field -->
@@ -365,7 +357,7 @@ content %}
           Number:</label>
         <div class="mt-2 relative">
           <input type="text" id="personal_phone_number" name="personal_phone_number"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -374,7 +366,7 @@ content %}
         <label for="level_of_culture" class="block text-sm font-medium text-gray-700">Level of Culture:</label>
         <div class="mt-2 relative">
           <select id="level_of_culture" name="level_of_culture"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="bachelor_degree">-- Select One --</option>
             <option value="diploma_degree">Diploma Degree</option>
             <option value="bachelor_degree">Bachelor Degree</option>
@@ -383,8 +375,6 @@ content %}
           </select>
         </div>
       </div>
-
-
 
       <!-- Skill Field as Select -->
       <div>
@@ -422,7 +412,7 @@ content %}
           Institution:</label>
         <div class="mt-2 relative">
           <input type="text" id="name_of_educational_institution" name="name_of_educational_institution"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -447,7 +437,7 @@ content %}
         <label for="current_function" class="block text-sm font-medium text-gray-700">Current Function:</label>
         <div class="mt-2 relative">
           <input type="text" id="current_function" name="current_function"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -456,10 +446,9 @@ content %}
         <label for="id_card_number" class="block text-sm font-medium text-gray-700">ID Card Number:</label>
         <div class="mt-2 relative">
           <input type="text" id="id_card_number" name="id_card_number"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
-
 
       <!-- Work At Field as Select -->
       <div>
@@ -470,7 +459,7 @@ content %}
             <option value="">Select Work Location</option>
             <option value="BanteayMeanchey">Banteay Meanchey</option>
             <option value="Battambang">Battambang</option>
-            <option value="KampongCham">Kampong Cham </option>
+            <option value="KampongCham">Kampong Cham</option>
             <option value="KampongChhnang">Kampong Chhnang</option>
             <option value="KampongSpeu">Kampong Speu</option>
             <option value="KampongThom">Kampong Thom</option>
@@ -485,7 +474,7 @@ content %}
             <option value="PhnomPenh">Phnom Penh Capital</option>
             <option value="PreahVihear">Preah Vihear</option>
             <option value="Pursat">Pursat</option>
-            <option value="PreyVeng">Prey Veng </option>
+            <option value="PreyVeng">Prey Veng</option>
             <option value="Ratanakiri">Ratanakiri</option>
             <option value="SiemReap">Siem Reap</option>
             <option value="PreahSihanouk">Preah Sihanouk</option>
@@ -497,13 +486,12 @@ content %}
         </div>
       </div>
 
-
       <!-- Employment ID Field -->
       <div>
         <label for="employment_id" class="block text-sm font-medium text-gray-700">Employment ID:</label>
         <div class="mt-2 relative">
           <input type="text" id="employment_id" name="employment_id"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -512,7 +500,7 @@ content %}
         <label for="employment_date" class="block text-sm font-medium text-gray-700">Employment Date:</label>
         <div class="mt-2 relative">
           <input type="text" id="employment_date" name="employment_date"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
@@ -522,7 +510,7 @@ content %}
           Identity Card:</label>
         <div class="mt-2 relative">
           <input type="text" id="khmer_nationality_identity_card" name="khmer_nationality_identity_card"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
     </div>
@@ -534,54 +522,54 @@ content %}
         🏡 Family Information
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <!-- Passing Test Date -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Passing Test Date</label>
           <input type="date" name="passing_test_date"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Residence Book or Family Book -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Residence Book / Family Book</label>
           <input type="text" name="residence_book_or_family_book" placeholder="Book number or details"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Made On -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Made On</label>
           <input type="date" name="made_on"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Number of Children -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Number of Children</label>
           <input type="number" name="have_a_number_of_children" min="0"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Father Name -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Father's Name</label>
           <input type="text" name="father_name"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Mother Name -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Mother's Name</label>
           <input type="text" name="mother_name"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Father Status -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Father Status</label>
           <select name="father_status"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="alive">Alive</option>
             <option value="dead">Dead</option>
           </select>
@@ -591,7 +579,7 @@ content %}
         <div>
           <label class="block text-sm font-medium text-gray-700">Mother Status</label>
           <select name="mother_status"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="alive" selected>Alive</option>
             <option value="dead">Dead</option>
           </select>
@@ -601,128 +589,97 @@ content %}
         <div>
           <label class="block text-sm font-medium text-gray-700">Father's Occupation</label>
           <input type="text" name="father_occupation"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Mother Occupation -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Mother's Occupation</label>
           <input type="text" name="mother_occupation"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Father Permanent Address -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Father's Permanent Address</label>
           <input type="text" name="father_permanent_address"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Mother Permanent Address -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Mother's Permanent Address</label>
           <input type="text" name="mother_permanent_address"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Village -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents Village</label>
           <input type="text" name="parents_village"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Commune -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents Commune</label>
           <input type="text" name="parents_commune"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents District -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents District</label>
           <input type="text" name="parents_district"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Province -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents Province</label>
           <input type="text" name="parents_province"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Home Number -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents Home Number</label>
           <input type="text" name="parents_home_number"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Street Number -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents Street Number</label>
           <input type="text" name="parents_street_number"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Group -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents Group</label>
           <input type="text" name="parents_group"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Phone -->
         <div>
           <label class="block text-sm font-medium text-gray-700">Parents Phone</label>
           <input type="text" name="parents_phone"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500" />
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
+    </section>
 
-
-
-      <!-- Photo Field -->
-      <!-- <div>
-        <label for="photo" class="block text-sm font-medium text-gray-700">Upload Photo</label>
-        <input type="file" name="photo" id="photo" class="mt-1 block w-full px-4 py-2 border rounded-md"
-          accept="image/*" />
-      </div>
-
-   
-      <div>
-        <label for="fingerprints" class="block text-sm font-medium text-gray-700">Upload Fingerprints Image</label>
-        <input type="file" name="fingerprints" id="fingerprints" class="mt-1 block w-full px-4 py-2 border rounded-md"
-          accept="image/*" />
-      </div>
-
-   
-      <div>
-        <label for="signature" class="block text-sm font-medium text-gray-700">Upload Signature Image</label>
-        <input type="file" name="signature" id="signature" class="mt-1 block w-full px-4 py-2 border rounded-md"
-          accept="image/*" />
-      </div>
-    </div> -->
-
-      <!-- Submit Button -->
-      <!-- <div>
-      <button type="submit"
-        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300">
-        Add Employee
+    <div class="mt-4">
+      <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md">
+        Submit
       </button>
-    </div> -->
 
-      <div class="mt-4">
-        <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-md">
-          Submit
-        </button>
-
-        <a href="{{ url_for('list_employees') }}" class="text-blue-500 hover:text-blue-700 transition duration-300">
-          ← Back to Employees List
-        </a>
-      </div>
+      <a href="{{ url_for('list_employees') }}" class="text-blue-500 hover:text-blue-700 transition duration-300">
+        ← Back to Employees List
+      </a>
+    </div>
   </form>
 </div>
 
