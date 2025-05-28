@@ -40,11 +40,19 @@
         <hr class="border-gray-300 mb-3" />
         <div class="grid grid-cols-2 gap-2 leading-relaxed">
           <p>
-            <strong>គោត្តនាម និងនាម (Name):</strong> {{ leave.requested_by or
+            <strong>គោត្តនាម និងនាម (Name):</strong> {{ leave.employee_name or
             'N/A' }}
           </p>
           <p>
             <strong>បម្រើការងារនៅ (Duty Station):</strong> {{ leave.branch or
+            'N/A' }}
+          </p>
+
+          <p>
+            <strong>អាយុបុគ្គលិក (Age):</strong> {{ leave.employee_age or 'N/A' }}
+          </p>
+          <p>
+            <strong>ថ្នាក់បុគ្គលិក (Department):</strong> {{ leave.employee_department or
             'N/A' }}
           </p>
         </div>

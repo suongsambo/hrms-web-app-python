@@ -125,34 +125,70 @@ def print_leaves():
 
     with get_db_connection() as conn:
         # Fetch leave data
+        # leaves = conn.execute(
+        #     f'''
+        #     SELECT
+        #         id,
+        #         employee_id,
+        #         leave_type,
+        #         start_date,
+        #         end_date,
+        #         reason,
+        #         start_date_obj,
+        #         end_date_obj,
+        #         excluded_days,
+        #         final_end_date,
+        #         service_count,
+        #         leave_hours,
+        #         requested_by,
+        #         requested_by_roles,
+        #         verified_by,
+        #         approved_by,
+        #         type_of_leave,
+        #         status,
+        #         spm_status,
+        #         dd_status,
+        #         manager_status,
+        #         branch,
+        #         category
+        #     FROM leaves
+        #     WHERE id IN ({placeholders})
+        #     ''',
+        #     ids
+        # ).fetchall()
+
         leaves = conn.execute(
             f'''
             SELECT
-                id,
-                employee_id,
-                leave_type,
-                start_date,
-                end_date,
-                reason,
-                start_date_obj,
-                end_date_obj,
-                excluded_days,
-                final_end_date,
-                service_count,
-                leave_hours,
-                requested_by,
-                requested_by_roles,
-                verified_by,
-                approved_by,
-                type_of_leave,
-                status,
-                spm_status,
-                dd_status,
-                manager_status,
-                branch,
-                category
-            FROM leaves
-            WHERE id IN ({placeholders})
+                l.id,
+                l.employee_id,
+                e.age AS employee_age,
+                e.department AS employee_department,
+                e.name AS employee_name, 
+                l.leave_type,
+                l.start_date,
+                l.end_date,
+                l.reason,
+                l.start_date_obj,
+                l.end_date_obj,
+                l.excluded_days,
+                l.final_end_date,
+                l.service_count,
+                l.leave_hours,
+                l.requested_by,
+                l.requested_by_roles,
+                l.verified_by,
+                l.approved_by,
+                l.type_of_leave,
+                l.status,
+                l.spm_status,
+                l.dd_status,
+                l.manager_status,
+                l.branch,
+                l.category
+            FROM leaves l
+            JOIN employees e ON l.employee_id = e.id  -- Join to get employee name
+            WHERE l.id IN ({placeholders})
             ''',
             ids
         ).fetchall()
@@ -1176,51 +1212,59 @@ def leaves_by_branch_and_ccc_category(branch_name):
 
     if branch_name:
         query = '''
-            SELECT
-                l.id,
-                e.name AS employee_name,
-                e.branch AS branch_name,
-                l.leave_type,
-                l.start_date,
-                l.end_date,
-                l.reason,
-                l.status,
-                l.type_of_leave,
-                l.verified_by,
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE e.branch = ? AND (l.category IS NULL
-                                    OR l.category = 'S'
-                                    OR l.type_of_leave = 'H')
+         SELECT
+            l.id,
+            e.name AS employee_name,
+            e.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE e.branch = ?
+        AND (
+            l.category IS NULL
+            OR l.category = 'S'
+            OR l.type_of_leave = 'H'
+        )
+        AND (l.requested_by_roles IS NULL OR l.requested_by_roles != 35)
+
         '''
         params = (branch_name,)
     else:
         query = '''
-            SELECT
-                l.id,
-                e.name AS employee_name,
-                e.branch AS branch_name,
-                l.leave_type,
-                l.start_date,
-                l.end_date,
-                l.reason,
-                l.status,
-                l.type_of_leave,
-                l.verified_by,
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE
-                l.category IS NULL
-                OR l.category = 'S'
-                OR l.type_of_leave = 'H'
+        SELECT
+            l.id,
+            e.name AS employee_name,
+            e.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE e.branch = ?
+        AND (
+            l.category IS NULL
+            OR l.category = 'S'
+            OR l.type_of_leave = 'H'
+        )
+        AND (l.requested_by_roles IS NULL OR l.requested_by_roles != 35)
         '''
         params = ()
 
