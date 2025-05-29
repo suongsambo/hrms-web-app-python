@@ -10,53 +10,48 @@
         class="inline-flex items-center space-x-2 bg-white p-2 rounded-lg shadow border border-gray-200">
         <label for="filter" class="text-sm font-medium text-gray-700">Filter:</label>
         <select name="active" id="filter" onchange="this.form.submit()"
-          class="block w-32 text-sm rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-gray-100 transition-colors duration-150 px-3 py-1">
+          class="block w-32 text-sm rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 hover:bg-gray-100 transition-colors duration-150 px-1 py-1">
           <option value="all" {% if active_filter=='all' %}selected{% endif %}>All</option>
           <option value="1" {% if active_filter=='1' %}selected{% endif %}>Active</option>
           <option value="0" {% if active_filter=='0' %}selected{% endif %}>Inactive</option>
         </select>
       </form>
 
-      <a href="{{ url_for('import_users_csv') }}"
-        class="inline-flex items-center px-4 py-2 border border-green-500 text-green-500 hover:bg-green-500 hover:text-white font-semibold rounded-lg shadow-sm transition duration-200">
-        📂 Import CSV
+      <a href="{{ url_for('import_users_csv') }}" class="btn btn-accent">
+        <span class="material-symbols-outlined text-sm">folder_open</span>
+        <span class="ml-1 text-xs">Import</span>
       </a>
 
       <a href="{{ url_for('download_csv_template') }}"
-        onclick="return confirm('Are you sure you want to download the CSV template?');"
-        class="inline-flex items-center px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white font-semibold rounded-lg shadow-sm transition duration-200">
-        📄 CSV Template
+        onclick="return confirm('Are you sure you want to download the CSV template?');" class="btn btn-accent">
+        <span class="material-symbols-outlined mr-1 text-sm">file_download</span>
+        <span>Template</span>
       </a>
 
       <a href="{{ url_for('export_users_csv', active=active_filter) }}"
-        onclick="return confirm('Are you sure you want to export {{ users|length }} users?');"
-        class="inline-flex items-center px-4 py-2 border border-blue-500 text-blue-500 hover:bg-blue-500 hover:text-white font-semibold rounded-lg shadow-sm transition duration-200">
+        onclick="return confirm('Are you sure you want to export {{ users|length }} users?');" class="btn btn-info">
         <span class="material-symbols-outlined text-sm">file_download</span>
         <span class="ml-1 text-xs">Download</span>
       </a>
 
       <!-- Print Button -->
-      <button type="button" onclick="printTable()"
-        class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out">
+      <button type="button" onclick="printTable()" class="btn btn-neutral">
         <span class="material-symbols-outlined">print</span>
         <span class="text-xs">Print</span>
       </button>
 
       <!-- Add Branch Button -->
-      <a href="{{ url_for('add_user') }}"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out">
+      <a href="{{ url_for('add_user') }}" class="btn btn-success">
         <span class="material-symbols-outlined mr-2 text-lg">add_box</span>
-        <span class="text-sm font-semibold">Add User</span>
+        <span class="text-sm font-semibold">Add</span>
       </a>
-      <a href="{{ url_for('force_reset_password') }}"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out">
+      <a href="{{ url_for('force_reset_password') }}" class="btn btn-soft">
         <span class="material-symbols-outlined mr-2 text-lg">lock_reset</span>
         <span class="text-sm font-semibold">Reset Password</span>
       </a>
 
       <!-- Refresh Button -->
-      <button type="button" onclick="window.location.reload()"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full flex items-center justify-center space-x-1 transition duration-200 ease-in-out">
+      <button type="button" onclick="window.location.reload()" class="btn btn-primary">
         <span class="material-symbols-outlined">autorenew</span>
         <span class="text-xs">Refresh</span>
       </button>
@@ -154,32 +149,32 @@
 </div>
 </div>
 
-  <script>
-    function printTable() {
-      let table = document.querySelector("#user-table").cloneNode(true);
+<script>
+  function printTable() {
+    let table = document.querySelector("#user-table").cloneNode(true);
 
-      // Define columns to hide (zero-based)
-      let columnsToHide = [10, 11, 12, 13, 14, 15, 16, 17, 18];
+    // Define columns to hide (zero-based)
+    let columnsToHide = [10, 11, 12, 13, 14, 15, 16, 17, 18];
 
-      // Hide header columns
-      table.querySelectorAll("thead tr th").forEach((th, index) => {
+    // Hide header columns
+    table.querySelectorAll("thead tr th").forEach((th, index) => {
+      if (columnsToHide.includes(index)) {
+        th.style.display = "none";
+      }
+    });
+
+    // Hide body columns
+    table.querySelectorAll("tbody tr").forEach((tr) => {
+      tr.querySelectorAll("td").forEach((td, index) => {
         if (columnsToHide.includes(index)) {
-          th.style.display = "none";
+          td.style.display = "none";
         }
       });
+    });
 
-      // Hide body columns
-      table.querySelectorAll("tbody tr").forEach((tr) => {
-        tr.querySelectorAll("td").forEach((td, index) => {
-          if (columnsToHide.includes(index)) {
-            td.style.display = "none";
-          }
-        });
-      });
-
-      // Header content
-      const date = new Date();
-      const header = `
+    // Header content
+    const date = new Date();
+    const header = `
       <div class="text-center mb-4">
         <h1 style="font-size: 24px; font-weight: bold;">KPCC</h1>
         <p>Port Phillip, Victoria, Australia</p>
@@ -187,15 +182,15 @@
       </div>
     `;
 
-      // Footer content
-      const footer = `
+    // Footer content
+    const footer = `
       <p class="text-center mt-4">Note: Data export from system HRMS.</p>
     `;
 
-      // Open print window
-      const newWin = window.open("", "", "width=800,height=600");
+    // Open print window
+    const newWin = window.open("", "", "width=800,height=600");
 
-      newWin.document.write(`
+    newWin.document.write(`
       <html>
         <head>
           <title>Print Users</title>
@@ -217,14 +212,14 @@
       </html>
     `);
 
-      newWin.document.close();
+    newWin.document.close();
 
-      newWin.onload = function () {
-        newWin.print();
-        newWin.close();
-      };
-    }
-  </script>
+    newWin.onload = function () {
+      newWin.print();
+      newWin.close();
+    };
+  }
+</script>
 
 
 <script>

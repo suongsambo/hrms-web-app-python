@@ -4,238 +4,28 @@
 
 {% block content %}
 
+<body class="container mx-auto bg-white">
+    <div class="max-w-7xl mx-auto mt-10 p-8 bg-white rounded-lg shadow-xl">
+        <!-- <h4 class="text-3xl font-bold text-gray-800 mb-6">Add User111</h4> -->
+        <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-2">
+            <h2 class="text-lg font-semibold uppercase tracking-wide">
+                Add User
+            </h2>
+        </div>
 
-
-<div class="drawer z-100">
-    <input id="my-drawer" type="checkbox" class="drawer-toggle" />
-
-    <div class="drawer-side">
-        <label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
-        <ul class="menu bg-base-200 text-base-content min-h-full w-300 p-4">
-            <h4 class="text-3xl font-bold text-gray-800 mb-6">Add User</h4>
-            <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6"
-                enctype="multipart/form-data">
-                <!-- Username -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Username</label>
-                    <input type="text" name="username" required
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-                <!-- Branch -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Branch</label>
-                    <select name="branch" required
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Select a Branch</option>
-                        {% for branch in branches %}
-                        <option value="{{ branch['Branch'] }}" {% if selected_branch==branch['ID'] %}selected{% endif
-                            %}>{{
-                            branch['Branch'] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Zone -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Zone</label>
-                    <select name="zone_id"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Select a Zone (optional)</option>
-                        {% for zone in zones %}
-                        <option value="{{ zone['ID'] }}">{{ zone['Name'] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <!-- Role -->
-                <div>
-                    <label for="role_default" class="block text-gray-700 font-semibold mb-2">Select Role</label>
-                    <select id="role_default" name="role_default"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="" disabled selected hidden>Select Role</option>
-                        <option value="1">GUEST</option>
-                        <!-- <option value="10">CUSTOMER</option>  -->
-                        <!-- <option value="15">NONE</option> -->
-                        <option value="20">Employee</option>
-                        <option value="25">TELLER</option>
-                        <option value="30">CC</option>
-                        <option value="35">CCC</option>
-                        <option value="140">BM</option>
-                        <option value="145">SPM</option>
-                        <option value="140">PMS</option>
-                        <option value="150">HQS</option>
-                        <option value="160">HRD</option>
-                        <option value="165">CS</option>
-                        <option value="170">HD</option>
-                        <option value="175">DGM</option>
-                        <option value="180">GM</option>
-                        <option value="190">CB-190</option>
-                        <option value="1000">ADMIN-1000</option>
-
-                    </select>
-                </div>
-
-
-
-                <!-- Email -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Email</label>
-                    <input type="email" name="email" required
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- Mobile Number -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Mobile Number</label>
-                    <input type="text" name="mobile1" required
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- Khmer First Name -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">First Name (Khmer)</label>
-                    <input type="text" name="first_name_kh"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- Khmer Last Name -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Last Name (Khmer)</label>
-                    <input type="text" name="last_name_kh"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- English First Name -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">First Name (English)</label>
-                    <input type="text" name="first_name_en"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- English Last Name -->
-                <div>
-                    <label class="block text-gray-700 font-semibold mb-2">Last Name (English)</label>
-                    <input type="text" name="last_name_en"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-                <!-- Cover Photo Upload (Left) -->
-                <div class="w-full">
-                    <label for="cover-photo" class="block text-sm font-medium text-gray-900">Cover Photo</label>
-                    <div
-                        class="mt-2 flex justify-center w-full rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <div class="mt-4 flex text-sm text-gray-600">
-                                <label for="image_data"
-                                    class="relative cursor-pointer flex items-center gap-2 rounded-md bg-gradient-to-r from-indigo-500 to-purple-500 font-semibold text-white focus-within:ring-2 focus-within:ring-purple-400 focus-within:ring-offset-2 hover:opacity-90 px-4 py-2">
-                                    <!-- Upload Icon -->
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd"
-                                            d="M3 10a1 1 0 011-1h3V4a1 1 0 112 0v5h3a1 1 0 110 2h-3v5a1 1 0 11-2 0v-5H4a1 1 0 01-1-1z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    <span>Upload a file</span>
-                                    <input type="file" name="image" id="image_data" class="sr-only">
-                                </label>
-                                <button type="button" class="pl-1 bg-transparent border-none cursor-pointer">or drag and
-                                    drop</button>
-                            </div>
-                            <p class="mt-2 text-sm text-gray-500" id="image_file_name">No file selected</p>
-                            <p class="text-xs text-gray-600">PNG, JPG, GIF up to 10MB</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Signature Upload (Right) -->
-                <div class="w-full">
-                    <label for="signature" class="block text-sm font-medium text-gray-900">Signature</label>
-                    <div
-                        class="mt-2 flex justify-center w-full rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                        <div class="text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor"
-                                aria-hidden="true">
-                                <path fill-rule="evenodd"
-                                    d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                            <div class="mt-4 flex text-sm text-gray-600">
-                                <label for="signature_data"
-                                    class="relative cursor-pointer flex items-center gap-2 rounded-md bg-gradient-to-r from-indigo-500 to-purple-500 font-semibold text-white focus-within:ring-2 focus-within:ring-purple-400 focus-within:ring-offset-2 hover:opacity-90 px-4 py-2">
-                                    <!-- Upload Icon -->
-                                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd"
-                                            d="M3 10a1 1 0 011-1h3V4a1 1 0 112 0v5h3a1 1 0 110 2h-3v5a1 1 0 11-2 0v-5H4a1 1 0 01-1-1z"
-                                            clip-rule="evenodd" />
-                                    </svg>
-                                    <span>Upload a file</span>
-                                    <input type="file" name="signature" id="signature_data" class="sr-only"
-                                        accept="image/*">
-                                </label>
-                                <button type="button" class="pl-1 bg-transparent border-none cursor-pointer">or drag and
-                                    drop</button>
-                            </div>
-                            <p class="mt-2 text-sm text-gray-500" id="signature_file_name">No file selected</p>
-                            <p class="text-xs text-gray-600">PNG, JPG, GIF up to 10MB</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Admin Checkbox with Cool Style -->
-                <div class="flex items-center space-x-2 p-4 rounded-lg shadow-lg">
-                    <input type="checkbox" name="is_admin" value="1"
-                        class="h-5 w-5 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 accent-blue-600">
-                    <label class="text-gray-800 font-medium">Is Admin</label>
-                </div>
-
-                <!-- Password -->
-                <div>
-                    <label hidden class="block text-gray-700 font-semibold mb-2">Password</label>
-                    <input hidden type="password" name="password" required value="1111"
-                        class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                </div>
-
-
-                <!-- Action Buttons -->
-                <div class="flex items-center justify-start mt-6 space-x-4">
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
-                        <span class="material-symbols-outlined">send</span>
-                        <span>Submit</span>
-                    </button>
-                    <a href="{{ url_for('list_users') }}" class="text-gray-500">
-                        <button type="button"
-                            class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
-                            <span class="material-symbols-outlined">cancel</span>
-                            <span>Cancel</span>
-                        </button>
-                    </a>
-                </div>
-            </form>
-        </ul>
-    </div>
-</div>
-
-
-<body class="container mx-auto bg-white py-8 px-3">
-    <div class="max-w-4xl mx-auto mt-10 p-8 bg-white rounded-lg shadow-xl">
-        <h4 class="text-3xl font-bold text-gray-800 mb-6">Add User</h4>
-        <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6"
+        <form action="{{ url_for('add_user') }}" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-2"
             enctype="multipart/form-data">
             <!-- Username -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">Username</label>
+                <label class="block text-sm font-medium text-gray-700">Username</label>
                 <input type="text" name="username" required
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
             <!-- Branch -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">Branch</label>
+                <label class="block text-sm font-medium text-gray-700">Branch</label>
                 <select name="branch" required
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Select a Branch</option>
                     {% for branch in branches %}
                     <option value="{{ branch['Branch'] }}" {% if selected_branch==branch['ID'] %}selected{% endif %}>{{
@@ -245,9 +35,9 @@
             </div>
             <!-- Zone -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">Zone</label>
+                <label class="block text-sm font-medium text-gray-700">Zone</label>
                 <select name="zone_id"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="">Select a Zone (optional)</option>
                     {% for zone in zones %}
                     <option value="{{ zone['ID'] }}">{{ zone['Name'] }}</option>
@@ -256,9 +46,9 @@
             </div>
             <!-- Role -->
             <div>
-                <label for="role_default" class="block text-gray-700 font-semibold mb-2">Select Role</label>
+                <label for="role_default" class="block text-sm font-medium text-gray-700">Select Role</label>
                 <select id="role_default" name="role_default"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="" disabled selected hidden>Select Role</option>
                     <option value="1">GUEST</option>
                     <!-- <option value="10">CUSTOMER</option>  -->
@@ -286,45 +76,57 @@
 
             <!-- Email -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">Email</label>
+                <label class="block text-sm font-medium text-gray-700">Email</label>
                 <input type="email" name="email" required
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <!-- Mobile Number -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">Mobile Number</label>
+                <label class="block text-sm font-medium text-gray-700">Mobile Number</label>
                 <input type="text" name="mobile1" required
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <!-- Khmer First Name -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">First Name (Khmer)</label>
+                <label class="block text-sm font-medium text-gray-700">First Name (Khmer)</label>
                 <input type="text" name="first_name_kh"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <!-- Khmer Last Name -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">Last Name (Khmer)</label>
+                <label class="block text-sm font-medium text-gray-700">Last Name (Khmer)</label>
                 <input type="text" name="last_name_kh"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <!-- English First Name -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">First Name (English)</label>
+                <label class="block text-sm font-medium text-gray-700">First Name (English)</label>
                 <input type="text" name="first_name_en"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
             <!-- English Last Name -->
             <div>
-                <label class="block text-gray-700 font-semibold mb-2">Last Name (English)</label>
+                <label class="block text-sm font-medium text-gray-700">Last Name (English)</label>
                 <input type="text" name="last_name_en"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
+
+            <!-- Admin Checkbox with Cool Style -->
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" name="is_admin" value="1"
+                    class="h-5 w-5 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 accent-blue-600">
+                <label class="text-gray-800 font-medium">Is Admin</label>
+            </div>
+
+            <div>
+
+            </div>
+
 
             <!-- Cover Photo Upload (Left) -->
             <div class="w-full">
@@ -393,32 +195,31 @@
                 </div>
             </div>
 
-            <!-- Admin Checkbox with Cool Style -->
-            <div class="flex items-center space-x-2 p-4 rounded-lg shadow-lg">
-                <input type="checkbox" name="is_admin" value="1"
-                    class="h-5 w-5 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 accent-blue-600">
-                <label class="text-gray-800 font-medium">Is Admin</label>
-            </div>
+
+
 
             <!-- Password -->
             <div>
-                <label hidden class="block text-gray-700 font-semibold mb-2">Password</label>
+                <label hidden class="block text-sm font-medium text-gray-700">Password</label>
                 <input hidden type="password" name="password" required value="1111"
-                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             </div>
 
 
+
+            <br>
+
             <!-- Action Buttons -->
-            <div class="flex items-center justify-start mt-6 space-x-4">
+            <div class="flex items-center justify-start mt-2 space-x-4">
                 <button type="submit"
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
-                    <span class="material-symbols-outlined">send</span>
+                    class="bg-blue-400 hover:bg-blue-500 text-white font-semibold py-2 px-4 rounded-md w-full md:w-auto flex items-center justify-center space-x-2 text-sm">
+                    <span class="material-symbols-outlined mr-2">person_add</span>
                     <span>Submit</span>
                 </button>
                 <a href="{{ url_for('list_users') }}" class="text-gray-500">
                     <button type="button"
-                        class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-3 px-6 rounded-md w-full md:w-auto flex items-center justify-center space-x-2">
-                        <span class="material-symbols-outlined">cancel</span>
+                        class="bg-gray-400 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-md w-full md:w-auto flex items-center justify-center space-x-2 text-sm">
+                        <span class="material-symbols-outlined mr-2">cancel</span>
                         <span>Cancel</span>
                     </button>
                 </a>

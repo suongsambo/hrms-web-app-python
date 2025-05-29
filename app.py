@@ -1,5 +1,3 @@
-from flask import render_template, request
-from flask import request, render_template
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
     Response, session, send_from_directory, jsonify, send_file
@@ -87,6 +85,14 @@ UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 LANGUAGES = ['en', 'km']
 ALLOWED_EXCEL = {'xlsx', 'xls'}
+# If you're storing files or validating file types
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+# Define your image validation function
+
+
+def allowed_file(filename: str) -> bool:
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def allowed_excel(filename):
