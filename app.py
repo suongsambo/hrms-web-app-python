@@ -164,7 +164,7 @@ def print_leaves():
                 l.employee_id,
                 e.age AS employee_age,
                 e.department AS employee_department,
-                e.name AS employee_name, 
+                e.name AS employee_name,
                 l.leave_type,
                 l.start_date,
                 l.end_date,
@@ -855,6 +855,103 @@ def privacy_policy():
 def static_files(filename):
     return send_from_directory(app.static_folder, filename)
 
+# FIXME: leaves import
+
+
+@app.route('/leaves/import', methods=['GET', 'POST'])
+@login_required
+def import_leaves():
+    leave_columns = [
+        'employee_id', 'leave_type', 'start_date', 'end_date', 'reason',
+        'type_of_leave', 'requested_by', 'requested_by_roles',
+        'verified_by', 'approved_by', 'branch', 'category'
+    ]
+
+    if request.method == 'POST':
+        f = request.files.get('excel_file')
+        if not f or f.filename == '':
+            flash('Please choose an Excel file.', 'error')
+            return redirect(request.url)
+
+        if not allowed_excel(f.filename):
+            flash('Supported formats: .xlsx or .xls', 'error')
+            return redirect(request.url)
+
+        try:
+            df = pd.read_excel(f)
+        except Exception as e:
+            flash(f'Could not read file: {e}', 'error')
+            return redirect(request.url)
+
+        missing = [c for c in leave_columns if c not in df.columns]
+        if missing:
+            flash(f'Missing columns: {", ".join(missing)}', 'error')
+            return redirect(request.url)
+
+        inserted, skipped = 0, 0
+        with get_db_connection() as conn:
+            for _, row in df.iterrows():
+                # Skip rows with missing essential data
+                if pd.isna(row['employee_id']) or pd.isna(row['leave_type']) or pd.isna(row['start_date']) or pd.isna(row['end_date']):
+                    skipped += 1
+                    continue
+
+                conn.execute("""
+                    INSERT INTO leaves (
+                        employee_id, leave_type, start_date, end_date, reason,
+                        type_of_leave, requested_by, requested_by_roles,
+                        verified_by, approved_by, branch, category
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, tuple(row[col] for col in leave_columns))
+                inserted += 1
+
+            conn.commit()
+
+        flash(
+            f'Imported {inserted} leave entries ({skipped} skipped).', 'success')
+        return redirect(url_for('import_leaves'))
+
+    return render_template('leaves/import_leaves.html')
+
+
+@app.route('/leaves/import/template')
+@login_required
+def download_leave_import_template():
+    # Define the columns required for the leave import
+    columns = [
+        'employee_id', 'leave_type', 'start_date', 'end_date', 'reason',
+        'type_of_leave', 'requested_by', 'requested_by_roles',
+        'verified_by', 'approved_by', 'branch', 'category'
+    ]
+
+    # Optionally include a sample row
+    sample_data = [{
+        'employee_id': 1,
+        'leave_type': 'Annual Leave',
+        'start_date': '2025-06-01',
+        'end_date': '2025-06-05',
+        'reason': 'Vacation',
+        'type_of_leave': 'D',
+        'requested_by': 'John Doe',
+        'requested_by_roles': 20,
+        'verified_by': '',
+        'approved_by': '',
+        'branch': 'KPT',
+        'category': 'Staff'
+    }]
+
+    df = pd.DataFrame(sample_data)
+    output = BytesIO()
+    df.to_excel(output, index=False, engine='openpyxl')
+    output.seek(0)
+
+    return send_file(
+        output,
+        as_attachment=True,
+        download_name="leave_import_template.xlsx",
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
+
 
 @app.route('/leaves')
 def view_leaves():
@@ -1136,8 +1233,10 @@ def filter_leaves_by_employee_id(employee_id):
         print(f"Database error occurred: {e}")
         return f"Database error: {e}", 500
 
-
+# l
 # TODO CCC DASHBOARD
+
+
 @app.route('/leaves/ccc/dashboard/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_ccc_dashboard(branch_name):
     if not current_user.is_authenticated or current_user.role_default != 35:
