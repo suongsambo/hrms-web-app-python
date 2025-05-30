@@ -551,7 +551,8 @@ def init_db():
             ("OPD", "Operations Department"),
             ("FND", "Finance Department"),
             ("TRD", "Treasury Department"),
-            ("ITD", "Information Technology Department")
+            ("ITD", "Information Technology Department"),
+            ("Branch.Position", "Branch Position")
         ]
 
         # Loop through each department
@@ -567,6 +568,39 @@ def init_db():
                     VALUES (?, ?)
                 ''', (department_name, description))
                 print(f'Department {department_name} added successfully!')
+
+        branch_name = "Branch.Position"  # You can loop through multiple branches if needed
+
+        position_suffixes = ["SPM", "RM", "PM",
+                             "CCC", "SCC", "LRO", "CC", "Teller"]
+
+        # Get department/branch ID
+        branch_id_row = conn.execute(
+            "SELECT ID FROM departments WHERE Name = ?", (branch_name,)
+        ).fetchone()
+
+        if branch_id_row:
+            department_id = branch_id_row[0]
+
+            for suffix in position_suffixes:
+                position_name = f"{branch_name}.{suffix}"
+
+                # Check if position already exists
+                position_exists = conn.execute(
+                    "SELECT 1 FROM positions WHERE PositionName = ?", (
+                        position_name,)
+                ).fetchone()
+
+                if not position_exists:
+                    conn.execute('''
+                        INSERT INTO positions (PositionName, Description, department_id)
+                        VALUES (?, ?, ?)
+                    ''', (position_name, f'{suffix} role under {branch_name}', department_id))
+
+            conn.commit()
+            print("Positions added successfully.")
+        else:
+            print(f"Branch '{branch_name}' not found in departments.")
 
         # Check if the 'HR Manager' position already exists
         position_exists = conn.execute(

@@ -49,6 +49,41 @@
     </div>
 </div>
 
+
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'employees' ? '' : 'employees'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">person</span>
+        <span class="ml-2">{{ _('Employees') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'employees'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[270px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/employees/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">person_add</span>
+            <span>{{ _('Add Employee') }}</span>
+        </a>
+        <a href="/employees"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">people</span>
+            <span>{{ _('Manage Employees') }}</span>
+        </a>
+
+        <a href="/bankstatements/add"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">attach_money</span>
+            <span>{{ _('Add BankStatement') }}</span>
+        </a>
+
+        <a href="/bankstatements"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">attach_money</span>
+            <span>{{ _('Manage BankStatements') }}</span>
+        </a>
+    </div>
+</div>
+
 <div class="relative z-10">
     <button @click="activeMenu = activeMenu === 'departments' ? '' : 'departments'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
@@ -156,39 +191,7 @@
     </div>
 </div>
 
-<div class="relative z-10">
-    <button @click="activeMenu = activeMenu === 'employees' ? '' : 'employees'"
-        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-        <span class="material-symbols-outlined">person</span>
-        <span class="ml-2">{{ _('Employees') }}</span>
-        <span class="ml-2">&#9662;</span>
-    </button>
-    <div x-show="activeMenu === 'employees'" @click.away="activeMenu = ''"
-        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[270px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
-        <a href="/employees/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">person_add</span>
-            <span>{{ _('Add Employee') }}</span>
-        </a>
-        <a href="/employees"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">people</span>
-            <span>{{ _('Manage Employees') }}</span>
-        </a>
 
-        <a href="/bankstatements/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">attach_money</span>
-            <span>{{ _('Add BankStatement') }}</span>
-        </a>
-
-        <a href="/bankstatements"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">attach_money</span>
-            <span>{{ _('Manage BankStatements') }}</span>
-        </a>
-    </div>
-</div>
 
 <!-- Attendance -->
 <div class="relative z-10">
