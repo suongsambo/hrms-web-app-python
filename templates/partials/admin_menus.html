@@ -250,6 +250,13 @@
           <span class="material-symbols-outlined">event</span>
           <span>Add Holiday</span>
         </a> -->
+
+        <a href="/add-holiday"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">event</span>
+            <span>{{ _('Add Holiday') }}</span>
+        </a>
+
         <a href="/holidays"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
             <span class="material-symbols-outlined">event</span>
@@ -264,7 +271,7 @@
     <button @click="activeMenu = activeMenu === 'data_management' ? '' : 'data_management'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">data_usage</span>
-        <span class="ml-2">{{ _('Data Management') }}</span>
+        <span class="ml-2">{{ _('Data Clear') }}</span>
         <span class="ml-2">&#9662;</span>
     </button>
     <div x-show="activeMenu === 'data_management'" @click.away="activeMenu = ''"

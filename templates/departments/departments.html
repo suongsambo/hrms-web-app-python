@@ -79,32 +79,37 @@ content %}
 </script>
 
 <body class="bg-gray-100 font-sans">
-  <div class="container mx-auto px-4 py-6">
-    <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
-      Departments
-    </h1>
-
-    <div class="flex items-center justify-start gap-x-4 mb-6">
-      <!-- Add Department Button -->
-      <a href="/departments/add"
-        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        tabindex="0">
-        <i class="fas fa-plus mr-2"></i> Add Department
-      </a>
-
+  <div class="container mx-auto px-2 py-2">
+    <div class="grid grid-cols-2 gap-2 items-center my-2">
       <!-- Print Button -->
-      <button onclick="printDepartments()"
-        class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
-        tabindex="0">
-        <i class="fas fa-print mr-2"></i> Print Departments
-      </button>
+      <div class="flex items-center justify-start gap-x-4 mb-6">
+        <!-- Add Department Button -->
+        <a href="/departments/add"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          tabindex="0">
+          <i class="fas fa-plus mr-2"></i> Add
+        </a>
 
-      <!-- Refresh Button -->
-      <button onclick="window.location.reload()"
-        class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-        tabindex="0">
-        <i class="fas fa-sync-alt mr-2"></i> Refresh
-      </button>
+        <!-- Print Button -->
+        <button onclick="printDepartments()"
+          class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+          tabindex="0">
+          <i class="fas fa-print mr-2"></i> Print
+        </button>
+
+        <!-- Refresh Button -->
+        <button onclick="window.location.reload()"
+          class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          tabindex="0">
+          <i class="fas fa-sync-alt mr-2"></i> Refresh
+        </button>
+      </div>
+
+      <div>
+        <p id="route-path"
+          class="text-blue-700 bg-gradient-to-r from-blue-200 via-blue-100 to-blue-200 px-2 py-2 rounded-lg shadow-lg border-l-8 border-blue-600 text-md font-semibold tracking-wide uppercase select-none transition duration-300 hover:shadow-xl hover:border-blue-800">
+        </p>
+      </div>
     </div>
 
     <!-- Check if there are any departments -->

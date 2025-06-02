@@ -1426,6 +1426,75 @@ def leaves_by_branch_and_ccc_dashboard(branch_name):
     return render_template('leaves/leaves_ccc_dashboard.html', leaves=leaves or [], branch_name=branch_name or '', users=users or [])
 
 
+# TODO: PM Report
+@app.route('/leaves/pm/report/<string:branch_name>', methods=['GET'])
+def leaves_by_branch_and_pm_report(branch_name):
+
+    if not current_user.is_authenticated or current_user.role_default != 140:
+        return redirect(url_for('access_denied'))
+
+    if branch_name:
+        query = '''
+            SELECT
+                l.id,
+                e.name AS employee_name,
+                l.branch AS branch_name,
+                l.leave_type,
+                l.start_date,
+                l.end_date,
+                l.reason,
+                l.status,
+                l.type_of_leave,
+                l.verified_by,
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE l.branch = ? AND (
+
+                l.type_of_leave = 'H' OR
+                l.requested_by_roles = 140)
+        '''
+        params = (branch_name,)
+    else:
+        query = '''
+            SELECT
+                l.id,
+                e.name AS employee_name,
+                e.branch AS branch_name,
+                l.leave_type,
+                l.start_date,
+                l.end_date,
+                l.reason,
+                l.status,
+                l.type_of_leave,
+                l.verified_by,
+                l.approved_by,
+                l.leave_hours,
+                l.service_count,
+                l.requested_by
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+            WHERE
+
+                l.type_of_leave = 'H' OR
+                l.requested_by_roles = 140
+        '''
+        params = ()
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+            users = conn.execute("SELECT * FROM users").fetchall()
+            print(leaves, 'leave')
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template('leaves/leaves_pm_dashboard.html', leaves=leaves or [], branch_name=branch_name or '', users=users or [])
+
+
 @app.route('/leaves/ccc/verify/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_ccc_category(branch_name):
     if not current_user.is_authenticated or current_user.role_default != 35:
@@ -2396,6 +2465,179 @@ def add_leave_days_ccc(branch):
         users2=users2,
         users3=users3,
         users4=users4,
+        branch=user_branch
+    )
+
+
+@app.route('/leave_days/pm/add/<string:branch>', methods=['GET', 'POST'])
+@login_required
+def leave_days_pm(branch):
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+    with get_db_connection() as conn:
+        users3 = []
+        branch_row = conn.execute(
+            "SELECT id FROM branches WHERE Branch = ?", (user_branch,)
+        ).fetchone()
+
+        if branch_row:
+            branch_id = branch_row[0]
+            print("Branch ID:", branch_id)
+
+            # Check if the branch_id exists in zone_branch table
+            cursor = conn.execute(
+                "SELECT zone_id FROM zone_branch WHERE branch_id = ?", (branch_id,))
+
+            zone_row = cursor.fetchone()
+            zone_id = zone_row[0] if zone_row else None
+
+            if zone_row:
+                print(
+                    f"Branch ID {branch_id} is linked to Zone ID {zone_row[0]}")
+            else:
+                print(f"Branch ID {branch_id} is not linked to any zone.")
+
+            # Now find users that belong to this zone
+            if zone_id:
+                cursor.execute(
+                    "SELECT * FROM users WHERE ZoneID = ?", (zone_id,))
+                users_in_zone = cursor.fetchall()
+
+                if users_in_zone:
+                    for user in users_in_zone:
+                        user_info = {
+                            "id": user[0],
+                            "Username": user[1],
+                            "Branch": user[2],
+                            "ZoneID": user[3]
+                        }
+                        users3.append(user_info)
+                        print(f"User added: {user_info}")
+                else:
+                    print(f"No users found in zone ID {zone_id}")
+            else:
+                print("Zone ID not found for the given branch.")
+
+            # Check if branch_id exists in zone_branch
+            zone_check = conn.execute(
+                "SELECT 1 FROM zone_branch WHERE branch_id = ? LIMIT 1", (
+                    branch_id,)
+            ).fetchone()
+
+            if zone_check:
+                print("Branch is in zone_branch ✅")
+                users3 = conn.execute('''
+                    SELECT DISTINCT
+                        u.id,
+                        u.username,
+                        u.branch,
+                        u.ZoneID
+                    FROM
+                        users AS u
+                    WHERE
+                        u.RoleDefault = 145
+                        AND u.ZoneID IS NOT NULL
+                        AND u.branch IS NOT NULL
+                        AND Active = 1
+                        AND u.ZoneID = ?
+                ''', (zone_id,)).fetchall()
+
+            else:
+                print("Branch is NOT in zone_branch ❌")
+        else:
+            print("Branch not found.")
+        employees = conn.execute(
+            'SELECT id, name, branch FROM employees').fetchall()
+        users = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (140) AND branch = ? AND Active = 1', (
+                user_branch,)
+        ).fetchall()
+        users2 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault IN (140) AND branch = ? AND Active = 1', (
+                user_branch,)
+        ).fetchall()
+        users4 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
+        ).fetchall()
+
+        users5 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault = 160 AND Active = 1'
+        ).fetchall()
+
+    if request.method == 'POST':
+        employee_id = request.form['employee_id']
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        requested_by = request.form['requested_by']
+        type_of_leave = request.form.get('type_of_leave', 'D')
+        user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form.getlist('requested_by_roles')
+
+        branch = user_branch
+
+        current_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        holiday_labels = None
+        if holiday_labels is None:
+            holiday_labels = [holiday["label"]
+                              for holiday in get_holidays(current_date.year)]
+        public_holidays_str = ",".join(holiday_labels)
+
+       # Calculate the adjusted leave details
+        result = calculate_add_day_and_final_end_date(
+            start_date, end_date, public_holidays_str)
+        excluded_days = result['ExcludedDays']
+        final_end_date = result['FinalEndDate']
+        final_end_date_obj = datetime.strptime(str(final_end_date), "%Y-%m-%d")
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+
+        # Now calculate working days between actual start and adjusted final end
+        service_count = calculate_service_count_1(
+            start_date_obj, final_end_date_obj)
+        # leave_hours = service_count * 8
+
+        # Determine category
+        if service_count <= 2:
+            category = "S"
+        elif 3 <= service_count <= 5:
+            category = "M"
+        else:
+            category = "L"
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date, requested_by_roles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
+                reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date_obj.date(
+                ), ','.join(requested_by_roles)
+            ))
+
+            leave_id = cursor.lastrowid
+
+            for user_id in user_ids:
+                cursor.execute('''
+                    INSERT INTO user_leave (user_id, leave_id)
+                    VALUES (?, ?)
+                ''', (user_id, leave_id))
+
+            conn.commit()
+        if current_user.role_default == 140:
+            return redirect(url_for('leaves_by_branch_and_pm_report', branch_name=current_user.branch))
+        else:
+            return redirect(url_for('view_leaves'))
+
+    return render_template(
+        'leaves/leave_days_pm.html',
+        employees=employees,
+        users=users,
+        users2=users2,
+        users3=users3,
+        users4=users4,
+        users5=users5,
         branch=user_branch
     )
 
