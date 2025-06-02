@@ -257,3 +257,53 @@
         </a>
     </div>
 </div>
+
+
+<!-- Clear Data -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'data_management' ? '' : 'data_management'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">data_usage</span>
+        <span class="ml-2">{{ _('Data Management') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'data_management'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+
+        <a href="/data-management"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">data_usage</span>
+            <span>{{ _('Data Clear') }}</span>
+        </a>
+        <!-- 
+        <a href="/clear_data"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">delete</span>
+            <span>{{ _('Clear All Data') }}</span>
+        </a> -->
+    </div>
+</div>
+
+<!-- Routes -->
+<!-- <div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'routes' ? '' : 'routes'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">map</span>
+        <span class="ml-2">{{ _('Routes') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'routes'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/routes"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">map</span>
+            <span>{{ _('Manage Routes') }}</span>
+        </a>
+
+        <a href="/routes/current"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">map</span>
+            <span>{{ _('Current Route') }}</span>
+        </a>
+    </div>
+</div> -->

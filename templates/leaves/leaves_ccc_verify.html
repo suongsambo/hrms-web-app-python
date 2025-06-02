@@ -1,14 +1,26 @@
 {% extends 'base.html' %} {% block title %}CCC Verify{% endblock %} {% block
 content %}
-<div class="bg-gray-100 text-gray-800">
+<div class="">
   <!-- Main Content -->
-  <div class="container mx-auto mt-8 px-4">
+  <div class="container mx-auto mt-2 px-2">
 
-    <div class="my-2">
-      <button onclick="printSelectedLeaves()"
-        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
-        <i class="fas fa-print mr-2"></i> Print
-      </button>
+
+
+
+    <div class="grid grid-cols-2 gap-4 items-center my-2">
+      <!-- Print Button -->
+      <div class="my-2">
+        <button onclick="printSelectedLeaves()"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
+          <i class="fas fa-print mr-2"></i> Print
+        </button>
+      </div>
+
+      <div>
+        <p id="route-path"
+          class="text-blue-700 bg-gradient-to-r from-blue-200 via-blue-100 to-blue-200 px-2 py-2 rounded-lg shadow-lg border-l-8 border-blue-600 text-md font-semibold tracking-wide uppercase select-none transition duration-300 hover:shadow-xl hover:border-blue-800">
+        </p>
+      </div>
     </div>
 
     <!-- Leaves Table -->

@@ -156,6 +156,18 @@
     });
   </script>
 
+  <!-- <script>
+    // Display the current path on the page
+    document.getElementById('route-path').textContent = "Current path: " + window.location.pathname.toUpperCase();
+  </script> -->
+
+  <script>
+    let path = window.location.pathname.toUpperCase();
+    path = path.replace(/_/g, '/');  // Replace all underscores with slashes
+    document.getElementById('route-path').textContent = "Title: " + path;
+  </script>
+
+
   {% block scripts %}
   {% include 'partials/footer.html' %}
   {% endblock %}
