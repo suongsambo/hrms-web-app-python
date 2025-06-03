@@ -275,12 +275,9 @@ content %}
 
     flatpickr("#end_date", {
       dateFormat: "Y-m-d",
-      minDate: "today", // Optional: Disable past dates
-      maxDate: new Date().fp_incr(365), // Optional: Enable a year range
+      minDate: "today",
+      maxDate: new Date().fp_incr(365),
     });
   </script>
-
-
-
 </body>
 {% endblock %}
