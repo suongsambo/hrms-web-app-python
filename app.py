@@ -1702,9 +1702,6 @@ def leaves_by_gm():
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
 @login_required
 def filter_leaves_by_branch_name(branch_name):
-    # Check if user is role 140 and has a branch assigned
-    # if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
-    #     return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
     if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
 
