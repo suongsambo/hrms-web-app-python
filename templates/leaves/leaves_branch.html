@@ -3,7 +3,6 @@ content %}
 <div class="bg-gray-100 text-gray-800">
   <!-- Main Content -->
   <div class="container mx-auto mt-2 px-4">
-
     <!-- <a href="{{ url_for('download_leave_import_template') }}" class="btn btn-secondary mb-3">
       <span class="material-symbols-outlined text-base">download</span>
       <span>Template</span>
@@ -14,11 +13,27 @@ content %}
       <span>Import</span>
     </a> -->
 
+    <div class="grid grid-cols-2 gap-4 items-center my-4">
+      <!-- Print Button -->
+      <div>
+        <button onclick="printSelectedLeaves()"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
+          <i class="fas fa-print mr-2"></i> Print
+        </button>
+      </div>
+      <div>
+        <p id="route-path"
+          class="text-blue-700 bg-gradient-to-r from-blue-200 via-blue-100 to-blue-200 px-2 py-2 rounded-lg shadow-lg border-l-8 border-blue-600 text-md font-semibold tracking-wide uppercase select-none transition duration-300 hover:shadow-xl hover:border-blue-800">
+        </p>
+      </div>
+    </div>
+
     <!-- Leaves Table -->
     <div class="overflow-x-auto bg-white shadow-lg rounded-md border border-gray-300">
       <table id="leaveTable" class="min-w-full text-sm text-left border-collapse nowrap" style="width: 100%">
         <thead class="bg-gray-200 text-gray-700">
           <tr>
+            <th class="px-4 py-3 border-b">Select</th>
             <th class="px-6 py-3 border-b">EmployeeName</th>
             <th class="px-6 py-3 border-b">Branch</th>
             <th class="px-6 py-3 border-b">LeaveType</th>
@@ -42,6 +57,9 @@ content %}
         <tbody class="text-gray-600">
           {% for leave in leaves %}
           <tr class="border-t">
+            <td class="px-4 py-3 border-b text-center">
+              <input type="checkbox" class="leave-checkbox" value="{{ leave.id }}" />
+            </td>
             <td class="px-6 py-3 border-b">{{ leave.employee_name }}</td>
             <td class="px-6 py-3 border-b">{{ leave.branch_name }}</td>
             <td class="px-6 py-3 border-b">{{ leave.leave_type }}</td>
@@ -183,6 +201,25 @@ content %}
         $(this).text(formattedEndDate);
       });
     });
+  </script>
+
+  <script>
+    function printSelectedLeaves() {
+      let selectedIDs = [];
+      $(".leave-checkbox:checked").each(function () {
+        selectedIDs.push($(this).val());
+      });
+
+      if (selectedIDs.length === 0) {
+        alert("Please select at least one leave to print.");
+        return;
+      }
+
+      // Open the print page
+      const url =
+        "/print-leaves?" + selectedIDs.map((id) => `ids=${id}`).join("&");
+      window.open(url, "_blank");
+    }
   </script>
 </div>
 {% endblock %}

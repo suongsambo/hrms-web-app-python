@@ -18,7 +18,7 @@ content %}
         </button>
       </div>
 
-      <form method="POST" action="{{ url_for('add_leave_days_ccc',  branch=branch) }}" class="space-y-4">
+      <form method="POST" action="{{ url_for('leave_days_pm',  branch=branch) }}" class="space-y-4">
         <div>
           <label for="branch" class="hidden">Branch</label>
           <input type="text" id="branch" name="branch" value="{{ current_user.branch }}" hidden
@@ -206,6 +206,10 @@ content %}
               class="w-1/2 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center">
               <i class="fas fa-paper-plane mr-2"></i> Submit
             </button>
+            <a href="{{ url_for('leaves_by_branch_and_pm_report', branch_name=branch) }}"
+              class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
+              <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
           </div>
       </form>
 

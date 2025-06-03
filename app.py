@@ -1711,8 +1711,6 @@ def filter_leaves_by_branch_name(branch_name):
     app.logger.debug(f"Filtering by branch: {branch_name}")
 
     query = '''
-   
-
         SELECT
             l.id,
             l.requested_by AS employee_name,
@@ -1732,7 +1730,9 @@ def filter_leaves_by_branch_name(branch_name):
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
         WHERE (
-            l.branch = ? AND (
+            l.branch = ?
+            AND l.requested_by_roles != 140
+            AND (
                 l.category != 'L'
                 OR l.category IS NULL
                 OR l.type_of_leave = 'H'
@@ -1747,8 +1747,6 @@ def filter_leaves_by_branch_name(branch_name):
             )
         )
         ORDER BY l.start_date DESC;
-
-
     '''
 
     params = (branch_name,)
@@ -1761,6 +1759,70 @@ def filter_leaves_by_branch_name(branch_name):
         return "An error occurred while retrieving data. Please try again later.", 500
 
     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
+# @login_required
+# def filter_leaves_by_branch_name(branch_name):
+#     if current_user.role_default == 140 and current_user.branch and current_user.branch != branch_name:
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif current_user.role_default != 140:
+#         return redirect(url_for('access_denied'))
+
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     query = '''
+
+
+#         SELECT
+#             l.id,
+#             l.requested_by AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by,
+#             l.requested_by_roles
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE (
+#             l.branch = ? AND (
+#                 l.category != 'L'
+#                 OR l.category IS NULL
+#                 OR l.type_of_leave = 'H'
+#                 OR (
+#                     l.category = 'S' AND l.verified_by IS NOT NULL
+#                 )
+#                 OR (
+#                     l.category = 'M' AND (
+#                         l.verified_by IS NULL OR l.requested_by_roles = 35
+#                     )
+#                 )
+#             )
+#         )
+#         ORDER BY l.start_date DESC;
+
+
+#     '''
+
+#     params = (branch_name,)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     return render_template('leaves/leaves_branch.html', leaves=leaves, branch_name=branch_name)
 
 
 # @app.route('/leave_hours/add/<string:branch>', methods=['GET', 'POST'])
@@ -2450,6 +2512,7 @@ def add_leave_days_ccc(branch):
                 ''', (user_id, leave_id))
 
             conn.commit()
+
         if current_user.role_default == 35:
             return redirect(url_for('leaves_by_branch_and_ccc_dashboard', branch_name=current_user.branch))
         else:
@@ -2622,10 +2685,12 @@ def leave_days_pm(branch):
                 ''', (user_id, leave_id))
 
             conn.commit()
-        if current_user.role_default == 140:
-            return redirect(url_for('leaves_by_branch_and_pm_report', branch_name=current_user.branch))
-        else:
-            return redirect(url_for('view_leaves'))
+
+        return redirect(url_for('leaves_by_branch_and_pm_report', branch_name=current_user.branch))
+        # if current_user.role_default == 140:
+        #     return redirect(url_for('leaves_by_branch_and_pm_report', branch_name=current_user.branch))
+        # else:
+        #     return redirect(url_for('view_leaves'))
 
     return render_template(
         'leaves/leave_days_pm.html',
