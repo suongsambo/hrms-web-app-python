@@ -1812,6 +1812,66 @@ def leaves_by_branch_and_spm():
     )
 
 
+@app.route('/leaves/hrd', methods=['GET'])
+def leaves_by_branch_and_hrd():
+    if not current_user.is_authenticated or current_user.role_default != 160:
+        return redirect(url_for('access_denied'))
+
+    branch_name = request.args.get('branch_name', 'All')
+
+    try:
+        with get_db_connection() as conn:
+            # Fetch all branch names
+            branches = conn.execute(
+                "SELECT DISTINCT Branch FROM branches").fetchall()
+            branch_names = [b["Branch"] for b in branches]
+
+            # Prepare SQL query based on branch selection
+            if branch_name == "All" or not branch_name:
+                placeholders = ', '.join(['?'] * len(branch_names))
+                where_clause = f"l.branch IN ({placeholders})"
+                params = tuple(branch_names)
+            else:
+                where_clause = "l.branch = ?"
+                params = (branch_name,)
+
+            query = f"""
+                SELECT
+                    l.id,
+                    l.requested_by AS employee_name,
+                    l.branch AS branch_name,
+                    l.leave_type,
+                    l.start_date,
+                    l.end_date,
+                    l.reason,
+                    l.status,
+                    l.type_of_leave,
+                    l.verified_by,
+                    l.approved_by,
+                    l.leave_hours,
+                    l.service_count,
+                    l.requested_by
+                FROM leaves l
+                LEFT JOIN employees e ON l.employee_id = e.id
+                WHERE {where_clause}
+                AND  (l.requested_by_roles = 140 AND l.category = 'L')
+                OR (l.requested_by_roles = 145 AND l.category = 'L')
+            """
+
+            leaves = conn.execute(query, params).fetchall()
+
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template(
+        'leaves/leaves_hrd_approve.html',
+        leaves=leaves,
+        branch_name=branch_name,
+        branches_in_zone=branches,  # Renamed but kept to avoid template changes
+        zone=None  # Set to None if template expects it
+    )
+
+
 @app.route('/leaves/gm', methods=['GET'])
 def leaves_by_gm():
     if current_user.role_default in [180]:
@@ -3113,6 +3173,53 @@ def edit_leave_ccc_verify(id):
     return render_template('/leaves/edit_ccc_leave.html', leave=leave)
 
 
+# @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_spm_approve(id):
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+
+#         # Calculate service count
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         # Determine leave category and set the appropriate fields
+#         if service_count <= 2:
+#             category = "S"
+#             status = "Approved"
+#             approved_by = current_user.username  # Automatically set current user
+#             verified_by = request.form['verified_by']
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#             status = "Verified"
+#             approved_by = request.form['approved_by']
+#             verified_by = current_user.username  # Automatically set current user
+#         else:
+#             category = "L"
+#             status = request.form['status']
+#             approved_by = request.form.get('approved_by', None)
+#             verified_by = request.form.get('verified_by', None)
+
+#         # Update the leave in the database
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ?
+#                 WHERE id = ?
+#             ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
 @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
 def edit_leave_spm_approve(id):
     with get_db_connection() as conn:
@@ -3160,8 +3267,8 @@ def edit_leave_spm_approve(id):
     return render_template('/leaves/edit_spm_leave.html', leave=leave)
 
 
-@app.route('/leave/edit_gm_approve/<int:id>', methods=['GET', 'POST'])
-def edit_leave_gm_approve(id):
+@app.route('/leave/edit_hrd_approve/<int:id>', methods=['GET', 'POST'])
+def edit_leave_hrd_approve(id):
     with get_db_connection() as conn:
         leave = conn.execute(
             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
@@ -3198,7 +3305,7 @@ def edit_leave_gm_approve(id):
 
         return redirect(url_for('view_leaves'))
 
-    return render_template('/leaves/edit_gm_leave.html', leave=leave)
+    return render_template('/leaves/edit_hrd_leave.html', leave=leave)
 
 
 @app.route('/leave_pm/edit/<int:id>', methods=['GET', 'POST'])
@@ -5199,6 +5306,10 @@ def dashboard():
     if role == 145:
         return redirect(url_for('spm_dashboard'))
 
+    # SPM dashboard
+    if role == 160:
+        return redirect(url_for('hrd_dashboard'))
+
     # GM dashboard
     if role == 180:
         return redirect(url_for('gm_dashboard'))
@@ -5220,9 +5331,9 @@ def dashboard():
 @app.route('/gm/dashboard')
 @login_required
 def gm_dashboard():
-    if current_user.role_default != 180:
-        flash("Access denied to GM dashboard.", "danger")
-        return render_template('access_denied.html')
+    # if current_user.role_default != 180 :
+    #     flash("Access denied to GM dashboard.", "danger")
+    #     return render_template('access_denied.html')
 
     today_date = date.today()
 
@@ -5285,6 +5396,85 @@ def gm_dashboard():
 
     return render_template(
         'dashboard/gm_dashboard.html',
+        sun_zones=sun_zones,
+        branches=branches,
+        employees=employees,
+        users=users,
+        employees_on_leave_today=employees_on_leave_today,
+        total_leave=total_leave,
+        leave_summary=leave_summary_by_branch,
+        leave_summary_by_zone=leave_summary_by_zone
+    )
+
+
+@app.route('/hrd/dashboard')
+@login_required
+def hrd_dashboard():
+    # if current_user.role_default != 180 :
+    #     flash("Access denied to GM dashboard.", "danger")
+    #     return render_template('access_denied.html')
+
+    today_date = date.today()
+
+    with get_db_connection() as conn:
+        sun_zones = conn.execute("SELECT * FROM zones").fetchall()
+        branches = conn.execute("SELECT * FROM branches").fetchall()
+        employees = conn.execute("SELECT * FROM employees").fetchall()
+        users = conn.execute("SELECT * FROM users").fetchall()
+
+        # Employees on leave today
+        employees_on_leave_today = conn.execute("""
+                SELECT 
+                    u.ID AS user_id,
+                    u.UserName AS username,
+                    l.requested_by AS employee_name,
+                    l.branch AS employee_branch,
+                    b.Branch AS branch_name,
+                    l.start_date,
+                    l.end_date,
+                    l.reason,
+                    l.service_count,
+                    l.leave_hours
+                FROM leaves l
+                JOIN users u ON l.id = u.id
+                JOIN employees e ON u.id = e.id
+                JOIN branches b ON u.branch = b.Branch
+                WHERE l.start_date IS NOT NULL AND l.end_date IS NOT NULL
+                AND ? BETWEEN l.start_date AND l.end_date
+            """, (today_date,)).fetchall()
+        total_leave = len(employees_on_leave_today)
+
+        # total_leave = len(employees_on_leave_today)
+
+        # # Leave summary by branch
+        leave_summary_by_branch = conn.execute("""
+            SELECT 
+                branch AS branch_name,
+                SUM(service_count) AS total_leave_days,
+                SUM(leave_hours) AS total_leave_hours
+            FROM leaves
+            GROUP BY branch
+        """).fetchall()
+
+        leave_summary_by_zone = conn.execute("""
+           SELECT 
+            z.Name AS zone_name,
+            COUNT(DISTINCT l.employee_id) AS employee_count,
+            SUM(julianday(l.end_date) - julianday(l.start_date) + 1) AS total_leave_days,
+            SUM((julianday(l.end_date) - julianday(l.start_date) + 1) * 8) AS total_leave_hours
+        FROM zones z
+        LEFT JOIN zone_branch zb ON z.ID = zb.zone_id
+        LEFT JOIN branches b ON zb.branch_id = b.ID
+        LEFT JOIN users u ON u.branch = b.ID  -- Make sure this is branch ID
+        LEFT JOIN leaves l 
+            ON l.employee_id = u.id 
+            AND l.start_date IS NOT NULL 
+            AND l.end_date IS NOT NULL
+        GROUP BY z.Name;
+        """).fetchall()
+
+    return render_template(
+        'dashboard/hrd_dashboard.html',
         sun_zones=sun_zones,
         branches=branches,
         employees=employees,

@@ -66,6 +66,14 @@
     {% endif %}
 
 
+
+
+    <!-- Menu SPM -->
+    {% if current_user.role_default == 160 %}
+    {% include "partials/hrd_menus.html" %}
+    {% endif %}
+
+
     <!-- Menu GM -->
     {% if current_user.role_default == 180 %}
     {% include 'partials/gm_menu.html' %}
