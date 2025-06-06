@@ -1567,174 +1567,6 @@ def leaves_by_branch_and_ccc_category(branch_name):
     return render_template('leaves/leaves_ccc_verify.html', leaves=leaves, branch_name=branch_name)
 
 
-# @app.route('/leaves/spm', methods=['GET'])
-# def leaves_by_branch_and_spm():
-#     if not current_user.is_authenticated or current_user.role_default != 145:
-#         return redirect(url_for('access_denied'))
-
-#     branch_name = request.args.get('branch_name')
-#     zone_id = current_user.zone_id
-
-#     if zone_id is None:
-#         flash("Zone ID not found for the current user!", "danger")
-#         return redirect(url_for('dashboard'))
-
-#     try:
-#         with get_db_connection() as conn:
-#             zone = conn.execute(
-#                 "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
-#             print("zone", zone)
-#             if not zone:
-#                 flash("Zone not found!", "danger")
-#                 return redirect(url_for('dashboard'))
-
-#             branches_in_zone = conn.execute(
-#                 "SELECT b.ID, b.Branch FROM branches b "
-#                 "JOIN zone_branch zb ON b.ID = zb.branch_id WHERE zb.zone_id = ?",
-#                 (zone_id,)
-#             ).fetchall()
-
-#             branch_names = [branch["Branch"] for branch in branches_in_zone]
-
-#             if not branch_name or branch_name == "All":
-#                 placeholders = ', '.join(['?'] * len(branch_names))
-#                 query = f'''
-#                     SELECT
-#                         l.id,
-#                         l.requested_by AS employee_name,
-#                         l.branch AS branch_name,
-#                         l.leave_type,
-#                         l.start_date,
-#                         l.end_date,
-#                         l.reason,
-#                         l.status,
-#                         l.type_of_leave,
-#                         l.verified_by,
-#                         l.approved_by,
-#                         l.leave_hours,
-#                         l.service_count,
-#                         l.requested_by
-#                     FROM leaves l
-#                     LEFT JOIN employees e ON l.employee_id = e.id
-#                     WHERE l.branch IN ({placeholders})
-#                     AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
-#                 '''
-#                 params = tuple(branch_names)
-#                 branch_name = "All"
-#             else:
-#                 query = '''
-#                     SELECT
-#                         l.id,
-#                         l.requested_by AS employee_name,
-#                         l.branch AS branch_name,
-#                         l.leave_type,
-#                         l.start_date,
-#                         l.end_date,
-#                         l.reason,
-#                         l.status,
-#                         l.type_of_leave,
-#                         l.verified_by,
-#                         l.approved_by,
-#                         l.leave_hours,
-#                         l.service_count,
-#                         l.requested_by
-#                     FROM leaves l
-#                     LEFT JOIN employees e ON l.employee_id = e.id
-#                     WHERE l.branch = ?
-#                     AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
-#                 '''
-#                 params = (branch_name,)
-
-#             leaves = conn.execute(query, params).fetchall()
-
-#     except sqlite3.DatabaseError as e:
-#         return f"Database error: {e}", 500
-
-#     return render_template(
-#         'leaves/leaves_spm_approve.html',
-#         leaves=leaves,
-#         branch_name=branch_name,
-#         branches_in_zone=branches_in_zone,
-#         zone=zone
-#     )
-
-
-# @app.route('/leaves/spm', methods=['GET'])
-# def leaves_by_branch_and_spm():
-#     if not current_user.is_authenticated or current_user.role_default != 145:
-#         return redirect(url_for('access_denied'))
-
-#     zone_id = current_user.zone_id
-#     if zone_id is None:
-#         flash("Zone ID not found for the current user!", "danger")
-#         return redirect(url_for('dashboard'))
-
-#     branch_name = request.args.get('branch_name', 'All')
-
-#     try:
-#         with get_db_connection() as conn:
-#             # Fetch zone
-#             zone = conn.execute(
-#                 "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
-#             if not zone:
-#                 flash("Zone not found!", "danger")
-#                 return redirect(url_for('dashboard'))
-
-#             # Fetch branches in zone
-#             branches_in_zone = conn.execute("""
-#                 SELECT b.ID, b.Branch
-#                 FROM branches b
-#                 JOIN zone_branch zb ON b.ID = zb.branch_id
-#                 WHERE zb.zone_id = ?
-#             """, (zone_id,)).fetchall()
-
-#             branch_names = [b["Branch"] for b in branches_in_zone]
-
-#             # Prepare SQL query based on branch selection
-#             if branch_name == "All" or not branch_name:
-#                 placeholders = ', '.join(['?'] * len(branch_names))
-#                 where_clause = f"l.branch IN ({placeholders})"
-#                 params = tuple(branch_names)
-#             else:
-#                 where_clause = "l.branch = ?"
-#                 params = (branch_name,)
-
-#             query = f"""
-#                 SELECT
-#                     l.id,
-#                     l.requested_by AS employee_name,
-#                     l.branch AS branch_name,
-#                     l.leave_type,
-#                     l.start_date,
-#                     l.end_date,
-#                     l.reason,
-#                     l.status,
-#                     l.type_of_leave,
-#                     l.verified_by,
-#                     l.approved_by,
-#                     l.leave_hours,
-#                     l.service_count,
-#                     l.requested_by
-#                 FROM leaves l
-#                 LEFT JOIN employees e ON l.employee_id = e.id
-#                 WHERE {where_clause}
-#                 AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
-#             """
-
-#             leaves = conn.execute(query, params).fetchall()
-
-#     except sqlite3.DatabaseError as e:
-#         return f"Database error: {e}", 500
-
-#     return render_template(
-#         'leaves/leaves_spm_approve.html',
-#         leaves=leaves,
-#         branch_name=branch_name,
-#         branches_in_zone=branches_in_zone,
-#         zone=zone
-#     )
-
-
 @app.route('/leaves/spm', methods=['GET'])
 def leaves_by_branch_and_spm():
     if not current_user.is_authenticated or current_user.role_default != 145:
@@ -1758,7 +1590,7 @@ def leaves_by_branch_and_spm():
 
             # Fetch branches in zone
             branches_in_zone = conn.execute("""
-                SELECT b.ID, b.Branch 
+                SELECT b.ID, b.Branch
                 FROM branches b
                 JOIN zone_branch zb ON b.ID = zb.branch_id
                 WHERE zb.zone_id = ?
@@ -1790,11 +1622,16 @@ def leaves_by_branch_and_spm():
                     l.approved_by,
                     l.leave_hours,
                     l.service_count,
-                    l.requested_by
+                    l.requested_by,
+                    l.requested_by_roles
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
-                AND (l.category = 'M' OR l.category = 'L' OR l.type_of_leave = 'T')
+                AND l.requested_by_roles = 140
+                AND (
+                    l.category IN ('M', 'L', 'S') OR
+                    l.type_of_leave = 'T'
+                )
                 AND NOT (l.requested_by_roles = 140 AND l.category = 'L')
             """
 
@@ -1872,19 +1709,57 @@ def leaves_by_branch_and_hrd():
     )
 
 
+# @app.route('/leaves/gm', methods=['GET'])
+# def leaves_by_gm():
+#     if not current_user.is_authenticated or current_user.role_default != 180:
+#         return redirect(url_for('access_denied'))
+
+#     query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE l.category = 'L'
+#           AND l.verified_by IS NOT NULL
+#           OR (l.requested_by_roles = 140 OR l.category = 'M')
+#     '''
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query).fetchall()
+#             employees = conn.execute('SELECT * FROM employees').fetchone()
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template(
+#         'leaves/leaves_gm_approve.html',
+#         leaves=leaves or [],
+#         employees=employees
+#     )
+
 @app.route('/leaves/gm', methods=['GET'])
 def leaves_by_gm():
-    if current_user.role_default in [180]:
-        pass
-    elif not current_user.is_authenticated or current_user.role_default != 180:
+    if not current_user.is_authenticated or current_user.role_default != 180:
         return redirect(url_for('access_denied'))
 
-    # Simplified query without branch_name
     query = '''
         SELECT
             l.id,
             e.name AS employee_name,
-            e.branch AS branch_name,
+            l.branch AS branch_name,
             l.leave_type,
             l.start_date,
             l.end_date,
@@ -1898,18 +1773,26 @@ def leaves_by_gm():
             l.requested_by
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE l.category = 'L'
-        AND l.verified_by IS NOT NULL
+        WHERE l.verified_by IS NOT NULL
+          AND l.category != 'S'
+          AND (
+              l.category = 'L'
+              OR (l.category = 'M' AND l.requested_by_roles = 140)
+          )
     '''
-    params = ()  # No branch_name parameter needed
 
     try:
         with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
+            leaves = conn.execute(query).fetchall()
+            employees = conn.execute('SELECT * FROM employees').fetchone()
     except sqlite3.DatabaseError as e:
         return f"Database error: {e}", 500
 
-    return render_template('leaves/leaves_gm_approve.html', leaves=leaves)
+    return render_template(
+        'leaves/leaves_gm_approve.html',
+        leaves=leaves or [],
+        employees=employees
+    )
 
 
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
@@ -3277,10 +3160,64 @@ def edit_leave_gm_approve(id):
     return render_template('/leaves/edit_gm_leave.html', leave=leave)
 
 
+# @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_spm_approve(id):
+
+#     user_role = 160 if current_user.is_authenticated and current_user.role_default == 160 else None
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         # requested_by_roles = request.form['requested_by_roles']
+
+#         # Calculate service count
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         # Determine leave category and set the appropriate fields
+#         if service_count <= 2:
+#             category = "S"
+#             status = "Approved"
+#             approved_by = current_user.username  # Automatically set current user
+#             verified_by = request.form['verified_by']
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#             status = "Verified"
+#             approved_by = request.form['approved_by']
+#             verified_by = current_user.username  # Automatically set current user
+#         else:
+#             category = "L"
+#             status = request.form['status']
+#             approved_by = request.form.get('approved_by', None)
+#             verified_by = request.form.get('verified_by', None)
+
+#         # Update the leave in the database
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ?
+#                 WHERE id = ?
+#             ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+#         if user_role == 160:
+#             return redirect(url_for('leaves_by_branch_and_hrd'))
+#         elif user_role == 145:
+#             return redirect(url_for('view_leaves'))
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
 @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
 def edit_leave_spm_approve(id):
-
     user_role = 160 if current_user.is_authenticated and current_user.role_default == 160 else None
+
     with get_db_connection() as conn:
         leave = conn.execute(
             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
@@ -3290,6 +3227,8 @@ def edit_leave_spm_approve(id):
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
+        # ✅ Now included
+        requested_by_roles = request.form['requested_by_roles']
 
         # Calculate service count
         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
@@ -3300,13 +3239,13 @@ def edit_leave_spm_approve(id):
         if service_count <= 2:
             category = "S"
             status = "Approved"
-            approved_by = current_user.username  # Automatically set current user
+            approved_by = current_user.username
             verified_by = request.form['verified_by']
         elif 3 <= service_count <= 5:
             category = "M"
             status = "Verified"
             approved_by = request.form['approved_by']
-            verified_by = current_user.username  # Automatically set current user
+            verified_by = current_user.username
         else:
             category = "L"
             status = request.form['status']
@@ -3317,9 +3256,9 @@ def edit_leave_spm_approve(id):
         with get_db_connection() as conn:
             conn.execute('''
                 UPDATE leaves
-                SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ?
+                SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ?, requested_by_roles = ?
                 WHERE id = ?
-            ''', (leave_type, reason, status, approved_by, verified_by, id))
+            ''', (leave_type, reason, status, approved_by, verified_by, requested_by_roles, id))  # ✅ Include in params
 
         if user_role == 160:
             return redirect(url_for('leaves_by_branch_and_hrd'))
@@ -3328,6 +3267,117 @@ def edit_leave_spm_approve(id):
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
+# @app.route('/leave/edit_spm_to_pm/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_spm_to_pm_approve(id):
+
+#     user_role = 160 if current_user.is_authenticated and current_user.role_default == 160 else None
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by_roles = request.form['requested_by_roles']
+
+#         # Calculate service count
+#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+#         service_count = (end_date_obj - start_date_obj).days + 1
+
+#         # Determine leave category and set the appropriate fields
+#         if service_count <= 2:
+#             category = "S"
+#             status = "Approved"
+#             approved_by = current_user.username  # Automatically set current user
+#             verified_by = request.form['verified_by']
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#             status = "Verified"
+#             # approved_by = request.form['approved_by']
+#             verified_by = request.form.get('verified_by', None)
+#             verified_by = current_user.username  # Automatically set current user
+#         else:
+#             category = "L"
+#             status = request.form['status']
+#             approved_by = request.form.get('approved_by', None)
+#             verified_by = request.form.get('verified_by', None)
+
+#         # Update the leave in the database
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ? requested_by_roles = ?
+#                 WHERE id = ?
+#             ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+#         if user_role == 160:
+#             return redirect(url_for('leaves_by_branch_and_hrd'))
+#         elif user_role == 145:
+#             return redirect(url_for('view_leaves'))
+#         return redirect(url_for('view_leaves'))
+
+#     return render_template('/leaves/edit_spm_leave.html', leave=leave)
+
+
+@app.route('/leave/edit_spm_to_pm/<int:id>', methods=['GET', 'POST'])
+def edit_leave_spm_to_pm_approve(id):
+    user_role = 160 if current_user.is_authenticated and current_user.role_default == 160 else None
+
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        requested_by_roles = request.form['requested_by_roles']
+
+        # Calculate service count
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        approved_by = None
+        verified_by = None
+
+        # Determine leave category and status
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = None
+            verified_by = current_user.username
+        else:
+            category = "L"
+            status = request.form.get('status')
+            approved_by = request.form.get('approved_by')
+            verified_by = request.form.get('verified_by')
+
+        # Update the leave record
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ?, requested_by_roles = ?
+                WHERE id = ?
+            ''', (leave_type, reason, status, approved_by, verified_by, requested_by_roles, id))
+
+        # Redirect based on role
+        if user_role == 160:
+            return redirect(url_for('leaves_by_branch_and_hrd'))
+        return redirect(url_for('view_leaves'))
+
+    return render_template('/leaves/edit_pm_request_leave.html', leave=leave)
 
 
 @app.route('/leave/edit_hrd_approve/<int:id>', methods=['GET', 'POST'])

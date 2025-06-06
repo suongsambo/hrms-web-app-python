@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Leave SPM {% endblock %}
+{% block title %}Edit Leave {% endblock %}
 
 {% block content %}
 
@@ -8,12 +8,12 @@
 
     <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
 
-        <form method="POST" action="{{ url_for('edit_leave_spm_approve', id=leave['id']) }}"
+        <form method="POST" action="{{ url_for('edit_leave_spm_to_pm_approve', id=leave['id']) }}"
             class="bg-white shadow-xl rounded-2xl p-8 space-y-6">
 
             <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-2">
                 <h2 class="text-lg font-semibold uppercase tracking-wide">
-                    Edit Leave
+                    Edit Leave(PM)
                 </h2>
             </div>
             <!-- Leave Type -->
@@ -51,13 +51,13 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Approved By (if applicable)</label>
                     <input type="text" name="approved_by"
-                        value="{% if leave['service_count'] <= 5 %}{{ current_user.username }}{% else %}{{ leave['approved_by'] or '' }}{% endif %}"
+                        value="{% if leave['service_count'] <= 2 %}{{ current_user.username }}{% elif 3 <= leave['service_count'] <= 5 %}{% else %}{{ leave['approved_by'] or '' }}{% endif %}"
                         class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Verified By (if applicable)</label>
                     <input type="text" name="verified_by"
-                        value="{% if leave['service_count'] >= 6 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
+                        value="{% if leave['service_count'] >= 6 %}{{ current_user.username }}{% elif 3 <= leave['service_count'] <= 5 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
                         class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
             </div>
