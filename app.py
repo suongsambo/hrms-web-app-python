@@ -3220,8 +3220,67 @@ def edit_leave_ccc_verify(id):
 #     return render_template('/leaves/edit_spm_leave.html', leave=leave)
 
 
+# @app.route('/leave/edit_gm_approve/<int:id>', methods=['GET', 'POST'])
+# def edit_leave_gm_approve(id):
+#     user_role = 180 if current_user.is_authenticated and current_user.role_default == 180 else None
+
+#     with get_db_connection() as conn:
+#         leave = conn.execute(
+#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+#     if request.method == 'POST':
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+
+#         status = "Approved"
+#         approved_by = current_user.username
+
+#         with get_db_connection() as conn:
+#             conn.execute('''
+#                 UPDATE leaves
+#                 SET leave_type = ?, reason = ?, status = ?, approved_by = ?
+#                 WHERE id = ?
+#             ''', (leave_type, reason, status, approved_by, id))
+
+#         return redirect(url_for('leaves_by_gm'))
+
+#     return render_template('/leaves/edit_gm_leave.html', leave=leave)
+
+
+@app.route('/leave/edit_gm_approve/<int:id>', methods=['GET', 'POST'])
+def edit_leave_gm_approve(id):
+    user_role = 180 if current_user.is_authenticated and current_user.role_default == 180 else None
+
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        status = request.form['status']  # <-- Now using form input
+        approved_by = current_user.username
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type = ?, reason = ?, status = ?, approved_by = ?
+                WHERE id = ?
+            ''', (leave_type, reason, status, approved_by, id))
+
+        return redirect(url_for('leaves_by_gm'))
+
+    return render_template('/leaves/edit_gm_leave.html', leave=leave)
+
+
 @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
 def edit_leave_spm_approve(id):
+
+    user_role = 160 if current_user.is_authenticated and current_user.role_default == 160 else None
     with get_db_connection() as conn:
         leave = conn.execute(
             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
@@ -3262,6 +3321,10 @@ def edit_leave_spm_approve(id):
                 WHERE id = ?
             ''', (leave_type, reason, status, approved_by, verified_by, id))
 
+        if user_role == 160:
+            return redirect(url_for('leaves_by_branch_and_hrd'))
+        elif user_role == 145:
+            return redirect(url_for('view_leaves'))
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_spm_leave.html', leave=leave)
@@ -3303,7 +3366,7 @@ def edit_leave_hrd_approve(id):
                 WHERE id= ?
             ''', (leave_type,  reason, status, category, approved_by, id))
 
-        return redirect(url_for('view_leaves'))
+        return redirect(url_for('leaves_by_branch_and_hrd'))
 
     return render_template('/leaves/edit_hrd_leave.html', leave=leave)
 

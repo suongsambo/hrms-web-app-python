@@ -2,9 +2,21 @@
 content %}
 <div class="bg-gray-100 text-gray-800">
   <!-- Main Content -->
-  <div class="container mx-auto mt-8 px-4">
-
-    <!-- Leaves Table -->
+  <div class="container mx-auto mt-2 px-4">
+    <div class="grid grid-cols-2 gap-4 items-center my-4">
+      <!-- Print Button -->
+      <div>
+        <button onclick="printSelectedLeaves()"
+          class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
+          <i class="fas fa-print mr-2"></i> Print
+        </button>
+      </div>
+      <div>
+        <p id="route-path"
+          class="text-blue-700 bg-gradient-to-r from-blue-200 via-blue-100 to-blue-200 px-2 py-2 rounded-lg shadow-lg border-l-8 border-blue-600 text-md font-semibold tracking-wide uppercase select-none transition duration-300 hover:shadow-xl hover:border-blue-800">
+        </p>
+      </div>
+    </div>
     <div class="overflow-x-auto bg-white shadow-lg rounded-md border border-gray-300">
       <table id="leaveTable" class="min-w-full text-sm text-left border-collapse">
         <thead class="bg-gray-200 text-gray-700">
@@ -37,7 +49,8 @@ content %}
             <td class="px-6 py-3 border-b">{{ leave.leave_type }}</td>
             <!-- Formatted Start Date -->
             <td class="px-10 py-3 border-b leave-start-date" data-start="{{ leave.start_date }}"
-              style="min-width: 180px"></td>
+              style="min-width: 180px">
+            </td>
             <!-- Formatted End Date -->
             <td class="px-10 py-3 border-b leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px">
             </td>
@@ -83,94 +96,95 @@ content %}
   </div>
 
   <!-- Initialize DataTable -->
-  <script>
-    $(document).ready(function () {
-      $("#leaveTable").DataTable({
-        paging: true, // Enables pagination
-        searching: true, // Enables the search box
-        ordering: true, // Enables sorting
-        responsive: true, // Makes the table responsive for smaller screens
-        order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
-        scrollX: true, // Enable horizontal scrolling
-        scrollCollapse: true,
-        paging: true,
-        searching: true,
-        ordering: true,
-        responsive: false,
-        order: [[3, "asc"]],
-        fixedColumns: {
-          leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
-          rightColumns: 2, // Fix last 2 columns (like Reason and Status)
-        },
-        drawCallback: function () {
-          formatLeaveDatesAndHours();
-        },
-      });
+
+</div>
+<script>
+  $(document).ready(function () {
+    $("#leaveTable").DataTable({
+      paging: true, // Enables pagination
+      searching: true, // Enables the search box
+      ordering: true, // Enables sorting
+      responsive: true, // Makes the table responsive for smaller screens
+      order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
+      scrollX: true, // Enable horizontal scrolling
+      scrollCollapse: true,
+      paging: true,
+      searching: true,
+      ordering: true,
+      responsive: false,
+      order: [[3, "asc"]],
+      fixedColumns: {
+        leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
+        rightColumns: 2, // Fix last 2 columns (like Reason and Status)
+      },
+      drawCallback: function () {
+        formatLeaveDatesAndHours();
+      },
+    });
 
 
 
-      function formatLeaveDatesAndHours() {
-        $(".leave-start-date").each(function () {
-          var startDate = $(this).data("start");
-          var formattedStartDate =
-            moment(startDate).format("MM-DD-YYYY hh:mm A");
-          $(this).text(formattedStartDate);
-        });
-
-        $(".leave-end-date").each(function () {
-          var endDate = $(this).data("end");
-          var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
-          $(this).text(formattedEndDate);
-        });
-
-        $(".leave-hours").each(function () {
-          var startDate = $(this).data("start");
-          var endDate = $(this).data("end");
-
-          var startTime = moment(startDate);
-          var endTime = moment(endDate);
-
-          if (startTime.isValid() && endTime.isValid()) {
-            var duration = moment.duration(endTime.diff(startTime));
-            var totalHours = duration.asHours();
-
-            // Subtract lunch overlap
-            var lunchStart = moment(startDate).hour(12).minute(0).second(0);
-            var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
-
-            var overlapStart = moment.max(startTime, lunchStart);
-            var overlapEnd = moment.min(endTime, lunchEnd);
-
-            if (overlapEnd.isAfter(overlapStart)) {
-              var lunchOverlap = moment
-                .duration(overlapEnd.diff(overlapStart))
-                .asHours();
-              totalHours -= lunchOverlap;
-            }
-
-            totalHours = Math.max(totalHours, 0);
-            var displayHours = totalHours.toFixed(1) + " H";
-
-            $(this).text(displayHours);
-          } else {
-            $(this).text("Invalid dates");
-          }
-        });
-      }
-
-      // Format the Start and End Dates using Moment.js
+    function formatLeaveDatesAndHours() {
       $(".leave-start-date").each(function () {
         var startDate = $(this).data("start");
-        var formattedStartDate = moment(startDate).format("MM-DD-YYYY");
+        var formattedStartDate =
+          moment(startDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedStartDate);
       });
 
       $(".leave-end-date").each(function () {
         var endDate = $(this).data("end");
-        var formattedEndDate = moment(endDate).format("MM-DD-YYYY");
+        var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedEndDate);
       });
+
+      $(".leave-hours").each(function () {
+        var startDate = $(this).data("start");
+        var endDate = $(this).data("end");
+
+        var startTime = moment(startDate);
+        var endTime = moment(endDate);
+
+        if (startTime.isValid() && endTime.isValid()) {
+          var duration = moment.duration(endTime.diff(startTime));
+          var totalHours = duration.asHours();
+
+          // Subtract lunch overlap
+          var lunchStart = moment(startDate).hour(12).minute(0).second(0);
+          var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
+
+          var overlapStart = moment.max(startTime, lunchStart);
+          var overlapEnd = moment.min(endTime, lunchEnd);
+
+          if (overlapEnd.isAfter(overlapStart)) {
+            var lunchOverlap = moment
+              .duration(overlapEnd.diff(overlapStart))
+              .asHours();
+            totalHours -= lunchOverlap;
+          }
+
+          totalHours = Math.max(totalHours, 0);
+          var displayHours = totalHours.toFixed(1) + " H";
+
+          $(this).text(displayHours);
+        } else {
+          $(this).text("Invalid dates");
+        }
+      });
+    }
+
+    // Format the Start and End Dates using Moment.js
+    $(".leave-start-date").each(function () {
+      var startDate = $(this).data("start");
+      var formattedStartDate = moment(startDate).format("MM-DD-YYYY");
+      $(this).text(formattedStartDate);
     });
-  </script>
-</div>
+
+    $(".leave-end-date").each(function () {
+      var endDate = $(this).data("end");
+      var formattedEndDate = moment(endDate).format("MM-DD-YYYY");
+      $(this).text(formattedEndDate);
+    });
+  });
+</script>
 {% endblock %}
