@@ -13,7 +13,7 @@ import hashlib
 import os
 import io
 import pandas as pd
-from io import StringIO, BytesIO, TextIOWrapper
+from io import BytesIO, TextIOWrapper
 import csv
 import json
 import requests
@@ -1698,14 +1698,11 @@ def leaves_by_branch_and_ccc_category(branch_name):
             l.category IS NULL
             OR l.category = 'S'
             OR (
-                l.type_of_leave = 'H' AND (
-                    l.requested_by_roles = 20
-                )
+                l.type_of_leave = 'H' AND l.requested_by_roles = 20
             )
         )
         AND (
-            (l.requested_by_roles IS NULL OR l.requested_by_roles != 35)
-            AND l.verified_by != 'Not required'
+            l.category IS NULL OR l.category NOT IN ('M', 'L')
         )
     '''
     params = (branch_name,)
@@ -3797,17 +3794,35 @@ def edit_leave_spm_approve(id):
         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
         service_count = (end_date_obj - start_date_obj).days + 1
 
+        # # Determine leave category and set the appropriate fields
+        # if service_count <= 2:
+        #     category = "S"
+        #     status = "Approved"
+        #     approved_by = current_user.username
+        #     verified_by = request.form['verified_by']
+        # elif 3 <= service_count <= 5:
+        #     category = "M"
+        #     status = "Approved"
+        #     approved_by = current_user.username
+        #     approved_by = request.form['approved_by']
+        # else:
+        #     category = "L"
+        #     status = request.form['status']
+        #     approved_by = request.form.get('approved_by', None)
+        #     verified_by = request.form.get('verified_by', None)
         # Determine leave category and set the appropriate fields
         if service_count <= 2:
             category = "S"
             status = "Approved"
             approved_by = current_user.username
             verified_by = request.form['verified_by']
+
         elif 3 <= service_count <= 5:
             category = "M"
-            status = "Verified"
-            approved_by = request.form['approved_by']
-            verified_by = current_user.username
+            status = "Approved"
+            approved_by = current_user.username
+            verified_by = request.form['verified_by']  # Add this if needed
+
         else:
             category = "L"
             status = request.form['status']
@@ -4008,7 +4023,7 @@ def edit_leave_pm(id):
             verified_by = request.form['verified_by']
         elif 3 <= service_count <= 5:
             category = "M"
-            status = "Verified"
+            status = "Approved"
             approved_by = request.form['approved_by']
             verified_by = current_user.username  # Automatically set current user
         else:

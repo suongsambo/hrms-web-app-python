@@ -42,12 +42,8 @@
                 </div>
             </div>
 
-
-
-
-
             <!-- Approved By / Verified By -->
-            <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Approved By (if applicable)</label>
                     <input type="text" name="approved_by"
@@ -60,12 +56,9 @@
                         value="{% if leave['service_count'] >= 6 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
                         class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-            </div> -->
+            </div>
 
-
-
-            <!-- Approved By / Verified By -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Approved By (if applicable)</label>
                     <input type="text" name="approved_by"
@@ -78,7 +71,7 @@
                         value="{% if leave['service_count'] >= 6 %}{{ current_user.username }}{% elif 3 <= leave['service_count'] <= 5 %}{{ current_user.username }}{% else %}{{ request.form.get('verified_by', leave['verified_by'] or '') }}{% endif %}"
                         class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                 </div>
-            </div>
+            </div> -->
 
             <div>
                 <label for="requested_by_roles" class="block text-sm font-medium text-gray-700">
