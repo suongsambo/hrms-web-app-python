@@ -3,50 +3,63 @@
 {% block title %}Edit Leave{% endblock %}
 
 {% block content %}
-<div class="bg-gradient-to-br from-blue-50 to-white min-h-screen py-10">
-  <div class="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-lg">
-    <h4 class="text-2xl font-bold text-blue-700 mb-6 text-center">Edit Leave</h4>
 
-    <form action="{{ url_for('edit_leave', id=leave['id']) }}" method="POST" class="space-y-6">
+<body class="bg-gray-100 min-h-screen">
+
+  <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+
+
+    <form action="{{ url_for('edit_leave', id=leave['id']) }}" method="POST"
+      class="bg-white shadow-xl rounded-2xl p-8 space-y-6">
       <!-- Verified By -->
-      <div>
-        <label for="verified_by" class="block text-gray-700 font-semibold">Verified By</label>
-        <input type="text" id="verified_by" name="verified_by" value="{{ current_user.username }}"
-          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-          required>
+
+      <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-2">
+        <h2 class="text-lg font-semibold uppercase tracking-wide">
+          Edit Leave
+        </h2>
+      </div>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <label for="verified_by" class="block text-gray-700 font-semibold">Verified By</label>
+          <input type="text" id="verified_by" name="verified_by" value="{{ current_user.username }}"
+            class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none"
+            required>
+        </div>
+
+        <!-- Leave Type -->
+        <div>
+          <label for="leave_type" class="block text-gray-700 font-semibold">Select Leave Type</label>
+          <select id="leave_type" name="leave_type"
+            class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+            <option value="annualLeave">Annual Leave</option>
+            <option value="sickLeave">Sick Leave</option>
+            <option value="maternityLeave">Maternity Leave</option>
+            <option value="specialLeave">Special Leave</option>
+          </select>
+        </div>
       </div>
 
-      <!-- Leave Type -->
-      <div>
-        <label for="leave_type" class="block text-gray-700 font-semibold">Select Leave Type</label>
-        <select id="leave_type" name="leave_type"
-          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-          <option value="annualLeave">Annual Leave</option>
-          <option value="sickLeave">Sick Leave</option>
-          <option value="maternityLeave">Maternity Leave</option>
-          <option value="specialLeave">Special Leave</option>
-        </select>
-      </div>
+      <div class="grid grid-cols-2 gap-6">
+        <!-- Start Date -->
+        <div>
+          <label for="start_date" class="block text-gray-700 font-semibold">Start Date</label>
+          <input type="datetime-local" name="start_date" id="start_date" value="{{ leave['start_date'] }}"
+            class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+        </div>
 
-      <!-- Start Date -->
-      <div>
-        <label for="start_date" class="block text-gray-700 font-semibold">Start Date</label>
-        <input type="datetime-local" name="start_date" id="start_date" value="{{ leave['start_date'] }}"
-          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
-      </div>
-
-      <!-- End Date -->
-      <div>
-        <label for="end_date" class="block text-gray-700 font-semibold">End Date</label>
-        <input type="datetime-local" name="end_date" id="end_date" value="{{ leave['end_date'] }}"
-          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition">
+        <!-- End Date -->
+        <div>
+          <label for="end_date" class="block text-gray-700 font-semibold">End Date</label>
+          <input type="datetime-local" name="end_date" id="end_date" value="{{ leave['end_date'] }}"
+            class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+        </div>
       </div>
 
       <!-- Reason -->
       <div>
         <label for="reason" class="block text-gray-700 font-semibold">Reason</label>
         <textarea name="reason" id="reason" rows="4"
-          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+          class="w-full rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none"
           required>{{ leave['reason'] }}</textarea>
       </div>
 
@@ -74,5 +87,5 @@
       </div>
     </form>
   </div>
-</div>
+</body>
 {% endblock %}

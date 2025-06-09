@@ -1359,153 +1359,83 @@ def filter_leaves_by_employee_id(employee_id):
 # TODO CCC DASHBOARD
 
 
+# @app.route('/leaves/ccc/dashboard/<string:branch_name>', methods=['GET'])
+# def leaves_by_branch_and_ccc_dashboard(branch_name):
+#     if not current_user.is_authenticated or current_user.role_default != 35:
+#         return redirect(url_for('access_denied'))
+
+#     if branch_name:
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 l.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE l.branch = ? AND (
+
+#                 l.type_of_leave = 'H' OR
+#                 l.requested_by_roles = 35)
+#         '''
+#         params = (branch_name,)
+#     else:
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE
+
+#                 l.type_of_leave = 'H' OR
+#                 l.requested_by_roles = 35
+#         '''
+#         params = ()
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#             users = conn.execute("SELECT * FROM users").fetchall()
+#             print(leaves, 'leave')
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template('leaves/leaves_ccc_dashboard.html', leaves=leaves or [], branch_name=branch_name or '', users=users or [])
+
+
 @app.route('/leaves/ccc/dashboard/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_ccc_dashboard(branch_name):
     if not current_user.is_authenticated or current_user.role_default != 35:
         return redirect(url_for('access_denied'))
 
-    if branch_name:
-        query = '''
-            SELECT
-                l.id,
-                e.name AS employee_name,
-                l.branch AS branch_name,
-                l.leave_type,
-                l.start_date,
-                l.end_date,
-                l.reason,
-                l.status,
-                l.type_of_leave,
-                l.verified_by,
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE l.branch = ? AND (
-
-                l.type_of_leave = 'H' OR
-                l.requested_by_roles = 35)
-        '''
-        params = (branch_name,)
-    else:
-        query = '''
-            SELECT
-                l.id,
-                e.name AS employee_name,
-                e.branch AS branch_name,
-                l.leave_type,
-                l.start_date,
-                l.end_date,
-                l.reason,
-                l.status,
-                l.type_of_leave,
-                l.verified_by,
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE
-
-                l.type_of_leave = 'H' OR
-                l.requested_by_roles = 35
-        '''
-        params = ()
-
-    try:
-        with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
-            users = conn.execute("SELECT * FROM users").fetchall()
-            print(leaves, 'leave')
-    except sqlite3.DatabaseError as e:
-        return f"Database error: {e}", 500
-
-    return render_template('leaves/leaves_ccc_dashboard.html', leaves=leaves or [], branch_name=branch_name or '', users=users or [])
-
-
-# TODO: PM Report
-@app.route('/leaves/pm/report/<string:branch_name>', methods=['GET'])
-def leaves_by_branch_and_pm_report(branch_name):
-
-    if not current_user.is_authenticated or current_user.role_default != 140:
-        return redirect(url_for('access_denied'))
-
-    if branch_name:
-        query = '''
-            SELECT
-                l.id,
-                e.name AS employee_name,
-                l.branch AS branch_name,
-                l.leave_type,
-                l.start_date,
-                l.end_date,
-                l.reason,
-                l.status,
-                l.type_of_leave,
-                l.verified_by,
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE l.branch = ? AND (
-
-                l.type_of_leave = 'H' OR
-                l.requested_by_roles = 140)
-        '''
-        params = (branch_name,)
-    else:
-        query = '''
-            SELECT
-                l.id,
-                e.name AS employee_name,
-                e.branch AS branch_name,
-                l.leave_type,
-                l.start_date,
-                l.end_date,
-                l.reason,
-                l.status,
-                l.type_of_leave,
-                l.verified_by,
-                l.approved_by,
-                l.leave_hours,
-                l.service_count,
-                l.requested_by
-            FROM leaves l
-            LEFT JOIN employees e ON l.employee_id = e.id
-            WHERE
-
-                l.type_of_leave = 'H' OR
-                l.requested_by_roles = 140
-        '''
-        params = ()
-
-    try:
-        with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
-            users = conn.execute("SELECT * FROM users").fetchall()
-            print(leaves, 'leave')
-    except sqlite3.DatabaseError as e:
-        return f"Database error: {e}", 500
-
-    return render_template('leaves/leaves_pm_dashboard.html', leaves=leaves or [], branch_name=branch_name or '', users=users or [])
-
-
-@app.route('/leaves/ccc/verify/<string:branch_name>', methods=['GET'])
-def leaves_by_branch_and_ccc_category(branch_name):
-    if not current_user.is_authenticated or current_user.role_default != 35:
-        return redirect(url_for('access_denied'))
-
-    if branch_name:
-        query = '''
-         SELECT
+    base_query = '''
+        SELECT
             l.id,
             e.name AS employee_name,
-            e.branch AS branch_name,
+            l.branch AS branch_name,
             l.leave_type,
             l.start_date,
             l.end_date,
@@ -1519,18 +1449,232 @@ def leaves_by_branch_and_ccc_category(branch_name):
             l.requested_by
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE e.branch = ?
-        AND (
-            l.category IS NULL
-            OR l.category = 'S'
-            OR l.type_of_leave = 'H'
-        )
-        AND (l.requested_by_roles IS NULL OR l.requested_by_roles != 35)
+        WHERE ({conditions})
+    '''
 
-        '''
+    if branch_name:
+        conditions = '(l.branch = ? AND (l.type_of_leave = "H" OR l.requested_by_roles = 35)) AND l.requested_by_roles = 35'
         params = (branch_name,)
     else:
-        query = '''
+        conditions = '(l.type_of_leave = "H" OR l.requested_by_roles = 35) AND l.requested_by_roles = 35'
+        params = ()
+
+    query = base_query.format(conditions=conditions)
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+            users = conn.execute("SELECT * FROM users").fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template(
+        'leaves/leaves_ccc_dashboard.html',
+        leaves=leaves or [],
+        branch_name=branch_name or '',
+        users=users or []
+    )
+
+
+# # TODO: PM Report
+# @app.route('/leaves/pm/report/<string:branch_name>', methods=['GET'])
+# def leaves_by_branch_and_pm_report(branch_name):
+
+#     if not current_user.is_authenticated or current_user.role_default != 140:
+#         return redirect(url_for('access_denied'))
+
+#     if branch_name:
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 l.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE l.branch = ? AND (
+
+#                 l.type_of_leave = 'H' OR
+#                 l.requested_by_roles = 140)
+#         '''
+#         params = (branch_name,)
+#     else:
+#         query = '''
+#             SELECT
+#                 l.id,
+#                 e.name AS employee_name,
+#                 e.branch AS branch_name,
+#                 l.leave_type,
+#                 l.start_date,
+#                 l.end_date,
+#                 l.reason,
+#                 l.status,
+#                 l.type_of_leave,
+#                 l.verified_by,
+#                 l.approved_by,
+#                 l.leave_hours,
+#                 l.service_count,
+#                 l.requested_by
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#             WHERE
+
+#                 l.type_of_leave = 'H' OR
+#                 l.requested_by_roles = 140
+#         '''
+#         params = ()
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#             users = conn.execute("SELECT * FROM users").fetchall()
+#             print(leaves, 'leave')
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template('leaves/leaves_pm_dashboard.html', leaves=leaves or [], branch_name=branch_name or '', users=users or [])
+
+
+# TODO: PM Report
+@app.route('/leaves/pm/report/<string:branch_name>', methods=['GET'])
+def leaves_by_branch_and_pm_report(branch_name):
+    if not current_user.is_authenticated or current_user.role_default != 140:
+        return redirect(url_for('access_denied'))
+
+    base_query = '''
+        SELECT
+            l.id,
+            e.name AS employee_name,
+            l.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE ({conditions})
+    '''
+
+    if branch_name:
+        # Enforce role 140 even when OR is used
+        conditions = '(l.branch = ? AND (l.type_of_leave = "H" OR l.requested_by_roles = 140)) AND l.requested_by_roles = 140'
+        params = (branch_name,)
+    else:
+        conditions = '(l.type_of_leave = "H" OR l.requested_by_roles = 140) AND l.requested_by_roles = 140'
+        params = ()
+
+    query = base_query.format(conditions=conditions)
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+            users = conn.execute("SELECT * FROM users").fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template(
+        'leaves/leaves_pm_dashboard.html',
+        leaves=leaves or [],
+        branch_name=branch_name or '',
+        users=users or []
+    )
+
+
+# @app.route('/leaves/ccc/verify/<string:branch_name>', methods=['GET'])
+# def leaves_by_branch_and_ccc_category(branch_name):
+#     if not current_user.is_authenticated or current_user.role_default != 35:
+#         return redirect(url_for('access_denied'))
+
+#     if branch_name:
+#         query = '''
+#          SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             e.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE e.branch = ?
+#         AND (
+#             l.category IS NULL
+#             OR l.category = 'S'
+#             OR (l.type_of_leave = 'H' AND l.requested_by_roles = 20)
+#         )
+#         AND (l.requested_by_roles IS NULL OR l.requested_by_roles != 35)
+
+#         '''
+#         params = (branch_name,)
+#     else:
+#         query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             e.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE e.branch = ?
+#         AND (
+#             l.category IS NULL
+#             OR l.category = 'S'
+#             OR l.type_of_leave = 'H'
+#             OR l.requested_by_roles = 20
+#         )
+#         AND (l.type_of_leave = 'H' AND l.requested_by_roles = 20)
+#         '''
+#         params = ()
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template('leaves/leaves_ccc_verify.html', leaves=leaves, branch_name=branch_name)
+
+@app.route('/leaves/ccc/verify/<string:branch_name>', methods=['GET'])
+def leaves_by_branch_and_ccc_category(branch_name):
+    if not current_user.is_authenticated or current_user.role_default != 35:
+        return redirect(url_for('access_denied'))
+
+    query = '''
         SELECT
             l.id,
             e.name AS employee_name,
@@ -1545,18 +1689,26 @@ def leaves_by_branch_and_ccc_category(branch_name):
             l.approved_by,
             l.leave_hours,
             l.service_count,
-            l.requested_by
+            l.requested_by,
+            l.requested_by_roles
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
         WHERE e.branch = ?
         AND (
             l.category IS NULL
             OR l.category = 'S'
-            OR l.type_of_leave = 'H'
+            OR (
+                l.type_of_leave = 'H' AND (
+                    l.requested_by_roles = 20
+                )
+            )
         )
-        AND (l.requested_by_roles IS NULL OR l.requested_by_roles != 35)
-        '''
-        params = ()
+        AND (
+            (l.requested_by_roles IS NULL OR l.requested_by_roles != 35)
+            AND l.verified_by != 'Not required'
+        )
+    '''
+    params = (branch_name,)
 
     try:
         with get_db_connection() as conn:
@@ -1565,6 +1717,178 @@ def leaves_by_branch_and_ccc_category(branch_name):
         return f"Database error: {e}", 500
 
     return render_template('leaves/leaves_ccc_verify.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leaves/spm', methods=['GET'])
+# def leaves_by_branch_and_spm():
+#     if not current_user.is_authenticated or current_user.role_default != 145:
+#         return redirect(url_for('access_denied'))
+
+#     zone_id = current_user.zone_id
+#     if zone_id is None:
+#         flash("Zone ID not found for the current user!", "danger")
+#         return redirect(url_for('dashboard'))
+
+#     branch_name = request.args.get('branch_name', 'All')
+
+#     try:
+#         with get_db_connection() as conn:
+#             # Fetch zone
+#             zone = conn.execute(
+#                 "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
+#             if not zone:
+#                 flash("Zone not found!", "danger")
+#                 return redirect(url_for('dashboard'))
+
+#             # Fetch branches in zone
+#             branches_in_zone = conn.execute("""
+#                 SELECT b.ID, b.Branch
+#                 FROM branches b
+#                 JOIN zone_branch zb ON b.ID = zb.branch_id
+#                 WHERE zb.zone_id = ?
+#             """, (zone_id,)).fetchall()
+
+#             branch_names = [b["Branch"] for b in branches_in_zone]
+
+#             # Prepare SQL query based on branch selection
+#             if branch_name == "All" or not branch_name:
+#                 placeholders = ', '.join(['?'] * len(branch_names))
+#                 where_clause = f"l.branch IN ({placeholders})"
+#                 params = tuple(branch_names)
+#             else:
+#                 where_clause = "l.branch = ?"
+#                 params = (branch_name,)
+
+#             query = f"""
+#                 SELECT
+#                     l.id,
+#                     l.requested_by AS employee_name,
+#                     l.branch AS branch_name,
+#                     l.leave_type,
+#                     l.start_date,
+#                     l.end_date,
+#                     l.reason,
+#                     l.status,
+#                     l.type_of_leave,
+#                     l.verified_by,
+#                     l.approved_by,
+#                     l.leave_hours,
+#                     l.service_count,
+#                     l.requested_by,
+#                     l.requested_by_roles
+#                 FROM leaves l
+#                 LEFT JOIN employees e ON l.employee_id = e.id
+#                 WHERE {where_clause}
+#                 AND (
+#                       l.category IN ('M', 'L', 'S') OR
+#                       l.type_of_leave = 'H'
+#                 )
+#                 AND NOT (l.requested_by_roles = 140 AND l.category = 'L')
+#                 AND (l.requested_by_roles = 140 OR l.type_of_leave = 'H' OR l.verified_by 'Not required')
+#             """
+
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template(
+#         'leaves/leaves_spm_approve.html',
+#         leaves=leaves,
+#         branch_name=branch_name,
+#         branches_in_zone=branches_in_zone,
+#         zone=zone
+#     )
+
+
+# @app.route('/leaves/spm', methods=['GET'])
+# def leaves_by_branch_and_spm():
+#     if not current_user.is_authenticated or current_user.role_default != 145:
+#         return redirect(url_for('access_denied'))
+
+#     zone_id = current_user.zone_id
+#     if zone_id is None:
+#         flash("Zone ID not found for the current user!", "danger")
+#         return redirect(url_for('dashboard'))
+
+#     branch_name = request.args.get('branch_name', 'All')
+
+#     try:
+#         with get_db_connection() as conn:
+#             # Fetch zone
+#             zone = conn.execute(
+#                 "SELECT * FROM zones WHERE ID = ?", (zone_id,)
+#             ).fetchone()
+#             if not zone:
+#                 flash("Zone not found!", "danger")
+#                 return redirect(url_for('dashboard'))
+
+#             # Fetch branches in zone
+#             branches_in_zone = conn.execute("""
+#                 SELECT b.ID, b.Branch
+#                 FROM branches b
+#                 JOIN zone_branch zb ON b.ID = zb.branch_id
+#                 WHERE zb.zone_id = ?
+#             """, (zone_id,)).fetchall()
+
+#             branch_names = [b["Branch"] for b in branches_in_zone]
+
+#             # Prepare SQL query based on branch selection
+#             if branch_name == "All" or not branch_name:
+#                 if not branch_names:
+#                     flash("No branches found in your zone.", "warning")
+#                     return redirect(url_for('dashboard'))
+#                 placeholders = ', '.join(['?'] * len(branch_names))
+#                 where_clause = f"l.branch IN ({placeholders})"
+#                 params = tuple(branch_names)
+#             else:
+#                 where_clause = "l.branch = ?"
+#                 params = (branch_name,)
+
+#             query = f"""
+#                 SELECT
+#                     l.id,
+#                     l.requested_by AS employee_name,
+#                     l.branch AS branch_name,
+#                     l.leave_type,
+#                     l.start_date,
+#                     l.end_date,
+#                     l.reason,
+#                     l.status,
+#                     l.type_of_leave,
+#                     l.verified_by,
+#                     l.approved_by,
+#                     l.leave_hours,
+#                     l.service_count,
+#                     l.requested_by,
+#                     l.requested_by_roles
+#                 FROM leaves l
+#                 LEFT JOIN employees e ON l.employee_id = e.id
+#                 WHERE {where_clause}
+
+#                 AND (
+#                     l.category IN ('M', 'L')
+#                     OR (
+#                         (l.requested_by_roles = 140 AND l.category = 'L')
+#                         OR (l.type_of_leave = 'H' AND l.requested_by_roles = 140)
+#                         OR l.verified_by = 'Not required'
+#                     )
+#                 )
+#             """
+
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         flash(f"Database error: {e}", "danger")
+#         return redirect(url_for('dashboard'))
+
+#     return render_template(
+#         'leaves/leaves_spm_approve.html',
+#         leaves=leaves,
+#         branch_name=branch_name,
+#         branches_in_zone=branches_in_zone,
+#         zone=zone
+#     )
 
 
 @app.route('/leaves/spm', methods=['GET'])
@@ -1583,12 +1907,13 @@ def leaves_by_branch_and_spm():
         with get_db_connection() as conn:
             # Fetch zone
             zone = conn.execute(
-                "SELECT * FROM zones WHERE ID = ?", (zone_id,)).fetchone()
+                "SELECT * FROM zones WHERE ID = ?", (zone_id,)
+            ).fetchone()
             if not zone:
                 flash("Zone not found!", "danger")
                 return redirect(url_for('dashboard'))
 
-            # Fetch branches in zone
+            # Fetch branches in the zone
             branches_in_zone = conn.execute("""
                 SELECT b.ID, b.Branch
                 FROM branches b
@@ -1598,8 +1923,11 @@ def leaves_by_branch_and_spm():
 
             branch_names = [b["Branch"] for b in branches_in_zone]
 
-            # Prepare SQL query based on branch selection
+            # Prepare SQL condition
             if branch_name == "All" or not branch_name:
+                if not branch_names:
+                    flash("No branches found in your zone.", "warning")
+                    return redirect(url_for('dashboard'))
                 placeholders = ', '.join(['?'] * len(branch_names))
                 where_clause = f"l.branch IN ({placeholders})"
                 params = tuple(branch_names)
@@ -1627,18 +1955,22 @@ def leaves_by_branch_and_spm():
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
-                AND l.requested_by_roles = 140
+                AND l.requested_by_roles IS NOT NULL
                 AND (
-                    l.category IN ('M', 'L', 'S') OR
-                    l.type_of_leave = 'T'
+                    l.category IN ('M', 'L')
+                    OR (
+                        (l.requested_by_roles IN (140, 145) AND l.category = 'L')
+                        OR (l.type_of_leave = 'H' AND l.requested_by_roles IN (140, 145))
+                        OR (l.type_of_leave = 'D' AND l.requested_by_roles IN (140, 145))
+                    )
                 )
-                AND NOT (l.requested_by_roles = 140 AND l.category = 'L')
             """
 
             leaves = conn.execute(query, params).fetchall()
 
     except sqlite3.DatabaseError as e:
-        return f"Database error: {e}", 500
+        flash(f"Database error: {e}", "danger")
+        return redirect(url_for('dashboard'))
 
     return render_template(
         'leaves/leaves_spm_approve.html',
@@ -2094,6 +2426,7 @@ def add_leave_hours_ccc(branch):
         branch = request.form['branch']
         requested_by = request.form['requested_by']
         user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form['requested_by_roles']
 
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
@@ -2145,9 +2478,9 @@ def add_leave_hours_ccc(branch):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required"))
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by,requested_by_roles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
 
             leave_id = cursor.lastrowid
 
@@ -2259,6 +2592,7 @@ def add_leave_hours_pm(branch):
         branch = request.form['branch']
         requested_by = request.form['requested_by']
         user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form['requested_by_roles']
 
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
@@ -2310,9 +2644,9 @@ def add_leave_hours_pm(branch):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required"))
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by, requested_by_roles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?  , ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
 
             leave_id = cursor.lastrowid
 
@@ -2352,6 +2686,7 @@ def add_leave_hours(branch):
         branch = request.form['branch']
         requested_by = request.form['requested_by']
         user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form['requested_by_roles']
 
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
@@ -2403,9 +2738,9 @@ def add_leave_hours(branch):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch))
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, requested_by_roles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, requested_by_roles))
 
             leave_id = cursor.lastrowid
 
