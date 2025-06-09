@@ -1658,12 +1658,10 @@ def leaves_by_branch_and_hrd():
 
     try:
         with get_db_connection() as conn:
-            # Fetch all branch names
             branches = conn.execute(
                 "SELECT DISTINCT Branch FROM branches").fetchall()
             branch_names = [b["Branch"] for b in branches]
 
-            # Prepare SQL query based on branch selection
             if branch_name == "All" or not branch_name:
                 placeholders = ', '.join(['?'] * len(branch_names))
                 where_clause = f"l.branch IN ({placeholders})"
@@ -1691,8 +1689,11 @@ def leaves_by_branch_and_hrd():
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
-                AND  (l.requested_by_roles = 140 AND l.category = 'L')
-                OR (l.requested_by_roles = 145 AND l.category = 'L')
+                AND (
+                    (l.requested_by_roles = 140 AND l.category = 'L')
+                    OR (l.requested_by_roles = 145 AND l.category = 'L')
+                )
+                AND NOT (l.requested_by_roles = 145 AND l.category = 'M')
             """
 
             leaves = conn.execute(query, params).fetchall()
@@ -1704,9 +1705,69 @@ def leaves_by_branch_and_hrd():
         'leaves/leaves_hrd_approve.html',
         leaves=leaves,
         branch_name=branch_name,
-        branches_in_zone=branches,  # Renamed but kept to avoid template changes
-        zone=None  # Set to None if template expects it
+        branches_in_zone=branches,
+        zone=None
     )
+
+
+# @app.route('/leaves/hrd', methods=['GET'])
+# def leaves_by_branch_and_hrd():
+#     if not current_user.is_authenticated or current_user.role_default != 160:
+#         return redirect(url_for('access_denied'))
+
+#     branch_name = request.args.get('branch_name', 'All')
+
+#     try:
+#         with get_db_connection() as conn:
+#             # Fetch all branch names
+#             branches = conn.execute(
+#                 "SELECT DISTINCT Branch FROM branches").fetchall()
+#             branch_names = [b["Branch"] for b in branches]
+
+#             # Prepare SQL query based on branch selection
+#             if branch_name == "All" or not branch_name:
+#                 placeholders = ', '.join(['?'] * len(branch_names))
+#                 where_clause = f"l.branch IN ({placeholders})"
+#                 params = tuple(branch_names)
+#             else:
+#                 where_clause = "l.branch = ?"
+#                 params = (branch_name,)
+
+#             query = f"""
+#                 SELECT
+#                     l.id,
+#                     l.requested_by AS employee_name,
+#                     l.branch AS branch_name,
+#                     l.leave_type,
+#                     l.start_date,
+#                     l.end_date,
+#                     l.reason,
+#                     l.status,
+#                     l.type_of_leave,
+#                     l.verified_by,
+#                     l.approved_by,
+#                     l.leave_hours,
+#                     l.service_count,
+#                     l.requested_by
+#                 FROM leaves l
+#                 LEFT JOIN employees e ON l.employee_id = e.id
+#                 WHERE {where_clause}
+#                 AND  (l.requested_by_roles = 140 AND l.category = 'L')
+#                 OR (l.requested_by_roles = 145 AND l.category = 'L')
+#             """
+
+#             leaves = conn.execute(query, params).fetchall()
+
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template(
+#         'leaves/leaves_hrd_approve.html',
+#         leaves=leaves,
+#         branch_name=branch_name,
+#         branches_in_zone=branches,  # Renamed but kept to avoid template changes
+#         zone=None  # Set to None if template expects it
+#     )
 
 
 # @app.route('/leaves/gm', methods=['GET'])
@@ -2103,6 +2164,171 @@ def add_leave_hours_ccc(branch):
     return render_template('/leaves/add_leave_hours_ccc.html', employees=employees, users=users, branch=branch)
 
 
+@app.route('/leave_hours/pm/add/<string:branch>', methods=['GET', 'POST'])
+@login_required
+def add_leave_hours_pm(branch):
+    employees = []
+    users = []
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+    with get_db_connection() as conn:
+        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        # users = conn.execute(
+        #     'SELECT id, username FROM users WHERE RoleDefault IN (145) AND branch = ? AND Active = 1',
+        #     (user_branch,)
+        # ).fetchall()
+
+        users = []
+        branch_row = conn.execute(
+            "SELECT id FROM branches WHERE Branch = ?", (user_branch,)
+        ).fetchone()
+
+        if branch_row:
+            branch_id = branch_row[0]
+            print("Branch ID:", branch_id)
+
+            # Check if the branch_id exists in zone_branch table
+            cursor = conn.execute(
+                "SELECT zone_id FROM zone_branch WHERE branch_id = ?", (branch_id,))
+
+            zone_row = cursor.fetchone()
+            zone_id = zone_row[0] if zone_row else None
+
+            if zone_row:
+                print(
+                    f"Branch ID {branch_id} is linked to Zone ID {zone_row[0]}")
+            else:
+                print(f"Branch ID {branch_id} is not linked to any zone.")
+
+            # Now find users that belong to this zone
+            if zone_id:
+                cursor.execute(
+                    "SELECT * FROM users WHERE ZoneID = ?", (zone_id,))
+                users_in_zone = cursor.fetchall()
+
+                if users_in_zone:
+                    for user in users_in_zone:
+                        user_info = {
+                            "id": user[0],
+                            "Username": user[1],
+                            "Branch": user[2],
+                            "ZoneID": user[3]
+                        }
+                        users.append(user_info)
+                        print(f"User added: {user_info}")
+                else:
+                    print(f"No users found in zone ID {zone_id}")
+            else:
+                print("Zone ID not found for the given branch.")
+
+            # Check if branch_id exists in zone_branch
+            zone_check = conn.execute(
+                "SELECT 1 FROM zone_branch WHERE branch_id = ? LIMIT 1", (
+                    branch_id,)
+            ).fetchone()
+
+            if zone_check:
+                print("Branch is in zone_branch ✅")
+                users = conn.execute('''
+                    SELECT DISTINCT
+                        u.id,
+                        u.username,
+                        u.branch,
+                        u.ZoneID
+                    FROM
+                        users AS u
+                    WHERE
+                        u.RoleDefault = 145
+                        AND u.ZoneID IS NOT NULL
+                        AND u.branch IS NOT NULL
+                        AND Active = 1
+                        AND u.ZoneID = ?
+                ''', (zone_id,)).fetchall()
+
+            else:
+                print("Branch is NOT in zone_branch ❌")
+        else:
+            print("Branch not found.")
+
+    if request.method == 'POST':
+        employee_id = request.form['employee_id']
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        branch = request.form['branch']
+        requested_by = request.form['requested_by']
+        user_ids = request.form.getlist('user_ids')
+
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+        # Validations...
+        if end_date_obj <= start_date_obj:
+            flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        # Disallow leave hours on Saturday and Sunday
+        if start_date_obj.weekday() >= 5 or end_date_obj.weekday() >= 5:
+            flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_date_obj.hour < 7:
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+           end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        # Calculate total hours
+        total_seconds = (end_date_obj - start_date_obj).total_seconds()
+        total_hours = total_seconds / 3600
+
+        # Define lunch time range
+        lunch_start = start_date_obj.replace(hour=12, minute=0)
+        lunch_end = start_date_obj.replace(hour=13, minute=30)
+
+        # Subtract lunch only if overlapping
+        if start_date_obj < lunch_end and end_date_obj > lunch_start:
+            lunch_overlap_start = max(start_date_obj, lunch_start)
+            lunch_overlap_end = min(end_date_obj, lunch_end)
+            if lunch_overlap_end > lunch_overlap_start:
+                lunch_overlap = (lunch_overlap_end -
+                                 lunch_overlap_start).total_seconds() / 3600
+                total_hours -= lunch_overlap
+
+        total_hours = max(total_hours, 0)
+        leave_hours = round(total_hours, 2)  # Show decimals like 4.5
+
+        # Check if leave hours are greater than 8
+        if leave_hours > 8:
+            flash("ម៉ោងឈប់សម្រាកមិនគួរធំជាង 8 ម៉ោងទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required"))
+
+            leave_id = cursor.lastrowid
+
+            for user_id in user_ids:
+                cursor.execute('''
+                    INSERT INTO user_leave (user_id, leave_id)
+                    VALUES (?, ?)
+                ''', (user_id, leave_id))
+
+            conn.commit()
+
+        return redirect(url_for('leaves_by_branch_and_pm_report', branch_name=branch))
+
+    return render_template('/leaves/add_leave_hours_pm.html', employees=employees, users=users, branch=branch)
+
+
 @app.route('/leave_hours/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_leave_hours(branch):
@@ -2290,6 +2516,7 @@ def calculate_service_count(start_date, end_date):
 @app.route('/leave_many/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_many_leave(branch):
+
     user_branch = branch if not current_user.is_authenticated else current_user.branch
 
     with get_db_connection() as conn:
