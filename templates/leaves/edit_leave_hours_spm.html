@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Leave Hours (SPM){% endblock %}
+
+{% block content %}
+
+<body class="bg-gray-100 min-h-screen">
+
+  <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+
+
+    <form action="{{ url_for('edit_leave_hours_spm', id=leave['id']) }}" method="POST"
+      class="bg-white shadow-xl rounded-2xl p-8 space-y-6">
+      <!-- Verified By -->
+
+      <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-2">
+        <h2 class="text-lg font-semibold uppercase tracking-wide">
+          Edit Leave Hours (SPM)
+        </h2>
+      </div>
+      <div class="mb-2 p-2 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md shadow">
+        <p class="text-sm font-medium">
+          ⚠️ This form is read-only except for Status field.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-6">
+        <div>
+          <label for="approved_by" class="block text-gray-700 font-semibold">Approved By</label>
+          <input type="text" id="approved_by" name="approved_by" value="{{ current_user.username }}" readonly
+            class="w-full  bg-gray-200 rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none"
+            required>
+        </div>
+
+        <!-- Leave Type -->
+        <div>
+          <label for="leave_type" class="block text-gray-700 font-semibold">Select Leave Type</label>
+          <input type="text" id="leave_type" name="leave_type" value="{{ leave['leave_type'] }}" readonly
+            class="w-full  bg-gray-200 rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-6">
+        <!-- Start Date -->
+        <div>
+          <label for="start_date" class="block text-gray-700 font-semibold">Start Date</label>
+          <input type="datetime-local" name="start_date" id="start_date" value="{{ leave['start_date'] }}" readonly
+            class="w-full bg-gray-200 rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+        </div>
+
+        <!-- End Date -->
+        <div>
+          <label for="end_date" class="block text-gray-700 font-semibold">End Date</label>
+          <input type="datetime-local" name="end_date" id="end_date" value="{{ leave['end_date'] }}" readonly
+            class="w-full bg-gray-200 rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none">
+        </div>
+      </div>
+
+      <!-- Reason -->
+      <div>
+        <label for="reason" class="block text-gray-700 font-semibold">Reason</label>
+        <textarea name="reason" id="reason" rows="4" readonly
+          class="w-full bg-gray-200 rounded-xl border border-gray-300 px-4 py-2 shadow-sm focus:border-indigo-600 focus:ring-2 focus:ring-indigo-200 focus:outline-none"
+          required>{{ leave['reason'] }}</textarea>
+      </div>
+
+      <!-- Status -->
+      <div>
+        <label for="status" class="block text-gray-700 font-semibold">Status</label>
+        <select id="status" name="status"
+          class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+          <option value="Approved" {% if leave['status']=='Approved' or leave['status'] is none %}selected{% endif %}>
+            Approved</option>
+          <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="flex justify-between items-center mt-6 space-x-4">
+        <button type="submit"
+          class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+          <i class="fas fa-save mr-2"></i> Update Leave
+        </button>
+        <a href="{{ url_for('leaves_by_branch_and_hrd') }}"
+          class="w-full py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </a>
+      </div>
+    </form>
+  </div>
+</body>
+{% endblock %}
