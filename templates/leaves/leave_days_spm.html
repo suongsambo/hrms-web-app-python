@@ -169,7 +169,7 @@ content %}
   <script>
     function closeModal() {
       document.getElementById("leaveModal").classList.add("hidden");
-      window.location.href = "{{ url_for('leaves_by_branch_and_pm_report', branch_name=current_user.branch) }}"; // Redirect after closing the modal
+      window.location.href = "{{ url_for('leaves_by_branch_and_spm_report', branch_name=current_user.branch) }}"; // Redirect after closing the modal
     }
     // Function to select all checkboxes
     function selectAll() {

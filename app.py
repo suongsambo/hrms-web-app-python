@@ -2101,9 +2101,11 @@ def leaves_by_branch_and_hrd():
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
+             
                 AND (
-                    (l.requested_by_roles = 140 AND l.category = 'L')
-                    OR (l.requested_by_roles = 145 AND l.category IN ('L', 'M', 'S'))
+                        (l.requested_by_roles = 140 AND l.category = 'L')
+                        OR (l.requested_by_roles = 145 AND l.category IN ('L', 'M', 'S'))
+                        OR (l.requested_by_roles = 145  AND l.type_of_leave = 'H')
                 )
             """
             leaves = conn.execute(query, params).fetchall()
@@ -2294,6 +2296,7 @@ def leaves_by_gm():
             (l.category = 'L')
             OR (l.category = 'M' AND l.requested_by_roles = 140)
             OR (l.requested_by_roles = 145 AND l.category IN ('L', 'M', 'S'))
+            OR (l.requested_by_roles = 145  AND l.type_of_leave = 'H')
     '''
 
     try:
@@ -2783,6 +2786,175 @@ def add_leave_hours_pm(branch):
         return redirect(url_for('leaves_by_branch_and_pm_report', branch_name=branch))
 
     return render_template('/leaves/add_leave_hours_pm.html', employees=employees, users=users, branch=branch)
+
+
+@app.route('/leave_hours/spm/add/<string:branch>', methods=['GET', 'POST'])
+@login_required
+def add_leave_hours_spm(branch):
+    employees = []
+    users = []
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+    with get_db_connection() as conn:
+        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        users = []
+        users2 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
+        ).fetchall()
+
+        users3 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault = 160 AND Active = 1'
+        ).fetchall()
+
+        branch_row = conn.execute(
+            "SELECT id FROM branches WHERE Branch = ?", (user_branch,)
+        ).fetchone()
+
+        if branch_row:
+            branch_id = branch_row[0]
+            print("Branch ID:", branch_id)
+
+            # Check if the branch_id exists in zone_branch table
+            cursor = conn.execute(
+                "SELECT zone_id FROM zone_branch WHERE branch_id = ?", (branch_id,))
+
+            zone_row = cursor.fetchone()
+            zone_id = zone_row[0] if zone_row else None
+
+            if zone_row:
+                print(
+                    f"Branch ID {branch_id} is linked to Zone ID {zone_row[0]}")
+            else:
+                print(f"Branch ID {branch_id} is not linked to any zone.")
+
+            # Now find users that belong to this zone
+            if zone_id:
+                cursor.execute(
+                    "SELECT * FROM users WHERE ZoneID = ?", (zone_id,))
+                users_in_zone = cursor.fetchall()
+
+                if users_in_zone:
+                    for user in users_in_zone:
+                        user_info = {
+                            "id": user[0],
+                            "Username": user[1],
+                            "Branch": user[2],
+                            "ZoneID": user[3]
+                        }
+                        users.append(user_info)
+                        print(f"User added: {user_info}")
+                else:
+                    print(f"No users found in zone ID {zone_id}")
+            else:
+                print("Zone ID not found for the given branch.")
+
+            # Check if branch_id exists in zone_branch
+            zone_check = conn.execute(
+                "SELECT 1 FROM zone_branch WHERE branch_id = ? LIMIT 1", (
+                    branch_id,)
+            ).fetchone()
+
+            if zone_check:
+                print("Branch is in zone_branch ✅")
+                users = conn.execute('''
+                    SELECT DISTINCT
+                        u.id,
+                        u.username,
+                        u.branch,
+                        u.ZoneID
+                    FROM
+                        users AS u
+                    WHERE
+                        u.RoleDefault = 145
+                        AND u.ZoneID IS NOT NULL
+                        AND u.branch IS NOT NULL
+                        AND Active = 1
+                        AND u.ZoneID = ?
+                ''', (zone_id,)).fetchall()
+
+            else:
+                print("Branch is NOT in zone_branch ❌")
+        else:
+            print("Branch not found.")
+
+    if request.method == 'POST':
+        employee_id = request.form['employee_id']
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        branch = request.form['branch']
+        requested_by = request.form['requested_by']
+        user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form['requested_by_roles']
+
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+        # Validations...
+        if end_date_obj <= start_date_obj:
+            flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        # Disallow leave hours on Saturday and Sunday
+        if start_date_obj.weekday() >= 5 or end_date_obj.weekday() >= 5:
+            flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_date_obj.hour < 7:
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+           end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        # Calculate total hours
+        total_seconds = (end_date_obj - start_date_obj).total_seconds()
+        total_hours = total_seconds / 3600
+
+        # Define lunch time range
+        lunch_start = start_date_obj.replace(hour=12, minute=0)
+        lunch_end = start_date_obj.replace(hour=13, minute=30)
+
+        # Subtract lunch only if overlapping
+        if start_date_obj < lunch_end and end_date_obj > lunch_start:
+            lunch_overlap_start = max(start_date_obj, lunch_start)
+            lunch_overlap_end = min(end_date_obj, lunch_end)
+            if lunch_overlap_end > lunch_overlap_start:
+                lunch_overlap = (lunch_overlap_end -
+                                 lunch_overlap_start).total_seconds() / 3600
+                total_hours -= lunch_overlap
+
+        total_hours = max(total_hours, 0)
+        leave_hours = round(total_hours, 2)  # Show decimals like 4.5
+
+        # Check if leave hours are greater than 8
+        if leave_hours > 8:
+            flash("ម៉ោងឈប់សម្រាកមិនគួរធំជាង 8 ម៉ោងទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by, requested_by_roles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?  , ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
+
+            leave_id = cursor.lastrowid
+
+            for user_id in user_ids:
+                cursor.execute('''
+                    INSERT INTO user_leave (user_id, leave_id)
+                    VALUES (?, ?)
+                ''', (user_id, leave_id))
+
+            conn.commit()
+
+        return redirect(url_for('leaves_by_branch_and_spm_report', branch_name=branch))
+
+    return render_template('/leaves/add_leave_hours_spm.html', employees=employees, users=users, users2=users2, users3=users3, branch=branch)
 
 
 @app.route('/leave_hours/add/<string:branch>', methods=['GET', 'POST'])
@@ -4426,6 +4598,92 @@ def edit_leave(id):
         return redirect(url_for('view_leaves'))
 
     return render_template('/leaves/edit_leave.html', leave=leave)
+
+
+@app.route('/leave/edit/hours/hrd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_hours_hrd(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if not leave:
+        return "Leave record not found", 404
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        type_of_leave = request.form.get('type_of_leave')
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        # approved_by = request.form.get('approved_by')
+        verified_by = request.form.get('verified_by')
+        status = request.form.get('status')
+        # status = "Pending"
+
+        # Logic for half-day leave only
+        if type_of_leave == 'H':
+            status = "Approved"
+            verified_by = request.form['verified_by']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type = ?, reason = ?, status = ?,
+                    verified_by = ?,
+                    start_date = ?, end_date = ?
+                WHERE id = ?
+            ''', (
+                leave_type, reason, status,
+                verified_by,
+                start_date, end_date, id
+            ))
+
+        return redirect(url_for('leaves_by_branch_and_hrd'))
+
+    return render_template('/leaves/edit_leave_hrd.html', leave=leave)
+
+
+@app.route('/leave/edit/hours/gm/<int:id>', methods=['GET', 'POST'])
+def edit_leave_hours_gm(id):
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if not leave:
+        return "Leave record not found", 404
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        type_of_leave = request.form.get('type_of_leave')
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        approved_by = request.form.get('approved_by')
+        # verified_by = request.form.get('verified_by')
+        status = request.form.get('status')
+        # status = "Pending"
+
+        # Logic for half-day leave only
+        if type_of_leave == 'H':
+            status = "Approved"
+            approved_by = request.form['approved_by']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type = ?, reason = ?, status = ?,
+                    approved_by = ?,
+                    start_date = ?, end_date = ?
+                WHERE id = ?
+            ''', (
+                leave_type, reason, status,
+                approved_by,
+                start_date, end_date, id
+            ))
+
+        return redirect(url_for('leaves_by_gm'))
+
+    return render_template('/leaves/edit_leave_gm.html', leave=leave)
 
 
 @app.route('/leave/edit/hours/pm/<int:id>', methods=['GET', 'POST'])
