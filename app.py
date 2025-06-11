@@ -104,6 +104,11 @@ def allowed_excel(filename):
 #     session.permanent = True
 
 
+@app.route('/leave-guide')
+def leave_guide():
+    return render_template('/guideline/leave_guide.html')
+
+
 @app.route('/data-management')
 def data_management():
     conn = get_db_connection()
