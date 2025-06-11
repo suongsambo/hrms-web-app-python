@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block title %}SPM Approved{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}SPM Approved 1{% endblock %} {% block
 content %}
 <div class="bg-gray-100 text-gray-800">
 
@@ -103,12 +103,13 @@ content %}
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
               {% elif leave.type_of_leave == 'D' %}
-              <a href="{{ url_for('edit_leave_spm_approve', id=leave.id) }}"
+              <a href="{{ url_for('edit_leave_hrd_spm_approve', id=leave.id) }}"
                 class="text-blue-600 hover:text-blue-900 flex items-center space-x-1">
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
               {% endif %}
             </td>
+
           </tr>
           {% else %}
           <tr>
