@@ -18,5 +18,22 @@
             <span class="material-symbols-outlined">lock</span>
             <span>{{ _('Security') }}</span>
         </a>
+
+        {% if current_user.is_admin == 1 %}
+        <a href="/data-management"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">data_usage</span>
+            <span>{{ _('Data Clear') }}</span>
+        </a>
+        {% endif %}
+
+
+        <a href="/leave-guide"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined"> lightbulb </span>
+            <span>Guide Line</span>
+        </a>
+
+
     </div>
 </div>
