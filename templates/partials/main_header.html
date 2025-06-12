@@ -29,57 +29,58 @@
             <!-- Branch Name Section -->
             <div class="text-white text-sm flex items-center gap-x-2">
                 <i class="fas fa-building mr-1"></i>
-                <span class="font-semibold">Branch:</span> {{ current_user.branch }}
+                <span class="font-semibold">Branch:</span>
+                <span class="bg-gray-600 text-white text-sm px-2 rounded-full">{{ current_user.branch }}</span>
             </div>
 
             <!-- System Date Section -->
             <div id="system-date" class="text-white text-sm flex items-center gap-x-2">
-                <i class="fa-solid fa-calendar-day mr-1"></i>
-                <!-- Date will be inserted here by JavaScript -->
+                <i class="fas fa-calendar-day mr-1 text-base"></i>
+                <div id="system-date"></div>
+                <!-- Date and Time will be inserted here by JavaScript -->
             </div>
 
+
+
             <!-- Notifications Section -->
-            <div class="relative top-1">
-                <button
-                    class="text-white flex items-center gap-x-2 notification-button hover:bg-gray-700 bg-gray-600 rounded-full p-2">
+            <div class="relative top-1 z-50">
+                <!-- Notification Button -->
+                <button onclick="toggleNotificationDropdown()"
+                    class="text-white flex items-center gap-x-2 notification-button bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-full p-2 shadow-lg relative">
                     <span class="material-symbols-outlined">notifications_active</span>
                     <span
-                        class="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md">
                         {{ notifications_employees|length + notifications|length }}
                     </span>
-                    <!-- Notification count -->
                 </button>
-                <!-- Dropdown for Notifications -->
-                <div
-                    class="absolute right-0 mt-2 w-64 bg-white text-black rounded-lg shadow-lg hidden notification-dropdown max-h-64 overflow-y-auto">
-                    <div class="bg-gray-200 p-2 border-b">
-                        <p class="text-sm text-gray-500">Notifications</p>
+
+                <!-- Notification Dropdown -->
+                <div id="notificationDropdown"
+                    class="absolute right-0 mt-3 w-80 bg-white text-black rounded-xl shadow-2xl hidden max-h-72 overflow-y-auto border border-gray-200">
+
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-3 rounded-t-xl border-b">
+                        <p class="text-sm font-semibold">Notifications</p>
                     </div>
-                    <ul>
+
+                    <ul class="divide-y divide-gray-200">
                         {% for notification in notifications %}
-                        <li class="p-2 border-b hover:bg-gray-100">
-                            <span class="font-semibold">{{ notification.title }}</span>
-                            <p class="text-sm text-gray-500">{{ notification.message }}</p>
+                        <li class="p-4 hover:bg-gray-100">
+                            <p class="font-semibold text-gray-800">{{ notification.title }}</p>
+                            <p class="text-sm text-gray-600">{{ notification.message }}</p>
                         </li>
                         {% else %}
-                        <li class="p-2">
-                            <p class="text-sm text-gray-500">No notifications available.</p>
-                        </li>
+                        <li class="p-4 text-center text-gray-500">No general notifications available.</li>
                         {% endfor %}
                     </ul>
 
-                    <ul>
+                    <ul class="divide-y divide-gray-200">
                         {% for notifications_employee in notifications_employees %}
-                        <li class="p-2 border-b hover:bg-gray-100">
-                            <span class="font-semibold">{{ notifications_employee.title }}</span>
-                            <p class="text-sm text-gray-500">
-                                {{ notifications_employee.message }}
-                            </p>
+                        <li class="p-4 hover:bg-gray-100">
+                            <p class="font-semibold text-gray-800">{{ notifications_employee.title }}</p>
+                            <p class="text-sm text-gray-600">{{ notifications_employee.message }}</p>
                         </li>
                         {% else %}
-                        <li class="p-2">
-                            <p class="text-sm text-gray-500">No notifications available.</p>
-                        </li>
+                        <li class="p-4 text-center text-gray-500">No employee notifications available.</li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -110,3 +111,40 @@
         window.location.href = url.toString();
     });
 </script>
+
+
+<!-- JavaScript to toggle dropdown -->
+<script>
+    function toggleNotificationDropdown() {
+        const dropdown = document.getElementById('notificationDropdown');
+        dropdown.classList.toggle('hidden');
+    }
+
+    // Close dropdown on outside click
+    window.addEventListener('click', function (e) {
+        const button = document.querySelector('.notification-button');
+        const dropdown = document.getElementById('notificationDropdown');
+        if (!button.contains(e.target) && !dropdown.contains(e.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+</script>
+
+<!-- Optional: Fade-in animation -->
+<style>
+    @keyframes fade-in-down {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fade-in-down {
+        animation: fade-in-down 0.3s ease-out;
+    }
+</style>

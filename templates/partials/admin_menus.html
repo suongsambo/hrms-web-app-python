@@ -198,7 +198,7 @@
     <button @click="activeMenu = activeMenu === 'attendance' ? '' : 'attendance'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">event</span>
-        <span class="ml-2">{{ _('Attendance') }}</span>
+        <span class="ml-2">{{ _('Manage Leaves') }}</span>
         <span class="ml-2">&#9662;</span>
     </button>
     <div x-show="activeMenu === 'attendance'" @click.away="activeMenu = ''"
@@ -227,16 +227,22 @@
           <span>Add Leave</span>
         </a> -->
 
+        <a href="/holidays"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">event</span>
+            <span>{{ _('Manage Holidays') }}</span>
+        </a>
+
         <a href="/leaves"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
             <span class="material-symbols-outlined">event</span>
-            <span>{{ _('Leave Manage') }}</span>
+            <span>{{ _('Manage Leaves') }}</span>
         </a>
     </div>
 </div>
 
 <!-- Holiday -->
-<div class="relative z-10">
+<!-- <div class="relative z-10">
     <button @click="activeMenu = activeMenu === 'holiday' ? '' : 'holiday'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
         <span class="material-symbols-outlined">event</span>
@@ -251,7 +257,7 @@
             <span>{{ _('Manage Holidays') }}</span>
         </a>
     </div>
-</div>
+</div> -->
 
 
 <!-- Clear Data -->

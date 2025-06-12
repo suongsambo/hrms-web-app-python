@@ -23,7 +23,7 @@ block content %}
           <tr class="border-t hover:bg-gray-100">
             <td class="px-4 py-2">{{ user['id'] }}</td>
             <td class="px-4 py-2">{{ user['Email'] }}</td>
-            <td class="px-4 py-2">{{ user['Name'] }}</td>
+            <td class="px-4 py-2">{{ user['UserName'] }}</td>
             <td class="px-4 py-2">
               {{ 'Yes' if user['AcceptedTerms'] else 'No' }}
             </td>
@@ -39,9 +39,7 @@ block content %}
     {% endif %}
 
     <div class="mt-6 text-center">
-      <a href="{{ url_for('dashboard') }}" class="text-blue-600 hover:underline"
-        >Go to Dashboard</a
-      >
+      <a href="{{ url_for('dashboard') }}" class="text-blue-600 hover:underline">Go to Dashboard</a>
     </div>
   </div>
 </body>

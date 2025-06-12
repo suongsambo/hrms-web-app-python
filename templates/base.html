@@ -21,14 +21,12 @@
 
     var chart = new google.visualization.PieChart(document.getElementById("branchChart"));
     chart.draw(data, options);
-                                  }
+                                    }
   </script>
-
 
   <style>
     body {
-      font-family: 'Roboto', sans-serif;
-
+      font-family: "Roboto", sans-serif;
     }
   </style>
   <!-- font-family: 'Noto Sans Khmer', sans-serif; -->
@@ -39,62 +37,51 @@
 <div x-data="{ activeMenu: '' }">
   <!-- Navigation Menu -->
   <nav class="flex space-x-6 text-white bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 p-1 shadow-lg">
-
     <!-- Menu General -->
     {% include "partials/dashboard_menu.html" %}
     <!-- Menu Admin-->
-    {% if current_user.is_admin == 1 %}
-    {% include "partials/admin_menus.html" %}
+    {% if current_user.is_admin == 1 %} {% include "partials/admin_menus.html"
+    %}
     <!-- {% include "partials/payroll_menu.html" %} -->
     <!-- {% include "partials/media_menu.html" %} -->
     <!-- {% include "partials/chat_menu.html" %} -->
     {% endif %}
 
     <!-- Menu EM -->
-    {% if current_user.role_default == 20 %}
-    {% include "partials/employee_menu.html" %}
-    {% endif %}
+    {% if current_user.role_default == 20 %} {% include
+    "partials/employee_menu.html" %} {% endif %}
 
     <!-- Menu CCC  -->
-    {% if current_user.role_default == 35 %}
-    {% include "partials/ccc_menus.html" %}
-    {% include "partials/ccc_request_menu.html" %}
+    {% if current_user.role_default == 35 %} {% include
+    "partials/ccc_menus.html" %} {% include "partials/ccc_request_menu.html"
+    %}
     <!-- {% include "partials/chat_menu.html" %} -->
 
     {% endif %}
 
     <!-- Menu PM -->
-    {% if current_user.role_default == 140 %}
-    {% include "partials/pm_menus.html" %}
-    {% include "partials/pm_request_menu.html" %}
+    {% if current_user.role_default == 140 %} {% include
+    "partials/pm_menus.html" %} {% include "partials/pm_request_menu.html" %}
     {% endif %}
 
     <!-- Menu SPM -->
-    {% if current_user.role_default == 145 %}
-    {% include "partials/spm_menus.html" %}
-    {% include "partials/spm_request_menu.html" %}
-    {% endif %}
-
-
-
+    {% if current_user.role_default == 145 %} {% include
+    "partials/spm_menus.html" %} {% include "partials/spm_request_menu.html"
+    %} {% endif %}
 
     <!-- Menu SPM -->
-    {% if current_user.role_default == 160 %}
-    {% include "partials/hrd_menus.html" %}
-    {% endif %}
-
+    {% if current_user.role_default == 160 %} {% include
+    "partials/hrd_menus.html" %} {% endif %}
 
     <!-- Menu GM -->
-    {% if current_user.role_default == 180 %}
-    {% include 'partials/gm_menu.html' %}
-    {% endif %}
+    {% if current_user.role_default == 180 %} {% include
+    'partials/gm_menu.html' %} {% endif %}
 
     <!-- Leave Guide Line -->
     {% include "partials/leave_guide_menu.html" %}
 
     <!-- Menu General -->
     {% include "partials/settings_menu.html" %}
-
   </nav>
 </div>
 
@@ -103,12 +90,10 @@
     <!-- Sidebar -->
 
     <!-- Main Content -->
-    <div class="flex-1 p-0 h-[calc(100vh-148px)] overflow-x-auto overflow-y-scroll ">
+    <div class="flex-1 p-0 h-[calc(100vh-148px)] overflow-x-auto overflow-y-scroll">
       <main>{% block content %}{% endblock %}</main>
     </div>
   </div>
-
-
 
   <script>
     // Get elements for notification button and dropdown
@@ -178,21 +163,13 @@
     });
   </script>
 
-  <!-- <script>
-    // Display the current path on the page
-    document.getElementById('route-path').textContent = "Current path: " + window.location.pathname.toUpperCase();
-  </script> -->
-
   <script>
     let path = window.location.pathname.toUpperCase();
-    path = path.replace(/_/g, '/');  // Replace all underscores with slashes
-    document.getElementById('route-path').textContent = "Title: " + path;
+    path = path.replace(/_/g, "/"); // Replace all underscores with slashes
+    document.getElementById("route-path").textContent = "Title: " + path;
   </script>
 
-
-  {% block scripts %}
-  {% include 'partials/footer.html' %}
-  {% endblock %}
+  {% block scripts %} {% include 'partials/footer.html' %} {% endblock %}
 </body>
 
 </html>
