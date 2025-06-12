@@ -1,169 +1,216 @@
 {% extends 'base.html' %} {% block title %} Add Employee {% endblock %} {% block
 content %}
-<div class="max-w-5xl mx-auto p-6 bg-white rounded-2xl shadow-lg space-y-6 text-sm">
+<div class="max-w-7xl mx-auto p-6 bg-white rounded-2xl shadow-lg space-y-6 text-sm">
+    <div class="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 rounded-2xl shadow-xl text-white">
+        <span class="material-icons text-blue-500">push_pin</span>
+        <h1 class="text-3xl md:text-4xl font-bold tracking-wide">
+            🕒 Leave Hours & Days
+        </h1>
+        <!-- <p class="mt-2 text-sm md:text-base text-blue-100">Track, manage, and analyze employee leave records with
+            clarity.</p> -->
+    </div>
+
     <h2 class="text-xl font-bold text-gray-800">
         📌 Leave Hours & Days Guide (ការណែនាំ)
-        <!-- Leave Hours Section -->
-        <div class="space-y-2">
-            <h3 class="font-semibold text-blue-600">Leave Hours (ម៉ោងសុំច្បាប់)</h3>
-            <ul class="list-disc pl-5 text-gray-700 space-y-1">
-                <li>
-                    ⏰ ពេលវេលាដកដោយស្វ័យប្រវត្តិ: <strong>12:00 PM ដល់ 1:30 PM</strong>
-                </li>
-                <li>
-                    📅 ម៉ោងសុំច្បាប់ត្រូវនៅចន្លោះ <strong>7:30 AM ដល់ 5:00 PM</strong> (ចន្ទ
-                    - សុក្រ)
-                </li>
-                <li>
-                    ❗️ មិនអនុញ្ញាតឲ្យសុំច្បាប់លើស <strong>8 ម៉ោង</strong> ក្នុងមួយថ្ងៃ
-                </li>
-            </ul>
+    </h2>
+    <div class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Leave Hours Section -->
+            <div class="space-y-2">
+                <h3 class="font-semibold text-blue-600">
+                    1. Leave Hours (ម៉ោងសុំច្បាប់)
+                </h3>
+                <ul class="list-disc pl-5 text-gray-700 space-y-1">
+                    <li>
+                        ⏰ ពេលវេលាដកដោយស្វ័យប្រវត្តិ: <strong>12:00 PM ដល់ 1:30 PM</strong>
+                    </li>
+                    <li>
+                        📅 ម៉ោងសុំច្បាប់ត្រូវនៅចន្លោះ
+                        <strong>7:30 AM ដល់ 5:00 PM</strong> (ចន្ទ - សុក្រ)
+                    </li>
+                    <li>
+                        ❗️ មិនអនុញ្ញាតឲ្យសុំច្បាប់លើស <strong>8 ម៉ោង</strong> ក្នុងមួយថ្ងៃ
+                    </li>
+                </ul>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3 text-gray-700">
-                <div class="border p-3 rounded-lg bg-gray-50">
-                    <h4 class="font-semibold">🕒 Time Breakdown</h4>
-                    <ul class="mt-1 list-disc pl-5">
-                        <li>ម៉ោងសម្រាក 12:00 PM - 1:30 PM = <strong>1.5H</strong></li>
-                        <li>ព្រឹក: 7:30 AM - 12:00 PM = <strong>4.5H</strong></li>
-                        <li>ល្ងាច: 1:30 PM - 5:00 PM = <strong>3.5H</strong></li>
-                        <li>មួយថ្ងៃ: 7:30 AM - 5:00 PM = <strong>8H</strong></li>
+                <div class="grid grid-cols-1 sm:grid-cols-1 gap-4 mt-3 text-gray-700">
+                    <div class="border p-3 rounded-lg bg-gray-50">
+                        <h4 class="font-semibold">🕒 Time Breakdown</h4>
+                        <ul class="mt-1 list-disc pl-5">
+                            <li>ម៉ោងសម្រាក 12:00 PM - 1:30 PM = <strong>1.5H</strong></li>
+                            <li>ព្រឹក: 7:30 AM - 12:00 PM = <strong>4.5H</strong></li>
+                            <li>ល្ងាច: 1:30 PM - 5:00 PM = <strong>3.5H</strong></li>
+                            <li>មួយថ្ងៃ: 7:30 AM - 5:00 PM = <strong>8H</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Days Section -->
+            <div class="space-y-2">
+                <h3 class="font-semibold text-green-600">
+                    2. Leave Days (សុំច្បាប់ជាថ្ងៃ)
+                </h3>
+                <ul class="list-disc pl-5 text-gray-700 space-y-1">
+                    <li>
+                        📍 <strong>Short Leave</strong>: ច្រើនបំផុត <strong>2 days</strong>
+                    </li>
+                    <li>
+                        📍 <strong>Medium Leave</strong>: ចន្លោះ <strong>3 - 5 days</strong>
+                    </li>
+                    <li>
+                        📍 <strong>Long Leave</strong>: ចាប់ពី <strong>6 days ឡើងទៅ</strong>
+                    </li>
+                </ul>
+
+                <div class="border p-3 rounded-lg bg-gray-50 text-gray-700 mt-2">
+                    <p class="font-semibold mb-1">📌 ចំណាំ:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li>គិតតែ <strong>ថ្ងៃធ្វើការ (ចន្ទ - សុក្រ)</strong></li>
+                        <li>មិនរួមបញ្ចូល <strong>ថ្ងៃសៅរ៍ និង អាទិត្យ</strong></li>
+                        <li>មិនរួមបញ្ចូល <strong>ថ្ងៃបុណ្យជាតិ</strong></li>
                     </ul>
                 </div>
             </div>
         </div>
 
-        <!-- Leave Days Section -->
-        <div class="space-y-2">
-            <h3 class="font-semibold text-green-600">Leave Days (សុំច្បាប់ជាថ្ងៃ)</h3>
-            <ul class="list-disc pl-5 text-gray-700 space-y-1">
-                <li>
-                    📍 <strong>Short Leave</strong>: ច្រើនបំផុត <strong>2 days</strong>
-                </li>
-                <li>
-                    📍 <strong>Medium Leave</strong>: ចន្លោះ <strong>3 - 5 days</strong>
-                </li>
-                <li>
-                    📍 <strong>Long Leave</strong>: ចាប់ពី <strong>6 days ឡើងទៅ</strong>
-                </li>
-            </ul>
+        <hr class="my-8" />
 
-            <div class="border p-3 rounded-lg bg-gray-50 text-gray-700 mt-2">
-                <p class="font-semibold mb-1">📌 ចំណាំ:</p>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>គិតតែ <strong>ថ្ងៃធ្វើការ (ចន្ទ - សុក្រ)</strong></li>
-                    <li>មិនរួមបញ្ចូល <strong>ថ្ងៃសៅរ៍ និង អាទិត្យ</strong></li>
-                    <li>មិនរួមបញ្ចូល <strong>ថ្ងៃបុណ្យជាតិ</strong></li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Available Leave by Role -->
         <div class="space-y-2">
-            <h3 class="font-semibold text-purple-600">Available Leave by Role (ចំនួនច្បាប់អាចប្រើ)</h3>
+            <h3 class="font-semibold text-purple-600">
+                3. Type of User in System (ប្រភេទនៃអ្នកប្រើប្រាស់នៅក្នុងប្រព័ន្ធ)
+            </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-
-                <!-- CCC -->
+                {% set roles = [ {"icon": "👤", "title": "CCC", "kh": "CCC"}, {"icon":
+                "👨‍💼", "title": "PM", "kh": "PM"}, {"icon": "🧑‍⚖️", "title": "SPM", "kh":
+                "SPM"}, {"icon": "👤", "title": "Staff", "kh": "Staff"}, {"icon": "👤",
+                "title": "HRD", "kh": "HRD"}, {"icon": "👤", "title": "GM", "kh": "GM"},
+                ] %} {% set leave_types = [ "ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)",
+                "ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)", "ការឈប់សម្រាកលំហែមាតុភាព (Maternity
+                Leave)", "ការឈប់សម្រាកពិសេស (Special Leave)" ] %} {% for role in roles
+                %}
                 <div class="border p-4 rounded-lg bg-gray-50 space-y-4">
-                    <h4 class="font-bold text-gray-800">👤 CCC Request Leave (សំណើរសុំច្បាប់របស់ CCC)</h4>
-                    <div>
-                        <ol class="list-decimal pl-5 text-gray-800 space-y-1 text-sm">
-                            <li><strong>Leave Hours (ម៉ោងសុំច្បាប់)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                            <li><strong>Leave Days (សុំច្បាប់ជាថ្ងៃ)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                        </ol>
-                    </div>
+                    <h4 class="font-bold text-gray-800 flex items-center gap-2">
+                        {{ role.icon }} {{ role.title }} Request Leave | Verify | Approved (សំណើរសុំច្បាប់របស់
+                        {{ role.kh }}) {% if role.title == "HRD" %}
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
+                            ✔️ Verified only
+                        </span>
+                        {% elif role.title == "GM" %}
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
+                            ✔️ Approved only
+                        </span>
+                        {% elif role.title in ["SPM", "PM"] %}
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                            ✔️ Request Leave and Verify and Approve
+                        </span>
+                        {% elif role.title == "CCC" %}
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                            ✔️ Request and Verify
+                        </span>
+                        {% elif role.title == "Staff" %}
+                        <span
+                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">
+                            ✔️ Request Only
+                        </span>
+                        {% endif %}
+                    </h4>
+                    <ol class="list-decimal pl-5 text-gray-800 space-y-1 text-sm">
+                        <li>
+                            <strong>Leave Hours (ម៉ោងសុំច្បាប់)</strong>
+                            <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
+                                {% for leave in leave_types %}
+                                <li><strong>{{ leave }}</strong></li>
+                                {% endfor %}
+                            </ol>
+                        </li>
+                        <li>
+                            <strong>Leave Days (សុំច្បាប់ជាថ្ងៃ)</strong>
+                            <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
+                                {% for leave in leave_types %}
+                                <li><strong>{{ leave }}</strong></li>
+                                {% endfor %}
+                            </ol>
+                        </li>
+                    </ol>
                 </div>
-
-                <!-- PM -->
-                <div class="border p-4 rounded-lg bg-gray-50 space-y-4">
-                    <h4 class="font-bold text-gray-800">👨‍💼 PM Request Leave (សំណើរសុំច្បាប់របស់ PM)</h4>
-                    <div>
-                        <ol class="list-decimal pl-5 text-gray-800 space-y-1 text-sm">
-                            <li><strong>Leave Hours (ម៉ោងសុំច្បាប់)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                            <li><strong>Leave Days (សុំច្បាប់ជាថ្ងៃ)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-
-                <!-- SPM -->
-                <div class="border p-4 rounded-lg bg-gray-50 space-y-4">
-                    <h4 class="font-bold text-gray-800">🧑‍⚖️ SPM Request Leave (សំណើរសុំច្បាប់របស់ SPM)</h4>
-                    <div>
-                        <ol class="list-decimal pl-5 text-gray-800 space-y-1 text-sm">
-                            <li><strong>Leave Hours (ម៉ោងសុំច្បាប់)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                            <li><strong>Leave Days (សុំច្បាប់ជាថ្ងៃ)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                        </ol>
-                    </div>
-                </div>
-
-                <!-- Staff -->
-                <div class="border p-4 rounded-lg bg-gray-50 space-y-4">
-                    <h4 class="font-bold text-gray-800">👤 Staff Request Leave (សំណើរសុំច្បាប់របស់ Staff)</h4>
-                    <div>
-                        <ol class="list-decimal pl-5 text-gray-800 space-y-1 text-sm">
-                            <li><strong>Leave Hours (ម៉ោងសុំច្បាប់)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                            <li><strong>Leave Days (សុំច្បាប់ជាថ្ងៃ)</strong>
-                                <ol class="list-decimal pl-5 mt-3 space-y-1 text-gray-800 text-sm">
-                                    <li><strong>ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)</strong></li>
-                                    <li><strong>ការឈប់សម្រាកពិសេស (Special Leave)</strong></li>
-                                </ol>
-                            </li>
-                        </ol>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
 
-</div>
+        <hr class="my-8" />
 
-{% endblock %}
+        <div class="grid grid-cols-1 md:grid-cols-1 gap-2">
+            {% set guides = [ {"title": "How to Use the User Request Leave (Staff) ",
+            "img": "staff_leaves.jpg"}, {"title": "How to Use the User | Request Leave
+            | Verify (CCC)", "img": "ccc.jpg"}, {"title": "How to Use the User |
+            Request Leave | Verify | Approved (PM)", "img": "pm.jpg"}, {"title": "How
+            to Use the User | Request Leave | Verify | Approved (SPM)", "img":
+            "spm.jpg"}, {"title": "How to Use the User Verify (HRD)", "img":
+            "hrd.jpg"}, {"title": "How to Use the User Approved (GM)", "img":
+            "gm.jpg"}, ] %} {% for guide in guides %}
+            <div
+                class="relative overflow-hidden rounded-2xl shadow-xl border border-gray-200 bg-gradient-to-br from-white to-gray-100 transition-transform duration-300 hover:scale-[1.01]">
+                <div class="p-6">
+                    <div class="flex items-center justify-center mb-4">
+                        <div class="inline-flex items-center gap-2 text-blue-600 text-lg font-semibold">
+                            <span class="text-2xl">🚀</span>
+                            <h2 class="text-center font-bold tracking-wide text-gray-700 text-xl md:text-2xl">
+                                {{ guide.title }}
+                            </h2>
+                        </div>
+                    </div>
+                    <!-- <ol class="list-decimal pl-6 text-gray-800 text-sm md:text-base leading-relaxed space-y-1 mb-6">
+                        <li>Go to the "Request Leave" page</li>
+                        <li>Choose the type of leave you want to request</li>
+                        <li>Choose the date and time you want to take leave</li>
+                        <li>Fill in the reason for taking leave</li>
+                        <li>Click the "Request Leave" button to submit your request</li>
+                    </ol> -->
+
+                    <ol class="list-decimal pl-6 text-gray-800 text-sm md:text-base leading-relaxed space-y-1 mb-6">
+                        <li>
+                            ទៅកាន់ទំព័រ "ស្នើសុំច្បាប់"
+                            <span class="block text-gray-600 text-xs md:text-sm">Go to the "Request Leave" page</span>
+                        </li>
+                        <li>
+                            ជ្រើសប្រភេទច្បាប់ដែលអ្នកចង់ស្នើសុំ
+                            <span class="block text-gray-600 text-xs md:text-sm">Choose the type of leave you want to
+                                request</span>
+                        </li>
+                        <li>
+                            ជ្រើសកាលបរិច្ឆេទ និងម៉ោងដែលអ្នកចង់សុំច្បាប់
+                            <span class="block text-gray-600 text-xs md:text-sm">Choose the date and time you want to
+                                take leave</span>
+                        </li>
+                        <li>
+                            បំពេញមូលហេតុនៃការសុំច្បាប់
+                            <span class="block text-gray-600 text-xs md:text-sm">Fill in the reason for taking
+                                leave</span>
+                        </li>
+                        <li>
+                            ចុចប៊ូតុង "ស្នើសុំច្បាប់" ដើម្បីដាក់សំណើរបស់អ្នក
+                            <span class="block text-gray-600 text-xs md:text-sm">Click the "Request Leave" button to
+                                submit your request</span>
+                        </li>
+                    </ol>
+
+                    <!-- ✅ Image opens in new tab -->
+                    <a href="{{ url_for('static', filename='images/' ~ guide.img) }}" target="_blank">
+                        <img src="{{ url_for('static', filename='images/' ~ guide.img) }}" alt="Leave Request Guide"
+                            class="rounded-xl w-full border border-gray-300 shadow-md transition duration-300 hover:shadow-lg cursor-zoom-in" />
+                    </a>
+                </div>
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-blue-500 to-blue-400 rounded-t-2xl">
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% endblock %}
+</div>
