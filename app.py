@@ -2086,6 +2086,7 @@ def leaves_by_branch_and_hrd():
                         OR (l.requested_by_roles = 145 AND l.category = 'S')
                         OR (l.requested_by_roles = 145  AND l.type_of_leave = 'H')
                 )
+                AND l.status = 'Pending'
             """
             leaves = conn.execute(query, params).fetchall()
 
