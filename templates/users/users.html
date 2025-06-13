@@ -112,13 +112,13 @@
                 onsubmit="return confirmAction()">
                 {% if user.active == 1 %}
                 <button type="submit" name="active_status" value="0"
-                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 text-sm rounded">
-                  Deactivate
+                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 text-sm rounded">
+                  Active
                 </button>
                 {% else %}
                 <button type="submit" name="active_status" value="1"
-                  class="bg-green-500 hover:bg-green-700 text-white font-bold py-1 px-2 text-sm rounded">
-                  Activate
+                  class="bg-red-500 hover:bg-red-700 text-white font-bold py-1 px-2 text-sm rounded">
+                  Inactive
                 </button>
                 {% endif %}
               </form>

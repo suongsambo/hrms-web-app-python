@@ -2081,7 +2081,9 @@ def leaves_by_branch_and_hrd():
              
                 AND (
                         (l.requested_by_roles = 140 AND l.category = 'L')
-                        OR (l.requested_by_roles = 145 AND l.category IN ('L', 'M', 'S'))
+                        OR (l.requested_by_roles = 145 AND l.category = 'L')
+                        OR (l.requested_by_roles = 145 AND l.category = 'M')
+                        OR (l.requested_by_roles = 145 AND l.category = 'S')
                         OR (l.requested_by_roles = 145  AND l.type_of_leave = 'H')
                 )
             """
@@ -2246,6 +2248,51 @@ def leaves_by_branch_and_hrd():
 #     )
 
 
+# @app.route('/leaves/gm', methods=['GET'])
+# def leaves_by_gm():
+#     if not current_user.is_authenticated or current_user.role_default != 180:
+#         return redirect(url_for('access_denied'))
+
+#     query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE
+#             (l.category = 'L')
+#             AND (l.status = 'Pending')
+#             OR (l.category = 'M' AND l.requested_by_roles = 140)
+#             OR (l.requested_by_roles = 145 AND l.category IN ('L', 'M', 'S'))
+#             OR (l.requested_by_roles = 145  AND l.type_of_leave = 'H')
+#     '''
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query).fetchall()
+#             employees = conn.execute('SELECT * FROM employees').fetchall()
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template(
+#         'leaves/leaves_gm_approve.html',
+#         leaves=leaves or [],
+#         employees=employees
+#     )
+
+
 @app.route('/leaves/gm', methods=['GET'])
 def leaves_by_gm():
     if not current_user.is_authenticated or current_user.role_default != 180:
@@ -2270,10 +2317,24 @@ def leaves_by_gm():
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
         WHERE
-            (l.category = 'L')
-            OR (l.category = 'M' AND l.requested_by_roles = 140)
-            OR (l.requested_by_roles = 145 AND l.category IN ('L', 'M', 'S'))
-            OR (l.requested_by_roles = 145  AND l.type_of_leave = 'H')
+            (
+                (l.category = 'L' AND l.verified_by IS NULL AND l.approved_by IS NULL)
+                
+                OR (l.category = 'M' AND l.requested_by_roles = 140)
+                OR (l.category = 'M' AND l.requested_by_roles = 140)
+                OR (l.category = 'L' AND l.requested_by_roles = 140)
+                OR (l.category = 'L' AND l.requested_by_roles = 20)
+                OR (l.category = 'L' AND l.requested_by_roles = 35)
+                OR (l.requested_by_roles = 145 AND l.category IN ('L', 'M', 'S'))
+                OR (l.requested_by_roles = 145 AND l.type_of_leave = 'H')
+            )
+            AND (
+                l.status = 'Approved' AND
+                l.verified_by IS NOT NULL AND
+                (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+
+            )
+
     '''
 
     try:
@@ -7843,3 +7904,4 @@ if __name__ == "__main__":
     init_db()
     socketio.run(app, debug=True)
     start_scheduler()
+    app.run(ssl_context=('cert.pem', 'key.pem'))  # Use self-signed cert

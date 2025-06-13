@@ -29,12 +29,14 @@ content %}
             <th class="px-6 py-3 border-b">LeaveHours</th>
             <th class="px-6 py-3 border-b">ServiceCount</th>
             <th class="px-6 py-3 border-b">TypeOfLeave</th>
-            <th class="px-6 py-3 border-b">VerifiedBy</th>
-            <th class="px-6 py-3 border-b">ApprovedBy</th>
-            <th class="px-6 py-3 border-b">RequestedBy</th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
               Reason
             </th>
+            <th class="px-6 py-3 border-b">RequestedBy</th>
+            <th class="px-6 py-3 border-b">VerifiedBy</th>
+            <th class="px-6 py-3 border-b">ApprovedBy</th>
+
+
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
               Status
             </th>
@@ -57,17 +59,32 @@ content %}
             <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td>
             <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
             <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
-            <td class="px-6 py-3 border-b">{{ leave.verified_by }}</td>
-            <td class="px-6 py-3 border-b">{{ leave.approved_by }}</td>
-            <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
               <b>{{ leave.reason }}</b>
             </td>
+            <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
+            <td class="px-6 py-3 border-b">{{ leave.verified_by }}</td>
+            <td class="px-6 py-3 border-b">
+              {% if leave.approved_by is none or leave.approved_by == ''%}
+              <div class="badge badge-warning">
+                Pending
+              </div>
+              {% else %}
+              {{ leave.approved_by }}
+              {% endif %}
+            </td>
+
+
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
-              <span
-                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
-                <b>{{ leave.status }}</b>
+              {% if leave.status == 'Approved' %}
+              <span class="text-green-500">
+                <div class="badge badge-info">Verified</div>
               </span>
+              {% elif leave.status == 'Pending' %}
+              <span class="text-blue-500"><b>{{ leave.status }}</b></span>
+              {% else %}
+              <span class="text-red-500"><b>{{ leave.status }}</b></span>
+              {% endif %}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">
               {% if leave.type_of_leave == 'H' %}
@@ -115,7 +132,7 @@ content %}
       order: [[3, "asc"]],
       fixedColumns: {
         leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
-        rightColumns: 2, // Fix last 2 columns (like Reason and Status)
+        rightColumns: 3, // Fix last 2 columns (like Reason and Status)
       },
       drawCallback: function () {
         formatLeaveDatesAndHours();
