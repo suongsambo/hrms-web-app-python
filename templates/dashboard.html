@@ -2,7 +2,12 @@
 content %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <div class="container mx-auto py-8 px-3">
-  <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+  <!-- <h1 class="text-3xl font-bold mb-6">Dashboard</h1> -->
+  <h1
+    class="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 drop-shadow-lg">
+    🚀 Dashboard Overview
+  </h1>
+
 
   {% if current_user.role_default == 20 %}
 
@@ -28,7 +33,7 @@ content %}
   {% endif %} {% if current_user.is_admin == 1 %}
 
   <!-- Summary Cards -->
-  <div class="grid grid-cols-5 gap-4 mb-6">
+  <!-- <div class="grid grid-cols-6 gap-4 mb-6">
     <div class="bg-white rounded shadow p-4">
       <h2 class="text-lg font-bold mb-2">Total Users</h2>
       <p class="text-2xl font-bold">{{ total_users }}</p>
@@ -53,10 +58,74 @@ content %}
         {{ total_salary is not none and "$%.2f"|format(total_salary) }}
       </p>
     </div>
+
+    <div class="bg-white rounded shadow p-4">
+      <h2 class="text-lg font-bold mb-2">Total Leaves Today</h2>
+      <p class="text-2xl font-bold">
+        {{ total_leaves }}
+      </p>
+    </div>
+  </div> -->
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+    {% set cards = [
+    {'title': 'Total Users', 'value': total_users, 'icon': 'users', 'bg': 'from-blue-500 to-indigo-500'},
+    {'title': 'Total Branch', 'value': total_branches, 'icon': 'office-building', 'bg': 'from-teal-500 to-cyan-500'},
+    {'title': 'Total Employees', 'value': total_employees, 'icon': 'user-group', 'bg': 'from-purple-500 to-pink-500'},
+    {'title': 'Average Age', 'value': "%.2f"|format(average_age), 'icon': 'sparkles', 'bg': 'from-yellow-500
+    to-orange-500'},
+    {'title': 'Total Salary', 'value': "$%.2f"|format(total_salary), 'icon': 'currency-dollar', 'bg': 'from-green-500
+    to-emerald-500'},
+    {'title': 'Leaves Today', 'value': total_leaves, 'icon': 'calendar-days', 'bg': 'from-red-500 to-rose-500'}
+    ] %}
+
+    {% for card in cards %}
+    <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex items-center gap-4 p-4">
+      <div class="bg-gradient-to-br {{ card.bg }} text-white p-3 rounded-full">
+        <!-- Heroicon SVG -->
+        {% if card.icon == 'users' %}
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6 0a4 4 0 110-8 4 4 0 010 8zM15 11a4 4 0 100-8 4 4 0 000 8z" />
+        </svg>
+        {% elif card.icon == 'office-building' %}
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M3 21V3h18v18H3zm5-5h2v2H8v-2zm0-4h2v2H8v-2zm0-4h2v2H8V8zm4 8h2v2h-2v-2zm0-4h2v2h-2v-2zm0-4h2v2h-2V8z" />
+        </svg>
+        {% elif card.icon == 'user-group' %}
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M12 12a4 4 0 100-8 4 4 0 000 8z" />
+        </svg>
+        {% elif card.icon == 'sparkles' %}
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M5 15l2 5m0 0l2-5m-2 5v-6m13-3h2m-1-1v2m-1-1h-2m-4.5 2.5l1.5 4 1.5-4m-1.5 4v-5M5 5l1.5 4 1.5-4m-1.5 4V4" />
+        </svg>
+        {% elif card.icon == 'currency-dollar' %}
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 8c-3.314 0-6-1.343-6-3s2.686-3 6-3 6 1.343 6 3-2.686 3-6 3zm0 8c3.314 0 6 1.343 6 3s-2.686 3-6 3-6-1.343-6-3 2.686-3 6-3zm0-8v16" />
+        </svg>
+        {% elif card.icon == 'calendar-days' %}
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M8 7V3M16 7V3M3 11h18M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        {% endif %}
+      </div>
+      <div>
+        <h2 class="text-sm text-gray-500 font-medium">{{ card.title }}</h2>
+        <p class="text-xl font-bold text-gray-900">{{ card.value }}</p>
+      </div>
+    </div>
+    {% endfor %}
   </div>
+
   <div class="bg-white rounded-lg shadow-lg p-6">
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Payroll Branches</h2>
-    <table class="min-w-full table-auto border-collapse">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Payroll Summary by Branches</h2>
+    <table id="payrollTable" class="min-w-full table-auto border-collapse">
       <thead>
         <tr class="bg-blue-600 text-white">
           <th class="px-6 py-4 text-left text-sm font-medium border-r border-gray-300">
@@ -83,85 +152,78 @@ content %}
     </table>
   </div>
   <br />
-  <div class="grid grid-cols-2 gap-6">
-    <div class="bg-white p-6 rounded-lg shadow-md">
-      <div class="flex items-center space-x-2 mb-2">
-        <!-- Icon for User Information -->
-        <i class="fas fa-info-circle w-5 h-5 text-blue-500"></i>
-        <h3 class="text-xl font-semibold text-gray-800">User Information</h3>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <!-- User Information Card -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg ring-1 ring-gray-200 transition transform hover:scale-[1.01]">
+      <div class="flex items-center gap-3 mb-4">
+        <i class="fas fa-info-circle text-blue-600 text-xl"></i>
+        <h3 class="text-2xl font-semibold text-gray-800">User Information</h3>
       </div>
-      <ul class="list-disc list-inside space-y-2">
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Username -->
-          <i class="fas fa-user-circle w-5 h-5 text-blue-500"></i>
-          <span>Username: {{ current_user.username }}</span>
+      <ul class="space-y-3 text-gray-600">
+        <li class="flex items-center gap-3">
+          <i class="fas fa-user-circle text-blue-500 text-lg"></i>
+          <span><strong>Username:</strong> {{ current_user.username }}</span>
         </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Email -->
-          <i class="fas fa-envelope w-5 h-5 text-blue-500"></i>
-          <span>Email: {{ current_user.email }}</span>
+        <li class="flex items-center gap-3">
+          <i class="fas fa-envelope text-blue-500 text-lg"></i>
+          <span><strong>Email:</strong> {{ current_user.email }}</span>
         </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Branch -->
-          <i class="fas fa-building w-5 h-5 text-blue-500"></i>
-          <span>Branch: {{ current_user.branch }}</span>
+        <li class="flex items-center gap-3">
+          <i class="fas fa-building text-blue-500 text-lg"></i>
+          <span><strong>Branch:</strong> {{ current_user.branch }}</span>
         </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Role -->
-          <i class="fas fa-user-tag w-5 h-5 text-blue-500"></i>
-          <span>Role: {% if current_user.role_default == 20 %}Employee{% else %}{{
-            current_user.role_default }}{% endif %}</span>
+        <li class="flex items-center gap-3">
+          <i class="fas fa-user-tag text-blue-500 text-lg"></i>
+          <span><strong>Role:</strong>
+            {% if current_user.role_default == 20 %}Employee{% else %}{{ current_user.role_default }}{% endif %}
+          </span>
         </li>
-        <li class="flex items-center space-x-2 text-gray-600">
-          <!-- Icon for Admin -->
-          <i class="fas fa-user-shield w-5 h-5 text-blue-500"></i>
-          <span>Admin: {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif
-            %}</span>
+        <li class="flex items-center gap-3">
+          <i class="fas fa-user-shield text-blue-500 text-lg"></i>
+          <span><strong>Admin:</strong>
+            {% if current_user.is_admin == 1 %}Yes{% else %}No{% endif %}
+          </span>
         </li>
       </ul>
     </div>
-    <table class="table-auto w-full">
-      <thead>
-        <tr class="bg-gray-200">
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
-            ID
-          </th>
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
-            Username
-          </th>
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
-            Email
-          </th>
-          <th class="px-4 py-2 border-b border-gray-300 text-left font-semibold">
-            Profile Image
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for user in online_users %}
-        <tr class="hover:bg-gray-50">
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {{ user[0] }}
-          </td>
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {{ user[1] }}
-          </td>
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {{ user[2] }}
-          </td>
-          <td class="px-4 py-2 border-b border-gray-300 text-sm">
-            {% if user[3] %}
-            <img src="{{ url_for('get_user_image', user_id=user[0]) }}" alt="User Profile Image"
-              class="w-10 h-10 rounded-full object-cover shadow-md" />
-            {% else %}
-            <i class="fas fa-user-circle text-3xl text-blue-500 bg-white p-2 rounded-full shadow-md"></i>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+
+    <!-- Online Users Table -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg ring-1 ring-gray-200 overflow-auto">
+      <div class="flex items-center gap-3 mb-4">
+        <i class="fas fa-users text-green-500 text-xl"></i>
+        <h3 class="text-2xl font-semibold text-gray-800">Online Users</h3>
+      </div>
+      <table class="min-w-full text-sm text-left border border-gray-200 rounded-md overflow-hidden">
+        <thead class="bg-gray-100 text-gray-700">
+          <tr>
+            <th class="px-4 py-3 border-b border-gray-300">ID</th>
+            <th class="px-4 py-3 border-b border-gray-300">Username</th>
+            <th class="px-4 py-3 border-b border-gray-300">Email</th>
+            <th class="px-4 py-3 border-b border-gray-300">Profile</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-700">
+          {% for user in online_users %}
+          <tr class="hover:bg-gray-50 transition">
+            <td class="px-4 py-2 border-b border-gray-300">{{ user[0] }}</td>
+            <td class="px-4 py-2 border-b border-gray-300">{{ user[1] }}</td>
+            <td class="px-4 py-2 border-b border-gray-300">{{ user[2] }}</td>
+            <td class="px-4 py-2 border-b border-gray-300">
+              {% if user[3] %}
+              <img src="{{ url_for('get_user_image', user_id=user[0]) }}" alt="User Profile Image"
+                class="w-10 h-10 rounded-full object-cover shadow-md ring-2 ring-indigo-500" />
+              {% else %}
+              <i class="fas fa-user-circle text-3xl text-blue-500 bg-white p-1 rounded-full shadow"></i>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
   </div>
+
 
   <br />
 
@@ -176,6 +238,18 @@ content %}
 </div>
 
 {% endif %}
+
+<script>
+  $(document).ready(function () {
+    $('#payrollTable').DataTable({
+      paging: true,
+      searching: true,
+      ordering: true,
+      info: true
+    });
+  });
+</script>
+
 
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

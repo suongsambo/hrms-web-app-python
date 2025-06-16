@@ -1,3 +1,4 @@
+from datetime import date
 from flask import (
     Flask, render_template, request, redirect, url_for, flash,
     Response, session, send_from_directory, jsonify, send_file
@@ -6558,8 +6559,112 @@ def render_dashboard_employees(employee_id):
         )
 
 
+# def render_dashboard(user_id):
+#     timeout_threshold = 15  # minutes
+
+#     with get_db_connection() as conn:
+#         total_users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+#         total_employees = conn.execute(
+#             "SELECT COUNT(*) FROM employees").fetchone()[0]
+#         average_age = conn.execute(
+#             "SELECT AVG(Age) FROM employees").fetchone()[0] or 0
+#         total_salary = conn.execute(
+#             "SELECT SUM(Salary) FROM employees").fetchone()[0] or 0
+
+#         # Employee count and total salary by branch
+#         branch_data = conn.execute("""
+#             SELECT Branch, COUNT(*) AS employee_count, SUM(Salary) AS total_salary
+#             FROM employees
+#             GROUP BY Branch
+#         """).fetchall()
+
+#         branch_names = [row['Branch'] for row in branch_data]
+#         branch_counts = [row['employee_count'] for row in branch_data]
+#         branch_salaries = [row['total_salary'] for row in branch_data]
+
+#         total_branches = len(branch_names)
+#         total_payroll = total_salary
+
+#         # Fetch online users
+#         online_users = conn.execute('''
+#             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
+#             FROM online_users ou
+#             JOIN users u ON ou.user_id=u.ID
+#             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
+#         ''', (timeout_threshold,)).fetchall()
+
+#     return render_template(
+#         'dashboard.html',
+#         total_users=total_users,
+#         total_employees=total_employees,
+#         average_age=average_age,
+#         total_salary=total_salary,
+#         total_branches=total_branches,
+#         total_payroll=total_payroll,
+#         branch_names=branch_names,
+#         branch_counts=branch_counts,
+#         branch_salaries=branch_salaries,
+#         online_users=online_users
+#     )
+
+
+# def render_dashboard(user_id):
+#     timeout_threshold = 15  # minutes
+
+#     with get_db_connection() as conn:
+#         total_users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+#         total_employees = conn.execute(
+#             "SELECT COUNT(*) FROM employees").fetchone()[0]
+#         average_age = conn.execute(
+#             "SELECT AVG(Age) FROM employees").fetchone()[0] or 0
+#         total_salary = conn.execute(
+#             "SELECT SUM(Salary) FROM employees").fetchone()[0] or 0
+
+#         # 📌 Add this query to count total leaves
+#         total_leaves = conn.execute(
+#             "SELECT COUNT(*) FROM leaves").fetchone()[0]
+
+#         # Employee count and total salary by branch
+#         branch_data = conn.execute("""
+#             SELECT Branch, COUNT(*) AS employee_count, SUM(Salary) AS total_salary
+#             FROM employees
+#             GROUP BY Branch
+#         """).fetchall()
+
+#         branch_names = [row['Branch'] for row in branch_data]
+#         branch_counts = [row['employee_count'] for row in branch_data]
+#         branch_salaries = [row['total_salary'] for row in branch_data]
+
+#         total_branches = len(branch_names)
+#         total_payroll = total_salary
+
+#         # Fetch online users
+#         online_users = conn.execute('''
+#             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
+#             FROM online_users ou
+#             JOIN users u ON ou.user_id=u.ID
+#             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
+#         ''', (timeout_threshold,)).fetchall()
+
+#     return render_template(
+#         'dashboard.html',
+#         total_users=total_users,
+#         total_employees=total_employees,
+#         average_age=average_age,
+#         total_salary=total_salary,
+#         total_leaves=total_leaves,  # ✅ Pass to template
+#         total_branches=total_branches,
+#         total_payroll=total_payroll,
+#         branch_names=branch_names,
+#         branch_counts=branch_counts,
+#         branch_salaries=branch_salaries,
+#         online_users=online_users
+#     )
+
+
 def render_dashboard(user_id):
     timeout_threshold = 15  # minutes
+    today = date.today().isoformat()  # e.g. '2025-06-16'
 
     with get_db_connection() as conn:
         total_users = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
@@ -6570,7 +6675,15 @@ def render_dashboard(user_id):
         total_salary = conn.execute(
             "SELECT SUM(Salary) FROM employees").fetchone()[0] or 0
 
-        # Employee count and total salary by branch
+        total_leaves = conn.execute(
+            "SELECT COUNT(*) FROM leaves").fetchone()[0]
+
+        # 📌 Query for leaves happening today
+        leaves_today = conn.execute("""
+            SELECT COUNT(*) FROM leaves
+            WHERE date(?) BETWEEN date(start_date) AND date(end_date)
+        """, (today,)).fetchone()[0]
+
         branch_data = conn.execute("""
             SELECT Branch, COUNT(*) AS employee_count, SUM(Salary) AS total_salary
             FROM employees
@@ -6584,7 +6697,6 @@ def render_dashboard(user_id):
         total_branches = len(branch_names)
         total_payroll = total_salary
 
-        # Fetch online users
         online_users = conn.execute('''
             SELECT u.ID AS user_id, u.UserName, u.Email, ou.last_active_time
             FROM online_users ou
@@ -6598,6 +6710,8 @@ def render_dashboard(user_id):
         total_employees=total_employees,
         average_age=average_age,
         total_salary=total_salary,
+        total_leaves=total_leaves,
+        leaves_today=leaves_today,  # ✅ New variable
         total_branches=total_branches,
         total_payroll=total_payroll,
         branch_names=branch_names,
