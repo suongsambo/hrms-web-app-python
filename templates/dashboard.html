@@ -8,7 +8,6 @@ content %}
     🚀 Dashboard Overview
   </h1>
 
-
   {% if current_user.role_default == 20 %}
 
   <body>
@@ -68,18 +67,17 @@ content %}
   </div> -->
 
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-    {% set cards = [
-    {'title': 'Total Users', 'value': total_users, 'icon': 'users', 'bg': 'from-blue-500 to-indigo-500'},
-    {'title': 'Total Branch', 'value': total_branches, 'icon': 'office-building', 'bg': 'from-teal-500 to-cyan-500'},
-    {'title': 'Total Employees', 'value': total_employees, 'icon': 'user-group', 'bg': 'from-purple-500 to-pink-500'},
-    {'title': 'Average Age', 'value': "%.2f"|format(average_age), 'icon': 'sparkles', 'bg': 'from-yellow-500
-    to-orange-500'},
-    {'title': 'Total Salary', 'value': "$%.2f"|format(total_salary), 'icon': 'currency-dollar', 'bg': 'from-green-500
-    to-emerald-500'},
-    {'title': 'Leaves Today', 'value': total_leaves, 'icon': 'calendar-days', 'bg': 'from-red-500 to-rose-500'}
-    ] %}
-
-    {% for card in cards %}
+    {% set cards = [ {'title': 'Total Users', 'value': total_users, 'icon':
+    'users', 'bg': 'from-blue-500 to-indigo-500'}, {'title': 'Total Branch',
+    'value': total_branches, 'icon': 'office-building', 'bg': 'from-teal-500
+    to-cyan-500'}, {'title': 'Total Employees', 'value': total_employees,
+    'icon': 'user-group', 'bg': 'from-purple-500 to-pink-500'}, {'title':
+    'Average Age', 'value': "%.2f"|format(average_age), 'icon': 'sparkles',
+    'bg': 'from-yellow-500 to-orange-500'}, {'title': 'Total Salary', 'value':
+    "$%.2f"|format(total_salary), 'icon': 'currency-dollar', 'bg':
+    'from-green-500 to-emerald-500'}, {'title': 'Leaves Today', 'value':
+    total_leaves, 'icon': 'calendar-days', 'bg': 'from-red-500 to-rose-500'} ]
+    %} {% for card in cards %}
     <div class="bg-white rounded-2xl shadow-lg overflow-hidden flex items-center gap-4 p-4">
       <div class="bg-gradient-to-br {{ card.bg }} text-white p-3 rounded-full">
         <!-- Heroicon SVG -->
@@ -124,7 +122,9 @@ content %}
   </div>
 
   <div class="bg-white rounded-lg shadow-lg p-6">
-    <h2 class="text-2xl font-semibold mb-4 text-gray-800">Payroll Summary by Branches</h2>
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+      Payroll Summary by Branches
+    </h2>
     <table id="payrollTable" class="min-w-full table-auto border-collapse">
       <thead>
         <tr class="bg-blue-600 text-white">
@@ -145,6 +145,38 @@ content %}
           <td class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-l border-gray-300">
             ${{ '%.2f'|format(branch_salaries[loop.index0] /
             branch_counts[loop.index0]) }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <br />
+
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+      Leave Summary by Branches
+    </h2>
+    <table id="payrollTable" class="min-w-full table-auto border-collapse">
+      <thead>
+        <tr class="bg-blue-600 text-white">
+          <th class="px-6 py-4 text-left text-sm font-medium border-r border-gray-300">
+            Branch Name
+          </th>
+          <th class="px-6 py-4 text-left text-sm font-medium border-l border-gray-300">
+            Total Leave Days
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for name in leave_branch_names %}
+        <tr class="hover:bg-gray-50 transition duration-300 ease-in-out">
+          <td class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-r border-gray-300">
+            {{ name }}
+          </td>
+          <td class="px-6 py-4 text-sm font-medium text-gray-700 border-b border-l border-gray-300">
+            {{ leave_branch_counts[loop.index0] }}
           </td>
         </tr>
         {% endfor %}
@@ -175,7 +207,8 @@ content %}
         <li class="flex items-center gap-3">
           <i class="fas fa-user-tag text-blue-500 text-lg"></i>
           <span><strong>Role:</strong>
-            {% if current_user.role_default == 20 %}Employee{% else %}{{ current_user.role_default }}{% endif %}
+            {% if current_user.role_default == 20 %}Employee{% else %}{{
+            current_user.role_default }}{% endif %}
           </span>
         </li>
         <li class="flex items-center gap-3">
@@ -209,9 +242,12 @@ content %}
             <td class="px-4 py-2 border-b border-gray-300">{{ user[1] }}</td>
             <td class="px-4 py-2 border-b border-gray-300">{{ user[2] }}</td>
             <td class="px-4 py-2 border-b border-gray-300">
-              {% if user[3] %}
+              {% if user[3] is not none %}
               <img src="{{ url_for('get_user_image', user_id=user[0]) }}" alt="User Profile Image"
                 class="w-10 h-10 rounded-full object-cover shadow-md ring-2 ring-indigo-500" />
+              {% elif user[3] == '' %}
+              <img src="{{ url_for('static', filename='images/empty-image.png') }}" alt="Empty Image"
+                class="w-10 h-10 rounded-full object-cover shadow-md ring-2 ring-gray-300" />
               {% else %}
               <i class="fas fa-user-circle text-3xl text-blue-500 bg-white p-1 rounded-full shadow"></i>
               {% endif %}
@@ -221,19 +257,24 @@ content %}
         </tbody>
       </table>
     </div>
-
   </div>
-
 
   <br />
 
   {% endif %} {% if current_user.is_admin == 1 %}
   <!-- Employee Distribution Chart -->
-  <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+  <div class="bg-white p-6 rounded-lg shadow-md">
     <h3 class="text-xl font-semibold text-gray-800 mb-2">
-      Employees by Branch
+      Payroll Employees by Branch
     </h3>
     <canvas id="employeeChart"></canvas>
+  </div>
+
+  <div class="bg-white p-6 mt-6 rounded-lg shadow-md">
+    <h2 class="text-xl font-bold text-gray-800 mb-4">Leaves Taken by Branch</h2>
+    <div class="relative h-72 w-full">
+      <canvas id="leavesByBranchChart"></canvas>
+    </div>
   </div>
 </div>
 
@@ -241,15 +282,14 @@ content %}
 
 <script>
   $(document).ready(function () {
-    $('#payrollTable').DataTable({
+    $("#payrollTable").DataTable({
       paging: true,
       searching: true,
       ordering: true,
-      info: true
+      info: true,
     });
   });
 </script>
-
 
 <!-- Include Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -287,6 +327,67 @@ content %}
     }
   }
       });
+  });
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById('leavesByBranchChart').getContext('2d');
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ leave_branch_names| tojson }},
+    datasets: [{
+      label: 'Leaves Days',
+      data: {{ leave_branch_counts| tojson }},
+    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+    borderColor: 'rgba(59, 130, 246, 1)',
+    borderWidth: 1,
+    borderRadius: 8,
+    hoverBackgroundColor: 'rgba(37, 99, 235, 0.9)',
+        }]
+      },
+    options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          stepSize: 1,
+          color: '#374151', // Tailwind gray-700
+          font: {
+            size: 12
+          }
+        },
+        title: {
+          display: true,
+          text: 'Number of Leaves',
+          color: '#6B7280', // gray-500
+          font: {
+            weight: 'bold'
+          }
+        }
+      },
+      x: {
+        ticks: {
+          color: '#374151'
+        }
+      }
+    },
+    plugins: {
+      legend: {
+        display: false
+      },
+      tooltip: {
+        backgroundColor: '#1E3A8A', // Tailwind blue-900
+        titleColor: '#fff',
+        bodyColor: '#fff'
+      }
+    }
+  }
+    });
   });
 </script>
 

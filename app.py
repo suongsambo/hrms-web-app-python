@@ -6704,6 +6704,24 @@ def render_dashboard(user_id):
             WHERE strftime('%s', 'now') - strftime('%s', ou.last_active_time) <= ? * 60
         ''', (timeout_threshold,)).fetchall()
 
+        # 📊 Leaves per branch
+        # leaves_by_branch = conn.execute("""
+        #     SELECT e.Branch, COUNT(l.id) AS leave_count
+        #     FROM leaves l
+        #     JOIN employees e ON e.ID = l.employee_id
+        #     GROUP BY e.Branch
+        # """).fetchall()
+        leaves_by_branch = conn.execute("""
+            SELECT e.Branch, SUM(l.service_count) AS total_service_count
+            FROM leaves l
+            JOIN employees e ON e.ID = l.employee_id
+            GROUP BY e.Branch
+        """).fetchall()
+
+        leave_branch_names = [row['Branch'] for row in leaves_by_branch]
+        leave_branch_counts = [row['total_service_count']
+                               or 0 for row in leaves_by_branch]
+
     return render_template(
         'dashboard.html',
         total_users=total_users,
@@ -6717,7 +6735,9 @@ def render_dashboard(user_id):
         branch_names=branch_names,
         branch_counts=branch_counts,
         branch_salaries=branch_salaries,
-        online_users=online_users
+        online_users=online_users,
+        leave_branch_names=leave_branch_names,
+        leave_branch_counts=leave_branch_counts,
     )
 
 
