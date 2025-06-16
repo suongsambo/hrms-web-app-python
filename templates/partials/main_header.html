@@ -42,49 +42,69 @@
 
 
 
+
+
+
             <!-- Notifications Section -->
-            <div class="relative top-1 z-50">
+            <div class="relative z-50">
                 <!-- Notification Button -->
                 <button onclick="toggleNotificationDropdown()"
-                    class="text-white flex items-center gap-x-2 notification-button bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 rounded-full p-2 shadow-lg relative">
-                    <span class="material-symbols-outlined">notifications_active</span>
+                    class="relative flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-400">
+                    <span class="material-symbols-outlined text-lg">notifications_active</span>
                     <span
-                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-md">
+                        class="absolute -top-1.5 -right-1.5 bg-red-600 text-white text-[10px] font-semibold rounded-full w-5 h-5 flex items-center justify-center ring-2 ring-white animate-ping-slow">
                         {{ notifications_employees|length + notifications|length }}
                     </span>
                 </button>
 
                 <!-- Notification Dropdown -->
                 <div id="notificationDropdown"
-                    class="absolute right-0 mt-3 w-80 bg-white text-black rounded-xl shadow-2xl hidden max-h-72 overflow-y-auto border border-gray-200">
+                    class="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-gray-200 ring-1 ring-indigo-100 transition-all duration-300 ease-in-out hidden max-h-96 overflow-y-auto">
 
-                    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-3 rounded-t-xl border-b">
-                        <p class="text-sm font-semibold">Notifications</p>
+                    <!-- Header -->
+                    <div class="bg-[linear-gradient(135deg,#6f00ff_0%,#b300ff_100%)] text-white border-b text-center">
+                        <h3 class="text-base font-bold tracking-wide flex items-center gap-2 justify-center">
+                            <span class="material-symbols-outlined text-white text-lg">notifications</span>
+                            Notifications Center
+                        </h3>
                     </div>
 
-                    <ul class="divide-y divide-gray-200">
+                    <!-- General Notifications -->
+                    <ul class="divide-y divide-gray-100">
                         {% for notification in notifications %}
-                        <li class="p-4 hover:bg-gray-100">
-                            <p class="font-semibold text-gray-800">{{ notification.title }}</p>
-                            <p class="text-sm text-gray-600">{{ notification.message }}</p>
+                        <li class="p-4 hover:bg-gray-50 transition-all duration-200">
+                            <div class="flex flex-col gap-0.5">
+                                <p class="text-sm font-medium text-gray-800 flex items-center gap-1">
+                                    📌 {{ notification.title }}
+                                </p>
+                                <p class="text-xs text-gray-600">{{ notification.message }}</p>
+                            </div>
                         </li>
                         {% else %}
-                        <li class="p-4 text-center text-gray-500">No general notifications available.</li>
+                        <li class="p-4 text-center text-sm text-gray-400">No general notifications available.</li>
                         {% endfor %}
                     </ul>
 
-                    <ul class="divide-y divide-gray-200">
+                    <!-- Employee Notifications -->
+                    <ul class="divide-y divide-gray-100">
                         {% for notifications_employee in notifications_employees %}
-                        <li class="p-4 hover:bg-gray-100">
-                            <p class="font-semibold text-gray-800">{{ notifications_employee.title }}</p>
-                            <p class="text-sm text-gray-600">{{ notifications_employee.message }}</p>
+                        <li class="p-4 hover:bg-gray-50 transition-all duration-200">
+                            <div class="flex flex-col gap-0.5">
+                                <p class="text-sm font-medium text-gray-800 flex items-center gap-1">
+                                    👤 {{ notifications_employee.title }}
+                                </p>
+                                <p class="text-xs text-gray-600">{{ notifications_employee.message }}</p>
+                            </div>
                         </li>
                         {% else %}
-                        <li class="p-4 text-center text-gray-500">No employee notifications available.</li>
+                        <li class="p-4 text-center text-sm text-gray-400">No employee notifications available.</li>
                         {% endfor %}
                     </ul>
                 </div>
             </div>
+
+
+
 
             <!-- Logout Form -->
             <form action="{{ url_for('logout') }}" method="post"

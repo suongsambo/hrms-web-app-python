@@ -1,0 +1,52 @@
+{% extends 'base.html' %} {% block content %}
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow ring-1 ring-gray-200 mt-8">
+    <h2 class="text-2xl font-bold mb-6 text-indigo-700">Leave Details</h2>
+
+    <!-- Section 1: Employee Info -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold text-indigo-600 mb-2">
+            Employee Information
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+            <p><strong>Employee Name:</strong> {{ leave['employee_name'] }}</p>
+            <p><strong>Employee ID:</strong> {{ leave['employee_id'] }}</p>
+            <p><strong>Department:</strong> {{ leave['department'] }}</p>
+            <p><strong>Branch:</strong> {{ leave['branch'] }}</p>
+            <p><strong>Category:</strong> {{ leave['category'] }}</p>
+        </div>
+    </div>
+
+    <!-- Section 2: Leave Duration -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold text-indigo-600 mb-2">
+            Leave Date & Time
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+            <p><strong>Leave Type:</strong> {{ leave['leave_type'] }}</p>
+            <p><strong>Type of Leave:</strong> {{ leave['type_of_leave'] }}</p>
+            <p><strong>Start Date:</strong> {{ leave['start_date'] }}</p>
+            <p><strong>End Date:</strong> {{ leave['end_date'] }}</p>
+            <p><strong>Reason:</strong> {{ leave['reason'] }}</p>
+            <p><strong>Total Days:</strong> {{ leave['service_count'] }} days</p>
+            <p><strong>Total Hours:</strong> {{ leave['leave_hours'] }} hours</p>
+        </div>
+    </div>
+
+    <!-- Section 3: Approval & Verification -->
+    <div class="mb-6">
+        <h3 class="text-lg font-semibold text-indigo-600 mb-2">
+            Approval & Verification
+        </h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800">
+            <p><strong>Status:</strong> {{ leave['status'] }}</p>
+            <p><strong>Requested By:</strong> {{ leave['requested_by'] }}</p>
+            <p><strong>Verified By:</strong> {{ leave['verified_by'] }}</p>
+            <p><strong>Approved By:</strong> {{ leave['approved_by'] }}</p>
+        </div>
+    </div>
+
+    <a href="{{ url_for('view_leaves') }}" class="inline-block text-blue-600 hover:underline mt-4">
+        ← Back to all leaves
+    </a>
+</div>
+{% endblock %}
