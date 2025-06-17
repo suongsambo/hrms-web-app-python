@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Sign Your Terms{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-10 bg-white shadow-lg rounded-xl p-6 space-y-4">
+    <h2 class="text-2xl font-bold text-center text-indigo-700">Please Sign Below</h2>
+    <p class="text-gray-600 text-center">Use your mouse or finger to sign the document</p>
+
+    <div class="border-2 border-dashed rounded-lg p-2 bg-gray-50">
+        <canvas id="signature-pad" class="w-full h-auto rounded shadow-md bg-white"
+            style="touch-action: none;"></canvas>
+    </div>
+
+    <div class="flex justify-between mt-4">
+        <button type="button" onclick="clearPad()"
+            class="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 flex items-center space-x-1">
+            <span class="material-symbols-outlined">delete</span>
+            <span>Clear</span>
+        </button>
+        <button type="button" onclick="savePad()"
+            class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 flex items-center space-x-1">
+            <span class="material-symbols-outlined">download</span>
+            <span>Download</span>
+        </button>
+
+    </div>
+
+    <form id="sig-form" method="POST" action="/download-signature">
+        <input type="hidden" name="signature_data" id="signature_data">
+    </form>
+</div>
+
+<!-- Signature Pad JS -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+<script>
+    const canvas = document.getElementById("signature-pad");
+
+    // Resize canvas to full container width
+    function resizeCanvas() {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = 200 * ratio; // fixed height
+        canvas.getContext("2d").scale(ratio, ratio);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    const signaturePad = new SignaturePad(canvas, {
+        backgroundColor: 'rgb(255,255,255)'
+    });
+
+    function clearPad() {
+        signaturePad.clear();
+    }
+
+    function savePad() {
+        if (!signaturePad.isEmpty()) {
+            const dataUrl = signaturePad.toDataURL('image/png');
+            if (confirm("Do you want to download your signature?")) {
+                document.getElementById("signature_data").value = dataUrl;
+                document.getElementById("sig-form").submit();
+            }
+        } else {
+            alert("Please sign before saving.");
+        }
+    }
+</script>
+{% endblock %}

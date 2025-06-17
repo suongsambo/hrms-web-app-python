@@ -86,10 +86,9 @@ UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 LANGUAGES = ['en', 'km']
 ALLOWED_EXCEL = {'xlsx', 'xls'}
-# If you're storing files or validating file types
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-# Define your image validation function
+UPLOAD_FOLDER = 'signatures'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 
 def allowed_file(filename: str) -> bool:
@@ -103,6 +102,31 @@ def allowed_excel(filename):
 # @app.before_request
 # def make_session_permanent():
 #     session.permanent = True
+
+
+@app.route('/signature')
+def signature():
+    return render_template('/signature/signature.html')
+
+
+@app.route('/save-signature', methods=['POST'])
+def save_signature():
+    data_url = request.form['signature_data']
+    # Strip metadata and decode
+    header, encoded = data_url.split(",", 1)
+    binary_data = base64.b64decode(encoded)
+
+    # Save to file
+    filepath = os.path.join(UPLOAD_FOLDER, 'signature.png')
+    with open(filepath, 'wb') as f:
+        f.write(binary_data)
+
+    return redirect(url_for('signature'))
+
+
+@app.route('/download-signature', methods=['POST'])
+def download_signature():
+    return send_from_directory(UPLOAD_FOLDER, 'signature.png', as_attachment=True)
 
 
 @app.route('/leave-guide')
@@ -5295,8 +5319,6 @@ def uploaded_file(filename):
 @app.route('/')
 def index():
     return render_template('login.html')
-
-# Function to get geolocation based on IP address (optional)
 
 
 def get_geolocation(ip):

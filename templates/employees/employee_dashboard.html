@@ -12,40 +12,53 @@ block content %}
       </p>
     </div>
 
+
     <!-- Metrics Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <!-- Total Leave Days -->
-      <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6">
-        <div class="flex items-center mb-4">
-          <i class="fas fa-calendar-alt text-blue-600 text-3xl mr-3"></i>
-          <h2 class="text-xl font-semibold text-gray-800">Total Leave Days</h2>
+      <div
+        class="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-2xl shadow hover:shadow-lg transition p-6">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="p-3 bg-blue-100 text-blue-600 rounded-full shadow-inner">
+            <i class="fas fa-calendar-alt text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800">Total Leave Days</h3>
         </div>
         <p class="text-4xl font-bold text-red-700">{{ cons_days }} Days</p>
       </div>
 
       <!-- Total Leave Hours -->
-      <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6">
-        <div class="flex items-center mb-4">
-          <i class="fas fa-clock text-blue-600 text-3xl mr-3"></i>
-          <h2 class="text-xl font-semibold text-gray-800">Total Leave Hours</h2>
+      <div
+        class="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-2xl shadow hover:shadow-lg transition p-6">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="p-3 bg-blue-100 text-blue-600 rounded-full shadow-inner">
+            <i class="fas fa-clock text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800">Total Leave Hours</h3>
         </div>
         <p class="text-4xl font-bold text-red-700">{{ total_leaves_hours }}</p>
       </div>
 
       <!-- Hours Converted to Days -->
-      <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6">
-        <div class="flex items-center mb-4">
-          <i class="fas fa-exchange-alt text-blue-600 text-3xl mr-3"></i>
-          <h2 class="text-xl font-semibold text-gray-800">Hours to Days</h2>
+      <div
+        class="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-2xl shadow hover:shadow-lg transition p-6">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="p-3 bg-blue-100 text-blue-600 rounded-full shadow-inner">
+            <i class="fas fa-exchange-alt text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800">Hours to Days</h3>
         </div>
         <p class="text-4xl font-bold text-red-700">{{ total_leave_pretty }}</p>
       </div>
 
-      <!-- Admin Status -->
-      <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6">
-        <div class="flex items-center mb-4">
-          <i class="fas fa-user-shield text-blue-600 text-3xl mr-3"></i>
-          <h2 class="text-xl font-semibold text-gray-800">Admin Access</h2>
+      <!-- Admin Access -->
+      <div
+        class="bg-gradient-to-br from-blue-50 to-white border border-blue-100 rounded-2xl shadow hover:shadow-lg transition p-6">
+        <div class="flex items-center gap-4 mb-3">
+          <div class="p-3 bg-blue-100 text-blue-600 rounded-full shadow-inner">
+            <i class="fas fa-user-shield text-2xl"></i>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-800">Admin Access</h3>
         </div>
         <p class="text-2xl font-bold {{ 'text-green-600' if current_user.is_admin else 'text-red-600' }}">
           {% if current_user.is_admin %} Yes {% else %} No {% endif %}
@@ -53,33 +66,65 @@ block content %}
       </div>
     </div>
 
+
     <!-- Employee Information Section -->
-    <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-8 mb-4">
-      <h2 class="text-2xl font-bold text-indigo-800 mb-6 flex items-center">
-        <i class="fas fa-user-tie mr-3 text-blue-600"></i> Employee Information
+    <div
+      class="bg-gradient-to-br from-white to-blue-50 border border-blue-100 rounded-2xl shadow-lg hover:shadow-xl transition-all p-8 mb-6">
+      <h2 class="text-2xl font-bold text-indigo-800 mb-6 flex items-center gap-3">
+        <i class="fas fa-user-tie text-blue-600 text-2xl"></i>
+        Employee Information
       </h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
-        <div><strong>ID:</strong> {{ employee.ID }}</div>
 
-        <div><strong>Age:</strong> {{ employee.Age }}</div>
-
-        <div><strong>Salary:</strong> ${{ employee.Salary }}</div>
-
-        <div><strong>Branch:</strong> {{ employee.Branch }}</div>
-
-        <div><strong>Position:</strong> {{ employee.Position }}</div>
-
-        <div><strong>Department:</strong> {{ employee.Department }}</div>
-
-        <div>
-          <strong>Role:</strong>
-          {% if current_user.role_default == 20 %} Employee {% else %} {{
-          current_user.role_default }} {% endif %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-gray-700">
+        <div class="flex items-start gap-2">
+          <i class="fas fa-id-badge text-indigo-500 mt-1"></i>
+          <div><span class="font-semibold">ID:</span> {{ employee.ID }}</div>
         </div>
 
-        <div><strong>Email:</strong> {{ current_user.email }}</div>
+        <div class="flex items-start gap-2">
+          <i class="fas fa-birthday-cake text-indigo-500 mt-1"></i>
+          <div><span class="font-semibold">Age:</span> {{ employee.Age }}</div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <i class="fas fa-money-bill-wave text-indigo-500 mt-1"></i>
+          <div><span class="font-semibold">Salary:</span> ${{ employee.Salary }}</div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <i class="fas fa-map-marker-alt text-indigo-500 mt-1"></i>
+          <div><span class="font-semibold">Branch:</span> {{ employee.Branch }}</div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <i class="fas fa-briefcase text-indigo-500 mt-1"></i>
+          <div><span class="font-semibold">Position:</span> {{ employee.Position }}</div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <i class="fas fa-building text-indigo-500 mt-1"></i>
+          <div><span class="font-semibold">Department:</span> {{ employee.Department }}</div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <i class="fas fa-user-tag text-indigo-500 mt-1"></i>
+          <div>
+            <span class="font-semibold">Role:</span>
+            {% if current_user.role_default == 20 %}
+            Employee
+            {% else %}
+            {{ current_user.role_default }}
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2">
+          <i class="fas fa-envelope text-indigo-500 mt-1"></i>
+          <div><span class="font-semibold">Email:</span> {{ current_user.email }}</div>
+        </div>
       </div>
     </div>
+
 
     <!-- Leave by Day Chart -->
     <div class="bg-white rounded-2xl shadow-md hover:shadow-lg transition-all p-6">

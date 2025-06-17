@@ -21,7 +21,7 @@ content %}
       <div class="flex justify-center">
         {% if user.image %}
         <img src="{{ url_for('get_user_image', user_id=user.id) }}" alt="User Profile Image"
-          class="w-48 h-48 rounded-full object-cover shadow-lg border-4 border-indigo-600 transition-transform duration-300 transform hover:scale-110" />
+          class="w-60 h-60 rounded-full object-cover shadow-lg border-4 border-indigo-600 transition-transform duration-300 transform hover:scale-110" />
         {% else %}
         <p class="text-center text-gray-500">No image found for this user.</p>
         {% endif %}
