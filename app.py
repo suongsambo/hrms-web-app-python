@@ -6103,44 +6103,118 @@ def access_denied():
     return render_template('access_denied.html')
 
 
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+
+#     # if 'user_id' not in session:
+#     #     return redirect(url_for('login'))
+#     # # Admin dashboard
+#     if getattr(current_user, 'is_admin', False):
+#         return render_dashboard(current_user.id)
+
+#     role = getattr(current_user, 'role_default', None)
+
+#     # Employee dashboard
+#     if role == 20:
+#         with get_db_connection() as conn:
+#             employee = conn.execute(
+#                 "SELECT e.ID FROM employees e WHERE e.user_id = ?",
+#                 (current_user.id,)
+#             ).fetchone()
+#         if employee:
+#             return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
+#         else:
+#             flash("Employee not found!", "danger")
+#             return render_template('access_denied.html')
+
+#     # SPM dashboard
+#     if role == 145:
+#         return redirect(url_for('spm_dashboard'))
+
+#     # SPM dashboard
+#     if role == 160:
+#         return redirect(url_for('hrd_dashboard'))
+
+#     # GM dashboard
+#     if role == 180:
+#         return redirect(url_for('gm_dashboard'))
+
+#     # Branch Manager dashboard
+#     if role in [140, 35]:
+#         branch = getattr(current_user, 'branch', None)
+#         if branch:
+#             return redirect(url_for('render_dashboard_branch_manager', branch_name=branch))
+#         else:
+#             flash("Branch information is missing.", "danger")
+#             return render_template('access_denied.html')
+
+#     # Default fallback (no redirect to dashboard again!)
+#     flash("Access denied: You do not have permission to view this page.", "danger")
+#     return render_template('access_denied.html')
+
+
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     role = getattr(current_user, 'role_default', None)
+#     user_id = current_user.id
+
+#     # Admin Dashboard
+#     if getattr(current_user, 'is_admin', False):
+#         return render_dashboard(user_id)
+
+#     # Role-based dashboards
+#     dashboard_routes = {
+#         145: 'spm_dashboard',
+#         160: 'hrd_dashboard',
+#         180: 'gm_dashboard',
+#         140: 'render_dashboard_branch_manager',
+#         35:  'render_dashboard_branch_manager'
+#     }
+
+#     # Employee (requires employee ID lookup)
+#     if role == 20:
+#         with get_db_connection() as conn:
+#             employee = conn.execute(
+#                 "SELECT e.ID FROM employees e WHERE e.user_id = ?", (user_id,)
+#             ).fetchone()
+
+#         if employee:
+#             return redirect(url_for('render_dashboard_employees', employee_id=employee['ID']))
+#         else:
+#             flash("Employee not found!", "danger")
+#             return render_template('access_denied.html')
+
+#     # Branch Manager (requires branch info)
+#     if role in [140, 35]:
+#         branch = getattr(current_user, 'branch', None)
+#         if branch:
+#             return redirect(url_for('render_dashboard_branch_manager', branch_name=branch))
+#         else:
+#             flash("Branch information is missing.", "danger")
+#             return render_template('access_denied.html')
+
+#     # Other roles (direct redirect)
+#     if role in dashboard_routes:
+#         return redirect(url_for(dashboard_routes[role]))
+
+#     # Fallback
+#     flash("Access denied: You do not have permission to view this page.", "danger")
+#     return render_template('access_denied.html')
+
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
-
-    # if 'user_id' not in session:
-    #     return redirect(url_for('login'))
-    # # Admin dashboard
-    if getattr(current_user, 'is_admin', False):
-        return render_dashboard(current_user.id)
-
     role = getattr(current_user, 'role_default', None)
+    user_id = current_user.id
 
-    # Employee dashboard
-    if role == 20:
-        with get_db_connection() as conn:
-            employee = conn.execute(
-                "SELECT e.ID FROM employees e WHERE e.user_id = ?",
-                (current_user.id,)
-            ).fetchone()
-        if employee:
-            return redirect(url_for('render_dashboard_employees', employee_id=employee[0]))
-        else:
-            flash("Employee not found!", "danger")
-            return render_template('access_denied.html')
+    # Admin Dashboard
+    if getattr(current_user, 'is_admin', False):
+        return render_dashboard(user_id)
 
-    # SPM dashboard
-    if role == 145:
-        return redirect(url_for('spm_dashboard'))
-
-    # SPM dashboard
-    if role == 160:
-        return redirect(url_for('hrd_dashboard'))
-
-    # GM dashboard
-    if role == 180:
-        return redirect(url_for('gm_dashboard'))
-
-    # Branch Manager dashboard
+    # Branch Manager roles that require 'branch_name'
     if role in [140, 35]:
         branch = getattr(current_user, 'branch', None)
         if branch:
@@ -6149,9 +6223,64 @@ def dashboard():
             flash("Branch information is missing.", "danger")
             return render_template('access_denied.html')
 
-    # Default fallback (no redirect to dashboard again!)
+    # Role-based dashboards
+    dashboard_routes = {
+        145: 'spm_dashboard',
+        160: 'hrd_dashboard',
+        180: 'gm_dashboard',
+        20: 'render_dashboard_employees'  # Regular employee
+    }
+
+    if role in dashboard_routes:
+        return redirect(url_for(dashboard_routes[role]))
+
+    # Fallback
     flash("Access denied: You do not have permission to view this page.", "danger")
     return render_template('access_denied.html')
+
+
+# @app.route('/dashboard')
+# @login_required
+# def dashboard():
+#     role = getattr(current_user, 'role_default', None)
+#     user_id = current_user.id
+
+#     # Admin Dashboard
+#     if getattr(current_user, 'is_admin', False):
+#         return render_dashboard(user_id)
+
+#     # Role-based dashboards
+#     dashboard_routes = {
+#         145: 'spm_dashboard',
+#         160: 'hrd_dashboard',
+#         180: 'gm_dashboard',
+#         140: 'render_dashboard_branch_manager',
+#         35:  'render_dashboard_branch_manager',
+#         20: 'render_dashboard_employees'  # Added role 20 route
+#     }
+
+#     # Employee (requires employee ID lookup)
+#     if role == 20:
+#         # Assuming you want a specific page for role 20
+#         # Check if there's a specific dashboard for role 20
+#         return redirect(url_for('render_dashboard_employees'))
+
+#     # Role-based dashboards redirection
+#     if role in dashboard_routes:
+#         return redirect(url_for(dashboard_routes[role]))
+
+#     # Branch Manager (requires branch info)
+#     if role in [140, 35]:
+#         branch = getattr(current_user, 'branch', None)
+#         if branch:
+#             return redirect(url_for('render_dashboard_branch_manager', branch_name=branch))
+#         else:
+#             flash("Branch information is missing.", "danger")
+#             return render_template('access_denied.html')
+
+#     # Fallback
+#     flash("Access denied: You do not have permission to view this page.", "danger")
+#     return render_template('access_denied.html')
 
 
 @app.route('/gm/dashboard')
@@ -6464,38 +6593,204 @@ def render_dashboard_branch_manager(branch_name):
         )
 
 
-@app.route('/dashboard/employee/<int:employee_id>')
+# @app.route('/dashboard/employee')
+# @login_required
+# def render_dashboard_employees():
+#     # Optional: you could skip the 'start_date' and 'end_date' request arguments if they're not needed
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+
+#     with get_db_connection() as conn:
+#         # If you want data for the current logged-in user, use `current_user.id`
+#         employee_id = current_user.id
+
+#         payroll_query = """
+#             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary
+#             FROM payroll p
+#             WHERE p.employee_id = ?
+#         """
+
+#         leave_by_day_query = """
+#             SELECT
+#                 DATE(l.start_date) AS leave_date,
+#                 SUM(l.service_count) AS leave_count
+#             FROM leaves l
+#             WHERE l.employee_id = ?
+#             GROUP BY leave_date
+#             ORDER BY leave_date
+#         """
+
+#         leave_by_day_params = [employee_id]
+#         if start_date and end_date:
+#             leave_by_day_query = """
+#                 SELECT
+#                     DATE(l.start_date) AS leave_date,
+#                     SUM(l.service_count) AS leave_count
+#                 FROM leaves l
+#                 WHERE l.employee_id = ?
+#                 AND l.start_date >= ? AND l.end_date <= ?
+#                 GROUP BY leave_date
+#                 ORDER BY leave_date
+#             """
+#             leave_by_day_params.extend([start_date, end_date])
+
+#         leave_by_day = conn.execute(
+#             leave_by_day_query, leave_by_day_params).fetchall()
+
+#         payroll_params = [employee_id]
+#         if start_date and end_date:
+#             payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
+#             payroll_params.extend([start_date, end_date])
+
+#         total_salary = conn.execute(payroll_query, payroll_params).fetchone()
+#         total_salary = total_salary["total_salary"] if total_salary else 0
+
+#         leaves_query = """
+#             SELECT
+#                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
+#                 COALESCE(SUM(l.leave_hours), 0) AS total_leaves_hours
+#             FROM leaves l
+#             WHERE l.employee_id = ?
+#         """
+#         leaves_params = [employee_id]
+#         if start_date and end_date:
+#             leaves_query += " AND l.start_date >= ? AND l.end_date <= ?"
+#             leaves_params.extend([start_date, end_date])
+
+#         leaves = conn.execute(leaves_query, leaves_params).fetchone()
+
+#         total_leaves_days = leaves["total_leaves_days"] if leaves else 0
+#         total_leaves_hours = leaves["total_leaves_hours"] if leaves else 0
+
+#         # Build lists to send to the template
+#         leave_days = [row['leave_date'] for row in leave_by_day]
+#         leave_counts = [row['leave_count'] for row in leave_by_day]
+
+#         # Calculate days and hours from leave hours
+#         days, hours = divmod(total_leaves_hours, 8)
+#         hours_to_days = days + (hours / 8)
+#         cons_days = total_leaves_days + hours_to_days
+#         formatted_value = math.trunc(cons_days)
+#         mod_hours = round(hours / 8, 2)
+#         total_leave_pretty = f"{int(hours_to_days)} Days | {int(mod_hours * 8)} hours"
+
+#         return render_template(
+#             'employees/employee_dashboard.html',
+#             total_salary=total_salary,
+#             total_leaves_days=total_leaves_days,
+#             total_leaves_hours="{:.0f} hours".format(total_leaves_hours),
+#             total_leave_hours_to_day=hours_to_days,
+#             total_leave_pretty=total_leave_pretty,
+#             cons_days=formatted_value,
+#             leave_days=leave_days,
+#             leave_counts=leave_counts
+#         )
+
+
+# @app.route('/dashboard/employee')
+# @login_required
+# def render_dashboard_employees():
+#     # Optional: you could skip the 'start_date' and 'end_date' request arguments if they're not needed
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+
+#     with get_db_connection() as conn:
+#         # If you want data for the current logged-in user, use `current_user.id`
+#         employee_id = current_user.id
+
+#         payroll_query = """
+#             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary
+#             FROM payroll p
+#             WHERE p.employee_id = ?
+#         """
+
+#         leave_by_day_query = """
+#             SELECT
+#                 DATE(l.start_date) AS leave_date,
+#                 SUM(l.service_count) AS leave_count
+#             FROM leaves l
+#             WHERE l.employee_id = ?
+#             GROUP BY leave_date
+#             ORDER BY leave_date
+#         """
+
+#         leave_by_day_params = [employee_id]
+#         if start_date and end_date:
+#             leave_by_day_query = """
+#                 SELECT
+#                     DATE(l.start_date) AS leave_date,
+#                     SUM(l.service_count) AS leave_count
+#                 FROM leaves l
+#                 WHERE l.employee_id = ?
+#                 AND l.start_date >= ? AND l.end_date <= ?
+#                 GROUP BY leave_date
+#                 ORDER BY leave_date
+#             """
+#             leave_by_day_params.extend([start_date, end_date])
+
+#         leave_by_day = conn.execute(
+#             leave_by_day_query, leave_by_day_params).fetchall()
+
+#         payroll_params = [employee_id]
+#         if start_date and end_date:
+#             payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
+#             payroll_params.extend([start_date, end_date])
+
+#         total_salary = conn.execute(payroll_query, payroll_params).fetchone()
+#         total_salary = total_salary["total_salary"] if total_salary and total_salary["total_salary"] is not None else 0
+
+#         leaves_query = """
+#             SELECT
+#                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
+#                 COALESCE(SUM(l.leave_hours), 0) AS total_leaves_hours
+#             FROM leaves l
+#             WHERE l.employee_id = ?
+#         """
+#         leaves_params = [employee_id]
+#         if start_date and end_date:
+#             leaves_query += " AND l.start_date >= ? AND l.end_date <= ?"
+#             leaves_params.extend([start_date, end_date])
+
+#         leaves = conn.execute(leaves_query, leaves_params).fetchone()
+
+#         total_leaves_days = leaves["total_leaves_days"] if leaves and leaves["total_leaves_days"] is not None else 0
+#         total_leaves_hours = leaves["total_leaves_hours"] if leaves and leaves["total_leaves_hours"] is not None else 0
+
+#         # Build lists to send to the template
+#         leave_days = [row['leave_date'] for row in leave_by_day]
+#         leave_counts = [row['leave_count'] for row in leave_by_day]
+
+#         # Calculate days and hours from leave hours
+#         days, hours = divmod(total_leaves_hours, 8)
+#         hours_to_days = days + (hours / 8)
+#         cons_days = total_leaves_days + hours_to_days
+#         formatted_value = math.trunc(cons_days)
+#         mod_hours = round(hours / 8, 2)
+#         total_leave_pretty = f"{int(hours_to_days)} Days | {int(mod_hours * 8)} hours"
+
+#         return render_template(
+#             'employees/employee_dashboard.html',
+#             total_salary=total_salary,
+#             total_leaves_days=total_leaves_days,
+#             total_leaves_hours="{:.0f} hours".format(total_leaves_hours),
+#             total_leave_hours_to_day=hours_to_days,
+#             total_leave_pretty=total_leave_pretty,
+#             cons_days=formatted_value,
+#             leave_days=leave_days,
+#             leave_counts=leave_counts
+#         )
+
+
+@app.route('/dashboard/employee')
 @login_required
-def render_dashboard_employees(employee_id):
+def render_dashboard_employees():
+    # Optional: you could skip the 'start_date' and 'end_date' request arguments if they're not needed
     start_date = request.args.get('start_date')
     end_date = request.args.get('end_date')
 
     with get_db_connection() as conn:
-        employee = conn.execute(
-            """
-            SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch,
-                   p.PositionName AS Position, d.Name AS Department
-            FROM employees e
-            LEFT JOIN positions p ON e.position_id = p.ID
-            LEFT JOIN departments d ON p.department_id = d.ID
-            WHERE e.ID = ?
-            """,
-            (employee_id,)
-        ).fetchone()
-
-        if not employee:
-            flash("Employee not found!", "danger")
-            return redirect(url_for('dashboard', id=current_user.id))
-
-        employee_data = {
-            'ID': employee['ID'] or '',
-            'Name': employee['Name'] or '',
-            'Age': employee['Age'] or '',
-            'Salary': employee['Salary'] or '',
-            'Branch': employee['Branch'] or '',
-            'Position': employee['Position'] or '',
-            'Department': employee['Department'] or ''
-        }
+        # If you want data for the current logged-in user, use `current_user.id`
+        employee_id = current_user.id
 
         payroll_query = """
             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary
@@ -6512,8 +6807,8 @@ def render_dashboard_employees(employee_id):
             GROUP BY leave_date
             ORDER BY leave_date
         """
-        # leave_by_day_query
-        leave_by_day_params = [employee['ID']]
+
+        leave_by_day_params = [employee_id]
         if start_date and end_date:
             leave_by_day_query = """
                 SELECT
@@ -6530,13 +6825,13 @@ def render_dashboard_employees(employee_id):
         leave_by_day = conn.execute(
             leave_by_day_query, leave_by_day_params).fetchall()
 
-        payroll_params = [employee['ID']]
+        payroll_params = [employee_id]
         if start_date and end_date:
             payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
             payroll_params.extend([start_date, end_date])
 
         total_salary = conn.execute(payroll_query, payroll_params).fetchone()
-        total_salary = total_salary["total_salary"] if total_salary else 0
+        total_salary = total_salary["total_salary"] if total_salary and total_salary["total_salary"] is not None else 0
 
         leaves_query = """
             SELECT
@@ -6545,31 +6840,37 @@ def render_dashboard_employees(employee_id):
             FROM leaves l
             WHERE l.employee_id = ?
         """
-        leaves_params = [employee['ID']]
+        leaves_params = [employee_id]
         if start_date and end_date:
             leaves_query += " AND l.start_date >= ? AND l.end_date <= ?"
             leaves_params.extend([start_date, end_date])
 
         leaves = conn.execute(leaves_query, leaves_params).fetchone()
 
-        total_leaves_days = leaves["total_leaves_days"] if leaves else 0
-        # keep as number
-        total_leaves_hours = leaves["total_leaves_hours"] if leaves else 0
+        total_leaves_days = leaves["total_leaves_days"] if leaves and leaves["total_leaves_days"] is not None else 0
+        total_leaves_hours = leaves["total_leaves_hours"] if leaves and leaves["total_leaves_hours"] is not None else 0
+
         # Build lists to send to the template
         leave_days = [row['leave_date'] for row in leave_by_day]
         leave_counts = [row['leave_count'] for row in leave_by_day]
 
+        # Calculate days and hours from leave hours
         days, hours = divmod(total_leaves_hours, 8)
         hours_to_days = days + (hours / 8)
         cons_days = total_leaves_days + hours_to_days
         formatted_value = math.trunc(cons_days)
         mod_hours = round(hours / 8, 2)
         total_leave_pretty = f"{int(hours_to_days)} Days | {int(mod_hours * 8)} hours"
-        # ---------------------------------
+
+        # You can fetch employee details here if you need to display them
+        employee_data = {
+            'id': employee_id,
+            # Add other employee details if needed
+        }
 
         return render_template(
             'employees/employee_dashboard.html',
-            employee=employee_data,
+            employee=employee_data,  # Pass employee data to the template
             total_salary=total_salary,
             total_leaves_days=total_leaves_days,
             total_leaves_hours="{:.0f} hours".format(total_leaves_hours),
@@ -6579,6 +6880,123 @@ def render_dashboard_employees(employee_id):
             leave_days=leave_days,
             leave_counts=leave_counts
         )
+
+
+# @app.route('/dashboard/employee/<int:employee_id>')
+# @login_required
+# def render_dashboard_employees(employee_id):
+#     start_date = request.args.get('start_date')
+#     end_date = request.args.get('end_date')
+
+#     with get_db_connection() as conn:
+#         employee = conn.execute(
+#             """
+#             SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch,
+#                    p.PositionName AS Position, d.Name AS Department
+#             FROM employees e
+#             LEFT JOIN positions p ON e.position_id = p.ID
+#             LEFT JOIN departments d ON p.department_id = d.ID
+#             WHERE e.ID = ?
+#             """,
+#             (employee_id,)
+#         ).fetchone()
+
+#         if not employee:
+#             flash("Employee not found!", "danger")
+#             return redirect(url_for('dashboard', id=current_user.id))
+
+#         employee_data = {
+#             'ID': employee['ID'] or '',
+#             'Name': employee['Name'] or '',
+#             'Age': employee['Age'] or '',
+#             'Salary': employee['Salary'] or '',
+#             'Branch': employee['Branch'] or '',
+#             'Position': employee['Position'] or '',
+#             'Department': employee['Department'] or ''
+#         }
+
+#         payroll_query = """
+#             SELECT COALESCE(SUM(p.base_salary + p.bonus - p.deductions - p.tax), 0) AS total_salary
+#             FROM payroll p
+#             WHERE p.employee_id = ?
+#         """
+
+#         leave_by_day_query = """
+#             SELECT
+#                 DATE(l.start_date) AS leave_date,
+#                 SUM(l.service_count) AS leave_count
+#             FROM leaves l
+#             WHERE l.employee_id = ?
+#             GROUP BY leave_date
+#             ORDER BY leave_date
+#         """
+#         # leave_by_day_query
+#         leave_by_day_params = [employee['ID']]
+#         if start_date and end_date:
+#             leave_by_day_query = """
+#                 SELECT
+#                     DATE(l.start_date) AS leave_date,
+#                     SUM(l.service_count) AS leave_count
+#                 FROM leaves l
+#                 WHERE l.employee_id = ?
+#                 AND l.start_date >= ? AND l.end_date <= ?
+#                 GROUP BY leave_date
+#                 ORDER BY leave_date
+#             """
+#             leave_by_day_params.extend([start_date, end_date])
+
+#         leave_by_day = conn.execute(
+#             leave_by_day_query, leave_by_day_params).fetchall()
+
+#         payroll_params = [employee['ID']]
+#         if start_date and end_date:
+#             payroll_query += " AND p.period_start_date >= ? AND p.period_end_date <= ?"
+#             payroll_params.extend([start_date, end_date])
+
+#         total_salary = conn.execute(payroll_query, payroll_params).fetchone()
+#         total_salary = total_salary["total_salary"] if total_salary else 0
+
+#         leaves_query = """
+#             SELECT
+#                 COALESCE(SUM(l.service_count), 0) AS total_leaves_days,
+#                 COALESCE(SUM(l.leave_hours), 0) AS total_leaves_hours
+#             FROM leaves l
+#             WHERE l.employee_id = ?
+#         """
+#         leaves_params = [employee['ID']]
+#         if start_date and end_date:
+#             leaves_query += " AND l.start_date >= ? AND l.end_date <= ?"
+#             leaves_params.extend([start_date, end_date])
+
+#         leaves = conn.execute(leaves_query, leaves_params).fetchone()
+
+#         total_leaves_days = leaves["total_leaves_days"] if leaves else 0
+#         # keep as number
+#         total_leaves_hours = leaves["total_leaves_hours"] if leaves else 0
+#         # Build lists to send to the template
+#         leave_days = [row['leave_date'] for row in leave_by_day]
+#         leave_counts = [row['leave_count'] for row in leave_by_day]
+
+#         days, hours = divmod(total_leaves_hours, 8)
+#         hours_to_days = days + (hours / 8)
+#         cons_days = total_leaves_days + hours_to_days
+#         formatted_value = math.trunc(cons_days)
+#         mod_hours = round(hours / 8, 2)
+#         total_leave_pretty = f"{int(hours_to_days)} Days | {int(mod_hours * 8)} hours"
+#         # ---------------------------------
+
+#         return render_template(
+#             'employees/employee_dashboard.html',
+#             employee=employee_data,
+#             total_salary=total_salary,
+#             total_leaves_days=total_leaves_days,
+#             total_leaves_hours="{:.0f} hours".format(total_leaves_hours),
+#             total_leave_hours_to_day=hours_to_days,
+#             total_leave_pretty=total_leave_pretty,
+#             cons_days=formatted_value,
+#             leave_days=leave_days,
+#             leave_counts=leave_counts
+#         )
 
 
 # def render_dashboard(user_id):
@@ -7183,6 +7601,158 @@ def add_employee():
 
     # Render the form to add a new employee with necessary context
     return render_template('employees/add_employee.html', branches=branches, users=users, positions=positions, departments=departments)
+
+
+@app.route('/employees/complete/profile', methods=['GET', 'POST'])
+@login_required
+def add_employee_profile():
+    branches = []
+    users = []
+    positions = []
+    departments = []
+
+    # Get branches, users, and positions from the database
+    with get_db_connection() as conn:
+        branches = conn.execute("SELECT * FROM branches").fetchall()
+
+        users = conn.execute(
+            "SELECT id, UserName FROM users"
+        ).fetchall()
+        positions = conn.execute("SELECT * FROM positions").fetchall()
+        departments = conn.execute("SELECT * FROM departments").fetchall()
+
+    if request.method == 'POST':
+        # Collect all form data
+        name = request.form['name']
+        age = request.form['age']
+        department = request.form['department']
+        salary = request.form['salary']
+        position_id = request.form['position_id']
+        joining_date = request.form['joining_date']
+        status = request.form.get('status', 'Active')
+        branch = request.form['branch']
+        user_id = request.form['user_id']
+        phone_number = request.form['phone_number']
+        email = request.form['email']
+        address = request.form['address']
+        emergency_contact_name = request.form['emergency_contact_name']
+        emergency_contact_phone = request.form['emergency_contact_phone']
+        employees_height = request.form.get('employees_height')
+        ethnicity = request.form.get('ethnicity')
+        nationality = request.form.get('nationality')
+        religion = request.form.get('religion')
+        family_status = request.form.get('family_status')
+        place_of_birth = request.form.get('place_of_birth')
+        permanent_address = request.form.get('permanent_address')
+        village = request.form.get('village')
+        commune = request.form.get('commune')
+        district = request.form.get('district')
+        province = request.form.get('province')
+        home_number = request.form.get('home_number')
+        street_number = request.form.get('street_number')
+        group_name = request.form.get('group_name')
+
+        # New fields to be added
+        personal_phone_number = request.form.get('personal_phone_number')
+        level_of_culture = request.form.get('level_of_culture')
+        skill = request.form.get('skill')
+        name_of_educational_institution = request.form.get(
+            'name_of_educational_institution')
+        knowledge_of_foreign_languages = request.form.get(
+            'knowledge_of_foreign_languages')
+        current_function = request.form.get('current_function')
+        id_card_number = request.form.get('id_card_number')
+        work_at = request.form.get('work_at')
+        employment_id = request.form.get('employment_id')
+        employment_date = request.form.get('employment_date')
+        khmer_nationality_identity_card = request.form.get(
+            'khmer_nationality_identity_card')
+        passing_test_date = request.form.get('passing_test_date')
+        residence_book_or_family_book = request.form.get(
+            'residence_book_or_family_book')
+        made_on = request.form.get('made_on')
+        have_a_number_of_children = request.form.get(
+            'have_a_number_of_children')
+        father_name = request.form.get('father_name')
+        mother_name = request.form.get('mother_name')
+        father_status = request.form.get('father_status')
+        father_occupation = request.form.get('father_occupation')
+        mother_occupation = request.form.get('mother_occupation')
+        mother_status = request.form.get('mother_status')
+        father_permanent_address = request.form.get('father_permanent_address')
+        mother_permanent_address = request.form.get('mother_permanent_address')
+        parents_village = request.form.get('parents_village')
+        parents_commune = request.form.get('parents_commune')
+        parents_district = request.form.get('parents_district')
+        parents_province = request.form.get('parents_province')
+        parents_home_number = request.form.get('parents_home_number')
+        parents_street_number = request.form.get('parents_street_number')
+        parents_group = request.form.get('parents_group')
+        parents_phone = request.form.get('parents_phone')
+
+        # Handle photo, fingerprints, and signature upload
+        photo = request.files.get('photo')
+        fingerprints = request.files.get('fingerprints')
+        signature = request.files.get('signature')
+
+        # Function to check if file is allowed
+        def allowed_file(filename):
+            ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif', 'bmp'}
+            return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+        # Convert files to binary data if valid
+        photo_data = None
+        if photo and allowed_file(photo.filename):
+            photo_data = photo.read()
+
+        fingerprints_data = None
+        if fingerprints and allowed_file(fingerprints.filename):
+            fingerprints_data = fingerprints.read()
+
+        signature_data = None
+        if signature and allowed_file(signature.filename):
+            signature_data = signature.read()
+
+        # Ensure that mandatory fields are provided (simple validation)
+        if not name or not age or not department:
+            flash('Name, Age, and Department are required fields!', 'error')
+            return redirect(url_for('add_employee'))
+
+        # Insert the new employee into the database
+        with get_db_connection() as conn:
+            conn.execute(
+                """INSERT INTO employees (
+                    name, age, department, salary, position_id, joining_date, status,
+                    branch, user_id, phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+                    employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
+                    commune, district, province, home_number, street_number, group_name,
+                    personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+                    knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
+                    khmer_nationality_identity_card,
+                    passing_test_date, residence_book_or_family_book, made_on, have_a_number_of_children,
+                    father_name, mother_name, father_status, father_occupation, mother_occupation, mother_status,
+                    father_permanent_address, mother_permanent_address, parents_village, parents_commune, parents_district,
+                    parents_province, parents_home_number, parents_street_number, parents_group, parents_phone,
+                    photo, fingerprints, signature)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (name, age, department, salary, position_id, joining_date, status, branch, user_id,
+                 phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+                 employees_height, ethnicity, nationality, religion, family_status, place_of_birth, permanent_address, village,
+                 commune, district, province, home_number, street_number, group_name,
+                 personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+                 knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id, employment_date,
+                 khmer_nationality_identity_card, passing_test_date, residence_book_or_family_book, made_on, have_a_number_of_children,
+                 father_name, mother_name, father_status, father_occupation, mother_occupation, mother_status,
+                 father_permanent_address, mother_permanent_address, parents_village, parents_commune, parents_district,
+                 parents_province, parents_home_number, parents_street_number, parents_group, parents_phone, photo_data, fingerprints_data, signature_data)
+            )
+            conn.commit()
+
+        # Redirect to employee list after successful insertion
+        return redirect(url_for('profile', user_id=current_user.id))
+
+    # Render the form to add a new employee with necessary context
+    return render_template('employees/add_employee_profile.html', branches=branches, users=users, positions=positions, departments=departments)
 
 
 # @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])

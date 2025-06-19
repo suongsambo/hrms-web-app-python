@@ -1,11 +1,40 @@
 {% extends 'base.html' %} {% block content %}
 <div class="container mx-auto px-4 py-8">
   <!-- Cards Section -->
+  <h1
+    class="text-4xl font-extrabold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-500 to-pink-500 drop-shadow-lg">
+    🚀 Dashboard Overview
+  </h1>
+  {% if not current_user.employee_id %}
+  <div role="alert"
+    class="alert alert-warning shadow-lg rounded-xl border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 p-4 my-4 relative">
+    <div class="flex items-start space-x-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500 mt-1" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01M5.06 19h13.88c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.72 3z" />
+      </svg>
+      <div>
+        <h3 class="font-semibold text-lg">Complete Your Employee Profile</h3>
+        <p class="text-sm mb-2">
+          Your account is not yet linked to an employee record. To access features, please complete your employee
+          profile.
+        </p>
+
+        <a href="{{ url_for('add_employee_profile') }}"
+          class="btn btn-sm bg-yellow-500 text-white hover:bg-yellow-600 transition">
+          Complete Now
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+
   <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
     <!-- Total Employees Card -->
     <div
-      class="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
-    >
+      class="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-lg font-medium opacity-80">Total Employees</h3>
@@ -17,8 +46,7 @@
 
     <!-- Employees on Leave Today Card -->
     <div
-      class="bg-gradient-to-r from-orange-400 to-orange-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
-    >
+      class="bg-gradient-to-r from-orange-400 to-orange-600 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-lg font-medium opacity-80">On Leave Today</h3>
@@ -30,8 +58,7 @@
 
     <!-- Total Payroll Card -->
     <div
-      class="bg-gradient-to-r from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
-    >
+      class="bg-gradient-to-r from-green-500 to-green-700 text-white p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
       <div class="flex items-center justify-between">
         <div>
           <h3 class="text-lg font-medium opacity-80">Total Payroll</h3>
@@ -45,9 +72,7 @@
   <!-- User Information and Online Users Section -->
   <div class="grid grid-cols-1 gap-8">
     <!-- User Information Card -->
-    <div
-      class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300"
-    >
+    <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300">
       <div class="flex items-center space-x-4 mb-6">
         <i class="fas fa-user-circle text-5xl text-blue-600"></i>
         <h3 class="text-2xl font-bold text-gray-800">Your Profile</h3>

@@ -48,26 +48,40 @@
     {% endif %}
 
     <!-- Menu EM -->
-    {% if current_user.role_default == 20 %} {% include
-    "partials/employee_menu.html" %} {% endif %}
+    {% if current_user.role_default == 20 %}
+    {% if current_user.employee_id %}
+    {% include "partials/employee_menu.html" %}
+    {% endif %}
+    {% endif %}
 
     <!-- Menu CCC  -->
-    {% if current_user.role_default == 35 %} {% include
-    "partials/ccc_menus.html" %} {% include "partials/ccc_request_menu.html"
-    %}
+    {% if current_user.role_default == 35 %}
+    {% if current_user.employee_id %}
+    {% include "partials/ccc_menus.html" %}
+    {% include "partials/ccc_request_menu.html" %}
     <!-- {% include "partials/chat_menu.html" %} -->
 
     {% endif %}
+    {% endif %}
 
     <!-- Menu PM -->
-    {% if current_user.role_default == 140 %} {% include
-    "partials/pm_menus.html" %} {% include "partials/pm_request_menu.html" %}
+    {% if current_user.role_default == 140 %}
+
+    {% if current_user.employee_id %}
+    {% include "partials/pm_request_menu.html" %}
+    {% include "partials/pm_menus.html" %}
+    {% endif %}
     {% endif %}
 
     <!-- Menu SPM -->
-    {% if current_user.role_default == 145 %} {% include
-    "partials/spm_menus.html" %} {% include "partials/spm_request_menu.html"
-    %} {% endif %}
+    {% if current_user.role_default == 145 %}
+
+    {% if current_user.employee_id %}
+    {% include "partials/spm_menus.html" %}
+    {% include "partials/spm_request_menu.html"
+    %}
+    {% endif %}
+    {% endif %}
 
     <!-- Menu SPM -->
     {% if current_user.role_default == 160 %} {% include

@@ -8,13 +8,39 @@ content %}
     🚀 Dashboard Overview
   </h1>
 
+  {% if not current_user.employee_id %}
+  <div role="alert"
+    class="alert alert-warning shadow-lg rounded-xl border-l-4 border-yellow-400 bg-yellow-50 text-yellow-800 p-4 my-4 relative">
+    <div class="flex items-start space-x-3">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-500 mt-1" fill="none" viewBox="0 0 24 24"
+        stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M12 9v2m0 4h.01M5.06 19h13.88c1.54 0 2.5-1.67 1.73-3L13.73 4c-.77-1.33-2.69-1.33-3.46 0L3.34 16c-.77 1.33.19 3 1.72 3z" />
+      </svg>
+      <div>
+        <h3 class="font-semibold text-lg">Complete Your Employee Profile</h3>
+        <p class="text-sm mb-2">
+          Your account is not yet linked to an employee record. To access features, please complete your employee
+          profile.
+        </p>
+
+        <a href="{{ url_for('add_employee_profile') }}"
+          class="btn btn-sm bg-yellow-500 text-white hover:bg-yellow-600 transition">
+          Complete Now
+        </a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+
   {% if current_user.role_default == 20 %}
 
   <body>
     <div class="container mt-5">
       <h2 class="text-center">Employee Dashboard</h2>
 
-      {% if employee %}
+      <!-- {% if employee %}
       <div class="card p-4 shadow mt-4">
         <h4>{{ employee.Name }}</h4>
         <p><strong>ID:</strong> {{ employee.ID }}</p>
@@ -26,45 +52,12 @@ content %}
       <div class="alert alert-warning mt-4 text-center">
         Employee not found.
       </div>
-      {% endif %}
+      {% endif %} -->
     </div>
   </body>
-  {% endif %} {% if current_user.is_admin == 1 %}
+  {% endif %}
 
-  <!-- Summary Cards -->
-  <!-- <div class="grid grid-cols-6 gap-4 mb-6">
-    <div class="bg-white rounded shadow p-4">
-      <h2 class="text-lg font-bold mb-2">Total Users</h2>
-      <p class="text-2xl font-bold">{{ total_users }}</p>
-    </div>
-    <div class="bg-white rounded shadow p-4">
-      <h2 class="text-lg font-bold mb-2">Total Branch</h2>
-      <p class="text-2xl font-bold">{{ total_branches }}</p>
-    </div>
-    <div class="bg-white rounded shadow p-4">
-      <h2 class="text-lg font-bold mb-2">Total Employees</h2>
-      <p class="text-2xl font-bold">{{ total_employees }}</p>
-    </div>
-    <div class="bg-white rounded shadow p-4">
-      <h2 class="text-lg font-bold mb-2">Average Age</h2>
-      <p class="text-2xl font-bold">
-        {{ average_age is not none and "%.2f"|format(average_age) }}
-      </p>
-    </div>
-    <div class="bg-white rounded shadow p-4">
-      <h2 class="text-lg font-bold mb-2">Total Salary</h2>
-      <p class="text-2xl font-bold">
-        {{ total_salary is not none and "$%.2f"|format(total_salary) }}
-      </p>
-    </div>
-
-    <div class="bg-white rounded shadow p-4">
-      <h2 class="text-lg font-bold mb-2">Total Leaves Today</h2>
-      <p class="text-2xl font-bold">
-        {{ total_leaves }}
-      </p>
-    </div>
-  </div> -->
+  {% if current_user.is_admin == 1 %}
 
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
     {% set cards = [ {'title': 'Total Users', 'value': total_users, 'icon':
