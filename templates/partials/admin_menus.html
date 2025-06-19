@@ -121,29 +121,31 @@
     </div>
 </div>
 
-<!-- Menu Backup -->
+
+<!-- Menu Branch -->
 <div class="relative z-10">
-    <button @click="activeMenu = activeMenu === 'backup' ? '' : 'backup'"
+    <button @click="activeMenu = activeMenu === 'branch' ? '' : 'branch'"
         class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-        <span class="material-symbols-outlined">save</span>
-        <span class="ml-2">{{ _('Backup') }}</span>
+        <span class="material-symbols-outlined">store</span>
+        <span class="ml-2">{{ _('Branch') }}</span>
         <span class="ml-2">&#9662;</span>
     </button>
-    <div x-show="activeMenu === 'backup'" @click.away="activeMenu = ''"
+    <div x-show="activeMenu === 'branch'" @click.away="activeMenu = ''"
         class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
-        <a href="/backups"
+        <a href="/branches/add"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">save</span>
-            <span>{{ _('Manage Backup') }}</span>
+            <span class="material-symbols-outlined">add_business</span>
+            <span>{{ _('Add Branch') }}</span>
         </a>
-
-        <a href="/restore_local"
+        <a href="/branches"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">restore</span>
-            <span>{{ _('Restore Local') }}</span>
+            <span class="material-symbols-outlined">business</span>
+            <span>{{ _('Manage Branches') }}</span>
         </a>
     </div>
 </div>
+
+
 
 <!-- Menu Zones -->
 <div class="relative z-10">
@@ -168,28 +170,6 @@
     </div>
 </div>
 
-<!-- Menu Branch -->
-<div class="relative z-10">
-    <button @click="activeMenu = activeMenu === 'branch' ? '' : 'branch'"
-        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-        <span class="material-symbols-outlined">store</span>
-        <span class="ml-2">{{ _('Branch') }}</span>
-        <span class="ml-2">&#9662;</span>
-    </button>
-    <div x-show="activeMenu === 'branch'" @click.away="activeMenu = ''"
-        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
-        <a href="/branches/add"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">add_business</span>
-            <span>{{ _('Add Branch') }}</span>
-        </a>
-        <a href="/branches"
-            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
-            <span class="material-symbols-outlined">business</span>
-            <span>{{ _('Manage Branches') }}</span>
-        </a>
-    </div>
-</div>
 
 
 
@@ -237,6 +217,31 @@
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
             <span class="material-symbols-outlined">event</span>
             <span>{{ _('Manage Leaves') }}</span>
+        </a>
+    </div>
+</div>
+
+
+<!-- Menu Backup -->
+<div class="relative z-10">
+    <button @click="activeMenu = activeMenu === 'backup' ? '' : 'backup'"
+        class="flex items-center hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 p-2 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+        <span class="material-symbols-outlined">save</span>
+        <span class="ml-2">{{ _('Backup') }}</span>
+        <span class="ml-2">&#9662;</span>
+    </button>
+    <div x-show="activeMenu === 'backup'" @click.away="activeMenu = ''"
+        class="absolute top-full left-1/2 transform -translate-x-1/2 min-w-[250px] bg-gray-800 p-4 rounded-lg shadow-lg transition-all duration-300">
+        <a href="/backups"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">save</span>
+            <span>{{ _('Manage Backup') }}</span>
+        </a>
+
+        <a href="/restore_local"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">restore</span>
+            <span>{{ _('Restore Local') }}</span>
         </a>
     </div>
 </div>
