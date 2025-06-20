@@ -4,36 +4,39 @@ content %}
   <form action="{{ url_for('add_employee_profile') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
     <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-4">
       <h2 class="text-lg font-semibold uppercase tracking-wide">
-        Complete Employee Profile
+        បំពេញប្រវត្តិរូបបុគ្គលិក (Complete Employee Profile)
       </h2>
     </div>
 
     <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
-      🧑‍💼 Employment Information
+      🧑‍💼 ព័ត៌មានអំពីការងារ (Employment Information)
     </h2>
     <!-- TODO: one -->
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
       <!-- Name Field -->
       <div>
-        <label for="name" class="block text-sm font-medium text-gray-700">Name:</label>
+        <label for="name" class="block text-sm font-medium text-gray-700">នាមត្រកូល និងនាមខ្លួន (Full Name):</label>
         <div class="mt-2 relative">
-          <input type="text" id="name" name="name" required
+          <input type="text" id="name" placeholder="​ចាន់ រដ្ឋា" name="name" required
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
+
+
+
 
       <!-- Age Field -->
       <div>
-        <label for="age" class="block text-sm font-medium text-gray-700">Age:</label>
+        <label for="age" class="block text-sm font-medium text-gray-700">អាយុ (Age):</label>
         <div class="mt-2 relative">
-          <input type="number" id="age" name="age" required min="18" max="99"
+          <input type="number" id="age" name="age" required min="18" max="99" placeholder="25"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <div>
-        <label for="department" class="block text-sm font-medium text-gray-700">Department:</label>
+        <label for="department" class="block text-sm font-medium text-gray-700">នាយកដ្ឋាន (Department):</label>
         <div class="mt-2 relative">
           <select id="department" name="department" required
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -47,7 +50,7 @@ content %}
 
       <!-- Position Field -->
       <div>
-        <label for="position" class="block text-sm font-medium text-gray-700">Position:</label>
+        <label for="position" class="block text-sm font-medium text-gray-700">មុខតំណែង (Position):</label>
         <div class="mt-2 relative">
           <select id="position" name="position_id" required
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -63,18 +66,19 @@ content %}
 
       <!-- Joining Date Field -->
       <div>
-        <label for="joining_date" class="block text-sm font-medium text-gray-700">Joining Date:</label>
+        <label for="joining_date" class="block text-sm font-medium text-gray-700">កាលបរិច្ឆេទចូលបម្រើការងារ (Joining
+          Date):</label>
         <div class="mt-2 relative">
-          <input type="date" id="joining_date" name="joining_date" required
+          <input type="date" id="joining_date" name="joining_date" required placeholder="2023-01-01"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Phone Number Field -->
       <div>
-        <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number:</label>
+        <label for="phone_number" class="block text-sm font-medium text-gray-700">លេខទូរស័ព្ទ (Phone Number):</label>
         <div class="mt-2 relative">
-          <input type="text" id="phone_number" name="phone_number" required
+          <input type="text" id="phone_number" name="phone_number" required placeholder="0123456789"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
@@ -90,7 +94,7 @@ content %}
 
       <!-- Branch Field -->
       <div>
-        <label for="branch" class="block text-sm font-medium text-gray-700">Branch:</label>
+        <label for="branch" class="block text-sm font-medium text-gray-700"> បម្រើការងារនៅ (Branch):</label>
         <div class="mt-2 relative">
           <input type="text" id="branch" name="branch" value="{{ current_user.branch }}" readonly
             class="mt-1 bg-gray-100 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed"
@@ -109,7 +113,7 @@ content %}
       </div>
       <!-- Email Field -->
       <div class="lg:col-span-2">
-        <label for="email" class="block text-sm font-medium text-gray-700">Email:</label>
+        <label for="email" class="block text-sm font-medium text-gray-700">អ៊ីមែល (Email):</label>
         <div class="mt-2 relative">
           <input type="email" id="email" name="email" value="{{ current_user.email }}" readonly
             class="mt-1 block bg-gray-100 w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 cursor-not-allowed hover:cursor-not-allowed" />
@@ -118,7 +122,7 @@ content %}
 
       <!-- Address Field -->
       <div class="lg:col-span-4">
-        <label for="address" class="block text-sm font-medium text-gray-700">Address:</label>
+        <label for="address" class="block text-sm font-medium text-gray-700">អាស័យដ្ឋាន (Address):</label>
         <div class="mt-2 relative">
           <textarea id="address" name="address"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
@@ -128,7 +132,7 @@ content %}
     </div>
 
     <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
-      🚨 Emergency & Personal Information
+      🚨 ព័ត៌មានផ្ទាល់ខ្លួន និងការទំនាក់ទំនងបន្ទាន់ Emergency & Personal Information
     </h2>
 
     <!-- TODO: tow -->
@@ -136,48 +140,50 @@ content %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <!-- Emergency Contact Name Field -->
       <div>
-        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">Emergency Contact
-          Name:</label>
+        <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">ឈ្មោះទំនាក់ទំនងបន្ទាន់​
+          (Emergency Contact Name):</label>
         <div class="mt-2 relative">
           <input type="text" id="emergency_contact_name" name="emergency_contact_name"
+            placeholder="ឈ្មោះទំនាក់ទំនងបន្ទាន់"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Emergency Contact Phone Field -->
       <div>
-        <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700">Emergency Contact
-          Phone:</label>
+        <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700">ទូរស័ព្ទទំនាក់ទំនងបន្ទាន់​
+          (Emergency Contact Phone):</label>
         <div class="mt-2 relative">
           <input type="text" id="emergency_contact_phone" name="emergency_contact_phone"
+            placeholder="ទូរស័ព្ទទំនាក់ទំនងបន្ទាន់"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Salary Field -->
       <div>
-        <label for="salary" class="block text-sm font-medium text-gray-700">Salary:</label>
+        <label for="salary" class="block text-sm font-medium text-gray-700">ប្រាក់ខែ​ (Salary):</label>
         <div class="mt-2 relative">
-          <input type="number" id="salary" name="salary" step="0.01"
+          <input type="number" id="salary" name="salary" step="0.01" placeholder="250"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Height Field -->
       <div>
-        <label for="employees_height" class="block text-sm font-medium text-gray-700">Height:</label>
+        <label for="employees_height" class="block text-sm font-medium text-gray-700">កម្ពស់​​​ (Height):</label>
         <div class="mt-2 relative">
-          <input type="number" id="employees_height" name="employees_height" step="0.01"
+          <input type="number" id="employees_height" name="employees_height" step="0.01" placeholder="1.70"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Ethnicity Field as Select -->
       <div>
-        <label for="ethnicity" class="block text-sm font-medium text-gray-700">Ethnicity:</label>
+        <label for="ethnicity" class="block text-sm font-medium text-gray-700">ជាតិសាសន៍ (Ethnicity):</label>
         <div class="mt-2 relative">
           <select id="ethnicity" name="ethnicity"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="">Select Ethnicity</option>
             <option value="khmer">Khmer</option>
             <option value="chinese">Chinese</option>
@@ -192,10 +198,10 @@ content %}
 
       <!-- Nationality Field as Select -->
       <div>
-        <label for="nationality" class="block text-sm font-medium text-gray-700">Nationality:</label>
+        <label for="nationality" class="block text-sm font-medium text-gray-700">សញ្ជាតិ (Nationality):</label>
         <div class="mt-2 relative">
           <select id="nationality" name="nationality"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="">Select Nationality</option>
             <option value="cambodian">Cambodian</option>
             <option value="thai">Thai</option>
@@ -213,10 +219,10 @@ content %}
 
       <!-- Religion Field as Select -->
       <div>
-        <label for="religion" class="block text-sm font-medium text-gray-700">Religion:</label>
+        <label for="religion" class="block text-sm font-medium text-gray-700">សាសនា (Religion):</label>
         <div class="mt-2 relative">
-          <select id="religion" name="religion"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+          <select id="religion" name="religion" required
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="">Select Religion</option>
             <option value="buddhism">Buddhism</option>
             <option value="christianity">Christianity</option>
@@ -232,7 +238,8 @@ content %}
 
       <!-- Family Status Field -->
       <div>
-        <label for="family_status" class="block text-sm font-medium text-gray-700">Family Status:</label>
+        <label for="family_status" class="block text-sm font-medium text-gray-700">ស្ថានភាពគ្រួសារ (Family
+          Status):</label>
         <div class="mt-2 relative">
           <select id="family_status" name="family_status"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -246,81 +253,86 @@ content %}
 
       <!-- Place of Birth Field -->
       <div>
-        <label for="place_of_birth" class="block text-sm font-medium text-gray-700">Place of Birth:</label>
+        <label for="place_of_birth" class="block text-sm font-medium text-gray-700">ទីកន្លែងកំណើត (Place of
+          Birth):</label>
         <div class="mt-2 relative">
-          <input type="text" id="place_of_birth" name="place_of_birth"
+          <input type="text" id="place_of_birth" name="place_of_birth" required placeholder="Phnom Penh"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Permanent Address Field -->
       <div>
-        <label for="permanent_address" class="block text-sm font-medium text-gray-700">Permanent Address:</label>
+        <label for="permanent_address" class="block text-sm font-medium text-gray-700">អាស័យដ្ឋានអចិន្ត្រៃយ៍ (Permanent
+          Address):</label>
         <div class="mt-2 relative">
-          <input type="text" id="permanent_address" name="permanent_address"
+          <input type="text" id="permanent_address" name="permanent_address" required placeholder="Phnom Penh"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Village Field -->
       <div>
-        <label for="village" class="block text-sm font-medium text-gray-700">Village:</label>
+        <label for="village" class="block text-sm font-medium text-gray-700">
+          ភូមិ (Village):</label>
         <div class="mt-2 relative">
-          <input type="text" id="village" name="village"
+          <input type="text" id="village" name="village" required placeholder="Phnom Penh"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Commune Field -->
       <div>
-        <label for="commune" class="block text-sm font-medium text-gray-700">Commune:</label>
+        <label for="commune" class="block text-sm font-medium text-gray-700">
+          ឃុំ / សង្កាត់ (Commune):</label>
         <div class="mt-2 relative">
-          <input type="text" id="commune" name="commune"
+          <input type="text" id="commune" name="commune" required placeholder="Phnom Penh"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- District Field -->
       <div>
-        <label for="district" class="block text-sm font-medium text-gray-700">District:</label>
+        <label for="district" class="block text-sm font-medium text-gray-700"> ក្រុង / ស្រុក​ ​/ ខណ្ឌ
+          (District):</label>
         <div class="mt-2 relative">
-          <input type="text" id="district" name="district"
+          <input type="text" id="district" name="district" required placeholder="Phnom Penh"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Province Field -->
       <div>
-        <label for="province" class="block text-sm font-medium text-gray-700">Province:</label>
+        <label for="province" class="block text-sm font-medium text-gray-700">​រាធានី / ខេត្ត​ (Province):</label>
         <div class="mt-2 relative">
-          <input type="text" id="province" name="province"
+          <input type="text" id="province" name="province" required placeholder="Phnom Penh"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Home Number Field -->
       <div>
-        <label for="home_number" class="block text-sm font-medium text-gray-700">Home Number:</label>
+        <label for="home_number" class="block text-sm font-medium text-gray-700">លេខ​ផ្ទះ (Home Number):</label>
         <div class="mt-2 relative">
-          <input type="text" id="home_number" name="home_number"
+          <input type="text" id="home_number" name="home_number" placeholder="180"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Street Number Field -->
       <div>
-        <label for="street_number" class="block text-sm font-medium text-gray-700">Street Number:</label>
+        <label for="street_number" class="block text-sm font-medium text-gray-700">លេខផ្លូវ (Street Number):</label>
         <div class="mt-2 relative">
-          <input type="text" id="street_number" name="street_number"
+          <input type="text" id="street_number" name="street_number" placeholder="P11"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Group Name Field -->
       <div>
-        <label for="group_name" class="block text-sm font-medium text-gray-700">Group Name:</label>
+        <label for="group_name" class="block text-sm font-medium text-gray-700">ឈ្មោះក្រុម (Group Name):</label>
         <div class="mt-2 relative">
-          <input type="text" id="group_name" name="group_name"
+          <input type="text" id="group_name" name="group_name" placeholder="ឈ្មោះក្រុម"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
@@ -329,41 +341,42 @@ content %}
     <!-- TODO: three -->
 
     <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
-      📄 Personal & Employment Details
+      📄 ព័ត៌មានផ្ទាល់ខ្លួន និងការងារ (Personal & Employment Details)
     </h2>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <!-- Personal Phone Number Field -->
       <div>
-        <label for="personal_phone_number" class="block text-sm font-medium text-gray-700">Personal Phone
-          Number:</label>
+        <label for="personal_phone_number" class="block text-sm font-medium text-gray-700">
+          លេខទូរស័ព្ទផ្ទាល់ខ្លួន (Personal Phone Number):</label>
         <div class="mt-2 relative">
-          <input type="text" id="personal_phone_number" name="personal_phone_number"
+          <input type="text" id="personal_phone_number" name="personal_phone_number" placeholder="0123456789"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Level of Culture Field -->
       <div>
-        <label for="level_of_culture" class="block text-sm font-medium text-gray-700">Level of Culture:</label>
+        <label for="level_of_culture" class="block text-sm font-medium text-gray-700">កម្រិតវប្បធម៌ (Level of
+          Culture):</label>
         <div class="mt-2 relative">
           <select id="level_of_culture" name="level_of_culture"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="bachelor_degree">-- Select One --</option>
-            <option value="diploma_degree">Diploma Degree</option>
-            <option value="bachelor_degree">Bachelor Degree</option>
-            <option value="master_degree">Master Degree</option>
-            <option value="doctor">Doctor</option>
+            <option value="diploma_degree">សញ្ញាប័ត្រ (Diploma Degree)</option>
+            <option value="bachelor_degree">បរិញ្ញាបត្រ (Bachelor Degree)</option>
+            <option value="master_degree">ថ្នាក់អនុបណ្ឌិត (Master Degree)</option>
+            <option value="doctor">សញ្ញាបត្របណ្ឌិត (Doctor Degree)</option>
           </select>
         </div>
       </div>
 
       <!-- Skill Field as Select -->
       <div>
-        <label for="skill" class="block text-sm font-medium text-gray-700">Skill:</label>
+        <label for="skill" class="block text-sm font-medium text-gray-700">ជំនាញ (Skill):</label>
         <div class="mt-2 relative">
           <select id="skill" name="skill"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="">Select Skill</option>
             <option value="driving">Driving</option>
             <option value="computer">Computer</option>
@@ -390,8 +403,8 @@ content %}
 
       <!-- Name of Educational Institution Field -->
       <div>
-        <label for="name_of_educational_institution" class="block text-sm font-medium text-gray-700">Name of Educational
-          Institution:</label>
+        <label for="name_of_educational_institution" class="block text-sm font-medium text-gray-700">
+          ឈ្មោះស្ថាប័នអប់រំ (Name of Educational Institution):</label>
         <div class="mt-2 relative">
           <input type="text" id="name_of_educational_institution" name="name_of_educational_institution"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
@@ -401,11 +414,11 @@ content %}
       <!-- Knowledge of Foreign Languages Field (as select) -->
       <div>
         <label for="knowledge_of_foreign_languages" class="block text-sm font-medium text-gray-700">
-          Knowledge of Foreign Languages:
+          ភាសា ( Languages):
         </label>
         <div class="mt-2 relative">
           <select id="knowledge_of_foreign_languages" name="knowledge_of_foreign_languages"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="">Select Language</option>
             <option value="khmer">Khmer</option>
             <option value="english">English</option>
@@ -416,16 +429,18 @@ content %}
 
       <!-- Current Function Field -->
       <div>
-        <label for="current_function" class="block text-sm font-medium text-gray-700">Current Function:</label>
+        <label for="current_function" class="block text-sm font-medium text-gray-700">មុខងារបច្ចុប្បន្ន (Current
+          Function):</label>
         <div class="mt-2 relative">
-          <input type="text" id="current_function" name="current_function"
+          <input type="text" id="current_function" name="current_function" placeholder="IT Support"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- ID Card Number Field -->
       <div>
-        <label for="id_card_number" class="block text-sm font-medium text-gray-700">ID Card Number:</label>
+        <label for="id_card_number" class="block text-sm font-medium text-gray-700">លេខអត្តសញ្ញាណប័ណ្ណ (ID Card
+          Number):</label>
         <div class="mt-2 relative">
           <input type="text" id="id_card_number" name="id_card_number"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
@@ -434,10 +449,10 @@ content %}
 
       <!-- Work At Field as Select -->
       <div>
-        <label for="work_at" class="block text-sm font-medium text-gray-700">Work At:</label>
+        <label for="work_at" class="block text-sm font-medium text-gray-700">ធ្វើការនៅ (Work At):</label>
         <div class="mt-2 relative">
           <select id="work_at" name="work_at"
-            class="block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-700">
+            class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="">Select Work Location</option>
             <option value="BanteayMeanchey">Banteay Meanchey</option>
             <option value="Battambang">Battambang</option>
@@ -470,16 +485,18 @@ content %}
 
       <!-- Employment ID Field -->
       <div>
-        <label for="employment_id" class="block text-sm font-medium text-gray-700">Employment ID:</label>
+        <label for="employment_id" class="block text-sm font-medium text-gray-700">លេខសម្គាល់ការងារ (Employment
+          ID):</label>
         <div class="mt-2 relative">
-          <input type="text" id="employment_id" name="employment_id"
+          <input type="text" id="employment_id" name="employment_id" placeholder="HQ-24" required
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
       </div>
 
       <!-- Employment Date Field -->
       <div>
-        <label for="employment_date" class="block text-sm font-medium text-gray-700">Employment Date:</label>
+        <label for="employment_date" class="block text-sm font-medium text-gray-700">កាលបរិច្ឆេទការងារ (Employment
+          Date):</label>
         <div class="mt-2 relative">
           <input type="text" id="employment_date" name="employment_date"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
@@ -488,8 +505,8 @@ content %}
 
       <!-- Khmer Nationality Identity Card Field -->
       <div>
-        <label for="khmer_nationality_identity_card" class="block text-sm font-medium text-gray-700">Khmer Nationality
-          Identity Card:</label>
+        <label for="khmer_nationality_identity_card" class="block text-sm font-medium text-gray-700">អត្តសញ្ញាណប័ណ្ណ
+          សញ្ជាតិខ្មែរ (Khmer Nationality Identity Card):</label>
         <div class="mt-2 relative">
           <input type="text" id="khmer_nationality_identity_card" name="khmer_nationality_identity_card"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
@@ -501,55 +518,57 @@ content %}
 
     <section class="mb-6">
       <h2 class="text-lg sm:text-xl font-semibold text-blue-600 mb-4 border-b border-blue-300 pb-2">
-        🏡 Family Information
+        🏡 ព័ត៌មានគ្រួសារ (Family Information)
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         <!-- Passing Test Date -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Passing Test Date</label>
+          <label class="block text-sm font-medium text-gray-700">កា​បរិច្ឆេទបញ្ជាប់ការសាកល្បងការងារ (Passing Test):
+            Passing Test Date</label>
           <input type="date" name="passing_test_date"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Residence Book or Family Book -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Residence Book / Family Book</label>
+          <label class="block text-sm font-medium text-gray-700">សៀវភៅស្នាក់នៅ / សៀវភៅគ្រួសារ​ (Residence Book or Family
+            Book)</label>
           <input type="text" name="residence_book_or_family_book" placeholder="Book number or details"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Made On -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Made On</label>
-          <input type="year" name="made_on"
+          <label class="block text-sm font-medium text-gray-700">ធ្វើនៅថ្ងៃទី (Made On):</label>
+          <input type="year" name="made_on" placeholder="2020-01-01"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Number of Children -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Number of Children</label>
+          <label class="block text-sm font-medium text-gray-700">ចំនួនកូនរបស់អ្នក (Number of Children):</label>
           <input type="number" name="have_a_number_of_children" min="0"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Father Name -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Father's Name</label>
+          <label class="block text-sm font-medium text-gray-700">ឈ្មោះឪពុក (Father's Name):</label>
           <input type="text" name="father_name"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Mother Name -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Mother's Name</label>
+          <label class="block text-sm font-medium text-gray-700">ឈ្មោះម្តាយ (Mother's Name):</label>
           <input type="text" name="mother_name"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Father Status -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Father Status</label>
+          <label class="block text-sm font-medium text-gray-700">ស្ថានភាពឪពុក (Father's Status):</label>
           <select name="father_status"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="alive">Alive</option>
@@ -559,7 +578,7 @@ content %}
 
         <!-- Mother Status -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Mother Status</label>
+          <label class="block text-sm font-medium text-gray-700">ស្ថានភាពម្តាយ (Mother's Status):</label>
           <select name="mother_status"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="alive" selected>Alive</option>
@@ -569,84 +588,86 @@ content %}
 
         <!-- Father Occupation -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Father's Occupation</label>
+          <label class="block text-sm font-medium text-gray-700">មុខរបររបស់ឪពុក (Father's Occupation):</label>
           <input type="text" name="father_occupation"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Mother Occupation -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Mother's Occupation</label>
+          <label class="block text-sm font-medium text-gray-700">មុខរបររបស់ម្តាយ (Mother's Occupation):</label>
           <input type="text" name="mother_occupation"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Father Permanent Address -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Father's Permanent Address</label>
+          <label class="block text-sm font-medium text-gray-700">អាស័យដ្ឋានអចិន្ត្រៃយ៍របស់ឪពុក (Father's Permanent
+            Address):</label>
           <input type="text" name="father_permanent_address"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Mother Permanent Address -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Mother's Permanent Address</label>
+          <label class="block text-sm font-medium text-gray-700">អាស័យដ្ឋានអចិន្ត្រៃយ៍របស់ម្តាយ (Mother's Permanent
+            Address):</label>
           <input type="text" name="mother_permanent_address"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Village -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents Village</label>
+          <label class="block text-sm font-medium text-gray-700">ភូមិឪពុកម្តាយ (Parents Village):</label>
           <input type="text" name="parents_village"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Commune -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents Commune</label>
+          <label class="block text-sm font-medium text-gray-700">ឃុំឪពុកម្តាយ (Parents Commune):</label>
           <input type="text" name="parents_commune"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents District -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents District</label>
+          <label class="block text-sm font-medium text-gray-700">ស្រុកឪពុកម្តាយ (Parents District):</label>
           <input type="text" name="parents_district"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Province -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents Province</label>
+          <label class="block text-sm font-medium text-gray-700">ខេត្តឪពុកម្តាយ (Parents Province):</label>
           <input type="text" name="parents_province"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Home Number -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents Home Number</label>
+          <label class="block text-sm font-medium text-gray-700">លេខផ្ទះឪពុកម្តាយ (Parents Home Number):</label>
           <input type="text" name="parents_home_number"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Street Number -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents Street Number</label>
+          <label class="block text-sm font-medium text-gray-700">លេខផ្លូវឪពុកម្តាយ (Parents Street Number):</label>
           <input type="text" name="parents_street_number"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Group -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents Group</label>
+          <label class="block text-sm font-medium text-gray-700">ក្រុមឪពុកម្តាយ (Parents Group):</label>
           <input type="text" name="parents_group"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
 
         <!-- Parents Phone -->
         <div>
-          <label class="block text-sm font-medium text-gray-700">Parents Phone</label>
+          <label class="block text-sm font-medium text-gray-700">ទូរស័ព្ទឪពុកម្តាយ (Parents Phone):</label>
           <input type="text" name="parents_phone"
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" />
         </div>
