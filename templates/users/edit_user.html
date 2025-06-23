@@ -74,7 +74,7 @@ Edit User
       </div>
 
       <!-- Role Select Field -->
-      <div class="flex flex-col">
+      <!-- <div class="flex flex-col">
         <label for="role_default" class="block text-lg font-medium text-gray-700">Select Role</label>
         <div class="relative">
           <select id="role_default" name="role_default"
@@ -108,6 +108,39 @@ Edit User
             <option value="100">OWNER</option>
           </select>
         </div>
+      </div> -->
+
+      <div>
+        <label for="role_default" class="block text-sm font-medium text-gray-700">Select Role</label>
+        <select id="role_default" name="role_default"
+          class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          <option value="" disabled selected hidden>Select Role</option>
+          <option value="1">GUEST</option>
+          <!-- <option value="10">CUSTOMER</option>  -->
+          <!-- <option value="15">NONE</option> -->
+          <option value="20">Employee</option>
+          <option value="25">TELLER</option>
+          <option value="30">CC</option>
+          <option value="35">CCC</option>
+          <option value="140">BM</option>
+          <option value="145">SPM</option>
+          <option value="140">PMS</option>
+          <option value="150">HQS</option>
+          <option value="160">HRD</option>
+          <option value="165">CS</option>
+          <option value="170">HD</option>
+          <option value="175">DGM</option>
+          <option value="180">GM</option>
+          <option value="190">CB</option>
+          <option value="200">CRD</option>
+          <option value="300">OPD</option>
+          <option value="400">TRD</option>
+          <option value="500">FND</option>
+          <option value="600">HRD</option>
+          <option value="700">ITD</option>
+          <option value="1000">ADMIN</option>
+
+        </select>
       </div>
 
       <!-- Is Admin Checkbox -->

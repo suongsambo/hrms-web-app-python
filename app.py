@@ -2069,6 +2069,122 @@ def leaves_by_gm():
     )
 
 
+# @app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
+# @login_required
+# def leaves_by_department_crd(branch_name):
+#     if current_user.role_default == 200 and current_user.branch and current_user.branch != branch_name:
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif current_user.role_default != 200:
+#         return redirect(url_for('access_denied'))
+
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     query = '''
+#         SELECT
+#             l.id,
+#             l.requested_by AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by,
+#             l.requested_by_roles,
+#             l.requested_from
+
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE (
+#             l.branch = ?
+#             ANDl.requested_from  == 'CRD'
+#             AND l.requested_by_roles != 140
+#             AND l.requested_by_roles != 145
+
+#             AND (
+#                 l.category != 'L'
+#                 OR l.category IS NULL
+#                 OR l.type_of_leave = 'H'
+#                 OR (
+#                     l.category = 'S' AND l.verified_by IS NOT NULL
+#                 )
+#                 OR (
+#                     l.category = 'M' AND (
+#                         l.verified_by IS NULL OR l.requested_by_roles = 35
+#                     )
+#                 )
+#             )
+#         )
+#         ORDER BY l.start_date DESC;
+#     '''
+
+#     params = (branch_name,)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     return render_template('leaves/leaves_deparment_crd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_crd(branch_name):
+    if current_user.role_default == 200 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+    elif current_user.role_default != 200:
+        return redirect(url_for('access_denied'))
+
+    app.logger.debug(f"Filtering by branch: {branch_name}")
+
+    query = '''
+        SELECT
+            l.id,
+            l.requested_by AS employee_name,
+            l.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by,
+            l.requested_by_roles,
+            l.requested_from
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE
+            l.branch = ?
+            AND l.requested_from = 'CRD'
+        ORDER BY l.start_date DESC;
+    '''
+
+    params = (branch_name,)
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        app.logger.error(f"Database error: {e}")
+        return "An error occurred while retrieving data. Please try again later.", 500
+
+    return render_template('leaves/leaves_department_crd.html', leaves=leaves, branch_name=branch_name)
+
+
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
 @login_required
 def filter_leaves_by_branch_name(branch_name):
@@ -5558,9 +5674,9 @@ def login():
             WHERE UserName = ? AND Password = ?
         ''', (username, password)).fetchone()
 
-        department = conn.execute('''
-            SELECT Department FROM employees WHERE user_id = ?
-        ''', (user['ID'],)).fetchone()
+        # department = conn.execute('''
+        #     SELECT Department FROM employees WHERE user_id = ?
+        # ''', (user['ID'],)).fetchone()
 
     if not user:
         flash("Invalid username or password", 'error')
@@ -5577,11 +5693,11 @@ def login():
     # Get employee ID if exists
     with get_db_connection() as conn:
         employee = conn.execute('''
-            SELECT id FROM employees WHERE user_id = ?
+            SELECT id , department FROM employees WHERE user_id = ?
         ''', (user['ID'],)).fetchone()
         employee_id = employee['id'] if employee else None
         print("Fetched Employee ID:", employee_id)
-        # department = employee['department'] if employee else None
+        department = employee['department'] if employee else None
 
         # Log login
         conn.execute('''
@@ -6395,7 +6511,15 @@ def dashboard():
     if role in [140, 35]:
         branch = getattr(current_user, 'branch', None)
         if branch:
-            return redirect(url_for('render_dashboard_branch_manager', branch_name=branch))
+            return redirect(url_for('render_dashboard_branch_manager', branch_name=branch), code=302)
+        else:
+            flash("Branch information is missing.", "danger")
+            return render_template('access_denied.html')
+
+    if role == 200:
+        branch = getattr(current_user, 'branch', None)
+        if branch:
+            return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
         else:
             flash("Branch information is missing.", "danger")
             return render_template('access_denied.html')
@@ -6414,50 +6538,6 @@ def dashboard():
     # Fallback
     flash("Access denied: You do not have permission to view this page.", "danger")
     return render_template('access_denied.html')
-
-
-# @app.route('/dashboard')
-# @login_required
-# def dashboard():
-#     role = getattr(current_user, 'role_default', None)
-#     user_id = current_user.id
-
-#     # Admin Dashboard
-#     if getattr(current_user, 'is_admin', False):
-#         return render_dashboard(user_id)
-
-#     # Role-based dashboards
-#     dashboard_routes = {
-#         145: 'spm_dashboard',
-#         160: 'hrd_dashboard',
-#         180: 'gm_dashboard',
-#         140: 'render_dashboard_branch_manager',
-#         35:  'render_dashboard_branch_manager',
-#         20: 'render_dashboard_employees'  # Added role 20 route
-#     }
-
-#     # Employee (requires employee ID lookup)
-#     if role == 20:
-#         # Assuming you want a specific page for role 20
-#         # Check if there's a specific dashboard for role 20
-#         return redirect(url_for('render_dashboard_employees'))
-
-#     # Role-based dashboards redirection
-#     if role in dashboard_routes:
-#         return redirect(url_for(dashboard_routes[role]))
-
-#     # Branch Manager (requires branch info)
-#     if role in [140, 35]:
-#         branch = getattr(current_user, 'branch', None)
-#         if branch:
-#             return redirect(url_for('render_dashboard_branch_manager', branch_name=branch))
-#         else:
-#             flash("Branch information is missing.", "danger")
-#             return render_template('access_denied.html')
-
-#     # Fallback
-#     flash("Access denied: You do not have permission to view this page.", "danger")
-#     return render_template('access_denied.html')
 
 
 @app.route('/gm/dashboard')
@@ -6706,6 +6786,132 @@ def spm_dashboard():
     }
 
     return render_template('/dashboard/spm_dashboard.html', data=data)
+
+
+# @app.route('/dashboard/hq/<string:branch_name>')
+# @login_required
+# def render_dashboard_hq(branch_name):
+#     today = date.today()
+
+#     with get_db_connection() as conn:
+#         # Fetch all employees in the branch
+#         employees = conn.execute(
+#             """
+#             SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch,
+#                    p.PositionName AS Position,
+#                    d.Name AS Department
+#             FROM employees e
+#             LEFT JOIN positions p ON e.position_id = p.ID
+#             LEFT JOIN departments d ON p.department_id = d.ID
+#             WHERE e.Branch = ?
+#             """,
+#             (branch_name,)
+#         ).fetchall()
+
+#         if not employees:
+#             flash("No employees found in this branch!", "danger")
+#             return redirect(url_for('dashboard'))
+
+#         # Count employees in the branch
+#         employee_count = len(employees)
+
+#         # Count employees on leave today
+#         employees_on_leave_today = conn.execute(
+#             """
+#             SELECT COUNT(*)
+#             FROM leaves l
+#             JOIN employees e ON l.employee_id = e.ID
+#             WHERE e.Branch = ?
+#               AND ? BETWEEN l.start_date AND l.end_date
+#               AND l.status = 'Approved'
+#             """,
+#             (branch_name, today)
+#         ).fetchone()[0]
+
+#         # Prepare employee data for rendering
+#         employee_data = [
+#             {
+#                 'ID': emp['ID'],
+#                 'Name': emp['Name'],
+#                 'Age': emp['Age'],
+#                 'Salary': emp['Salary'],
+#                 'Branch': emp['Branch'],
+#                 'Position': emp['Position'],
+#                 'Department': emp['Department']
+#             }
+#             for emp in employees
+#         ]
+
+#         return render_template(
+#             'employees/hq_dashboard.html',
+#             employees=employee_data or [],
+#             employees_in_branch=employee_count or 0,
+#             employees_on_leave_today=employees_on_leave_today or 0
+#         )
+
+
+@app.route('/dashboard/hq/<string:branch_name>')
+@login_required
+def render_dashboard_hq(branch_name):
+    today = date.today()
+
+    with get_db_connection() as conn:
+        # Fetch all employees in the branch
+        employees = conn.execute(
+            """
+            SELECT e.ID, e.Name, e.Age, e.Salary, e.Branch, 
+                   p.PositionName AS Position, 
+                   d.Name AS Department
+            FROM employees e
+            LEFT JOIN positions p ON e.position_id = p.ID
+            LEFT JOIN departments d ON p.department_id = d.ID
+            WHERE e.Branch = ?
+            """,
+            (branch_name,)
+        ).fetchall()
+
+        # Handle case where no employees are found
+        if not employees:
+            flash(f"No employees found in branch '{branch_name}'.", "warning")
+            # ensure 'dashboard' route exists
+            return redirect(url_for('dashboard'))
+
+        # Count total employees
+        employee_count = len(employees)
+
+        # Count employees on approved leave today
+        employees_on_leave_today = conn.execute(
+            """
+            SELECT COUNT(*)
+            FROM leaves l
+            JOIN employees e ON l.employee_id = e.ID
+            WHERE e.Branch = ?
+              AND ? BETWEEN l.start_date AND l.end_date
+              AND l.status = 'Approved'
+            """,
+            (branch_name, today)
+        ).fetchone()[0] or 0
+
+        # Format data for the template
+        employee_data = [
+            {
+                'ID': emp['ID'],
+                'Name': emp['Name'],
+                'Age': emp['Age'],
+                'Salary': emp['Salary'],
+                'Branch': emp['Branch'],
+                'Position': emp['Position'],
+                'Department': emp['Department']
+            }
+            for emp in employees
+        ]
+
+        return render_template(
+            'employees/hq_dashboard.html',
+            employees=employee_data,
+            employees_in_branch=employee_count,
+            employees_on_leave_today=employees_on_leave_today
+        )
 
 
 @app.route('/dashboard/branch_manager/<string:branch_name>')

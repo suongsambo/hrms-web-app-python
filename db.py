@@ -385,6 +385,16 @@ def init_db():
             )
         ''')
 
+        # Add requested_from column to leaves table
+        # Check if the checked column exists in the leaves table
+        columns = conn.execute('PRAGMA table_info(leaves)').fetchall()
+        column_names = [column[1] for column in columns]
+        if 'checked' not in column_names:
+            conn.execute('''
+                ALTER TABLE leaves
+                ADD COLUMN checked INTEGER DEFAULT 0;
+            ''')
+
         # Check if the user 'bo' exists
         user_exists = conn.execute(
             "SELECT 1 FROM users WHERE UserName = 'bo'").fetchone()
@@ -545,7 +555,7 @@ def init_db():
                 VALUES (?, ?, ?, ?, ?, ?, ?)
             ''', ('cb', hashed_password, 'cb@example.com', '010655037', 0, 190, 'SYS'))
 
-        # Create IT user
+        # Define departments
         departments = [
             ("HRD", "Human Resources Department"),
             ("CRD", "Credit Department"),
@@ -553,40 +563,38 @@ def init_db():
             ("FND", "Finance Department"),
             ("TRD", "Treasury Department"),
             ("ITD", "Information Technology Department"),
-            ("Branch.Position", "Branch Position")
+            ("None.Department", "CEO")
         ]
 
-        # Loop through each department
+        # Create departments if they don't already exist
         for department_name, description in departments:
-            # Check if the department already exists
             department_exists = conn.execute(
-                "SELECT 1 FROM departments WHERE Name = ?", (department_name,)).fetchone()
+                "SELECT 1 FROM departments WHERE Name = ?", (department_name,)
+            ).fetchone()
 
-            # If the department doesn't exist, insert it
             if not department_exists:
                 conn.execute('''
                     INSERT INTO departments (Name, Description)
                     VALUES (?, ?)
                 ''', (department_name, description))
-                print(f'Department {department_name} added successfully!')
+                print(f"Department {department_name} added successfully!")
 
-        branch_name = "Branch.Position"  # You can loop through multiple branches if needed
+        # ✅ Define the function outside the loop
 
-        position_suffixes = ["SPM", "RM", "PM",
-                             "CCC", "SCC", "LRO", "CC", "Teller"]
+        def add_positions(department_code, manager_count=5, staff_count=5):
+            dept_row = conn.execute(
+                "SELECT ID FROM departments WHERE Name = ?", (department_code,)
+            ).fetchone()
 
-        # Get department/branch ID
-        branch_id_row = conn.execute(
-            "SELECT ID FROM departments WHERE Name = ?", (branch_name,)
-        ).fetchone()
+            if not dept_row:
+                print(f"Department '{department_code}' not found!")
+                return
 
-        if branch_id_row:
-            department_id = branch_id_row[0]
+            department_id = dept_row[0]
 
-            for suffix in position_suffixes:
-                position_name = f"{branch_name}.{suffix}"
-
-                # Check if position already exists
+            # Add Manager positions
+            for i in range(1, manager_count + 1):
+                position_name = f"{department_code}.Manager.{i:02}"
                 position_exists = conn.execute(
                     "SELECT 1 FROM positions WHERE PositionName = ?", (
                         position_name,)
@@ -596,12 +604,33 @@ def init_db():
                     conn.execute('''
                         INSERT INTO positions (PositionName, Description, department_id)
                         VALUES (?, ?, ?)
-                    ''', (position_name, f'{suffix} role under {branch_name}', department_id))
+                    ''', (position_name, f"Manager role #{i} under {department_code}", department_id))
+
+            # Add Staff positions
+            for i in range(1, staff_count + 1):
+                position_name = f"{department_code}.Staff.{i:02}"
+                position_exists = conn.execute(
+                    "SELECT 1 FROM positions WHERE PositionName = ?", (
+                        position_name,)
+                ).fetchone()
+
+                if not position_exists:
+                    conn.execute('''
+                        INSERT INTO positions (PositionName, Description, department_id)
+                        VALUES (?, ?, ?)
+                    ''', (position_name, f"Staff role #{i} under {department_code}", department_id))
 
             conn.commit()
-            print("Positions added successfully.")
-        else:
-            print(f"Branch '{branch_name}' not found in departments.")
+            print(
+                f"{department_code} Manager and Staff positions added successfully.")
+
+       # ✅ Add positions for selected departments
+        add_positions("HRD", manager_count=1, staff_count=5)
+        add_positions("CRD", manager_count=1, staff_count=5)
+        add_positions("OPD", manager_count=1, staff_count=5)
+        add_positions("FND", manager_count=1, staff_count=5)
+        add_positions("ITD", manager_count=1, staff_count=5)
+        add_positions("TRD", manager_count=1, staff_count=5)
 
         # Check if the 'HR Manager' position already exists
         position_exists = conn.execute(
@@ -616,6 +645,20 @@ def init_db():
                 INSERT INTO positions (PositionName, Description, department_id)
                 VALUES (?, ?, ?)
             ''', ('HR Manager', 'Responsible for managing human resources', department_id))
+
+        # Check if the 'CEO' position already exists
+        position_exists = conn.execute(
+            "SELECT 1 FROM positions WHERE PositionName = 'CEO'").fetchone()
+
+        if not position_exists:
+
+            department_id = conn.execute(
+                "SELECT ID FROM departments WHERE Name = 'None.Department'").fetchone()[0]
+
+            conn.execute('''
+                INSERT INTO positions (PositionName, Description, department_id)
+                VALUES (?, ?, ?)
+            ''', ('CEO', 'Chief Executive Officer', department_id))
 
         branch_exists = conn.execute(
             "SELECT 1 FROM branches WHERE Branch = 'SYS'").fetchone()
@@ -808,6 +851,81 @@ def init_db():
                     140,  # Adjust RoleDefault as needed
                     user['branch']
                 ))
+
+        # TODO CRD Staff
+        crd_staff_users = [
+            {'username': 'ITDSTF.01',
+                'email': 'itdstf_user_01@example.com', 'branch': 'HQ'},
+            {'username': 'CRDSTF.01',
+                'email': 'crdstf_user_01@example.com', 'branch': 'HQ'},
+            {'username': 'FNDDSTF.01',
+                'email': 'fnddstf_user_01@example.com', 'branch': 'HQ'},
+            {'username': 'TRDSTF.01',
+                'email': 'trdstf_user_01@example.com', 'branch': 'HQ'},
+            {'username': 'HRDSTF.01',
+                'email': 'hrdstf_user_01@example.com', 'branch': 'HQ'},
+            {'username': 'OPDSTF.01',
+                'email': 'opdstf_user_01@example.com', 'branch': 'HQ'}
+        ]
+
+        # Hash the password
+        hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+        # Create CRD Staff users
+        for user in crd_staff_users:
+            # Check if user already exists
+            cursor.execute("SELECT 1 FROM users WHERE UserName = ?",
+                           (user['username'],))
+            if not cursor.fetchone():
+                # Insert new user
+                cursor.execute('''
+                    INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    user['username'],
+                    hashed_password,
+                    user['email'],
+                    '010655037',
+                    0,
+                    20,
+                    user['branch']
+                ))
+
+    # TODO Department Managers
+    crd_staff_users = [
+        {'username': 'CRD.Manager', 'email': 'crd_manager@example.com', 'branch': 'HQ'},
+        {'username': 'HRD.Manager',  'email': 'hrd_manager@example.com',  'branch': 'HQ'},
+        {'username': 'OPD.Manager', 'email': 'ops_manager@example.com', 'branch': 'HQ'},
+        {'username': 'FND.Manager', 'email': 'fnd_manager@example.com', 'branch': 'HQ'},
+        {'username': 'TRD.Manager', 'email': 'trd_manager@example.com', 'branch': 'HQ'},
+        {'username': 'ITD.Manager', 'email': 'itd_manager@example.com', 'branch': 'HQ'}
+    ]
+
+    # Corresponding RoleDefaults for each manager
+    manager_roles = [200, 300, 400, 500, 600, 700]
+
+    # Hash the password
+    hashed_password = hashlib.sha256('1111'.encode()).hexdigest()
+
+    # Create users with manager roles
+    for user, role in zip(crd_staff_users, manager_roles):
+        # Check if user already exists
+        cursor.execute("SELECT 1 FROM users WHERE UserName = ?",
+                       (user['username'],))
+        if not cursor.fetchone():
+            # Insert new user
+            cursor.execute('''
+                INSERT INTO users (UserName, Password, Email, Mobile1, IsAdmin, RoleDefault, Branch)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                user['username'],
+                hashed_password,
+                user['email'],
+                '010655037',
+                0,
+                role,
+                user['branch']
+            ))
 
     conn.commit()
     conn.close()
