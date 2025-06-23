@@ -17,11 +17,16 @@ def load_user(user_id):
     with get_db_connection() as conn:
         user_data = conn.execute(
             'SELECT * FROM users WHERE ID = ?', (user_id,)).fetchone()
+
         if user_data:
             # Fetch the employee ID associated with the user
             employee = conn.execute(
                 'SELECT id FROM employees WHERE user_id = ?', (user_id,)).fetchone()
             employee_id = employee['id'] if employee else None
+
+            department = conn.execute(
+                'SELECT department FROM employees WHERE id = ?', (employee_id,)).fetchone()
+            department = department['department'] if department else None
 
             return User(
                 id=user_data['ID'],
@@ -33,6 +38,7 @@ def load_user(user_id):
                 role_default=user_data['RoleDefault'],
                 image_data=user_data['Image'],
                 employee_id=employee_id,
+                department=department,
                 zone_id=user_data['ZoneID']
             )
-        return None
+    return None

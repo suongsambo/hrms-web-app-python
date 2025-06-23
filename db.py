@@ -318,6 +318,7 @@ def init_db():
                 leave_hours REAL,
                 requested_by TEXT,
                 requested_by_roles INTEGER,
+                requested_from TEXT,
                 verified_by TEXT,
                 approved_by TEXT,
                 type_of_leave TEXT,

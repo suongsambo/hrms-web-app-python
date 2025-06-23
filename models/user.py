@@ -7,7 +7,7 @@ class User(UserMixin):
     def __init__(self, id: int, username: str, password: str, email: str,
                  branch: Optional[str] = None, employee_id: Optional[int] = None, is_admin: bool = False,
                  role_default: Optional[int] = 0, image_data: Optional[bytes] = None,
-                 zone_id: Optional[int] = None):
+                 zone_id: Optional[int] = None, department: Optional[str] = None):
         self.id = id
         self.username = username
         self.password = password
@@ -18,6 +18,7 @@ class User(UserMixin):
         self.role_default = role_default
         self.image_data = image_data
         self.zone_id = zone_id
+        self.department = department
 
     def get_id(self):
         """Override get_id method to work with Flask-Login."""

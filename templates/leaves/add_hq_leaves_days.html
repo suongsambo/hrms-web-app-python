@@ -10,16 +10,24 @@ content %}
   <div id="leaveModal" class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50">
     <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
       <div class="flex justify-between items-center">
-        <h2 class="text-xl font-bold">ពាក្យសុំច្បាប់ឈប់សម្រាក</h2>
+        <h2 class="text-xl font-bold">ពាក្យសុំច្បាប់ឈប់សម្រាក {{ current_user.branch }}</h2>
         <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-800">
           &times;
         </button>
       </div>
 
-      <form method="POST" action="{{ url_for('add_many_leave',  branch=branch) }}" class="space-y-4">
+      <form method="POST" action="{{ url_for('add_leave_days_hq',  branch=branch) }}" class="space-y-4">
         <div>
           <label for="branch" class="hidden">Branch</label>
           <input type="text" id="branch" name="branch" value="{{ current_user.branch }}" hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+
+        <div>
+          <label for="requested_from" class="block text-gray-700 text-sm font-medium">
+            Requested From
+          </label>
+          <input type="text" id="requested_from" name="requested_from" required value="{{ current_user.department }}"
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
         </div>
 

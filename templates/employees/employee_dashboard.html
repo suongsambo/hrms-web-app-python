@@ -12,6 +12,11 @@ block content %}
       </p>
     </div>
 
+    <li class="flex items-center gap-3">
+      <i class="fas fa-building text-blue-500 text-lg"></i>
+      <span><strong>Department:</strong> {{ current_user.department}}</span>
+    </li>
+
 
     {% if not current_user.employee_id %}
     <div role="alert"

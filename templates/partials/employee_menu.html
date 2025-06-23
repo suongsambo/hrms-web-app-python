@@ -14,11 +14,34 @@
             <span>Add Leave Hours</span>
         </a>
 
+        <!-- {% if current_user.branch == 'HQ' %}
+        <a href="/leave_days_hq/add/{{ current_user.branch }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_task</span>
+            <span>Add Leave Days</span>
+        </a>
+        {% endif %}
+
+        <a href="/leave_days/add/{{ current_user.branch }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_task</span>
+            <span>Add Leave Days</span>
+        </a> -->
+
+        {% if current_user.branch == 'HQ' %}
+        <a href="/leave_days_hq/add/{{ current_user.branch }}"
+            class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
+            <span class="material-symbols-outlined">add_task</span>
+            <span>Add Leave Days</span>
+        </a>
+        {% else %}
         <a href="/leave_many/add/{{ current_user.branch }}"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
             <span class="material-symbols-outlined">add_task</span>
             <span>Add Leave Days</span>
         </a>
+        {% endif %}
+
 
         <a href="/leaves"
             class="block p-2 hover:bg-gradient-to-r hover:from-indigo-600 hover:to-purple-600 rounded-lg transition-all duration-300 ease-in-out transform hover:scale-105">
