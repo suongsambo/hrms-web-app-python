@@ -42,7 +42,7 @@ content %}
             class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="" disabled selected>Select a Department</option>
             {% for department in departments %}
-            <option value="{{ department.id}}">{{ department.Name }}</option>
+            <option value="{{ department.Name}}">{{ department.Name }}</option>
             {% endfor %}
           </select>
         </div>

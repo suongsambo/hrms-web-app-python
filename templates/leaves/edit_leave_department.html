@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Leave{% endblock %}
+
+{% block content %}
+
+<body class="bg-gray-100 min-h-screen">
+
+    <div class="max-w-4xl mx-auto py-10 px-6 sm:px-8">
+        <!-- -->
+
+        <!-- Edit Leave Form -->
+        <form action="" method="POST" class="bg-white p-8 rounded-2xl shadow-md space-y-8">
+
+            <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-2">
+                <h2 class="text-lg font-semibold uppercase tracking-wide">
+                    Edit Leave Department
+                </h2>
+            </div>
+
+            <!-- Grid Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Leave Type</label>
+                    <input type="text" name="leave_type" value="{{ leave['leave_type'] }}" required
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Leave Count</label>
+                    <input type="number" name="service_count" value="{{ leave['service_count'] }}" required
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Start Date</label>
+                    <input type="date" name="start_date" value="{{ leave['start_date'] }}" required
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">End Date</label>
+                    <input type="date" name="end_date" value="{{ leave['end_date'] }}" required
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+
+
+            <!-- Approval Section
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Approved By (if applicable)</label>
+                    <input type="text" name="approved_by"
+                        value="{% if leave['service_count'] <= 2 %}{{ current_user.username }}{% elif 3 <= leave['service_count'] <= 5 %}{{ leave['approved_by'] or '' }}{% else %}{{ leave['approved_by'] or '' }}{% endif %}"
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Verified By (if applicable)</label>
+                    <input type="text" name="verified_by"
+                        value="{% if leave['service_count'] <= 2 %}{{ leave['verified_by'] or '' }}{% elif 3 <= leave['service_count'] <= 6 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div> -->
+
+
+            <!-- Approval Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Approved By -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Approved By (if applicable)</label>
+                    <input type="text" name="approved_by"
+                        value="{% if leave['service_count'] <= 2 %}{{ current_user.username }}{% else %}{{ leave['approved_by'] or '' }}{% endif %}"
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+
+                <!-- Verified By -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Verified By (if applicable)</label>
+                    <input type="text" name="verified_by"
+                        value="{% if leave['service_count'] >= 3 %}{{ current_user.username }}{% else %}{{ leave['verified_by'] or '' }}{% endif %}"
+                        class="mt-1 block w-full p-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </div>
+
+
+            <!-- Reason -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Reason</label>
+                <textarea name="reason" required
+                    class="mt-2 p-3 w-full border border-gray-300 rounded-md h-28 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500">{{ leave['reason'] }}</textarea>
+            </div>
+
+
+            <!-- Status Dropdown -->
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Status</label>
+                <select name="status"
+                    class="mt-2 p-3 w-full border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="Approved" selected>Approved</option>
+                    <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-start items-center space-x-4">
+                <button type="submit"
+                    class="bg-blue-500 text-white font-small px-4 py-2 rounded-lg hover:bg-blue-600 transition duration-200 flex items-center">
+                    <i class="fas fa-check mr-1"></i> Update
+                </button>
+                <a href="{{ url_for('view_leaves') }}"
+                    class="text-gray-700 font-small px-4 py-2 border border-gray-300 rounded-lg hover:text-blue-600 hover:border-blue-600 transition duration-200 flex items-center">
+                    <i class="fas fa-times mr-1"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+
+</body>
+{% endblock %}
