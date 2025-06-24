@@ -2032,7 +2032,8 @@ def leaves_by_gm():
             l.approved_by,
             l.leave_hours,
             l.service_count,
-            l.requested_by
+            l.requested_by,
+            l.requested_from
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
         WHERE
@@ -2052,9 +2053,14 @@ def leaves_by_gm():
                 (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
 
             )
-
+            OR (
+                l.requested_by_roles = 20 
+                AND l.category IN ('L', 'M')  
+                AND l.verified_by IS NOT NULL 
+                AND l.requested_from IS NOT NULL
+                AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+            )
     '''
-
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query).fetchall()
@@ -2167,9 +2173,22 @@ def leaves_by_department_crd(branch_name):
             l.requested_from
         FROM leaves l
         LEFT JOIN employees e ON l.employee_id = e.id
-        WHERE
+       WHERE
             l.branch = ?
             AND l.requested_from = 'CRD'
+            AND (
+                (
+                    l.requested_by_roles = 20 
+                    AND l.verified_by IS  NULL 
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                )
+                OR
+                (
+                    l.status = 'Pending'
+                    AND l.verified_by IS  NULL
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                )
+            )
         ORDER BY l.start_date DESC;
     '''
 
