@@ -1920,7 +1920,6 @@ def leaves_by_branch_and_spm():
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
-                
                 AND l.requested_by_roles IN (35, 140)
                 AND (
                     l.category = 'M'
@@ -1988,7 +1987,6 @@ def leaves_by_branch_and_hrd():
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
-             
                 AND (
                         (l.requested_by_roles = 140 AND l.category = 'L')
                         OR (l.requested_by_roles = 145 AND l.category = 'L')
@@ -2074,7 +2072,6 @@ def leaves_by_gm():
         employees=employees
     )
 
-
 # @app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
 # @login_required
 # def leaves_by_department_crd(branch_name):
@@ -2140,6 +2137,68 @@ def leaves_by_gm():
 #         return "An error occurred while retrieving data. Please try again later.", 500
 
 #     return render_template('leaves/leaves_deparment_crd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_itd(branch_name):
+    if current_user.role_default == 700 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+    elif current_user.role_default != 700:
+        return redirect(url_for('access_denied'))
+
+    app.logger.debug(f"Filtering by branch: {branch_name}")
+
+    query = '''
+        SELECT
+            l.id,
+            l.requested_by AS employee_name,
+            l.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by,
+            l.requested_by_roles,
+            l.requested_from
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+       WHERE
+            l.branch = ?
+            AND l.requested_from = 'ITD'
+            AND (
+                (
+                    l.requested_by_roles = 20 
+                    AND l.verified_by IS  NULL 
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                )
+                OR
+                (
+                    l.status = 'Pending'
+                    AND l.verified_by IS  NULL
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                )
+            )
+        ORDER BY l.start_date DESC;
+    '''
+
+    params = (branch_name,)
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        app.logger.error(f"Database error: {e}")
+        return "An error occurred while retrieving data. Please try again later.", 500
+
+    return render_template('leaves/leaves_department_itd.html', leaves=leaves, branch_name=branch_name)
 
 
 @app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
@@ -4349,6 +4408,53 @@ def edit_leave_department(id):
     return render_template('/leaves/edit_leave_department.html', leave=leave)
 
 
+@app.route('/leave_department/edit/itd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_itd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_itd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
 @app.route('/leave/edit/hours/ccc/<int:id>', methods=['GET', 'POST'])
 def edit_leave(id):
     with get_db_connection() as conn:
@@ -6526,7 +6632,25 @@ def dashboard():
             flash("Branch information is missing.", "danger")
             return render_template('access_denied.html')
 
-    if role == 200:
+    # if role == 200:
+    #     branch = getattr(current_user, 'branch', None)
+    #     if branch:
+    #         return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
+    #     else:
+    #         flash("Branch information is missing.", "danger")
+    #         return render_template('access_denied.html')
+
+    # if role == 700:
+    #     branch = getattr(current_user, 'branch', None)
+    #     if branch:
+    #         return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
+    #     else:
+    #         flash("Branch information is missing.", "danger")
+    #         return render_template('access_denied.html')
+
+    HQ_ROLES = {200, 700, 300, 400, 500, 600}  # Extend as needed
+
+    if role in HQ_ROLES:
         branch = getattr(current_user, 'branch', None)
         if branch:
             return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
