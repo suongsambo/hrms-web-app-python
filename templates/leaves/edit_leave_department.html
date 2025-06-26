@@ -94,7 +94,7 @@
                 <select name="status"
                     class="mt-2 p-3 w-full border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
                     <option value="Approved" selected>Approved</option>
-                    <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
+                    <option value="Rejected" {% if leave['status']=='Rejected' %}selected{% endif %}>Rejected</option>
                 </select>
             </div>
 
