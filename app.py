@@ -1,6 +1,6 @@
 from datetime import date
 from flask import (
-    Flask, render_template, request, redirect, url_for, flash,
+    Flask, current_app, render_template, request, redirect, url_for, flash,
     Response, session, send_from_directory, jsonify, send_file
 )
 
@@ -2074,12 +2074,15 @@ def leaves_by_gm():
 
 
 @app.route('/leave/edit/hours/department/<int:id>', methods=['GET', 'POST'])
+@login_required
 def edit_leave_hours_department(id):
-    current_department = current_user.department
+    current_department = current_user.branch or current_user.department
 
     with get_db_connection() as conn:
         leave = conn.execute(
-            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+            'SELECT * FROM leaves WHERE id = ?', (id,)
+        ).fetchone()
+
     if not leave:
         return "Leave record not found", 404
 
@@ -2089,11 +2092,10 @@ def edit_leave_hours_department(id):
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         reason = request.form['reason']
-        approved_by = request.form.get('approved_by')
+        approved_by = request.form.get('approved_by') or None
         status = request.form.get('status')
 
-        # status = "Pending"
-
+        # If type_of_leave is 'H', force status to Approved
         if type_of_leave == 'H':
             status = "Approved"
             approved_by = request.form['approved_by']
@@ -2110,10 +2112,74 @@ def edit_leave_hours_department(id):
                 approved_by,
                 start_date, end_date, id
             ))
+            conn.commit()
 
-        return redirect(url_for('view_leaves'))
+        # Redirect logic based on user role
+        if current_user.role_default == 700:
+            return redirect(url_for('leaves_by_department_itd', branch_name=current_department))
+        elif current_user.role_default == 200:
+            return redirect(url_for('leaves_by_department_crd', branch_name=current_department))
+        elif current_user.role_default == 400:
+            return redirect(url_for('leaves_by_department_opd', branch_name=current_department))
+        else:
+            return redirect(url_for('view_leaves'))  # fallback
 
     return render_template('/leaves/edit_leave_hours_dep.html', leave=leave)
+
+
+def fetch_leaves(branch_name, requested_from):
+    query = '''
+        SELECT
+            l.id,
+            l.requested_by AS employee_name,
+            l.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by,
+            l.requested_by_roles,
+            l.requested_from
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE
+            l.branch = ?
+            AND l.requested_from = ?
+            AND (
+                (
+                    l.requested_by_roles = 20
+                    AND l.verified_by IS NULL
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                    OR l.type_of_leave = 'H'
+                )
+                OR
+                (
+                    l.status = 'Pending'
+                    AND l.verified_by IS NULL
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                )
+            )
+        ORDER BY l.start_date DESC;
+    '''
+
+    params = (branch_name, requested_from)
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        current_app.logger.error(f"Database error: {e}")
+        return None, f"An error occurred while retrieving data: {e}"
+
+    return leaves, None
+
+
+# --- ITD Route ---
 
 
 @app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
@@ -2121,124 +2187,176 @@ def edit_leave_hours_department(id):
 def leaves_by_department_itd(branch_name):
     if current_user.role_default == 700 and current_user.branch and current_user.branch != branch_name:
         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
-
     elif current_user.role_default != 700:
         return redirect(url_for('access_denied'))
 
-    app.logger.debug(f"Filtering by branch: {branch_name}")
+    current_app.logger.debug(f"Filtering ITD by branch: {branch_name}")
 
-    query = '''
-        SELECT
-            l.id,
-            l.requested_by AS employee_name,
-            l.branch AS branch_name,
-            l.leave_type,
-            l.start_date,
-            l.end_date,
-            l.reason,
-            l.status,
-            l.type_of_leave,
-            l.verified_by,
-            l.approved_by,
-            l.leave_hours,
-            l.service_count,
-            l.requested_by,
-            l.requested_by_roles,
-            l.requested_from
-        FROM leaves l
-        LEFT JOIN employees e ON l.employee_id = e.id
-       WHERE
-            l.branch = ?
-            AND l.requested_from = 'ITD'
-            AND (
-                (
-                    l.requested_by_roles = 20 
-                    AND l.verified_by IS  NULL 
-                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
-                )
-                OR
-                (
-                    l.status = 'Pending'
-                    AND l.verified_by IS  NULL
-                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
-                )
-            )
-        ORDER BY l.start_date DESC;
-    '''
-
-    params = (branch_name,)
-
-    try:
-        with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
-    except sqlite3.DatabaseError as e:
-        app.logger.error(f"Database error: {e}")
-        return "An error occurred while retrieving data. Please try again later.", 500
-
+    leaves, error = fetch_leaves(branch_name, 'ITD')
+    if error:
+        return error, 500
     return render_template('leaves/leaves_department_itd.html', leaves=leaves, branch_name=branch_name)
 
 
+# --- CRD Route ---
 @app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_department_crd(branch_name):
     if current_user.role_default == 200 and current_user.branch and current_user.branch != branch_name:
         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
-
     elif current_user.role_default != 200:
         return redirect(url_for('access_denied'))
 
-    app.logger.debug(f"Filtering by branch: {branch_name}")
+    current_app.logger.debug(f"Filtering CRD by branch: {branch_name}")
 
-    query = '''
-        SELECT
-            l.id,
-            l.requested_by AS employee_name,
-            l.branch AS branch_name,
-            l.leave_type,
-            l.start_date,
-            l.end_date,
-            l.reason,
-            l.status,
-            l.type_of_leave,
-            l.verified_by,
-            l.approved_by,
-            l.leave_hours,
-            l.service_count,
-            l.requested_by,
-            l.requested_by_roles,
-            l.requested_from
-        FROM leaves l
-        LEFT JOIN employees e ON l.employee_id = e.id
-       WHERE
-            l.branch = ?
-            AND l.requested_from = 'CRD'
-            AND (
-                (
-                    l.requested_by_roles = 20 
-                    AND l.verified_by IS  NULL 
-                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
-                    OR l.type_of_leave  = 'H'
-                )
-                OR
-                (
-                    l.status = 'Pending'
-                    AND l.verified_by IS  NULL
-                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
-                )
-            )
-        ORDER BY l.start_date DESC;
-    '''
-
-    params = (branch_name,)
-
-    try:
-        with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
-    except sqlite3.DatabaseError as e:
-        app.logger.error(f"Database error: {e}")
-        return "An error occurred while retrieving data. Please try again later.", 500
+    leaves, error = fetch_leaves(branch_name, 'CRD')
+    if error:
+        return error, 500
 
     return render_template('leaves/leaves_department_crd.html', leaves=leaves, branch_name=branch_name)
+
+
+# --- OPD Route ---
+@app.route('/leaves/department/opd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_opd(branch_name):
+    if current_user.role_default == 400 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 400:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering OPD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'OPD')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_opd.html', leaves=leaves, branch_name=branch_name)
+
+# @app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
+# @login_required
+# def leaves_by_department_itd(branch_name):
+#     if current_user.role_default == 700 and current_user.branch and current_user.branch != branch_name:
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif current_user.role_default != 700:
+#         return redirect(url_for('access_denied'))
+
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     query = '''
+#         SELECT
+#             l.id,
+#             l.requested_by AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by,
+#             l.requested_by_roles,
+#             l.requested_from
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#        WHERE
+#             l.branch = ?
+#             AND l.requested_from = 'ITD'
+#             AND (
+#                 (
+#                     l.requested_by_roles = 20
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+#                     OR l.type_of_leave  = 'H'
+#                 )
+#                 OR
+#                 (
+#                     l.status = 'Pending'
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+#                 )
+#             )
+#         ORDER BY l.start_date DESC;
+#     '''
+
+#     params = (branch_name,)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     return render_template('leaves/leaves_department_itd.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
+# @login_required
+# def leaves_by_department_crd(branch_name):
+#     if current_user.role_default == 200 and current_user.branch and current_user.branch != branch_name:
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif current_user.role_default != 200:
+#         return redirect(url_for('access_denied'))
+
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     query = '''
+#         SELECT
+#             l.id,
+#             l.requested_by AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by,
+#             l.requested_by_roles,
+#             l.requested_from
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#        WHERE
+#             l.branch = ?
+#             AND l.requested_from = 'CRD'
+#             AND (
+#                 (
+#                     l.requested_by_roles = 20
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+#                     OR l.type_of_leave  = 'H'
+#                 )
+#                 OR
+#                 (
+#                     l.status = 'Pending'
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+#                 )
+#             )
+#         ORDER BY l.start_date DESC;
+#     '''
+
+#     params = (branch_name,)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     return render_template('leaves/leaves_department_crd.html', leaves=leaves, branch_name=branch_name)
 
 
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
@@ -4453,6 +4571,53 @@ def edit_leave_department_itd(id):
             ''', (leave_type, reason, status, approved_by, verified_by, id))
 
         return redirect(url_for('leaves_by_department_itd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+@app.route('/leave_department/edit/opd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_opd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_opd', branch_name=branch_name))
 
     return render_template('/leaves/edit_leave_department.html', leave=leave)
 

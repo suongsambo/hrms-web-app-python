@@ -78,18 +78,22 @@
     {% if current_user.role_default == 200 %}
 
     {% if current_user.employee_id %}
-    <!-- {% include "partials/pm_request_menu.html" %} -->
     {% include "partials/crd_menus.html" %}
     {% endif %}
     {% endif %}
 
 
-
     {% if current_user.role_default == 700 %}
 
     {% if current_user.employee_id %}
-    <!-- {% include "partials/pm_request_menu.html" %} -->
     {% include "partials/itd_menus.html" %}
+    {% endif %}
+    {% endif %}
+
+
+    {% if current_user.role_default == 400 %}
+    {% if current_user.employee_id %}
+    {% include "partials/opd_menus.html" %}
     {% endif %}
     {% endif %}
 

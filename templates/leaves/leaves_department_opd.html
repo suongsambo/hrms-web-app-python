@@ -1,8 +1,10 @@
-{% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}Manage Leave Department OPD{% endblock %} {% block
 content %}
 <div class="bg-gray-100 text-gray-800">
   <!-- Main Content -->
   <div class="container mx-auto mt-2 px-4">
+
+
     <div class="grid grid-cols-2 gap-4 items-center my-4">
       <!-- Print Button -->
       <div>
@@ -86,7 +88,7 @@ content %}
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
               {% elif leave.type_of_leave == 'D' %}
-              <a href="{{ url_for('edit_leave_department_itd', id=leave.id) }}"
+              <a href="{{ url_for('edit_leave_department_opd', id=leave.id) }}"
                 class="text-blue-600 hover:text-blue-900 flex items-center space-x-1">
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
@@ -125,12 +127,10 @@ content %}
           formatLeaveDatesAndHours();
         },
       });
-
       function formatLeaveDatesAndHours() {
         $(".leave-start-date").each(function () {
           var startDate = $(this).data("start");
-          var formattedStartDate =
-            moment(startDate).format("MM-DD-YYYY hh:mm A");
+          var formattedStartDate = moment(startDate).format("MM-DD-YYYY hh:mm A");
           $(this).text(formattedStartDate);
         });
 
@@ -162,9 +162,7 @@ content %}
             var overlapEnd = moment.min(endTime, lunchEnd);
 
             if (overlapEnd.isAfter(overlapStart)) {
-              var lunchOverlap = moment
-                .duration(overlapEnd.diff(overlapStart))
-                .asHours();
+              var lunchOverlap = moment.duration(overlapEnd.diff(overlapStart)).asHours();
               totalHours -= lunchOverlap;
             }
 
@@ -188,6 +186,7 @@ content %}
           }
         });
       }
+
       // Format the Start and End Dates using Moment.js
       $(".leave-start-date").each(function () {
         var startDate = $(this).data("start");
