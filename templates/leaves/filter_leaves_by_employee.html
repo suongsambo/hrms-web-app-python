@@ -69,7 +69,6 @@ endblock %} {% block content %}
             <td class="px-6 py-3">{{ leave.verified_by }}</td>
             <td class="px-6 py-3">{{ leave.approved_by }}</td>
 
-
             <td class="px-6 py-4 font-semibold">
               {% if leave['status'] == 'Approved' %}
               <div class="badge badge-primary">Approved</div>
@@ -151,20 +150,13 @@ endblock %} {% block content %}
           var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
           $(this).text(formattedEndDate);
         });
+
         $(".leave-hours").each(function () {
           var $row = $(this).closest("tr");
-          var serviceCountText = $row.find("td:nth-child(8)").text().trim(); // 8th td = service_count
-          var hoursText = $row.find("td:nth-child(9)").text().trim(); // 9th td = hours
-          if (serviceCountText !== "None Days") {
-            $(this).text("-");
-            return;
-          }
+          var branchName = $row.find("td:nth-child(3)").text().trim();
 
           var startDate = $(this).data("start");
           var endDate = $(this).data("end");
-
-          // Find the branch name from the same row
-          var branchName = $row.find("td:nth-child(3)").text().trim();
 
           var startTime = moment(startDate);
           var endTime = moment(endDate);
@@ -189,14 +181,19 @@ endblock %} {% block content %}
 
             totalHours = Math.max(totalHours, 0);
 
-            // Branch-based adjustment:
-            if (branchName === "HQ") {
-              totalHours = 8; // fixed 8h for HQ
+            // Check special case: if branch is HQ and value exactly 7.5
+            var roundedHours = Number(totalHours.toFixed(1));
+            var displayHours = "";
+
+            // Adjust for HQ specific cases
+            if (branchName === "HQ" && roundedHours === 7.5) {
+              displayHours = "8 Hours";
+            } else if (branchName === "HQ" && roundedHours == 3.5) {
+              displayHours = "4 Hours";
             } else {
-              totalHours = 7.5; // fixed 7.5h for others
+              displayHours = roundedHours.toFixed(1) + " Hours";
             }
 
-            var displayHours = totalHours.toFixed(1) + " H";
             $(this).text(displayHours);
           } else {
             $(this).text("Invalid dates");

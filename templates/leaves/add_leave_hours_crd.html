@@ -166,7 +166,8 @@ content %}
   <script>
     function closeModal() {
       document.getElementById("leaveModal").classList.add("hidden");
-      window.location.href = "{{ url_for('leaves_by_branch_and_pm_report', branch_name=branch) }}";
+      window.location.href =
+        "{{ url_for('leaves_by_branch_and_pm_report', branch_name=branch) }}";
     }
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -175,28 +176,25 @@ content %}
 
       // Set default values
       const startDefault = `${formattedDate} 08:00`;
-      const endDefault = `${formattedDate} 17:00`;
+      // const endDefault = `${formattedDate} 17:00`;
 
       // Set input values manually
       document.getElementById("start_date").value = startDefault;
-      document.getElementById("end_date").value = endDefault;
+      // document.getElementById("end_date").value = endDefault;
 
       flatpickr("#start_date", {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
         minDate: "today",
-        defaultDate: startDefault
+        defaultDate: startDefault,
       });
 
       flatpickr("#end_date", {
         enableTime: true,
         dateFormat: "Y-m-d H:i",
         minDate: "today",
-        defaultDate: endDefault
       });
     });
   </script>
-
-
 </body>
 {% endblock %}
