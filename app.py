@@ -2121,6 +2121,12 @@ def edit_leave_hours_department(id):
             return redirect(url_for('leaves_by_department_crd', branch_name=current_department))
         elif current_user.role_default == 400:
             return redirect(url_for('leaves_by_department_opd', branch_name=current_department))
+        elif current_user.role_default == 500:
+            return redirect(url_for('leaves_by_department_fnd', branch_name=current_department))
+        elif current_user.role_default == 300:
+            return redirect(url_for('leaves_by_department_hrd', branch_name=current_department))
+        elif current_user.role_default == 600:
+            return redirect(url_for('leaves_by_department_trd', branch_name=current_department))
         else:
             return redirect(url_for('view_leaves'))  # fallback
 
@@ -2232,6 +2238,58 @@ def leaves_by_department_opd(branch_name):
         return error, 500
 
     return render_template('leaves/leaves_department_opd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/fnd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_fnd(branch_name):
+    if current_user.role_default == 500 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 500:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering FND by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'FND')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_fnd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/hrd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_hrd(branch_name):
+    if current_user.role_default == 300 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 300:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering HRD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'HRD')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_hrd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/trd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_trd(branch_name):
+    if current_user.role_default == 600 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 600:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering TRD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'TRD')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_trd.html', leaves=leaves, branch_name=branch_name)
+
 
 # @app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
 # @login_required
@@ -4618,6 +4676,100 @@ def edit_leave_department_opd(id):
             ''', (leave_type, reason, status, approved_by, verified_by, id))
 
         return redirect(url_for('leaves_by_department_opd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+@app.route('/leave_department/edit/fnd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_fnd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_fnd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+@app.route('/leave_department/edit/hrd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_hrd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_hrd', branch_name=branch_name))
 
     return render_template('/leaves/edit_leave_department.html', leave=leave)
 
@@ -7981,6 +8133,79 @@ def search_employees():
     return render_template('/employees/employees.html', employees=employees)
 
 
+# @app.route('/employees/import', methods=['GET', 'POST'])
+# @login_required
+# def import_employees():
+#     if request.method == 'POST':
+#         f = request.files.get('excel_file')
+#         if not f or f.filename == '':
+#             flash('Please choose an Excel file.', 'error')
+#             return redirect(request.url)
+
+#         if not allowed_excel(f.filename):
+#             flash('Supported formats: .xlsx or .xls', 'error')
+#             return redirect(request.url)
+
+#         try:
+#             df = pd.read_excel(f)
+#         except Exception as e:
+#             flash(f'Could not read file: {e}', 'error')
+#             return redirect(request.url)
+
+#         required = [
+#             'name', 'age', 'department', 'salary', 'position_id', 'joining_date', 'status', 'branch', 'user_id',
+#             'phone_number', 'email', 'address', 'emergency_contact_name', 'emergency_contact_phone',
+#             'employees_height', 'ethnicity', 'nationality', 'religion', 'family_status', 'place_of_birth',
+#             'permanent_address', 'village', 'commune', 'district', 'province', 'home_number', 'street_number',
+#             'group_name', 'personal_phone_number', 'level_of_culture', 'skill', 'name_of_educational_institution',
+#             'knowledge_of_foreign_languages', 'current_function', 'id_card_number', 'work_at', 'employment_id',
+#             'employment_date', 'khmer_nationality_identity_card', 'passing_test_date', 'residence_book_or_family_book',
+#             'made_on', 'have_a_number_of_children', 'father_name', 'mother_name', 'father_status', 'father_occupation',
+#             'mother_occupation', 'mother_status', 'father_permanent_address', 'mother_permanent_address',
+#             'parents_village', 'parents_commune', 'parents_district', 'parents_province', 'parents_home_number',
+#             'parents_street_number', 'parents_group', 'parents_phone'
+#         ]
+
+#         missing = [c for c in required if c not in df.columns]
+#         if missing:
+#             flash(f'Missing columns: {", ".join(missing)}', 'error')
+#             return redirect(request.url)
+
+#         inserted, skipped = 0, 0
+#         with get_db_connection() as conn:
+#             for _, row in df.iterrows():
+#                 if pd.isna(row['name']) or pd.isna(row['department']):
+#                     skipped += 1
+#                     continue
+
+#                 jd = row['joining_date']
+#                 if isinstance(jd, (pd.Timestamp, datetime)):
+#                     jd = jd.date()
+
+#                 conn.execute("""
+#                     INSERT INTO employees (
+#                         name, age, department, salary, position_id, joining_date, status, branch, user_id,
+#                         phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+#                         employees_height, ethnicity, nationality, religion, family_status, place_of_birth,
+#                         permanent_address, village, commune, district, province, home_number, street_number,
+#                         group_name, personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+#                         knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id,
+#                         employment_date, khmer_nationality_identity_card, passing_test_date, residence_book_or_family_book,
+#                         made_on, have_a_number_of_children, father_name, mother_name, father_status, father_occupation,
+#                         mother_occupation, mother_status, father_permanent_address, mother_permanent_address,
+#                         parents_village, parents_commune, parents_district, parents_province, parents_home_number,
+#                         parents_street_number, parents_group, parents_phone
+#                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#                 """, tuple(row[col] for col in required))
+#                 inserted += 1
+#             conn.commit()
+
+#         flash(f'Imported {inserted} employees ({skipped} skipped).', 'success')
+#         return redirect(url_for('list_employees'))
+
+#     return render_template('employees/import.html')
+
+
 @app.route('/employees/import', methods=['GET', 'POST'])
 @login_required
 def import_employees():
@@ -8020,10 +8245,29 @@ def import_employees():
             return redirect(request.url)
 
         inserted, skipped = 0, 0
+        skipped_messages = []
+
         with get_db_connection() as conn:
-            for _, row in df.iterrows():
+            for idx, row in df.iterrows():
                 if pd.isna(row['name']) or pd.isna(row['department']):
                     skipped += 1
+                    skipped_messages.append(
+                        f"Row {idx + 2}: Missing name or department.")
+                    continue
+
+                # Check for duplicates
+                position_id = row['position_id']
+                user_id = row['user_id']
+                email = row['email']
+
+                exists = conn.execute("""
+                    SELECT id FROM employees WHERE position_id = ? OR user_id = ? OR email = ?
+                """, (position_id, user_id, email)).fetchone()
+
+                if exists:
+                    skipped += 1
+                    skipped_messages.append(
+                        f"Row {idx + 2}: position_id '{position_id}', user_id '{user_id}', or email '{email}' already exists.")
                     continue
 
                 jd = row['joining_date']
@@ -8046,9 +8290,14 @@ def import_employees():
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, tuple(row[col] for col in required))
                 inserted += 1
+
             conn.commit()
 
         flash(f'Imported {inserted} employees ({skipped} skipped).', 'success')
+        if skipped_messages:
+            for msg in skipped_messages:
+                flash(msg, 'warning')
+
         return redirect(url_for('list_employees'))
 
     return render_template('employees/import.html')

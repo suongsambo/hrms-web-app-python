@@ -90,12 +90,37 @@
     {% endif %}
     {% endif %}
 
+    {% if current_user.role_default == 600 %}
+
+    {% if current_user.employee_id %}
+    {% include "partials/trd_menus.html" %}
+    {% endif %}
+    {% endif %}
+
+
+
+    {% if current_user.role_default == 300 %}
+    {% if current_user.employee_id %}
+    {% include "partials/hrd_hq_menus.html" %}
+    {% endif %}
+    {% endif %}
+
+
+
 
     {% if current_user.role_default == 400 %}
     {% if current_user.employee_id %}
     {% include "partials/opd_menus.html" %}
     {% endif %}
     {% endif %}
+
+
+    {% if current_user.role_default == 500 %}
+    {% if current_user.employee_id %}
+    {% include "partials/fnd_menus.html" %}
+    {% endif %}
+    {% endif %}
+
 
     <!-- Menu SPM -->
     {% if current_user.role_default == 145 %}
