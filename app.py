@@ -1635,8 +1635,8 @@ def leaves_by_branch_and_ccc_dashboard(branch_name):
 # TODO: PM Report
 @app.route('/leaves/pm/report/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_pm_report(branch_name):
-    if not current_user.is_authenticated or current_user.role_default != 140:
-        return redirect(url_for('access_denied'))
+    # if not current_user.is_authenticated or current_user.role_default != 140:
+    #     return redirect(url_for('access_denied'))
 
     base_query = '''
         SELECT
