@@ -90,7 +90,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'signatures'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -251,8 +250,7 @@ def show_current_routes():
 
 @app.route('/qr/<int:leave_id>')
 def generate_qr_for_leave(leave_id):
-    # Data encoded in the QR (e.g., a verification URL or just the leave ID)
-    # You can use a URL or more detail here
+  
     data = f"http://172.104.60.81/print-leaves?ids={leave_id}"
     img = qrcode.make(data)
     img_io = BytesIO()
@@ -276,39 +274,6 @@ def print_leaves():
     placeholders = ','.join(['?'] * len(ids))
 
     with get_db_connection() as conn:
-        # Fetch leave data
-        # leaves = conn.execute(
-        #     f'''
-        #     SELECT
-        #         id,
-        #         employee_id,
-        #         leave_type,
-        #         start_date,
-        #         end_date,
-        #         reason,
-        #         start_date_obj,
-        #         end_date_obj,
-        #         excluded_days,
-        #         final_end_date,
-        #         service_count,
-        #         leave_hours,
-        #         requested_by,
-        #         requested_by_roles,
-        #         verified_by,
-        #         approved_by,
-        #         type_of_leave,
-        #         status,
-        #         spm_status,
-        #         dd_status,
-        #         manager_status,
-        #         branch,
-        #         category
-        #     FROM leaves
-        #     WHERE id IN ({placeholders})
-        #     ''',
-        #     ids
-        # ).fetchall()
-
         leaves = conn.execute(
             f'''
             SELECT
@@ -391,16 +356,13 @@ def print_leaves():
 year = datetime.now().year
 holidays = get_holidays(year)
 
-
 def get_locale():
     lang = request.args.get('lang')
     if lang in LANGUAGES:
         return lang
     return request.accept_languages.best_match(LANGUAGES)
 
-
 babel.init_app(app, locale_selector=get_locale)
-
 
 @app.context_processor
 def inject_locale():
@@ -506,9 +468,7 @@ def add_holiday():
 
 @app.route('/holidays')
 def show_holidays():
-    # Load holidays from the file
     holidays = load_holidays()
-    # Get holidays for the current year
     holidays = get_holidays(datetime.now().year)
     holiday_labels = get_holiday_labels(datetime.now().year)
     return render_template('holidays/holidays.html', holidays=holidays, holiday_labels=holiday_labels)
@@ -4772,6 +4732,55 @@ def edit_leave_department_hrd(id):
         return redirect(url_for('leaves_by_department_hrd', branch_name=branch_name))
 
     return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+
+@app.route('/leave_department/edit/trd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_trd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_trd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
 
 
 @app.route('/leave/edit/hours/ccc/<int:id>', methods=['GET', 'POST'])

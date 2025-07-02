@@ -3,10 +3,6 @@ content %}
 <div class="">
   <!-- Main Content -->
   <div class="container mx-auto mt-2 px-2">
-
-
-
-
     <div class="grid grid-cols-2 gap-4 items-center my-2">
       <!-- Print Button -->
       <div class="my-2">
@@ -70,16 +66,12 @@ content %}
             <td class="px-6 py-3 border-b">
               {% if leave.verified_by is none %}
               <span class="text-blue-500">Pending</span>
-              {% else %}
-              {{ leave.verified_by }}
-              {% endif %}
+              {% else %} {{ leave.verified_by }} {% endif %}
             </td>
             <td class="px-6 py-3 border-b">
               {% if leave.approved_by is none %}
               <span class="text-blue-500">Pending</span>
-              {% else %}
-              {{ leave.approved_by }}
-              {% endif %}
+              {% else %} {{ leave.approved_by }} {% endif %}
             </td>
             <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
