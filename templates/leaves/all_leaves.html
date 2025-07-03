@@ -1,142 +1,198 @@
-{% extends 'base.html' %} {% block title %}Leaves{% endblock %} {% block content
-%}
+{% extends 'base.html' %}
+{% block title %}Leaves{% endblock %}
+
+{% block content %}
 
 <body class="bg-gray-100 text-gray-900 font-sans">
+
+  <!-- Header -->
   <header class="bg-blue-600 text-white p-6 rounded-b-lg shadow-md">
-    <h1 class="text-3xl font-semibold">All Leave Records</h1>
+    <h1 class="text-3xl font-bold">All Leave Records</h1>
     <p class="mt-2 text-lg">Total Leave Days: {{ total_leave_days }}</p>
   </header>
 
-  <section class="p-1 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
-      Filter Leave Records
-    </h2>
-    <a href="{{ url_for('view_leaves') }}"
-      class="inline-block px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-300 flex items-center">
-      <i class="fas fa-arrow-left mr-2"></i> Back
-    </a>
-    <button onclick="window.location.reload()"
-      class="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition duration-300 flex items-center ml-4">
-      <i class="fas fa-sync-alt mr-2"></i> Refresh
-    </button>
+  <!-- Top Actions -->
+  <section class="p-4 max-w-7xl mx-auto flex flex-wrap justify-between items-center bg-white rounded-lg shadow mb-6">
+    <div class="flex gap-3">
+      <a href="{{ url_for('view_leaves') }}" class="btn btn-success">
+        <i class="fas fa-arrow-left mr-2"></i> Back
+      </a>
+      <button onclick="window.location.reload()" class="btn btn-info">
+        <i class="fas fa-sync-alt mr-2"></i> Refresh
+      </button>
+    </div>
   </section>
 
-  <section
-    class="p-1 pb-1 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300 mb-8 print:hidden">
-    <!-- Search & Filter Form -->
-    <form method="get" action="/leaves/all"
-      class="flex flex-col lg:flex-row justify-between items-center gap-4 flex-wrap">
+  <!-- Filter Form -->
+  <section class="p-6 max-w-7xl mx-auto bg-white rounded-xl shadow-lg mb-8 print:hidden">
+    <h2 class="text-2xl font-semibold text-center mb-4 text-indigo-600">Filter Leave Records</h2>
+    <form method="get" action="/leaves/all" class="flex flex-col lg:flex-row flex-wrap justify-between gap-4">
+
       <!-- Date Filters -->
-      <div class="flex items-center gap-2">
-        <label for="start_date" class="text-base text-gray-700 font-medium">Start Date</label>
+      <div class="flex flex-col sm:flex-row items-center gap-2">
+        <label for="start_date" class="text-base font-medium">Start Date</label>
         <input type="date" name="start_date" id="start_date" value="{{ start_date or '' }}"
-          class="px-4 py-2 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40" />
-
-        <span class="text-gray-500 font-semibold">to</span>
-
-        <label for="end_date" class="text-base text-gray-700 font-medium">End Date</label>
+          class="input input-bordered w-36" />
+        <span class="text-gray-500 hidden sm:inline">to</span>
+        <label for="end_date" class="text-base font-medium">End Date</label>
         <input type="date" name="end_date" id="end_date" value="{{ end_date or '' }}"
-          class="px-4 py-2 border border-indigo-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 w-40" />
+          class="input input-bordered w-36" />
       </div>
 
       <!-- Employee Search -->
-      <div class="flex items-center gap-4">
-        <label for="employee_name" class="text-base text-gray-700 font-medium">Employee</label>
+      <div class="flex flex-col sm:flex-row items-center gap-2">
+        <label for="employee_name" class="text-base font-medium">Employee</label>
         <input type="text" name="employee_name" id="employee_name" placeholder="Search by name"
-          value="{{ employee_name or '' }}"
-          class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 w-64" />
+          value="{{ employee_name or '' }}" class="input input-bordered w-60" />
       </div>
 
-      <!-- Submit Button -->
-      <div>
-        <button type="submit"
-          class="bg-indigo-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-indigo-700 transition transform hover:scale-105">
-          Apply Filters
-        </button>
+      <!-- Branch Filter -->
+      <div class="flex flex-col sm:flex-row items-center gap-2">
+        <label for="branch" class="text-base font-medium">Branch</label>
+        <select name="branch" id="branch" class="select select-bordered w-44">
+          <option value="">All Branches</option>
+          {% for b in branches %}
+          <option value="{{ b.Branch }}" {% if branch==b.Branch %}selected{% endif %}>{{ b.Branch }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-2 mt-2 lg:mt-0">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{{ url_for('get_all_leave_dates') }}" class="btn btn-neutral">Clear</a>
       </div>
     </form>
   </section>
 
-  <section
-    class="mt-1 p-2 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h2 class="text-2xl font-semibold text-center mb-2 text-indigo-600">
-      Print Leave Records
-    </h2>
-    <div class="flex justify-start gap-4">
-      <button onclick="printSection('print-branch-leave')"
-        class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+  <!-- Print Buttons -->
+  <section class="p-4 max-w-7xl mx-auto bg-white rounded-xl shadow mb-6">
+    <h2 class="text-2xl font-semibold text-center mb-4 text-indigo-600">Print Leave Records</h2>
+    <div class="flex flex-wrap justify-center gap-4">
+      <button onclick="printSection('print-branch-leave')" class="btn btn-success">
         <i class="fas fa-print mr-2"></i> Leave Count by Branch
       </button>
-
-      <button onclick="printSection('leave-summary-section')"
-        class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center">
+      <button onclick="printSection('leave-summary-section')" class="btn btn-success">
         <i class="fas fa-print mr-2"></i> Print Leave Summary
       </button>
-
-      <button onclick="printLeaveDetail()" class="mt-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
-        <i class="fas fa-print mr-2"></i> Print Leave Detail Summary
+      <button onclick="printLeaveDetail()" class="btn btn-success">
+        <i class="fas fa-print mr-2"></i> Print Leave Detail
       </button>
     </div>
   </section>
 
   <!-- Leave Type Summary -->
-  <section
-    class="mt-4 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
-      Leave Type Summary
-    </h2>
-    <table
-      class="min-w-full table-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-200 rounded-lg overflow-hidden shadow-md">
-      <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <tr>
-          <th class="px-6 py-4 text-left">Leave Type</th>
-          <th class="px-6 py-4 text-left">Count</th>
-          <th class="px-6 py-4 text-left">Total Leave Duration (Days)</th>
-        </tr>
-      </thead>
-      <tbody class="text-gray-700">
-        {% for leave_type, data in leave_type_count.items() %}
-        <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
-          <td class="px-6 py-4">{{ leave_type }}</td>
-          <td class="px-6 py-4">{{ data['count'] }}</td>
-          <td class="px-6 py-4">{{ data['total_days'] }} days</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
-
-  <section id="print-branch-leave"
-    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h4 class="text-2xl font-semibold text-gray-800 mb-4 border-b pb-2">
-      Leave Count by Branch
-    </h4>
+  <section class="p-6 max-w-7xl mx-auto bg-white rounded-xl shadow mb-8">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">Leave Type Summary</h2>
     <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-100">
+      <table id="leave-type-table" class="table w-full bg-base-100">
+        <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
           <tr>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-              Branch
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-              Number of Leaves
-            </th>
-            <th class="px-6 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-              Total Leave Days
-            </th>
+            <th>Leave Type</th>
+            <th>Count</th>
+            <th>Total Duration (Days)</th>
           </tr>
         </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
+        <tbody>
+          {% for leave_type, data in leave_type_count.items() %}
+          <tr class="hover:bg-indigo-50">
+            <td>{{ leave_type }}</td>
+            <td>{{ data['count'] }}</td>
+            <td>{{ data['total_days'] }} days</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Leave Count by Branch -->
+  <section id="print-branch-leave" class="p-6 max-w-7xl mx-auto bg-white rounded-xl shadow mb-8">
+    <h2 class="text-2xl font-semibold mb-4 border-b pb-2">Leave Count by Branch</h2>
+    <div class="overflow-x-auto">
+      <table id="branch-leave-table" class="table w-full bg-base-100">
+        <thead class="bg-gray-200">
+          <tr>
+            <th>Branch</th>
+            <th>Number of Leaves</th>
+            <th>Total Leave Days</th>
+          </tr>
+        </thead>
+        <tbody>
           {% for branch, data in branch_leave_count.items() %}
-          <tr class="hover:bg-gray-50 transition duration-150 ease-in-out">
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-medium">
-              {{ branch }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-              {{ data.leave_count }}
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-              {{ data.total_days }}
+          <tr class="hover:bg-gray-50">
+            <td>{{ branch }}</td>
+            <td>{{ data.leave_count }}</td>
+            <td>{{ data.total_days }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Leave Summary -->
+  <section id="leave-summary-section" class="p-6 max-w-7xl mx-auto bg-white rounded-xl shadow mb-8">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-600">Leave Summary</h2>
+    <div class="overflow-x-auto">
+      <table id="leave-summary-table" class=" table w-full bg-base-100">
+        <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+          <tr>
+            <th>Branch</th>
+            <th>Employee</th>
+            <th>Leave Type</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Days</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for leave in leaves %}
+          <tr class="hover:bg-indigo-50">
+            <td>{{ leave['branch'] }}</td>
+            <td>{{ leave['employee_name'] }}</td>
+            <td>{{ leave['leave_type'] }}</td>
+            <td>{{ leave['start_date'] }}</td>
+            <td>{{ leave['end_date'] }}</td>
+            <td>{{ leave['leave_days'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Leave Detail Summary -->
+  <section id="leave-detail-section" class="p-6 max-w-7xl mx-auto bg-white rounded-xl shadow mb-8">
+    <h2 class="text-2xl font-semibold text-center mb-6 text-indigo-700">Leave Detail Summary</h2>
+    <div class="overflow-x-auto">
+      <table id="leave-detail-table" class="table w-full bg-base-100">
+        <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+          <tr>
+            <th>Branch</th>
+            <th>Employee</th>
+            <th>Leave Type</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Days</th>
+            <th>Days List</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for leave in leaves %}
+          <tr class="hover:bg-indigo-50">
+            <td>{{ leave['branch'] }}</td>
+            <td>{{ leave['employee_name'] }}</td>
+            <td>{{ leave['leave_type'] }}</td>
+            <td>{{ leave['start_date'] }}</td>
+            <td>{{ leave['end_date'] }}</td>
+            <td>{{ leave['leave_days'] }}</td>
+            <td>
+              <ul class="space-y-1">
+                {% for day in leave['leave_day_list'] %}
+                <li class="text-sm text-gray-500">{{ day }}</li>
+                {% endfor %}
+              </ul>
             </td>
           </tr>
           {% endfor %}
@@ -145,80 +201,81 @@
     </div>
   </section>
 
-  <section id="leave-summary-section"
-    class="mt-8 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h4 class="text-2xl font-semibold text-center mb-6 text-indigo-600">
-      Leave Summary
-    </h4>
-    <table
-      class="min-w-full table-auto bg-gradient-to-r from-indigo-100 via-purple-100 to-indigo-200 rounded-lg overflow-hidden shadow-md">
-      <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <tr>
-          <th class="px-6 py-4 text-left">Branch</th>
-          <th class="px-6 py-4 text-left">Employee</th>
-          <th class="px-6 py-4 text-left">Leave Type</th>
-          <th class="px-6 py-4 text-left">Start Date</th>
-          <th class="px-6 py-4 text-left">End Date</th>
-          <th class="px-6 py-4 text-left">Leave Days</th>
-        </tr>
-      </thead>
-      <tbody class="text-gray-700">
-        {% for leave in leaves %}
-        <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
-          <td class="px-6 py-4">{{ leave['branch'] }}</td>
-          <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
-          <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
-          <td class="px-6 py-4">{{ leave['start_date'] }}</td>
-          <td class="px-6 py-4">{{ leave['end_date'] }}</td>
-          <td class="px-6 py-4">{{ leave['leave_days'] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
 
-  <!-- Leave Detail Records Table -->
-  <section id="leave-detail-section"
-    class="mt-4 p-6 max-w-6xl mx-auto bg-white rounded-lg shadow-xl hover:shadow-2xl transition-all duration-300">
-    <h4 class="text-2xl font-semibold text-center mb-6 text-indigo-700">
-      Leave Detail Summary
-    </h4>
-    <table class="min-w-full table-auto bg-white shadow-md rounded-lg overflow-hidden">
-      <thead class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <tr>
-          <th class="px-6 py-4 text-left">Branch</th>
-          <th class="px-6 py-4 text-left text-lg font-medium">Employee</th>
-          <th class="px-6 py-4 text-left text-lg font-medium">Leave Type</th>
-          <th class="px-6 py-4 text-left text-lg font-medium">Start Date</th>
-          <th class="px-6 py-4 text-left text-lg font-medium">End Date</th>
-          <th class="px-6 py-4 text-left text-lg font-medium">Leave Days</th>
-          <th class="px-6 py-4 text-left text-lg font-medium">
-            Leave Days List
-          </th>
-        </tr>
-      </thead>
-      <tbody class="text-gray-700">
-        {% for leave in leaves %}
-        <tr class="border-t hover:bg-indigo-50 transition-all duration-200">
-          <td class="px-6 py-4">{{ leave['branch'] }}</td>
-          <td class="px-6 py-4">{{ leave['employee_name'] }}</td>
-          <td class="px-6 py-4">{{ leave['leave_type'] }}</td>
-          <td class="px-6 py-4">{{ leave['start_date'] }}</td>
-          <td class="px-6 py-4">{{ leave['end_date'] }}</td>
-          <td class="px-6 py-4">{{ leave['leave_days'] }}</td>
-          <td class="px-6 py-4">
-            <!-- Displaying the list of leave days -->
-            <ul class="space-y-1">
-              {% for day in leave['leave_day_list'] %}
-              <li class="text-sm text-gray-500">{{ day }}</li>
-              {% endfor %}
-            </ul>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </section>
+  <script>
+
+    $(document).ready(function () {
+
+      const advancedOptions = {
+        border: true,
+        info: true,
+        paging: true,
+        autoWidth: false,
+        pageLength: 5,
+        scrollX: true,
+        scrollCollapse: true,
+        searching: true,
+        ordering: true,
+        responsive: false,
+        order: [[3, "asc"]],
+
+        language: {
+          search: "🔍 Search:",
+          lengthMenu: "Show _MENU_ entries",
+          paginate: {
+            previous: "⬅ Prev",
+            next: "Next ➡"
+          },
+          info: "Showing _START_ to _END_ of _TOTAL_ entries",
+          zeroRecords: "No matching records found"
+        },
+        layout: {
+          topStart: 'pageLength',
+          topEnd: 'search',
+          bottomStart: 'info',
+          bottomEnd: 'paging'
+        }
+      };
+
+      // Leave Type Table (basic)
+      if ($("#leave-type-table").length) {
+        $("#leave-type-table").DataTable({
+          pageLength: 10,
+          lengthMenu: [5, 10, 25, 50],
+          ordering: true,
+          info: true
+        });
+      }
+
+      // Branch Leave Table (basic)
+      if ($("#branch-leave-table").length) {
+        $("#branch-leave-table").DataTable({
+          pageLength: 10,
+          lengthMenu: [5, 10, 25, 50],
+          ordering: true,
+          info: true
+        });
+      }
+
+      // Leave Summary Table (basic)
+      if ($("#leave-summary-table").length) {
+        $("#leave-summary-table").DataTable({
+          pageLength: 10,
+          lengthMenu: [5, 10, 25, 50],
+          ordering: true,
+          info: true
+        });
+      }
+
+      // Leave Detail Table (advanced options)
+      if ($("#leave-detail-table").length) {
+        $("#leave-detail-table").DataTable(advancedOptions);
+      }
+    });
+
+
+  </script>
+
 
   <script>
     function printSection(sectionId) {
@@ -513,6 +570,6 @@
       printWindow.close();
     }
   </script>
-</body>
 
+</body>
 {% endblock %}
