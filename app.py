@@ -8332,6 +8332,7 @@ def view_employee(id):
 
 if __name__ == "__main__":
     init_db()
-    socketio.run(app, debug=True)
-    start_scheduler()
-    app.run(ssl_context=('cert.pem', 'key.pem'))  # Use self-signed cert
+    # socketio.run(app, debug=True)
+    # start_scheduler()
+    # app.run(ssl_context=('cert.pem', 'key.pem'))  # Use self-signed cert
+    socketio.run(app, port=9000)
