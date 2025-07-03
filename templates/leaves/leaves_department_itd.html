@@ -1,17 +1,16 @@
-{% extends 'base.html' %} {% block title %}CCC Verify{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
 content %}
-<div class="">
+<div class="bg-gray-100 text-gray-800">
   <!-- Main Content -->
-  <div class="container mx-auto mt-2 px-2">
-    <div class="grid grid-cols-2 gap-4 items-center my-2">
+  <div class="container mx-auto mt-2 px-4">
+    <div class="grid grid-cols-2 gap-4 items-center my-4">
       <!-- Print Button -->
-      <div class="my-2">
+      <div>
         <button onclick="printSelectedLeaves()"
           class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center">
           <i class="fas fa-print mr-2"></i> Print
         </button>
       </div>
-
       <div>
         <p id="route-path"
           class="text-blue-700 bg-gradient-to-r from-blue-200 via-blue-100 to-blue-200 px-2 py-2 rounded-lg shadow-lg border-l-8 border-blue-600 text-md font-semibold tracking-wide uppercase select-none transition duration-300 hover:shadow-xl hover:border-blue-800">
@@ -21,7 +20,7 @@ content %}
 
     <!-- Leaves Table -->
     <div class="overflow-x-auto bg-white shadow-lg rounded-md border border-gray-300">
-      <table id="leaveTable" class="min-w-full text-sm text-left border-collapse">
+      <table id="leaveTable" class="min-w-full text-sm text-left border-collapse nowrap" style="width: 100%">
         <thead class="bg-gray-200 text-gray-700">
           <tr>
             <th class="px-4 py-3 border-b">Select</th>
@@ -55,23 +54,20 @@ content %}
             <td class="px-6 py-3 border-b">{{ leave.branch_name }}</td>
             <td class="px-6 py-3 border-b">{{ leave.leave_type }}</td>
             <!-- Formatted Start Date -->
-            <td class="px-10 py-3 border-b leave-start-date" data-start="{{ leave.start_date }}"
-              style="min-width: 180px"></td>
-            <!-- Formatted End Date -->
-            <td class="px-10 py-3 border-b leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px">
-            </td>
-            <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td>
+            <td class="px-6 py-3 leave-start-date" data-start="{{ leave.start_date }}" style="min-width: 180px"></td>
+            <td class="px-6 py-3 leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px"></td>
+            <td class="px-6 py-3 leave-hours" data-start="{{ leave.start_date }}" data-end="{{ leave.end_date }}"></td>
             <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
             <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
             <td class="px-6 py-3 border-b">
-              {% if leave.verified_by is none %}
+              {% if leave.verified_by %}{{ leave.verified_by }}{% else %}
               <span class="text-blue-500">Pending</span>
-              {% else %} {{ leave.verified_by }} {% endif %}
+              {% endif %}
             </td>
             <td class="px-6 py-3 border-b">
-              {% if leave.approved_by is none %}
+              {% if leave.approved_by %}{{ leave.approved_by }}{% else %}
               <span class="text-blue-500">Pending</span>
-              {% else %} {{ leave.approved_by }} {% endif %}
+              {% endif %}
             </td>
             <td class="px-6 py-3 border-b">{{ leave.requested_by }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
@@ -79,18 +75,18 @@ content %}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
               <span
-                class="{% if leave.status is not none and leave.status == 'Approved' %}text-green-500{% elif leave.status is not none and leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
+                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
                 <b>{{ leave.status }}</b>
               </span>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium border-b">
               {% if leave.type_of_leave == 'H' %}
-              <a href="{{ url_for('edit_leave', id=leave.id) }}"
+              <a href="{{ url_for('edit_leave_hours_department', id=leave.id) }}"
                 class="text-blue-600 hover:text-blue-900 flex items-center space-x-1">
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
               {% elif leave.type_of_leave == 'D' %}
-              <a href="{{ url_for('edit_leave_ccc_verify', id=leave.id) }}"
+              <a href="{{ url_for('edit_leave_department_itd', id=leave.id) }}"
                 class="text-blue-600 hover:text-blue-900 flex items-center space-x-1">
                 <i class="fas fa-edit mr-1"></i> Edit
               </a>
@@ -113,24 +109,18 @@ content %}
   <script>
     $(document).ready(function () {
       $("#leaveTable").DataTable({
-        paging: true, // Enables pagination
-        searching: true, // Enables the search box
-        ordering: true, // Enables sorting
-        responsive: true, // Makes the table responsive for smaller screens
-        pageLength: 14, // Number of rows per page
-        order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
         scrollX: true, // Enable horizontal scrolling
         scrollCollapse: true,
         paging: true,
         searching: true,
         ordering: true,
         responsive: false,
-        order: [[3, "asc"]],
+        pageLength: 14, // Number of rows per page
+        order: [[3, "desc"]],
         fixedColumns: {
           leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
           rightColumns: 2, // Fix last 2 columns (like Reason and Status)
         },
-
         drawCallback: function () {
           formatLeaveDatesAndHours();
         },
@@ -151,6 +141,9 @@ content %}
         });
 
         $(".leave-hours").each(function () {
+          var $row = $(this).closest("tr");
+          var branchName = $row.find("td:nth-child(3)").text().trim();
+
           var startDate = $(this).data("start");
           var endDate = $(this).data("end");
 
@@ -161,9 +154,9 @@ content %}
             var duration = moment.duration(endTime.diff(startTime));
             var totalHours = duration.asHours();
 
-            // Subtract lunch overlap
+            // Subtract lunch overlap (12:00 - 13:30)
             var lunchStart = moment(startDate).hour(12).minute(0).second(0);
-            var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
+            var lunchEnd = moment(startDate).hour(13).minute(0).second(0);
 
             var overlapStart = moment.max(startTime, lunchStart);
             var overlapEnd = moment.min(endTime, lunchEnd);
@@ -176,7 +169,18 @@ content %}
             }
 
             totalHours = Math.max(totalHours, 0);
-            var displayHours = totalHours.toFixed(1) + " H";
+
+            var roundedHours = Number(totalHours.toFixed(1));
+            var displayHours = "";
+
+            // Adjust for HQ specific cases
+            if (branchName === "HQ" && roundedHours === 7.5) {
+              displayHours = "8 Hours";
+            } else if (branchName === "HQ" && roundedHours == 3.5) {
+              displayHours = "4 Hours";
+            } else {
+              displayHours = roundedHours.toFixed(1) + " Hours";
+            }
 
             $(this).text(displayHours);
           } else {
@@ -184,17 +188,16 @@ content %}
           }
         });
       }
-
       // Format the Start and End Dates using Moment.js
       $(".leave-start-date").each(function () {
         var startDate = $(this).data("start");
-        var formattedStartDate = moment(startDate).format("MM-DD-YYYY");
+        var formattedStartDate = moment(startDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedStartDate);
       });
 
       $(".leave-end-date").each(function () {
         var endDate = $(this).data("end");
-        var formattedEndDate = moment(endDate).format("MM-DD-YYYY");
+        var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedEndDate);
       });
     });

@@ -1,6 +1,6 @@
 from datetime import date
 from flask import (
-    Flask, render_template, request, redirect, url_for, flash,
+    Flask, current_app, render_template, request, redirect, url_for, flash,
     Response, session, send_from_directory, jsonify, send_file
 )
 
@@ -89,7 +89,6 @@ ALLOWED_EXCEL = {'xlsx', 'xls'}
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'signatures'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
 
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -251,8 +250,7 @@ def show_current_routes():
 
 @app.route('/qr/<int:leave_id>')
 def generate_qr_for_leave(leave_id):
-    # Data encoded in the QR (e.g., a verification URL or just the leave ID)
-    # You can use a URL or more detail here
+  
     data = f"http://172.104.60.81/print-leaves?ids={leave_id}"
     img = qrcode.make(data)
     img_io = BytesIO()
@@ -276,39 +274,6 @@ def print_leaves():
     placeholders = ','.join(['?'] * len(ids))
 
     with get_db_connection() as conn:
-        # Fetch leave data
-        # leaves = conn.execute(
-        #     f'''
-        #     SELECT
-        #         id,
-        #         employee_id,
-        #         leave_type,
-        #         start_date,
-        #         end_date,
-        #         reason,
-        #         start_date_obj,
-        #         end_date_obj,
-        #         excluded_days,
-        #         final_end_date,
-        #         service_count,
-        #         leave_hours,
-        #         requested_by,
-        #         requested_by_roles,
-        #         verified_by,
-        #         approved_by,
-        #         type_of_leave,
-        #         status,
-        #         spm_status,
-        #         dd_status,
-        #         manager_status,
-        #         branch,
-        #         category
-        #     FROM leaves
-        #     WHERE id IN ({placeholders})
-        #     ''',
-        #     ids
-        # ).fetchall()
-
         leaves = conn.execute(
             f'''
             SELECT
@@ -391,16 +356,13 @@ def print_leaves():
 year = datetime.now().year
 holidays = get_holidays(year)
 
-
 def get_locale():
     lang = request.args.get('lang')
     if lang in LANGUAGES:
         return lang
     return request.accept_languages.best_match(LANGUAGES)
 
-
 babel.init_app(app, locale_selector=get_locale)
-
 
 @app.context_processor
 def inject_locale():
@@ -506,9 +468,7 @@ def add_holiday():
 
 @app.route('/holidays')
 def show_holidays():
-    # Load holidays from the file
     holidays = load_holidays()
-    # Get holidays for the current year
     holidays = get_holidays(datetime.now().year)
     holiday_labels = get_holiday_labels(datetime.now().year)
     return render_template('holidays/holidays.html', holidays=holidays, holiday_labels=holiday_labels)
@@ -1635,8 +1595,8 @@ def leaves_by_branch_and_ccc_dashboard(branch_name):
 # TODO: PM Report
 @app.route('/leaves/pm/report/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_pm_report(branch_name):
-    if not current_user.is_authenticated or current_user.role_default != 140:
-        return redirect(url_for('access_denied'))
+    # if not current_user.is_authenticated or current_user.role_default != 140:
+    #     return redirect(url_for('access_denied'))
 
     base_query = '''
         SELECT
@@ -1920,7 +1880,6 @@ def leaves_by_branch_and_spm():
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
-                
                 AND l.requested_by_roles IN (35, 140)
                 AND (
                     l.category = 'M'
@@ -1988,7 +1947,6 @@ def leaves_by_branch_and_hrd():
                 FROM leaves l
                 LEFT JOIN employees e ON l.employee_id = e.id
                 WHERE {where_clause}
-             
                 AND (
                         (l.requested_by_roles = 140 AND l.category = 'L')
                         OR (l.requested_by_roles = 145 AND l.category = 'L')
@@ -2075,6 +2033,287 @@ def leaves_by_gm():
     )
 
 
+@app.route('/leave/edit/hours/department/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_leave_hours_department(id):
+    current_department = current_user.branch or current_user.department
+
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)
+        ).fetchone()
+
+    if not leave:
+        return "Leave record not found", 404
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        type_of_leave = request.form.get('type_of_leave', '').strip().upper()
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        approved_by = request.form.get('approved_by') or None
+        status = request.form.get('status')
+
+        # If type_of_leave is 'H', force status to Approved
+        if type_of_leave == 'H':
+            status = "Approved"
+            approved_by = request.form['approved_by']
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type = ?, reason = ?, status = ?,
+                    approved_by = ?,
+                    start_date = ?, end_date = ?
+                WHERE id = ?
+            ''', (
+                leave_type, reason, status,
+                approved_by,
+                start_date, end_date, id
+            ))
+            conn.commit()
+
+        # Redirect logic based on user role
+        if current_user.role_default == 700:
+            return redirect(url_for('leaves_by_department_itd', branch_name=current_department))
+        elif current_user.role_default == 200:
+            return redirect(url_for('leaves_by_department_crd', branch_name=current_department))
+        elif current_user.role_default == 400:
+            return redirect(url_for('leaves_by_department_opd', branch_name=current_department))
+        elif current_user.role_default == 500:
+            return redirect(url_for('leaves_by_department_fnd', branch_name=current_department))
+        elif current_user.role_default == 300:
+            return redirect(url_for('leaves_by_department_hrd', branch_name=current_department))
+        elif current_user.role_default == 600:
+            return redirect(url_for('leaves_by_department_trd', branch_name=current_department))
+        else:
+            return redirect(url_for('view_leaves'))  # fallback
+
+    return render_template('/leaves/edit_leave_hours_dep.html', leave=leave)
+
+
+def fetch_leaves(branch_name, requested_from):
+    query = '''
+        SELECT
+            l.id,
+            l.requested_by AS employee_name,
+            l.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by,
+            l.requested_by_roles,
+            l.requested_from
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE
+            l.branch = ?
+            AND l.requested_from = ?
+            AND (
+                (
+                    l.requested_by_roles = 20
+                    AND l.verified_by IS NULL
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                    OR l.type_of_leave = 'H'
+                )
+                OR
+                (
+                    l.status = 'Pending'
+                    AND l.verified_by IS NULL
+                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+                )
+            )
+        ORDER BY l.start_date DESC;
+    '''
+
+    params = (branch_name, requested_from)
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+    except sqlite3.DatabaseError as e:
+        current_app.logger.error(f"Database error: {e}")
+        return None, f"An error occurred while retrieving data: {e}"
+
+    return leaves, None
+
+
+# --- ITD Route ---
+
+
+@app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_itd(branch_name):
+    if current_user.role_default == 700 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 700:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering ITD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'ITD')
+    if error:
+        return error, 500
+    return render_template('leaves/leaves_department_itd.html', leaves=leaves, branch_name=branch_name)
+
+
+# --- CRD Route ---
+@app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_crd(branch_name):
+    if current_user.role_default == 200 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 200:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering CRD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'CRD')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_crd.html', leaves=leaves, branch_name=branch_name)
+
+
+# --- OPD Route ---
+@app.route('/leaves/department/opd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_opd(branch_name):
+    if current_user.role_default == 400 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 400:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering OPD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'OPD')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_opd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/fnd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_fnd(branch_name):
+    if current_user.role_default == 500 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 500:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering FND by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'FND')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_fnd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/hrd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_hrd(branch_name):
+    if current_user.role_default == 300 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 300:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering HRD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'HRD')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_hrd.html', leaves=leaves, branch_name=branch_name)
+
+
+@app.route('/leaves/department/trd/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_department_trd(branch_name):
+    if current_user.role_default == 600 and current_user.branch and current_user.branch != branch_name:
+        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+    elif current_user.role_default != 600:
+        return redirect(url_for('access_denied'))
+
+    current_app.logger.debug(f"Filtering TRD by branch: {branch_name}")
+
+    leaves, error = fetch_leaves(branch_name, 'TRD')
+    if error:
+        return error, 500
+
+    return render_template('leaves/leaves_department_trd.html', leaves=leaves, branch_name=branch_name)
+
+
+# @app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
+# @login_required
+# def leaves_by_department_itd(branch_name):
+#     if current_user.role_default == 700 and current_user.branch and current_user.branch != branch_name:
+#         return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
+
+#     elif current_user.role_default != 700:
+#         return redirect(url_for('access_denied'))
+
+#     app.logger.debug(f"Filtering by branch: {branch_name}")
+
+#     query = '''
+#         SELECT
+#             l.id,
+#             l.requested_by AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by,
+#             l.requested_by_roles,
+#             l.requested_from
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#        WHERE
+#             l.branch = ?
+#             AND l.requested_from = 'ITD'
+#             AND (
+#                 (
+#                     l.requested_by_roles = 20
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+#                     OR l.type_of_leave  = 'H'
+#                 )
+#                 OR
+#                 (
+#                     l.status = 'Pending'
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+#                 )
+#             )
+#         ORDER BY l.start_date DESC;
+#     '''
+
+#     params = (branch_name,)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#     except sqlite3.DatabaseError as e:
+#         app.logger.error(f"Database error: {e}")
+#         return "An error occurred while retrieving data. Please try again later.", 500
+
+#     return render_template('leaves/leaves_department_itd.html', leaves=leaves, branch_name=branch_name)
+
+
 # @app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
 # @login_required
 # def leaves_by_department_crd(branch_name):
@@ -2104,29 +2343,25 @@ def leaves_by_gm():
 #             l.requested_by,
 #             l.requested_by_roles,
 #             l.requested_from
-
 #         FROM leaves l
 #         LEFT JOIN employees e ON l.employee_id = e.id
-#         WHERE (
+#        WHERE
 #             l.branch = ?
-#             ANDl.requested_from  == 'CRD'
-#             AND l.requested_by_roles != 140
-#             AND l.requested_by_roles != 145
-
+#             AND l.requested_from = 'CRD'
 #             AND (
-#                 l.category != 'L'
-#                 OR l.category IS NULL
-#                 OR l.type_of_leave = 'H'
-#                 OR (
-#                     l.category = 'S' AND l.verified_by IS NOT NULL
+#                 (
+#                     l.requested_by_roles = 20
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
+#                     OR l.type_of_leave  = 'H'
 #                 )
-#                 OR (
-#                     l.category = 'M' AND (
-#                         l.verified_by IS NULL OR l.requested_by_roles = 35
-#                     )
+#                 OR
+#                 (
+#                     l.status = 'Pending'
+#                     AND l.verified_by IS  NULL
+#                     AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
 #                 )
 #             )
-#         )
 #         ORDER BY l.start_date DESC;
 #     '''
 
@@ -2139,69 +2374,7 @@ def leaves_by_gm():
 #         app.logger.error(f"Database error: {e}")
 #         return "An error occurred while retrieving data. Please try again later.", 500
 
-#     return render_template('leaves/leaves_deparment_crd.html', leaves=leaves, branch_name=branch_name)
-
-
-@app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
-@login_required
-def leaves_by_department_crd(branch_name):
-    if current_user.role_default == 200 and current_user.branch and current_user.branch != branch_name:
-        return redirect(url_for('filter_leaves_by_branch_name', branch_name=current_user.branch))
-
-    elif current_user.role_default != 200:
-        return redirect(url_for('access_denied'))
-
-    app.logger.debug(f"Filtering by branch: {branch_name}")
-
-    query = '''
-        SELECT
-            l.id,
-            l.requested_by AS employee_name,
-            l.branch AS branch_name,
-            l.leave_type,
-            l.start_date,
-            l.end_date,
-            l.reason,
-            l.status,
-            l.type_of_leave,
-            l.verified_by,
-            l.approved_by,
-            l.leave_hours,
-            l.service_count,
-            l.requested_by,
-            l.requested_by_roles,
-            l.requested_from
-        FROM leaves l
-        LEFT JOIN employees e ON l.employee_id = e.id
-       WHERE
-            l.branch = ?
-            AND l.requested_from = 'CRD'
-            AND (
-                (
-                    l.requested_by_roles = 20 
-                    AND l.verified_by IS  NULL 
-                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
-                )
-                OR
-                (
-                    l.status = 'Pending'
-                    AND l.verified_by IS  NULL
-                    AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
-                )
-            )
-        ORDER BY l.start_date DESC;
-    '''
-
-    params = (branch_name,)
-
-    try:
-        with get_db_connection() as conn:
-            leaves = conn.execute(query, params).fetchall()
-    except sqlite3.DatabaseError as e:
-        app.logger.error(f"Database error: {e}")
-        return "An error occurred while retrieving data. Please try again later.", 500
-
-    return render_template('leaves/leaves_department_crd.html', leaves=leaves, branch_name=branch_name)
+#     return render_template('leaves/leaves_department_crd.html', leaves=leaves, branch_name=branch_name)
 
 
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
@@ -2526,6 +2699,106 @@ def add_leave_hours_pm(branch):
         return redirect(url_for('leaves_by_branch_and_pm_report', branch_name=branch))
 
     return render_template('/leaves/add_leave_hours_pm.html', employees=employees, users=users, branch=branch)
+
+
+@app.route('/leave_hours/department/add/<string:branch>', methods=['GET', 'POST'])
+@login_required
+def add_leave_hours_crd(branch):
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+    current_user_department = getattr(current_user, 'department', None)
+    employee_id = current_user.employee_id
+
+    with get_db_connection() as conn:
+        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        users = []
+        if current_user_department:
+            users = conn.execute(
+                '''
+                SELECT u.id, u.username, u.branch, e.department
+                FROM users u
+                INNER JOIN employees e ON u.id = e.user_id
+                WHERE u.branch = ?
+                  AND e.department = ?
+                  AND u.RoleDefault >= 200
+                  AND u.Active = 1
+                ''', (user_branch, current_user_department)
+            ).fetchall()
+
+    if request.method == 'POST':
+        form = request.form
+        employee_id = form['employee_id']
+        leave_type = form['leave_type']
+        start_date = form['start_date']
+        end_date = form['end_date']
+        reason = form['reason']
+        branch = form['branch']
+        requested_by = form['requested_by']
+        requested_by_roles = form['requested_by_roles']
+        requested_from = form['requested_from']  # <-- Added field
+
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+        if end_dt <= start_dt:
+            flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_dt.weekday() >= 5 or end_dt.weekday() >= 5:
+            flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_dt.hour < 8:
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចាប់ពីម៉ោង 8:00 ព្រឹក...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if end_dt.hour > 17 or (end_dt.hour == 17 and end_dt.minute > 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        # Calculate leave hours
+        if start_dt.hour == 8 and start_dt.minute == 0 and end_dt.hour == 17 and end_dt.minute == 0:
+            leave_hours = 7.5  # Full-day leave
+        else:
+            total_seconds = (end_dt - start_dt).total_seconds()
+            total_hours = total_seconds / 3600
+
+            # Subtract lunch break if overlaps
+            lunch_start = start_dt.replace(hour=12, minute=0)
+            lunch_end = start_dt.replace(hour=13, minute=0)
+            if start_dt < lunch_end and end_dt > lunch_start:
+                overlap_start = max(start_dt, lunch_start)
+                overlap_end = min(end_dt, lunch_end)
+                if overlap_end > overlap_start:
+                    lunch_deduction = (
+                        overlap_end - overlap_start).total_seconds() / 3600
+                    total_hours -= lunch_deduction
+
+            leave_hours = round(max(total_hours, 0), 2)
+
+        if leave_hours > 8:
+            flash("ម៉ោងឈប់សម្រាកមិនគួរធំជាង 8 ម៉ោងទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        with get_db_connection() as conn:
+            conn.execute(
+                '''
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours,
+                                   requested_by, type_of_leave, branch, verified_by, requested_by_roles, requested_from)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'H', ?, 'Not required', ?, ?)
+                ''',
+                (employee_id, leave_type, start_date, end_date, reason, leave_hours,
+                 requested_by, branch, requested_by_roles, requested_from)
+            )
+            conn.commit()
+
+        return redirect(url_for('filter_leaves_by_employee_id', employee_id=employee_id))
+
+    return render_template(
+        '/leaves/add_leave_hours_crd.html',
+        employees=employees,
+        users=users,
+        branch=branch
+    )
 
 
 @app.route('/leave_hours/spm/add/<string:branch>', methods=['GET', 'POST'])
@@ -3933,82 +4206,6 @@ def edit_leave_ccc_verify(id):
     return render_template('/leaves/edit_ccc_leave.html', leave=leave)
 
 
-# @app.route('/leave/edit_spm_approve/<int:id>', methods=['GET', 'POST'])
-# def edit_leave_spm_approve(id):
-#     with get_db_connection() as conn:
-#         leave = conn.execute(
-#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
-
-#     if request.method == 'POST':
-#         leave_type = request.form['leave_type']
-#         start_date = request.form['start_date']
-#         end_date = request.form['end_date']
-#         reason = request.form['reason']
-
-#         # Calculate service count
-#         start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
-#         end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
-#         service_count = (end_date_obj - start_date_obj).days + 1
-
-#         # Determine leave category and set the appropriate fields
-#         if service_count <= 2:
-#             category = "S"
-#             status = "Approved"
-#             approved_by = current_user.username  # Automatically set current user
-#             verified_by = request.form['verified_by']
-#         elif 3 <= service_count <= 5:
-#             category = "M"
-#             status = "Verified"
-#             approved_by = request.form['approved_by']
-#             verified_by = current_user.username  # Automatically set current user
-#         else:
-#             category = "L"
-#             status = request.form['status']
-#             approved_by = request.form.get('approved_by', None)
-#             verified_by = request.form.get('verified_by', None)
-
-#         # Update the leave in the database
-#         with get_db_connection() as conn:
-#             conn.execute('''
-#                 UPDATE leaves
-#                 SET leave_type = ?, reason = ?, status = ?, approved_by = ?, verified_by = ?
-#                 WHERE id = ?
-#             ''', (leave_type, reason, status, approved_by, verified_by, id))
-
-#         return redirect(url_for('view_leaves'))
-
-#     return render_template('/leaves/edit_spm_leave.html', leave=leave)
-
-
-# @app.route('/leave/edit_gm_approve/<int:id>', methods=['GET', 'POST'])
-# def edit_leave_gm_approve(id):
-#     user_role = 180 if current_user.is_authenticated and current_user.role_default == 180 else None
-
-#     with get_db_connection() as conn:
-#         leave = conn.execute(
-#             'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
-
-#     if request.method == 'POST':
-#         leave_type = request.form['leave_type']
-#         start_date = request.form['start_date']
-#         end_date = request.form['end_date']
-#         reason = request.form['reason']
-
-#         status = "Approved"
-#         approved_by = current_user.username
-
-#         with get_db_connection() as conn:
-#             conn.execute('''
-#                 UPDATE leaves
-#                 SET leave_type = ?, reason = ?, status = ?, approved_by = ?
-#                 WHERE id = ?
-#             ''', (leave_type, reason, status, approved_by, id))
-
-#         return redirect(url_for('leaves_by_gm'))
-
-#     return render_template('/leaves/edit_gm_leave.html', leave=leave)
-
-
 @app.route('/leave/edit_gm_approve/<int:id>', methods=['GET', 'POST'])
 def edit_leave_gm_approve(id):
     user_role = 180 if current_user.is_authenticated and current_user.role_default == 180 else None
@@ -4347,6 +4544,243 @@ def edit_leave_department(id):
         return redirect(url_for('leaves_by_department_crd', branch_name=branch_name))
 
     return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+@app.route('/leave_department/edit/itd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_itd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_itd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+@app.route('/leave_department/edit/opd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_opd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_opd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+@app.route('/leave_department/edit/fnd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_fnd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_fnd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+@app.route('/leave_department/edit/hrd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_hrd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_hrd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
+
+
+@app.route('/leave_department/edit/trd/<int:id>', methods=['GET', 'POST'])
+def edit_leave_department_trd(id):
+    branch_name = current_user.branch
+    with get_db_connection() as conn:
+        leave = conn.execute(
+            'SELECT * FROM leaves WHERE id = ?', (id,)).fetchone()
+
+    if request.method == 'POST':
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+
+        # Calculate service count (difference between start_date and end_date)
+        start_date_obj = datetime.strptime(start_date[:10], "%Y-%m-%d")
+        end_date_obj = datetime.strptime(end_date[:10], "%Y-%m-%d")
+        service_count = (end_date_obj - start_date_obj).days + 1
+
+        # Determine leave category and set the appropriate fields
+        if service_count <= 2:
+            category = "S"
+            status = "Approved"
+            approved_by = current_user.username  # Automatically set current user
+            verified_by = request.form['verified_by']
+        elif 3 <= service_count <= 5:
+            category = "M"
+            status = "Approved"
+            approved_by = request.form['approved_by']
+            verified_by = current_user.username  # Automatically set current user
+        else:
+            category = "L"
+            status = request.form['status']
+            approved_by = request.form.get('approved_by', None)
+            verified_by = request.form.get('verified_by', None)
+
+        with get_db_connection() as conn:
+            conn.execute('''
+                UPDATE leaves
+                SET leave_type= ?,  reason= ?, status= ?, approved_by= ?, verified_by= ?
+                WHERE id= ?
+            ''', (leave_type, reason, status, approved_by, verified_by, id))
+
+        return redirect(url_for('leaves_by_department_trd', branch_name=branch_name))
+
+    return render_template('/leaves/edit_leave_department.html', leave=leave)
+
 
 
 @app.route('/leave/edit/hours/ccc/<int:id>', methods=['GET', 'POST'])
@@ -6526,7 +6960,25 @@ def dashboard():
             flash("Branch information is missing.", "danger")
             return render_template('access_denied.html')
 
-    if role == 200:
+    # if role == 200:
+    #     branch = getattr(current_user, 'branch', None)
+    #     if branch:
+    #         return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
+    #     else:
+    #         flash("Branch information is missing.", "danger")
+    #         return render_template('access_denied.html')
+
+    # if role == 700:
+    #     branch = getattr(current_user, 'branch', None)
+    #     if branch:
+    #         return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
+    #     else:
+    #         flash("Branch information is missing.", "danger")
+    #         return render_template('access_denied.html')
+
+    HQ_ROLES = {200, 700, 300, 400, 500, 600}  # Extend as needed
+
+    if role in HQ_ROLES:
         branch = getattr(current_user, 'branch', None)
         if branch:
             return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
@@ -7690,6 +8142,79 @@ def search_employees():
     return render_template('/employees/employees.html', employees=employees)
 
 
+# @app.route('/employees/import', methods=['GET', 'POST'])
+# @login_required
+# def import_employees():
+#     if request.method == 'POST':
+#         f = request.files.get('excel_file')
+#         if not f or f.filename == '':
+#             flash('Please choose an Excel file.', 'error')
+#             return redirect(request.url)
+
+#         if not allowed_excel(f.filename):
+#             flash('Supported formats: .xlsx or .xls', 'error')
+#             return redirect(request.url)
+
+#         try:
+#             df = pd.read_excel(f)
+#         except Exception as e:
+#             flash(f'Could not read file: {e}', 'error')
+#             return redirect(request.url)
+
+#         required = [
+#             'name', 'age', 'department', 'salary', 'position_id', 'joining_date', 'status', 'branch', 'user_id',
+#             'phone_number', 'email', 'address', 'emergency_contact_name', 'emergency_contact_phone',
+#             'employees_height', 'ethnicity', 'nationality', 'religion', 'family_status', 'place_of_birth',
+#             'permanent_address', 'village', 'commune', 'district', 'province', 'home_number', 'street_number',
+#             'group_name', 'personal_phone_number', 'level_of_culture', 'skill', 'name_of_educational_institution',
+#             'knowledge_of_foreign_languages', 'current_function', 'id_card_number', 'work_at', 'employment_id',
+#             'employment_date', 'khmer_nationality_identity_card', 'passing_test_date', 'residence_book_or_family_book',
+#             'made_on', 'have_a_number_of_children', 'father_name', 'mother_name', 'father_status', 'father_occupation',
+#             'mother_occupation', 'mother_status', 'father_permanent_address', 'mother_permanent_address',
+#             'parents_village', 'parents_commune', 'parents_district', 'parents_province', 'parents_home_number',
+#             'parents_street_number', 'parents_group', 'parents_phone'
+#         ]
+
+#         missing = [c for c in required if c not in df.columns]
+#         if missing:
+#             flash(f'Missing columns: {", ".join(missing)}', 'error')
+#             return redirect(request.url)
+
+#         inserted, skipped = 0, 0
+#         with get_db_connection() as conn:
+#             for _, row in df.iterrows():
+#                 if pd.isna(row['name']) or pd.isna(row['department']):
+#                     skipped += 1
+#                     continue
+
+#                 jd = row['joining_date']
+#                 if isinstance(jd, (pd.Timestamp, datetime)):
+#                     jd = jd.date()
+
+#                 conn.execute("""
+#                     INSERT INTO employees (
+#                         name, age, department, salary, position_id, joining_date, status, branch, user_id,
+#                         phone_number, email, address, emergency_contact_name, emergency_contact_phone,
+#                         employees_height, ethnicity, nationality, religion, family_status, place_of_birth,
+#                         permanent_address, village, commune, district, province, home_number, street_number,
+#                         group_name, personal_phone_number, level_of_culture, skill, name_of_educational_institution,
+#                         knowledge_of_foreign_languages, current_function, id_card_number, work_at, employment_id,
+#                         employment_date, khmer_nationality_identity_card, passing_test_date, residence_book_or_family_book,
+#                         made_on, have_a_number_of_children, father_name, mother_name, father_status, father_occupation,
+#                         mother_occupation, mother_status, father_permanent_address, mother_permanent_address,
+#                         parents_village, parents_commune, parents_district, parents_province, parents_home_number,
+#                         parents_street_number, parents_group, parents_phone
+#                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#                 """, tuple(row[col] for col in required))
+#                 inserted += 1
+#             conn.commit()
+
+#         flash(f'Imported {inserted} employees ({skipped} skipped).', 'success')
+#         return redirect(url_for('list_employees'))
+
+#     return render_template('employees/import.html')
+
+
 @app.route('/employees/import', methods=['GET', 'POST'])
 @login_required
 def import_employees():
@@ -7729,10 +8254,29 @@ def import_employees():
             return redirect(request.url)
 
         inserted, skipped = 0, 0
+        skipped_messages = []
+
         with get_db_connection() as conn:
-            for _, row in df.iterrows():
+            for idx, row in df.iterrows():
                 if pd.isna(row['name']) or pd.isna(row['department']):
                     skipped += 1
+                    skipped_messages.append(
+                        f"Row {idx + 2}: Missing name or department.")
+                    continue
+
+                # Check for duplicates
+                position_id = row['position_id']
+                user_id = row['user_id']
+                email = row['email']
+
+                exists = conn.execute("""
+                    SELECT id FROM employees WHERE position_id = ? OR user_id = ? OR email = ?
+                """, (position_id, user_id, email)).fetchone()
+
+                if exists:
+                    skipped += 1
+                    skipped_messages.append(
+                        f"Row {idx + 2}: position_id '{position_id}', user_id '{user_id}', or email '{email}' already exists.")
                     continue
 
                 jd = row['joining_date']
@@ -7755,9 +8299,14 @@ def import_employees():
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, tuple(row[col] for col in required))
                 inserted += 1
+
             conn.commit()
 
         flash(f'Imported {inserted} employees ({skipped} skipped).', 'success')
+        if skipped_messages:
+            for msg in skipped_messages:
+                flash(msg, 'warning')
+
         return redirect(url_for('list_employees'))
 
     return render_template('employees/import.html')

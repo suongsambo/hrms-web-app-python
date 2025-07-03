@@ -1,20 +1,8 @@
-{% extends 'base.html' %} {% block title %}Add Leave Hours{% endblock %} {%
-block content %}
+{% extends 'base.html' %} {% block title %}Manage Leaves HQ & Branches {%
+endblock %} {% block content %}
 
 <body class="bg-gray-100 text-gray-800">
   <div class="container mx-auto mt-2 px-4">
-    <!-- <div class="mb-2">
-      {% if leaves %}
-      <a id="viewLeaveLink"
-        href="{{ url_for('filter_leaves_by_employee_id', employee_id=employee_id, leave_id=leaves[0].id) }}"
-        class="inline-block px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
-        <i class="fas fa-eye mr-2"></i> View Leave </a><br />
-      {% endif %}
-    </div> -->
-
-
-
-
     <div class="grid grid-cols-2 gap-4 items-center my-2">
       <!-- Print Button -->
       <div class="my-2">
@@ -30,7 +18,6 @@ block content %}
         </p>
       </div>
     </div>
-
 
     <!-- Leaves Table -->
     <div class="overflow-x-auto bg-white shadow-lg rounded-md">
@@ -60,20 +47,13 @@ block content %}
         <tbody class="text-gray-600">
           {% if leaves %} {% for leave in leaves %}
           <tr class="border-t">
-            <!-- <td class="px-6 py-3">
-              <input type="checkbox" class="select-row-checkbox" data-leave="{{ leave.id }}"
-                onchange="updateLink(this)" />
-            </td> -->
-
             <td class="px-4 py-3 border-b text-center">
               <input type="checkbox" class="leave-checkbox" value="{{ leave.id }}" />
             </td>
             <td class="px-6 py-3">{{ leave.employee_name }}</td>
             <td class="px-6 py-3">{{ leave.branch_name }}</td>
             <td class="px-6 py-3">{{ leave.leave_type }}</td>
-            <td class="px-6 py-3 leave-start-date" data-start="{{ leave.start_date }}" style="min-width: 180px">
-              <!-- Formatted Start Date will be inserted here -->
-            </td>
+            <td class="px-6 py-3 leave-start-date" data-start="{{ leave.start_date }}" style="min-width: 180px"></td>
             <td class="px-6 py-3 leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px">
               <!-- Formatted End Date will be inserted here -->
             </td>
@@ -88,20 +68,26 @@ block content %}
             <td class="px-6 py-3">{{ leave.requested_by }}</td>
             <td class="px-6 py-3">{{ leave.verified_by }}</td>
             <td class="px-6 py-3">{{ leave.approved_by }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-              <span
-                class="{% if leave.status == 'Approved' %}text-green-500{% elif leave.status == 'Pending' %}text-blue-500{% else %}text-red-500{% endif %}">
-                <b>{{ leave.status }}</b>
-              </span>
+
+            <td class="px-6 py-4 font-semibold">
+              {% if leave['status'] == 'Approved' %}
+              <div class="badge badge-primary">Approved</div>
+              {% elif leave['status'] == 'Pending' %}
+              <div class="badge badge-warning">Pending</div>
+              {% elif leave['status'] == 'Rejected' %}
+              <div class="badge badge-danger">Rejected</div>
+              {% endif %}
             </td>
             <td class="px-6 py-3">
               <div class="flex justify-center gap-x-3">
                 {% if leave.status not in ['Approved', 'Rejected'] %}
-                <a href="{{ url_for('delete_leave', id=leave.id) }}"
-                  class="text-red-500 hover:text-red-700 font-medium transition-colors duration-300"
-                  onclick="return confirm('Are you sure you want to delete this leave?')">
-                  <span class="material-symbols-outlined">delete</span>
-                </a>
+                <form action="{{ url_for('delete_leave', id=leave.id) }}" method="POST" class="inline-block">
+                  <button type="submit"
+                    class="text-red-500 hover:text-red-700 font-medium transition-colors duration-300"
+                    onclick="return confirm('Are you sure you want to delete this leave?')">
+                    <span class="material-symbols-outlined">delete</span>
+                  </button>
+                </form>
                 {% endif %}
               </div>
             </td>
@@ -119,7 +105,6 @@ block content %}
   </div>
 
   <script>
-    // Update the link dynamically based on selected leave
     function updateLink(selectElement) {
       const leaveId = selectElement.getAttribute("data-leave");
       const employeeId = "{{ employee_id }}";
@@ -136,7 +121,7 @@ block content %}
         pageLength: 12,
         order: [[3, "desc"]],
         responsive: true,
-        scrollX: true, // Enable horizontal scrolling
+        scrollX: true,
         scrollCollapse: true,
         paging: true,
         searching: true,
@@ -144,8 +129,8 @@ block content %}
         responsive: false,
         order: [[3, "asc"]],
         fixedColumns: {
-          leftColumns: 3, // Fix first 2 columns (like EmployeeName and Branch)
-          rightColumns: 2,// Fix last 2 columns (like Reason and Status)
+          leftColumns: 3,
+          rightColumns: 2,
         },
         drawCallback: function () {
           formatLeaveDatesAndHours();
@@ -167,6 +152,9 @@ block content %}
         });
 
         $(".leave-hours").each(function () {
+          var $row = $(this).closest("tr");
+          var branchName = $row.find("td:nth-child(3)").text().trim();
+
           var startDate = $(this).data("start");
           var endDate = $(this).data("end");
 
@@ -177,7 +165,7 @@ block content %}
             var duration = moment.duration(endTime.diff(startTime));
             var totalHours = duration.asHours();
 
-            // Subtract lunch overlap
+            // Subtract lunch overlap (12:00 - 13:30)
             var lunchStart = moment(startDate).hour(12).minute(0).second(0);
             var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
 
@@ -192,7 +180,19 @@ block content %}
             }
 
             totalHours = Math.max(totalHours, 0);
-            var displayHours = totalHours.toFixed(1) + " H";
+
+            // Check special case: if branch is HQ and value exactly 7.5
+            var roundedHours = Number(totalHours.toFixed(1));
+            var displayHours = "";
+
+            // Adjust for HQ specific cases
+            if (branchName === "HQ" && roundedHours === 7.5) {
+              displayHours = "8 Hours";
+            } else if (branchName === "HQ" && roundedHours == 3.5) {
+              displayHours = "4 Hours";
+            } else {
+              displayHours = roundedHours.toFixed(1) + " Hours";
+            }
 
             $(this).text(displayHours);
           } else {

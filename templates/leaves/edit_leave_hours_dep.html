@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Edit Leave Department{% endblock %}
+{% block content %}
+
+<body class="bg-gray-100 min-h-screen">
+  <div class="max-w-3xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <form action="{{ url_for('edit_leave_hours_department', id=leave['id']) }}" method="POST"
+      class="bg-white shadow-xl rounded-2xl p-8 space-y-6">
+
+      <div class="bg-blue-100 text-blue-800 px-4 py-2 rounded-t-md shadow-sm mb-2">
+        <h2 class="text-lg font-semibold uppercase tracking-wide">
+          Edit Leave Hours {{ current_user.department }}
+        </h2>
+      </div>
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Approved By -->
+        <div>
+          <label for="approved_by" class="block text-gray-800 font-semibold mb-1">Approved By</label>
+          <input type="text" id="approved_by" name="approved_by" value="{{ current_user.username }}"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm bg-gray-100 cursor-not-allowed" readonly
+            required>
+        </div>
+        <!-- Leave Type -->
+        <div>
+          <label for="leave_type" class="block text-gray-800 font-semibold mb-1">Select Leave Type</label>
+          <select id="leave_type" name="leave_type"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm bg-gray-100 cursor-not-allowed"
+            roadonly>
+            <option value="annualLeave" {% if leave['leave_type']=='annualLeave' %}selected{% endif %}>Annual Leave
+            </option>
+            <option value="sickLeave" {% if leave['leave_type']=='sickLeave' %}selected{% endif %}>Sick Leave</option>
+            <option value="maternityLeave" {% if leave['leave_type']=='maternityLeave' %}selected{% endif %}>Maternity
+              Leave</option>
+            <option value="specialLeave" {% if leave['leave_type']=='specialLeave' %}selected{% endif %}>Special Leave
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <!-- Start Date -->
+        <div>
+          <label for="start_date" class="block text-gray-800 font-semibold mb-1">Start Date</label>
+          <input type="datetime-local" name="start_date" id="start_date" value="{{ leave['start_date'] }}"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm bg-gray-100 cursor-not-allowed"
+            readonly>
+        </div>
+
+        <!-- End Date -->
+        <div>
+          <label for="end_date" class="block text-gray-800 font-semibold mb-1">End Date</label>
+          <input type="datetime-local" name="end_date" id="end_date" value="{{ leave['end_date'] }}"
+            class="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm bg-gray-100 cursor-not-allowed"
+            readonly>
+        </div>
+      </div>
+      <!-- Reason -->
+      <div>
+        <label for="reason" class="block text-gray-800 font-semibold mb-1">Reason</label>
+        <textarea name="reason" id="reason" rows="4"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm bg-gray-100 cursor-not-allowed"
+          readonly>{{ leave['reason'] }}</textarea>
+      </div>
+
+      <!-- Status -->
+      <div>
+        <label for="status" class="block text-gray-800 font-semibold mb-1">Status</label>
+        <select id="status" name="status"
+          class="w-full border border-gray-300 rounded-lg px-4 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
+          <option value="Approved" {% if leave['status']=='Approved' or leave['status'] is none %}selected{% endif %}>
+            Approved</option>
+          <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
+        </select>
+      </div>
+
+      <!-- Buttons -->
+      <div class="grid grid-cols-2 gap-4 pt-2">
+        <button type="submit"
+          class="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
+          <i class="fas fa-save mr-2"></i>Save Changes
+        </button>
+        <a href="{{ url_for('view_leaves') }}"
+          class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
+          <i class="fas fa-arrow-left mr-2"></i> Back
+        </a>
+      </div>
+
+    </form>
+  </div>
+</body>
+{% endblock %}
