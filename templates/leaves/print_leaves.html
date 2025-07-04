@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Print Leave Summary</title>
+    <style>
+        body {
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .info {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 15px;
+        }
+
+        .info p {
+            margin: 3px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f4f8;
+            color: #2c3e50;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+
+        .summary {
+            margin-top: 50px;
+        }
+
+        .summary h3 {
+            margin-top: 30px;
+            color: #2c3e50;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+
+        .summary p {
+            margin: 5px 0;
+            line-height: 1.4;
+        }
+
+        .totals {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .totals p {
+            margin: 5px 0;
+        }
+
+        .totals strong {
+            color: #27ae60;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Leave Hours & Days Summary</h2>
+
+    <div class="info">
+        {% if employee_name %}
+        <p><strong>Employee:</strong> {{ employee_name }}</p>
+        {% endif %} {% if branch %}
+        <p><strong>Branch:</strong> {{ branch }}</p>
+        {% endif %} {% if start_date and end_date %}
+        <p><strong>Period:</strong> {{ start_date }} to {{ end_date }}</p>
+        {% endif %}
+    </div>
+
+    <table id="leaveTable">
+        <thead>
+            <tr>
+                <th>EmployeeName</th>
+                <th>Branch</th>
+                <th>LeaveType</th>
+                <th style="min-width: 170px">StartDate</th>
+                <th style="min-width: 170px">EndDate</th>
+                <th>LeaveDays</th>
+                <th>LeaveHours</th>
+                <th>LeaveDates</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for leave in leaves %}
+            <tr>
+                <td>{{ leave.employee_name }}</td>
+                <td>{{ leave.branch }}</td>
+                <td>{{ leave.leave_type }}</td>
+                <td>{{ leave.start_date }}</td>
+                <td>{{ leave.end_date }}</td>
+                <td>{{ leave.leave_days }}</td>
+                <td>
+                    {% if leave.type_of_leave == 'H' %}{{ leave.leave_hours }}{% else
+                    %}-{% endif %}
+                </td>
+                <td>
+                    {% for day in leave.leave_day_list %} {{ day }}{% if not loop.last
+                    %}, {% endif %} {% endfor %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <!-- ⬇️ Add summary row here -->
+        <tfoot>
+            <tr>
+                <th colspan="5" style="text-align: right">Total:</th>
+                <th>{{ total_leave_days }}</th>
+                <th>{{ total_leave_hours }}</th>
+                <th>—</th>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="summary" style="margin: 0; padding: 0; font-size: smaller">
+        <h3 style="margin: 0; padding: 0">Leave Type Summary</h3>
+        {% for leave_type, summary in leave_type_count.items() %}
+        <p style="margin: 0; padding: 0">
+            <strong>{{ leave_type }}</strong>: {{ summary.count }} leaves, {{
+            summary.total_days }} days
+        </p>
+        {% endfor %}
+
+        <h3 style="margin: 0; padding: 0">Branch Summary</h3>
+        {% for branch_name, summary in branch_leave_count.items() %}
+        <p style="margin: 0; padding: 0">
+            <strong>{{ branch_name }}</strong>: {{ summary.leave_count }} leaves, {{
+            summary.total_days }} days
+        </p>
+        {% endfor %}
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $("#leaveTable").DataTable({
+                scrollX: true, // Enable horizontal scrolling
+                scrollCollapse: true,
+                paging: true,
+                searching: true,
+                ordering: true,
+                responsive: false,
+                pageLength: 14, // Number of rows per page
+                order: [[3, "desc"]],
+                fixedColumns: {
+                    leftColumns: 2, // Fix first 2 columns (like EmployeeName and Branch)
+                    rightColumns: 2, // Fix last 2 columns (like Reason and Status)
+                },
+                drawCallback: function () {
+                    formatLeaveDatesAndHours();
+                },
+            });
+
+            function formatLeaveDatesAndHours() {
+                $(".leave-start-date").each(function () {
+                    var startDate = $(this).data("start");
+                    var formattedStartDate =
+                        moment(startDate).format("MM-DD-YYYY hh:mm A");
+                    $(this).text(formattedStartDate);
+                });
+
+                $(".leave-end-date").each(function () {
+                    var endDate = $(this).data("end");
+                    var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
+                    $(this).text(formattedEndDate);
+                });
+
+                $(".leave-hours").each(function () {
+                    var $row = $(this).closest("tr");
+                    var branchName = $row.find("td:nth-child(3)").text().trim();
+
+                    var startDate = $(this).data("start");
+                    var endDate = $(this).data("end");
+
+                    var startTime = moment(startDate);
+                    var endTime = moment(endDate);
+
+                    if (startTime.isValid() && endTime.isValid()) {
+                        var duration = moment.duration(endTime.diff(startTime));
+                        var totalHours = duration.asHours();
+
+                        // Subtract lunch overlap (12:00 - 13:30)
+                        var lunchStart = moment(startDate).hour(12).minute(0).second(0);
+                        var lunchEnd = moment(startDate).hour(13).minute(0).second(0);
+
+                        var overlapStart = moment.max(startTime, lunchStart);
+                        var overlapEnd = moment.min(endTime, lunchEnd);
+
+                        if (overlapEnd.isAfter(overlapStart)) {
+                            var lunchOverlap = moment
+                                .duration(overlapEnd.diff(overlapStart))
+                                .asHours();
+                            totalHours -= lunchOverlap;
+                        }
+
+                        totalHours = Math.max(totalHours, 0);
+
+                        var roundedHours = Number(totalHours.toFixed(1));
+                        var displayHours = "";
+
+                        // Adjust for HQ specific cases
+                        if (branchName === "HQ" && roundedHours === 7.5) {
+                            displayHours = "8 Hours";
+                        } else if (branchName === "HQ" && roundedHours == 3.5) {
+                            displayHours = "4 Hours";
+                        } else {
+                            displayHours = roundedHours.toFixed(1) + " Hours";
+                        }
+
+                        $(this).text(displayHours);
+                    } else {
+                        $(this).text("Invalid dates");
+                    }
+                });
+            }
+            // Format the Start and End Dates using Moment.js
+            $(".leave-start-date").each(function () {
+                var startDate = $(this).data("start");
+                var formattedStartDate =
+                    moment(startDate).format("MM-DD-YYYY hh:mm A");
+                $(this).text(formattedStartDate);
+            });
+
+            $(".leave-end-date").each(function () {
+                var endDate = $(this).data("end");
+                var formattedEndDate = moment(endDate).format("MM-DD-YYYY hh:mm A");
+                $(this).text(formattedEndDate);
+            });
+        });
+    </script>
+</body>
+
+</html>

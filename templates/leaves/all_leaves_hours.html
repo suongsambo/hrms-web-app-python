@@ -3,12 +3,35 @@
 {% block title %}Leave Hours Summary{% endblock %}
 
 {% block content %}
-<div class="container bg-white mx-auto p-6 rounded-xl shadow">
+<div class="container bg-white mx-auto p-6 rounded-xl shadow-lg">
 
-    <h1 class="text-2xl font-bold mb-6 text-center text-indigo-700">Leave Hours & Days Summary</h1>
+    <!-- Title -->
+    <h1 class="text-xl font-extrabold mb-4 text-center tracking-wide">
+        <span class="text-indigo-700">Leave Hours</span>
+        <span class="text-green-600">&</span>
+        <span class="text-indigo-700"> Days Summary</span>
+    </h1>
+
+    <!-- Print Report Button -->
+
+    <section class=" flex flex-wrap justify-between items-center  mb-2">
+        <div class="flex gap-1">
+            <a href="{{ url_for('view_leaves') }}" class="btn btn-success">
+                <i class="fas fa-arrow-left mr-2"></i> Back
+            </a>
+            <div class="flex justify-start mb-4">
+                <a href="{{ url_for('print_leave_hours', start_date=start_date, end_date=end_date, employee_name=employee_name, branch=branch, type_of_leave=type_of_leave) }}"
+                    target="_blank" class="btn btn-accent flex items-center gap-2">
+                    <i class="fas fa-print"></i> Print Report
+                </a>
+            </div>
+
+        </div>
+    </section>
+
 
     <!-- Stats -->
-    <div class="stats shadow mb-8 flex justify-center">
+    <div class="stats shadow mb-10 justify-center">
         <div class="stat">
             <div class="stat-title">Total Leave Days</div>
             <div class="stat-value text-indigo-600">{{ total_leave_days }}</div>
@@ -21,13 +44,11 @@
 
     <!-- Filters -->
     <form method="get" action="{{ url_for('get_leave_hours') }}"
-        class="grid grid-cols-1 md:grid-cols-6 gap-4 bg-base-200 p-4 rounded-lg mb-10">
-        <input type="date" name="start_date" value="{{ start_date or '' }}" placeholder="Start Date"
-            class="input input-bordered w-full">
-        <input type="date" name="end_date" value="{{ end_date or '' }}" placeholder="End Date"
-            class="input input-bordered w-full">
+        class="grid grid-cols-1 md:grid-cols-6 gap-4 bg-base-200 p-5 rounded-lg mb-12">
+        <input type="date" name="start_date" value="{{ start_date or '' }}" class="input input-bordered w-full" />
+        <input type="date" name="end_date" value="{{ end_date or '' }}" class="input input-bordered w-full" />
         <input type="text" name="employee_name" value="{{ employee_name or '' }}" placeholder="Employee Name"
-            class="input input-bordered w-full">
+            class="input input-bordered w-full" />
         <select name="branch" class="select select-bordered w-full">
             <option value="">All Branches</option>
             {% for b in branches %}
@@ -40,26 +61,33 @@
             <option value="D" {% if type_of_leave=='D' %}selected{% endif %}>Days (D)</option>
         </select>
 
-        <button type="submit" class="btn btn-primary w-full">Filter</button>
-        <div>
-
-            <a href="{{ url_for('get_leave_hours') }}" class="btn btn-neutral">Clear</a>
+        <div class="flex gap-4">
+            <button type="submit" class="btn btn-primary w-1/2 flex items-center gap-2">
+                <i class="fas fa-filter"></i>
+                Filter
+            </button>
+            <a href="{{ url_for('get_leave_hours') }}"
+                class="btn btn-neutral w-1/2 text-center flex items-center gap-2">
+                <i class="fas fa-eraser"></i>
+                Clear
+            </a>
         </div>
+
     </form>
 
     <!-- Leave Table -->
-    <div class="overflow-x-auto rounded-lg shadow">
-        <table class="table table-zebra w-full">
+    <div class="overflow-x-auto rounded-lg shadow-lg">
+        <table id="leaveTable" class="table table-zebra w-full text-sm">
             <thead class="bg-base-300 text-base-content">
                 <tr>
                     <th>Employee Name</th>
                     <th>Branch</th>
-                    <th>LeaveType</th>
-                    <th style="min-width: 150px">StartDate</th>
-                    <th style="min-width: 150px">EndDate</th>
-                    <th>LeaveDays</th>
-                    <th>LeaveHours</th>
-                    <th>LeaveDates</th>
+                    <th>Leave Type</th>
+                    <th class="min-w-[160px]">Start Date</th>
+                    <th class="min-w-[160px]">End Date</th>
+                    <th class="min-w-[140px]">Leave Days</th>
+                    <th>Leave Hours</th>
+                    <th>Leave Dates</th>
                 </tr>
             </thead>
             <tbody>
@@ -86,41 +114,20 @@
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" class="text-center">No leave records found.</td>
+                    <td colspan="8" class="text-center italic text-gray-500">No leave records found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
+            <tfoot>
+                <tr>
+                    <th class="text-right text-bold text-base" colspan="5" style="text-align: right">Total:</th>
+                    <th>{{ total_leave_days }}</th>
+                    <th>{{ total_leave_hours }}</th>
+                    <th>—</th>
+                </tr>
+            </tfoot>
         </table>
     </div>
-
-    <!-- Leave Type Summary -->
-    <h2 class="text-xl font-semibold mt-10 mb-4 text-indigo-700">Leave Type Summary</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for leave_type, summary in leave_type_count.items() %}
-        <div class="card bg-base-100 shadow-xl border border-base-300">
-            <div class="card-body">
-                <h3 class="card-title text-indigo-600">{{ leave_type }}</h3>
-                <p><span class="font-semibold">Count:</span> {{ summary.count }}</p>
-                <p><span class="font-semibold">Total Days:</span> {{ summary.total_days }}</p>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
-    <!-- Branch Summary -->
-    <h2 class="text-xl font-semibold mt-10 mb-4 text-indigo-700">Branch Summary</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for branch_name, summary in branch_leave_count.items() %}
-        <div class="card bg-base-100 shadow-xl border border-base-300">
-            <div class="card-body">
-                <h3 class="card-title text-green-600">{{ branch_name }}</h3>
-                <p><span class="font-semibold">Leaves:</span> {{ summary.leave_count }}</p>
-                <p><span class="font-semibold">Total Days:</span> {{ summary.total_days }}</p>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-
 
 </div>
 {% endblock %}

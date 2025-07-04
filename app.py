@@ -4117,6 +4117,259 @@ def add_leave():
 #                            branch=branch_filter)
 
 
+# @app.route('/leaves/hours', methods=['GET'])
+# @login_required
+# def get_leave_hours():
+#     if current_user.is_admin == 0:
+#         return redirect(url_for('leaves_user_id', user_id=current_user.id))
+
+#     start_date_filter = request.args.get('start_date')
+#     end_date_filter = request.args.get('end_date')
+#     employee_name_filter = request.args.get('employee_name')
+#     branch_filter = request.args.get('branch')
+#     type_of_leave_filter = request.args.get('type_of_leave')
+
+#     with get_db_connection() as conn:
+#         branches = conn.execute("SELECT DISTINCT Branch FROM branches").fetchall()
+
+#         query = '''
+#             SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date,
+#                    l.type_of_leave, l.leave_hours
+#             FROM leaves l
+#             LEFT JOIN employees e ON l.employee_id = e.id
+#         '''
+
+#         conditions = []
+#         params = []
+
+#         if type_of_leave_filter:
+#             conditions.append("l.type_of_leave = ?")
+#             params.append(type_of_leave_filter)
+#         if start_date_filter:
+#             conditions.append('l.start_date >= ?')
+#             params.append(start_date_filter)
+#         if end_date_filter:
+#             conditions.append('l.start_date <= ?')
+#             params.append(end_date_filter)
+#         if employee_name_filter:
+#             conditions.append('e.name LIKE ?')
+#             params.append(f"%{employee_name_filter}%")
+#         if branch_filter:
+#             conditions.append('e.branch = ?')
+#             params.append(branch_filter)
+
+#         if conditions:
+#             query += ' WHERE ' + ' AND '.join(conditions)
+
+#         leaves = conn.execute(query, params).fetchall()
+
+#     total_leave_days = 0
+#     total_leave_hours = 0
+
+#     leave_records = []
+#     leave_type_count = {}
+#     branch_leave_count = {}
+
+#     for leave in leaves:
+#         employee_name = leave['employee_name'] or "Unknown Employee"
+#         branch = leave['branch'] or "Unknown Branch"
+
+#         try:
+#             start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
+#             end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
+#         except ValueError:
+#             continue
+
+#         holidays = get_holidays(start_date_obj.year)
+#         public_holidays_str = ",".join([holiday["label"] for holiday in holidays])
+
+#         result = remove_sun_sat_and_holiday(
+#             start_date_obj.strftime("%Y-%m-%d"),
+#             end_date_obj.strftime("%Y-%m-%d"),
+#             public_holidays_str
+#         )
+
+#         valid_leave_days = result.get("ValidWorkingDays", [])
+#         leave_day_list = [day.strftime('%Y-%m-%d') for day in valid_leave_days]
+#         leave_days = len(valid_leave_days)
+
+#         leave_hours = leave['leave_hours'] or 0
+
+#         if leave['type_of_leave'] == 'H':
+#             total_leave_hours += leave_hours
+#         else:
+#             total_leave_days += leave_days
+
+#         if leave['leave_type'] not in leave_type_count:
+#             leave_type_count[leave['leave_type']] = {'count': 0, 'total_days': 0}
+#         leave_type_count[leave['leave_type']]['count'] += 1
+#         leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+#         if branch not in branch_leave_count:
+#             branch_leave_count[branch] = {'leave_count': 0, 'total_days': 0}
+#         branch_leave_count[branch]['leave_count'] += 1
+#         branch_leave_count[branch]['total_days'] += leave_days
+
+#         leave_records.append({
+#             'branch': branch,
+#             'employee_name': employee_name,
+#             'leave_type': leave['leave_type'],
+#             'start_date': leave['start_date'],
+#             'end_date': leave['end_date'],
+#             'leave_days': leave_days,
+#             'leave_day_list': leave_day_list,
+#             'leave_hours': leave_hours,
+#             'type_of_leave': leave['type_of_leave']
+#         })
+
+#     return render_template('/leaves/all_leaves_hours.html',
+#                            leaves=leave_records,
+#                            total_leave_days=total_leave_days,
+#                            total_leave_hours=total_leave_hours,
+#                            leave_type_count=leave_type_count,
+#                            branch_leave_count=branch_leave_count,
+#                            start_date=start_date_filter,
+#                            end_date=end_date_filter,
+#                            employee_name=employee_name_filter,
+#                            type_of_leave=type_of_leave_filter,
+#                            branches=branches,
+#                            branch=branch_filter)
+
+
+
+@app.route('/leaves/print', methods=['GET'])
+@login_required
+def print_leave_hours():
+    # Same logic to fetch filters and leaves
+    start_date_filter = request.args.get('start_date')
+    end_date_filter = request.args.get('end_date')
+    employee_name_filter = request.args.get('employee_name')
+    branch_filter = request.args.get('branch')
+    type_of_leave_filter = request.args.get('type_of_leave')
+
+    with get_db_connection() as conn:
+        branches = conn.execute("SELECT DISTINCT Branch FROM branches").fetchall()
+
+        query = '''
+            SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date,
+                   l.type_of_leave, l.leave_hours
+            FROM leaves l
+            LEFT JOIN employees e ON l.employee_id = e.id
+        '''
+        conditions = []
+        params = []
+
+        if type_of_leave_filter:
+            conditions.append("l.type_of_leave = ?")
+            params.append(type_of_leave_filter)
+        if start_date_filter:
+            conditions.append('l.start_date >= ?')
+            params.append(start_date_filter)
+        if end_date_filter:
+            conditions.append('l.start_date <= ?')
+            params.append(end_date_filter)
+        if employee_name_filter:
+            conditions.append('e.name LIKE ?')
+            params.append(f"%{employee_name_filter}%")
+        if branch_filter:
+            conditions.append('e.branch = ?')
+            params.append(branch_filter)
+
+        if conditions:
+            query += ' WHERE ' + ' AND '.join(conditions)
+
+        leaves = conn.execute(query, params).fetchall()
+
+    # Process data the same as before
+    total_leave_days = 0
+    total_leave_hours = 0
+    leave_records = []
+    leave_type_count = {}
+    branch_leave_count = {}
+
+    for leave in leaves:
+        employee_name = leave['employee_name'] or "Unknown Employee"
+        branch = leave['branch'] or "Unknown Branch"
+
+        def parse_date(date_str):
+            for fmt in ("%Y-%m-%d", "%Y-%m-%d %H:%M"):
+                try:
+                    return datetime.strptime(date_str, fmt)
+                except ValueError:
+                    continue
+            return None
+
+        start_date_obj = parse_date(leave['start_date'])
+        end_date_obj = parse_date(leave['end_date'])
+
+        if not start_date_obj or not end_date_obj:
+            continue
+
+        holidays = get_holidays(start_date_obj.year)
+        public_holidays_str = ",".join([holiday["label"] for holiday in holidays])
+        result = remove_sun_sat_and_holiday(
+            start_date_obj.strftime("%Y-%m-%d"),
+            end_date_obj.strftime("%Y-%m-%d"),
+            public_holidays_str
+        )
+
+        valid_leave_days = result.get("ValidWorkingDays", [])
+        leave_day_list = [day.strftime('%Y-%m-%d') for day in valid_leave_days]
+        leave_days = len(valid_leave_days)
+
+        leave_hours = leave['leave_hours'] or 0
+
+        # Adjust leave_hours if branch is HQ
+        if branch == "HQ":
+            if leave_hours == 7.5:
+                leave_hours = 8
+            elif leave_hours == 3.5:
+                leave_hours = 4
+
+        # Fix here: If leave_hours > 0, set leave_days = '-'
+        if leave['type_of_leave'] == 'H' and leave_hours > 0:
+            display_leave_days = "-"
+        else:
+            display_leave_days = leave_days
+
+        # Count totals
+        if leave['type_of_leave'] == 'H':
+            total_leave_hours += leave_hours
+        else:
+            total_leave_days += leave_days
+
+        # Leave type summary
+        if leave['leave_type'] not in leave_type_count:
+            leave_type_count[leave['leave_type']] = {'count': 0, 'total_days': 0}
+        leave_type_count[leave['leave_type']]['count'] += 1
+        leave_type_count[leave['leave_type']]['total_days'] += leave_days
+
+        # Branch summary
+        if branch not in branch_leave_count:
+            branch_leave_count[branch] = {'leave_count': 0, 'total_days': 0}
+        branch_leave_count[branch]['leave_count'] += 1
+        branch_leave_count[branch]['total_days'] += leave_days
+
+        leave_records.append({
+            'branch': branch,
+            'employee_name': employee_name,
+            'leave_type': leave['leave_type'],
+            'start_date': leave['start_date'],
+            'end_date': leave['end_date'],
+            'leave_days': display_leave_days,  # ⬅️ Use adjusted value
+            'leave_day_list': leave_day_list,
+            'leave_hours': leave_hours,
+            'type_of_leave': leave['type_of_leave']
+        })
+
+    return render_template('/leaves/print_leaves.html',
+                           leaves=leave_records,
+                           total_leave_days=total_leave_days,
+                           total_leave_hours=total_leave_hours,
+                           leave_type_count=leave_type_count,
+                           branch_leave_count=branch_leave_count)
+
+
 @app.route('/leaves/hours', methods=['GET'])
 @login_required
 def get_leave_hours():
@@ -4169,16 +4422,28 @@ def get_leave_hours():
     leave_records = []
     leave_type_count = {}
     branch_leave_count = {}
+    
+
+
 
     for leave in leaves:
         employee_name = leave['employee_name'] or "Unknown Employee"
         branch = leave['branch'] or "Unknown Branch"
 
-        try:
-            start_date_obj = datetime.strptime(leave['start_date'], "%Y-%m-%d")
-            end_date_obj = datetime.strptime(leave['end_date'], "%Y-%m-%d")
-        except ValueError:
-            continue
+        # Try parsing start_date and end_date with both formats
+        def parse_date(date_str):
+            for fmt in ("%Y-%m-%d", "%Y-%m-%d %H:%M"):
+                try:
+                    return datetime.strptime(date_str, fmt)
+                except ValueError:
+                    continue
+            return None
+
+        start_date_obj = parse_date(leave['start_date'])
+        end_date_obj = parse_date(leave['end_date'])
+
+        if not start_date_obj or not end_date_obj:
+            continue  # Skip if date parsing fails
 
         holidays = get_holidays(start_date_obj.year)
         public_holidays_str = ",".join([holiday["label"] for holiday in holidays])
@@ -4194,6 +4459,18 @@ def get_leave_hours():
         leave_days = len(valid_leave_days)
 
         leave_hours = leave['leave_hours'] or 0
+        
+        # Adjust leave_hours if branch is HQ
+        if branch == "HQ":
+            if leave_hours == 7.5:
+                leave_hours = 8
+            elif leave_hours == 3.5:
+                leave_hours = 4
+
+        if leave['type_of_leave'] == 'H':
+            total_leave_hours += leave_hours
+        else:
+            total_leave_days += leave_days
 
         if leave['type_of_leave'] == 'H':
             total_leave_hours += leave_hours
