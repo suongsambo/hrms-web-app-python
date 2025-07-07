@@ -1643,6 +1643,229 @@ def leaves_by_branch_and_pm_report(branch_name):
         users=users or []
     )
 
+@app.route('/leaves/dep/crd/report/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_dep_crd(branch_name):
+    # if not current_user.is_authenticated or current_user.role_default != 140:
+    #     return redirect(url_for('access_denied'))
+
+    base_query = '''
+        SELECT
+            l.id,
+            e.name AS employee_name,
+            l.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE ({conditions})
+    '''
+
+    if branch_name:
+        # Enforce role 140 even when OR is used
+        conditions = '(l.branch = ? AND (l.type_of_leave = "H" OR l.requested_by_roles = 200)) AND l.requested_by_roles = 200'
+        params = (branch_name,)
+    else:
+        conditions = '(l.type_of_leave = "H" OR l.requested_by_roles = 200) AND l.requested_by_roles = 200'
+        params = ()
+
+    query = base_query.format(conditions=conditions)
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+            users = conn.execute("SELECT * FROM users").fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template(
+        'leaves/leaves_by_dep.html',
+        leaves=leaves or [],
+        branch_name=branch_name or '',
+        users=users or []
+    ) 
+
+
+
+@app.route('/leaves/dep/itd/report/<string:branch_name>', methods=['GET'])
+@login_required
+def leaves_by_dep_itd(branch_name):
+    base_query = '''
+        SELECT
+            l.id,
+            e.name AS employee_name,
+            l.branch AS branch_name,
+            l.leave_type,
+            l.start_date,
+            l.end_date,
+            l.reason,
+            l.status,
+            l.type_of_leave,
+            l.verified_by,
+            l.approved_by,
+            l.leave_hours,
+            l.service_count,
+            l.requested_by
+        FROM leaves l
+        LEFT JOIN employees e ON l.employee_id = e.id
+        WHERE ({conditions})
+    '''
+
+    if branch_name:
+        # Enforce role 700 even when OR is used
+        conditions = '(l.branch = ? AND (l.type_of_leave = "H" OR l.requested_by_roles = 700)) AND l.requested_by_roles = 700'
+        params = (branch_name,)
+    else:
+        conditions = '(l.type_of_leave = "H" OR l.requested_by_roles = 700) AND l.requested_by_roles = 700'
+        params = ()
+
+    query = base_query.format(conditions=conditions)
+
+    try:
+        with get_db_connection() as conn:
+            leaves = conn.execute(query, params).fetchall()
+            users = conn.execute("SELECT * FROM users").fetchall()
+    except sqlite3.DatabaseError as e:
+        return f"Database error: {e}", 500
+
+    return render_template(
+        'leaves/leaves_by_dep_itd.html',
+        leaves=leaves or [],
+        branch_name=branch_name or '',
+        users=users or []
+    ) 
+
+
+# @app.route('/leaves/dep/<string:dep_code>/report/<string:branch_name>', methods=['GET'])
+# @login_required
+# def leaves_by_dep(dep_code, branch_name):
+#     # Map department code to required role
+#     role_map = {
+#         'crd': 200,
+#         'itd': 700
+#     }
+
+#     # Validate department code
+#     if dep_code not in role_map:
+#         return "Invalid department code", 400
+
+#     role_required = role_map[dep_code]
+
+#     base_query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE ({conditions})
+#     '''
+
+#     if branch_name:
+#         conditions = '(l.branch = ? AND (l.type_of_leave = "H" OR l.requested_by_roles = ?)) AND l.requested_by_roles = ?'
+#         params = (branch_name, role_required, role_required)
+#     else:
+#         conditions = '(l.type_of_leave = "H" OR l.requested_by_roles = ?) AND l.requested_by_roles = ?'
+#         params = (role_required, role_required)
+
+#     query = base_query.format(conditions=conditions)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#             users = conn.execute("SELECT * FROM users").fetchall()
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     return render_template(
+#         f'leaves/leaves_by_dep_{dep_code}.html',
+#         leaves=leaves or [],
+#         branch_name=branch_name or '',
+#         users=users or []
+#     )
+
+
+# @app.route('/leaves/dep/<string:department_name>/report/<string:branch_name>', methods=['GET'])
+# @login_required
+# def leaves_by_dep(department_name, branch_name):
+#     # Map full department name to role
+#     department_map = {
+#         'CRD': 200,
+#         'ITD': 700
+#     }
+
+#     # Validate department name
+#     if department_name not in department_map:
+#         return "Invalid department name", 400
+
+#     role_required = department_map[department_name]
+
+#     base_query = '''
+#         SELECT
+#             l.id,
+#             e.name AS employee_name,
+#             l.branch AS branch_name,
+#             l.leave_type,
+#             l.start_date,
+#             l.end_date,
+#             l.reason,
+#             l.status,
+#             l.type_of_leave,
+#             l.verified_by,
+#             l.approved_by,
+#             l.leave_hours,
+#             l.service_count,
+#             l.requested_by
+#         FROM leaves l
+#         LEFT JOIN employees e ON l.employee_id = e.id
+#         WHERE ({conditions})
+#     '''
+
+#     if branch_name:
+#         conditions = '(l.branch = ? AND (l.type_of_leave = "H" OR l.requested_by_roles = ?)) AND l.requested_by_roles = ?'
+#         params = (branch_name, role_required, role_required)
+#     else:
+#         conditions = '(l.type_of_leave = "H" OR l.requested_by_roles = ?) AND l.requested_by_roles = ?'
+#         params = (role_required, role_required)
+
+#     query = base_query.format(conditions=conditions)
+
+#     try:
+#         with get_db_connection() as conn:
+#             leaves = conn.execute(query, params).fetchall()
+#             users = conn.execute("SELECT * FROM users").fetchall()
+#     except sqlite3.DatabaseError as e:
+#         return f"Database error: {e}", 500
+
+#     # Use a shared template if desired
+#     return render_template(
+#         'leaves/leaves_by_dep.html',
+#         leaves=leaves or [],
+#         branch_name=branch_name or '',
+#         department_name=department_name,
+#         users=users or []
+#     )
+
 
 @app.route('/leaves/spm/report/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_spm_report(branch_name):
