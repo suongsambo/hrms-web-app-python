@@ -3940,19 +3940,16 @@ def leave_days_pm(branch):
 
 
 
-
 @app.route('/leave/days/dep/crd/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def leave_days_dep_crd(branch):
     user_branch = branch if not current_user.is_authenticated else current_user.branch
 
     with get_db_connection() as conn:
-        # Fetch employees for the form
         employees = conn.execute(
             'SELECT id, name, branch FROM employees'
         ).fetchall()
 
-        # Keep only users4
         users4 = conn.execute(
             'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
         ).fetchall()
@@ -3967,6 +3964,7 @@ def leave_days_dep_crd(branch):
         type_of_leave = request.form.get('type_of_leave', 'D')
         user_ids = request.form.getlist('user_ids')
         requested_by_roles = request.form.getlist('requested_by_roles')
+        verified_by = request.form.get('verified_by', 'Not required') or 'Not required'  # ✅ Add this
 
         branch = user_branch
 
@@ -3974,7 +3972,6 @@ def leave_days_dep_crd(branch):
         holiday_labels = [holiday["label"] for holiday in get_holidays(current_date.year)]
         public_holidays_str = ",".join(holiday_labels)
 
-        # Calculate adjusted leave details
         result = calculate_add_day_and_final_end_date(start_date, end_date, public_holidays_str)
         excluded_days = result['ExcludedDays']
         final_end_date = result['FinalEndDate']
@@ -3983,7 +3980,6 @@ def leave_days_dep_crd(branch):
 
         service_count = calculate_service_count_1(start_date_obj, final_end_date_obj)
 
-        # Determine category
         if service_count <= 2:
             category = "S"
         elif 3 <= service_count <= 5:
@@ -3994,12 +3990,12 @@ def leave_days_dep_crd(branch):
         with get_db_connection() as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date, requested_by_roles)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date, requested_by_roles, verified_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
-                reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date_obj.date(),
-                ','.join(requested_by_roles)
+                reason, service_count, type_of_leave, requested_by, category, branch,
+                excluded_days, final_end_date_obj.date(), ','.join(requested_by_roles), verified_by
             ))
 
             leave_id = cursor.lastrowid
@@ -4020,6 +4016,167 @@ def leave_days_dep_crd(branch):
         users4=users4,
         branch=user_branch
     )
+
+
+
+@app.route('/leave/days/dep/itd/add/<string:branch>', methods=['GET', 'POST'])
+@login_required
+def leave_days_dep_itd(branch):
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+    with get_db_connection() as conn:
+        employees = conn.execute(
+            'SELECT id, name, branch FROM employees'
+        ).fetchall()
+
+        users4 = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
+        ).fetchall()
+
+    if request.method == 'POST':
+        employee_id = request.form['employee_id']
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        requested_by = request.form['requested_by']
+        type_of_leave = request.form.get('type_of_leave', 'D')
+        user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form.getlist('requested_by_roles')
+        verified_by = request.form.get('verified_by', 'Not required') or 'Not required'  # ✅ Add this
+
+        branch = user_branch
+
+        current_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+        holiday_labels = [holiday["label"] for holiday in get_holidays(current_date.year)]
+        public_holidays_str = ",".join(holiday_labels)
+
+        result = calculate_add_day_and_final_end_date(start_date, end_date, public_holidays_str)
+        excluded_days = result['ExcludedDays']
+        final_end_date = result['FinalEndDate']
+        final_end_date_obj = datetime.strptime(str(final_end_date), "%Y-%m-%d")
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+
+        service_count = calculate_service_count_1(start_date_obj, final_end_date_obj)
+
+        if service_count <= 2:
+            category = "S"
+        elif 3 <= service_count <= 5:
+            category = "M"
+        else:
+            category = "L"
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date, requested_by_roles, verified_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
+                reason, service_count, type_of_leave, requested_by, category, branch,
+                excluded_days, final_end_date_obj.date(), ','.join(requested_by_roles), verified_by
+            ))
+
+            leave_id = cursor.lastrowid
+
+            for user_id in user_ids:
+                cursor.execute('''
+                    INSERT INTO user_leave (user_id, leave_id)
+                    VALUES (?, ?)
+                ''', (user_id, leave_id))
+
+            conn.commit()
+
+        return redirect(url_for('leaves_by_dep_itd', branch_name=current_user.branch))
+
+    return render_template(
+        'leaves/add_leave_days_dep_itd.html',
+        employees=employees,
+        users4=users4,
+        branch=user_branch
+    )
+
+
+
+# @app.route('/leave/days/dep/crd/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required
+# def leave_days_dep_crd(branch):
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+
+#     with get_db_connection() as conn:
+#         # Fetch employees for the form
+#         employees = conn.execute(
+#             'SELECT id, name, branch FROM employees'
+#         ).fetchall()
+
+#         # Keep only users4
+#         users4 = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
+#         ).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         requested_by = request.form['requested_by']
+#         type_of_leave = request.form.get('type_of_leave', 'D')
+#         user_ids = request.form.getlist('user_ids')
+#         requested_by_roles = request.form.getlist('requested_by_roles')
+
+#         branch = user_branch
+
+#         current_date = datetime.strptime(start_date, "%Y-%m-%d").date()
+#         holiday_labels = [holiday["label"] for holiday in get_holidays(current_date.year)]
+#         public_holidays_str = ",".join(holiday_labels)
+
+#         # Calculate adjusted leave details
+#         result = calculate_add_day_and_final_end_date(start_date, end_date, public_holidays_str)
+#         excluded_days = result['ExcludedDays']
+#         final_end_date = result['FinalEndDate']
+#         final_end_date_obj = datetime.strptime(str(final_end_date), "%Y-%m-%d")
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
+
+#         service_count = calculate_service_count_1(start_date_obj, final_end_date_obj)
+
+#         # Determine category
+#         if service_count <= 2:
+#             category = "S"
+#         elif 3 <= service_count <= 5:
+#             category = "M"
+#         else:
+#             category = "L"
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO leaves (employee_id, leave_type, start_date, end_date, reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date, requested_by_roles)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (
+#                 employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
+#                 reason, service_count, type_of_leave, requested_by, category, branch, excluded_days, final_end_date_obj.date(),
+#                 ','.join(requested_by_roles)
+#             ))
+
+#             leave_id = cursor.lastrowid
+
+#             for user_id in user_ids:
+#                 cursor.execute('''
+#                     INSERT INTO user_leave (user_id, leave_id)
+#                     VALUES (?, ?)
+#                 ''', (user_id, leave_id))
+
+#             conn.commit()
+
+#         return redirect(url_for('leaves_by_dep_crd', branch_name=current_user.branch))
+
+#     return render_template(
+#         'leaves/add_leave_days_dep_crd.html',
+#         employees=employees,
+#         users4=users4,
+#         branch=user_branch
+#     )
 
 
 
