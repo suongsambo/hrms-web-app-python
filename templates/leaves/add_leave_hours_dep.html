@@ -147,7 +147,7 @@ content %}
             <i class="fas fa-paper-plane"></i>
             <span>Submit</span>
           </button>
-          <a href="{{ url_for('leaves_by_branch_and_pm_report', branch_name=branch) }}"
+          <a href="{{ url_for('leaves_by_dep_crd', branch_name=branch) }}"
             class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
             <i class="fas fa-arrow-left mr-2"></i> Back
           </a>
@@ -160,7 +160,7 @@ content %}
     function closeModal() {
       document.getElementById("leaveModal").classList.add("hidden");
       window.location.href =
-        "{{ url_for('leaves_by_branch_and_pm_report', branch_name=branch) }}";
+        "{{ url_for('leaves_by_dep_crd', branch_name=branch) }}";
     }
 
     document.addEventListener("DOMContentLoaded", function () {
