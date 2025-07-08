@@ -2763,6 +2763,7 @@ def add_leave_hours_pm(branch):
 
 
 
+# Manger Department
 @app.route('/leave_hours/dep/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_leave_hours_dep(branch):
@@ -2785,6 +2786,8 @@ def add_leave_hours_dep(branch):
         requested_by = request.form['requested_by']
         user_ids = request.form.getlist('user_ids')
         requested_by_roles = request.form['requested_by_roles']
+        verified_by = request.form.get('verified_by', 'Not required') or 'Not required'
+
 
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
@@ -2828,10 +2831,14 @@ def add_leave_hours_dep(branch):
 
         with get_db_connection() as conn:
             cursor = conn.cursor()
+            # cursor.execute('''
+            #     INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by, requested_by_roles)
+            #     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            # ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
             cursor.execute('''
                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by, requested_by_roles)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, verified_by, requested_by_roles))
 
             leave_id = cursor.lastrowid
 
@@ -2856,37 +2863,28 @@ def add_leave_hours_dep(branch):
     return render_template('/leaves/add_leave_hours_dep.html', employees=employees, users=users, branch=branch)
 
 
+# Staff Department
 @app.route('/leave_hours/department/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_leave_hours_crd(branch):
     user_branch = branch if not current_user.is_authenticated else current_user.branch
-    if start_date_obj.hour < 7:
-            flash("ម៉ោងឈប់សម្រាកត្រូវចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
-    employee_id = current_user.employee_id
+    current_user_department = current_user.department
 
     with get_db_connection() as conn:
-        if end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
-            flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
-            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+        # Get employee list (you might adjust this query)
+        employees = conn.execute('SELECT id, name FROM employees WHERE branch = ?', (user_branch,)).fetchall()
 
-        total_seconds = (end_date_obj - start_date_obj).total_seconds()
-        total_hours = total_seconds / 3600
-
-        # Lunch deduction logic
-        lunch_start = start_date_obj.replace(hour=12, minute=0)
-        users = []
-        if current_user_department:
-            users = conn.execute(
-                '''
-                SELECT u.id, u.username, u.branch, e.department
-                FROM users u
-                INNER JOIN employees e ON u.id = e.user_id
-                WHERE u.branch = ?
-                  AND e.department = ?
-                  AND u.RoleDefault >= 200
-                  AND u.Active = 1
-                ''', (user_branch, current_user_department)
-            ).fetchall()
+        users = conn.execute(
+            '''
+            SELECT u.id, u.username, u.branch, e.department
+            FROM users u
+            INNER JOIN employees e ON u.id = e.user_id
+            WHERE u.branch = ?
+              AND e.department = ?
+              AND u.RoleDefault >= 200
+              AND u.Active = 1
+            ''', (user_branch, current_user_department)
+        ).fetchall()
 
     if request.method == 'POST':
         form = request.form
@@ -2898,50 +2896,49 @@ def add_leave_hours_crd(branch):
         branch = form['branch']
         requested_by = form['requested_by']
         requested_by_roles = form['requested_by_roles']
-        requested_from = form['requested_from']  # <-- Added field
+        requested_from = form.get('requested_from', 'Not specified')  # optional
 
         start_dt = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
 
         if end_dt <= start_dt:
             flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
-            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+            return redirect(url_for('add_leave_hours_crd', branch=branch))
 
         if start_dt.weekday() >= 5 or end_dt.weekday() >= 5:
             flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
-            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+            return redirect(url_for('add_leave_hours_crd', branch=branch))
 
         if start_dt.hour < 8:
-            flash("ម៉ោងឈប់សម្រាកត្រូវតែចាប់ពីម៉ោង 8:00 ព្រឹក...", "error")
-            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+            flash("ម៉ោងឈប់សម្រាកត្រូវចាប់ពីម៉ោង 8:00 ព្រឹក...", "error")
+            return redirect(url_for('add_leave_hours_crd', branch=branch))
 
         if end_dt.hour > 17 or (end_dt.hour == 17 and end_dt.minute > 0):
             flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
-            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+            return redirect(url_for('add_leave_hours_crd', branch=branch))
 
         # Calculate leave hours
         if start_dt.hour == 8 and start_dt.minute == 0 and end_dt.hour == 17 and end_dt.minute == 0:
-            leave_hours = 7.5  # Full-day leave
+            leave_hours = 7.5  # Full-day
         else:
             total_seconds = (end_dt - start_dt).total_seconds()
             total_hours = total_seconds / 3600
 
-            # Subtract lunch break if overlaps
+            # Subtract lunch break if overlap
             lunch_start = start_dt.replace(hour=12, minute=0)
             lunch_end = start_dt.replace(hour=13, minute=0)
             if start_dt < lunch_end and end_dt > lunch_start:
                 overlap_start = max(start_dt, lunch_start)
                 overlap_end = min(end_dt, lunch_end)
                 if overlap_end > overlap_start:
-                    lunch_deduction = (
-                        overlap_end - overlap_start).total_seconds() / 3600
+                    lunch_deduction = (overlap_end - overlap_start).total_seconds() / 3600
                     total_hours -= lunch_deduction
 
             leave_hours = round(max(total_hours, 0), 2)
 
         if leave_hours > 8:
             flash("ម៉ោងឈប់សម្រាកមិនគួរធំជាង 8 ម៉ោងទេ។", "error")
-            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+            return redirect(url_for('add_leave_hours_crd', branch=branch))
 
         with get_db_connection() as conn:
             conn.execute(
@@ -2963,6 +2960,7 @@ def add_leave_hours_crd(branch):
         users=users,
         branch=branch
     )
+
 
 
 @app.route('/leave_hours/spm/add/<string:branch>', methods=['GET', 'POST'])
