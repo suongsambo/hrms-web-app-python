@@ -1,0 +1,180 @@
+{% extends 'base.html' %} {% block title %}Add Leave{% endblock %} {% block
+content %}
+
+<head>
+  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+</head>
+
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+  <!-- Modal -->
+  <div id="leaveModal" class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold">ពាក្យសុំច្បាប់ឈប់សម្រាក ( គិតជាម៉ោង )</h2>
+        <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-800">
+          &times;
+        </button>
+      </div>
+      <br />
+      <hr class="border-t border-gray-300" />
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %}
+      <ul class="flashes">
+        {% for category, message in messages %}
+        <li class="text-red-600 {{ category }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %} {% endwith %}
+      <!-- Render Message -->
+      <div id="message" class="bg-green-200 text-green-800 px-4 py-2 rounded-md shadow-md mt-4 hidden">
+        Your message has been successfully rendered!
+      </div>
+      <form method="POST" action="{{ url_for('add_leave_hours_dep', branch=branch) }}" class="space-y-6">
+        <!-- Employee selection -->
+
+        <div>
+          <label for="branch" class="hidden">Branch</label>
+          <input type="text" id="branch" name="branch" value="{{ current_user.branch }}" hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+
+        <div>
+          <label for="requested_by_roles" class="hidden">Requested By Roles</label>
+          <input type="text" id="requested_by_roles" name="requested_by_roles" hidden
+            value="{{ current_user.role_default }}"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+
+        <div>
+          <label for="verified_by" class="hidden">Verified By</label>
+          <input type="text" id="verified_by" name="verified_by" value="Not required" hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+
+        <div>
+          <label for="employee_id" class="hidden">Employee</label>
+          <input type="text" id="employee_id" name="employee_id" value="{{ current_user.employee_id }}" hidden
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+
+        <!-- Requested By -->
+        <div>
+          <label for="requested_by" class="hidden">Requested By</label>
+          <input type="text" id="requested_by" name="requested_by" hidden value="{{ current_user.username }}"
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+        </div>
+
+        <!-- Leave Type selection -->
+        <div class="mb-4">
+          <label for="leave_type" class="block text-gray-700 text-sm font-medium">
+            ប្រភេទនៃការឈប់សម្រាក (Types of Leave):
+          </label>
+          <select id="leave_type" name="leave_type"
+            class="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            <option value="annualLeave">
+              ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)
+            </option>
+            <option value="sickLeave">ការឈប់សម្រាកដោយជម្ងឺ (Sick Leave)</option>
+            <option value="maternityLeave">
+              ការឈប់សម្រាកលំហែមាតុភាព (Maternity Leave)
+            </option>
+            <option value="specialLeave">
+              ការឈប់សម្រាកពិសេស (Special Leave)
+            </option>
+          </select>
+        </div>
+
+        <!-- Grid Container for Start and End Date -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Start Date with Icon -->
+          <div class="relative">
+            <label for="start_date" class="block text-sm font-medium text-gray-700">សំណើសុំឈប់សម្រាកពីម៉ោង</label>
+            <div class="relative">
+              <input type="text" id="start_date" name="start_date" required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+              <!-- Calendar Icon -->
+              <span class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none">
+                <i class="fas fa-calendar-alt"></i>
+              </span>
+            </div>
+          </div>
+
+          <!-- End Date with Icon -->
+          <div class="relative">
+            <label for="end_date" class="block text-sm font-medium text-gray-700">រហូតដល់ម៉ោង</label>
+            <div class="relative">
+              <input type="text" id="end_date" name="end_date" required
+                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm pl-10 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
+              <!-- Calendar Icon -->
+              <span class="absolute inset-y-0 left-2 flex items-center text-gray-500 pointer-events-none">
+                <i class="fas fa-calendar-alt"></i>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label for="user_ids" class="block text-gray-700 text-sm font-medium">Assign to Users:</label>
+          <fieldset class="mt-2 mb-2 border-t border-b border-gray-300 shadow-lg p-4 rounded-lg">
+            <legend class="text-md font-semibold text-blue-600">
+              Leaves Hours (>= 8hours):
+            </legend>
+            <div class="grid grid-cols-2 gap-6">
+              {% for user in users %}
+              <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded-md transition-colors">
+                <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user1_{{ user.id }}"
+                  class="form-checkbox h-5 w-5 text-blue-600 border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
+                <label for="user1_{{ user.id }}"
+                  class="text-lg text-gray-700 cursor-pointer transition-colors hover:text-blue-600">{{ user.username
+                  }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </fieldset>
+        </div>
+
+        <!-- Reason -->
+        <div>
+          <label for="reason" class="block text-sm font-medium text-gray-700">មូលហេតុនៃការសុំឈប់សម្រាក (Reason for
+            Leave)</label>
+          <textarea id="reason" name="reason" rows="4" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+        </div>
+
+        <div class="flex justify-between gap-2">
+          <button type="submit"
+            class="px-6 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50 flex items-center space-x-2">
+            <i class="fas fa-paper-plane"></i>
+            <span>Submit</span>
+          </button>
+          <a href="{{ url_for('leaves_by_branch_and_pm_report', branch_name=branch) }}"
+            class="w-1/2 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function closeModal() {
+      document.getElementById("leaveModal").classList.add("hidden");
+      window.location.href =
+        "{{ url_for('leaves_by_branch_and_pm_report', branch_name=branch) }}";
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+      flatpickr("#start_date", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today",
+      });
+      flatpickr("#end_date", {
+        enableTime: true,
+        dateFormat: "Y-m-d H:i",
+        minDate: "today",
+      });
+    });
+  </script>
+</body>
+{% endblock %}

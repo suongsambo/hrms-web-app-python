@@ -2659,15 +2659,221 @@ def add_leave_hours_pm(branch):
     return render_template('/leaves/add_leave_hours_pm.html', employees=employees, users=users, branch=branch)
 
 
+
+# @app.route('/leave_hours/dep/add/<string:branch>', methods=['GET', 'POST'])
+# @login_required
+# def add_leave_hours_dep(branch):
+#     employees = []
+#     users = []
+#     user_branch = branch if not current_user.is_authenticated else current_user.branch
+#     current_department = current_user.branch or current_user.department
+
+#     with get_db_connection() as conn:
+#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
+
+#         branch_row = conn.execute(
+#             "SELECT id FROM branches WHERE Branch = ?", (user_branch,)
+#         ).fetchone()
+
+#         # Get active users with RoleDefault 180
+#         users = conn.execute(
+#             'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
+#         ).fetchall()
+
+#     if request.method == 'POST':
+#         employee_id = request.form['employee_id']
+#         leave_type = request.form['leave_type']
+#         start_date = request.form['start_date']
+#         end_date = request.form['end_date']
+#         reason = request.form['reason']
+#         branch = request.form['branch']
+#         requested_by = request.form['requested_by']
+#         user_ids = request.form.getlist('user_ids')
+#         requested_by_roles = request.form['requested_by_roles']
+
+#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+#         if end_date_obj <= start_date_obj:
+#             flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+#         if start_date_obj.weekday() >= 5 or end_date_obj.weekday() >= 5:
+#             flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
+#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+#         if start_date_obj.hour < 7:
+#             flash("ម៉ោងឈប់សម្រាកត្រូវចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
+#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+#         if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+#            end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+#             flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
+#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+#         total_seconds = (end_date_obj - start_date_obj).total_seconds()
+#         total_hours = total_seconds / 3600
+
+#         # Deduct lunch if overlapping
+#         lunch_start = start_date_obj.replace(hour=12, minute=0)
+#         lunch_end = start_date_obj.replace(hour=13, minute=30)
+
+#         if start_date_obj < lunch_end and end_date_obj > lunch_start:
+#             lunch_overlap_start = max(start_date_obj, lunch_start)
+#             lunch_overlap_end = min(end_date_obj, lunch_end)
+#             if lunch_overlap_end > lunch_overlap_start:
+#                 lunch_overlap = (lunch_overlap_end - lunch_overlap_start).total_seconds() / 3600
+#                 total_hours -= lunch_overlap
+
+#         total_hours = max(total_hours, 0)
+#         leave_hours = round(total_hours, 2)
+
+#         if leave_hours > 8:
+#             flash("ម៉ោងឈប់សម្រាកមិនគួរធំជាង 8 ម៉ោងទេ។", "error")
+#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+#         with get_db_connection() as conn:
+#             cursor = conn.cursor()
+#             cursor.execute('''
+#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by, requested_by_roles)
+#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
+
+#             leave_id = cursor.lastrowid
+
+#             for user_id in user_ids:
+#                 cursor.execute('INSERT INTO user_leave (user_id, leave_id) VALUES (?, ?)', (user_id, leave_id))
+
+#             conn.commit()
+
+#         if current_user.role_default == 700:
+#             return redirect(url_for('leaves_by_department_itd', branch_name=current_department))
+#         elif current_user.role_default == 200:
+#             return redirect(url_for('leaves_by_dep_crd', branch_name=current_department))
+#         elif current_user.role_default == 400:
+#             return redirect(url_for('leaves_by_department_opd', branch_name=current_department))
+#         elif current_user.role_default == 500:
+#             return redirect(url_for('leaves_by_department_fnd', branch_name=current_department))
+#         elif current_user.role_default == 300:
+#             return redirect(url_for('leaves_by_department_hrd', branch_name=current_department))
+#         elif current_user.role_default == 600:
+#             return redirect(url_for('leaves_by_department_trd', branch_name=current_department))
+
+#     return render_template('/leaves/add_leave_hours_dep.html', employees=employees, users=users, branch=branch)
+
+
+
+@app.route('/leave_hours/dep/add/<string:branch>', methods=['GET', 'POST'])
+@login_required
+def add_leave_hours_dep(branch):
+    user_branch = branch if not current_user.is_authenticated else current_user.branch
+    current_department = current_user.branch or current_user.department
+
+    with get_db_connection() as conn:
+        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        users = conn.execute(
+            'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
+        ).fetchall()
+
+    if request.method == 'POST':
+        employee_id = request.form['employee_id']
+        leave_type = request.form['leave_type']
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        reason = request.form['reason']
+        branch = request.form['branch']
+        requested_by = request.form['requested_by']
+        user_ids = request.form.getlist('user_ids')
+        requested_by_roles = request.form['requested_by_roles']
+
+        start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
+        end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
+
+        if end_date_obj <= start_date_obj:
+            flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_date_obj.weekday() >= 5 or end_date_obj.weekday() >= 5:
+            flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_date_obj.hour < 7:
+            flash("ម៉ោងឈប់សម្រាកត្រូវចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
+           end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        total_seconds = (end_date_obj - start_date_obj).total_seconds()
+        total_hours = total_seconds / 3600
+
+        lunch_start = start_date_obj.replace(hour=12, minute=0)
+        lunch_end = start_date_obj.replace(hour=13, minute=30)
+
+        if start_date_obj < lunch_end and end_date_obj > lunch_start:
+            lunch_overlap_start = max(start_date_obj, lunch_start)
+            lunch_overlap_end = min(end_date_obj, lunch_end)
+            if lunch_overlap_end > lunch_overlap_start:
+                lunch_overlap = (lunch_overlap_end - lunch_overlap_start).total_seconds() / 3600
+                total_hours -= lunch_overlap
+
+        total_hours = max(total_hours, 0)
+        leave_hours = round(total_hours, 2)
+
+        if leave_hours > 8:
+            flash("ម៉ោងឈប់សម្រាកមិនគួរធំជាង 8 ម៉ោងទេ។", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        with get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by, requested_by_roles)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
+
+            leave_id = cursor.lastrowid
+
+            for user_id in user_ids:
+                cursor.execute('INSERT INTO user_leave (user_id, leave_id) VALUES (?, ?)', (user_id, leave_id))
+
+            conn.commit()
+
+        role_redirects = {
+            700: 'leaves_by_dep_itd',
+            200: 'leaves_by_dep_crd',
+            400: 'leaves_by_department_opd',
+            500: 'leaves_by_department_fnd',
+            300: 'leaves_by_department_hrd',
+            600: 'leaves_by_department_trd'
+        }
+
+        redirect_endpoint = role_redirects.get(current_user.role_default)
+        if redirect_endpoint:
+            return redirect(url_for(redirect_endpoint, branch_name=current_department))
+
+    return render_template('/leaves/add_leave_hours_dep.html', employees=employees, users=users, branch=branch)
+
+
 @app.route('/leave_hours/department/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_leave_hours_crd(branch):
     user_branch = branch if not current_user.is_authenticated else current_user.branch
-    current_user_department = getattr(current_user, 'department', None)
+    if start_date_obj.hour < 7:
+            flash("ម៉ោងឈប់សម្រាកត្រូវចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
     employee_id = current_user.employee_id
 
     with get_db_connection() as conn:
-        employees = conn.execute('SELECT id, name FROM employees').fetchall()
+        if end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
+            flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
+            return redirect(url_for('add_leave_hours_ccc', branch=branch))
+
+        total_seconds = (end_date_obj - start_date_obj).total_seconds()
+        total_hours = total_seconds / 3600
+
+        # Lunch deduction logic
+        lunch_start = start_date_obj.replace(hour=12, minute=0)
         users = []
         if current_user_department:
             users = conn.execute(
