@@ -109,7 +109,7 @@
           class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center">
           <i class="fas fa-paper-plane mr-2"></i> Submit
         </button>
-        <a href="{{ url_for('leaves_by_dep_itd', branch_name=branch) }}"
+        <a href="{{ url_for('leaves_by_dep_fnd', branch_name=branch) }}"
           class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
           <i class="fas fa-arrow-left mr-2"></i> Back
         </a>
@@ -129,7 +129,7 @@
   function closeModal() {
     document.getElementById("leaveModal").classList.add("hidden");
     window.location.href =
-      "{{ url_for('leaves_by_dep_itd', branch_name=current_user.branch) }}";
+      "{{ url_for('leaves_by_dep_fnd', branch_name=current_user.branch) }}";
   }
 
   function selectAll() {

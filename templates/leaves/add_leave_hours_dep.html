@@ -5,10 +5,11 @@ content %}
   <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
 </head>
 
-<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+<body class="bg-gray-100 flex justify-center items-center">
   <!-- Modal -->
-  <div id="leaveModal" class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50">
-    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg">
+  <div id="leaveModal"
+    class="fixed inset-0 flex items-center justify-center bg-gray-500/75 transition-opacity z-50 m-0 p-0">
+    <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg m-0">
       <!-- Header -->
       <div class="flex justify-between items-center mb-2">
         <h2 class="text-xl font-bold text-gray-800">
@@ -59,7 +60,6 @@ content %}
 
         <!-- Date & Time -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Start -->
           <div class="relative">
             <label for="start_date" class="block text-gray-700 text-sm font-medium mb-1">សំណើសុំពីម៉ោង</label>
             <div class="relative">
@@ -70,8 +70,6 @@ content %}
               </span>
             </div>
           </div>
-
-          <!-- End -->
           <div class="relative">
             <label for="end_date" class="block text-gray-700 text-sm font-medium mb-1">រហូតដល់ម៉ោង</label>
             <div class="relative">
@@ -136,6 +134,18 @@ content %}
       } else if ("{{ current_user.department }}" === "ITD") {
         window.location.href =
           "{{ url_for('leaves_by_dep_itd', branch_name=branch) }}";
+      } else if ("{{ current_user.department }}" === "FND") {
+        window.location.href =
+          "{{ url_for('leaves_by_dep_fnd', branch_name=branch) }}";
+      } else if ("{{ current_user.department }}" === "OPD") {
+        window.location.href =
+          "{{ url_for('leaves_by_dep_opd', branch_name=branch) }}";
+      } else if ("{{ current_user.department }}" === "HRD") {
+        window.location.href =
+          "{{ url_for('leaves_by_dep_hrd', branch_name=branch) }}";
+      } else if ("{{ current_user.department }}" === "TRD") {
+        window.location.href =
+          "{{ url_for('leaves_by_dep_trd', branch_name=branch) }}";
       }
     }
 

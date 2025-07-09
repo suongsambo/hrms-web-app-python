@@ -95,6 +95,7 @@
 
     {% if current_user.employee_id %}
     {% include "partials/trd_menus.html" %}
+    {% include "partials/trd_dep_request_menu.html" %}
     {% endif %}
     {% endif %}
 
@@ -103,6 +104,7 @@
     {% if current_user.role_default == 300 %}
     {% if current_user.employee_id %}
     {% include "partials/hrd_hq_menus.html" %}
+    {% include "partials/hrd_dep_request_menu.html" %}
     {% endif %}
     {% endif %}
 
@@ -112,6 +114,7 @@
     {% if current_user.role_default == 400 %}
     {% if current_user.employee_id %}
     {% include "partials/opd_menus.html" %}
+    {% include "partials/opd_dep_request_menu.html" %}
     {% endif %}
     {% endif %}
 
@@ -119,6 +122,7 @@
     {% if current_user.role_default == 500 %}
     {% if current_user.employee_id %}
     {% include "partials/fnd_menus.html" %}
+    {% include "partials/fnd_dep_request_menu.html" %}
     {% endif %}
     {% endif %}
 

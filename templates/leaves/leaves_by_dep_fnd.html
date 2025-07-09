@@ -1,4 +1,4 @@
-{% extends 'base.html' %} {% block title %}ITD Leaves{% endblock %} {% block
+{% extends 'base.html' %} {% block title %}FND Leaves{% endblock %} {% block
 content %}
 <div class="bg-gray-100 text-gray-800">
     <!-- Main Content -->
@@ -61,8 +61,7 @@ content %}
                             style="min-width: 180px"></td>
                         <!-- Formatted End Date -->
                         <td class="px-10 py-3 border-b leave-end-date" data-end="{{ leave.end_date }}"
-                            style="min-width: 180px">
-                        </td>
+                            style="min-width: 180px"></td>
                         <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td>
                         <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
                         <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
