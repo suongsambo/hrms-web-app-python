@@ -2,33 +2,61 @@
 %} {% block content %}
 
 <head>
-  <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet" />
+  <link
+    href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"
+    rel="stylesheet"
+  />
 </head>
 
-<div class="fixed inset-0 flex items-center justify-center bg-gray-500/70 z-50 transition-opacity" id="leaveModal">
+<div
+  class="fixed inset-0 flex items-center justify-center bg-gray-500/70 z-50 transition-opacity"
+  id="leaveModal"
+>
   <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-lg relative">
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-bold text-blue-700">
         ពាក្យសុំច្បាប់ឈប់សម្រាក ({{ current_user.department }})
       </h2>
-      <button type="button" onclick="closeModal()" class="text-gray-500 hover:text-gray-800 text-2xl">
+      <button
+        type="button"
+        onclick="closeModal()"
+        class="text-gray-500 hover:text-gray-800 text-2xl"
+      >
         &times;
       </button>
     </div>
 
-    <form method="POST"
+    <form
+      method="POST"
       action="{{ url_for('leave_days_dep', dep=current_user.department, branch=current_user.branch) }}"
-      class="space-y-4">
+      class="space-y-4"
+    >
       <input type="hidden" name="branch" value="{{ current_user.branch }}" />
-      <input type="hidden" name="requested_by_roles" value="{{ current_user.role_default }}" />
-      <input type="hidden" name="employee_id" value="{{ current_user.employee_id }}" />
-      <input type="hidden" name="requested_by" value="{{ current_user.username }}" />
+      <input
+        type="hidden"
+        name="requested_by_roles"
+        value="{{ current_user.role_default }}"
+      />
+      <input
+        type="hidden"
+        name="employee_id"
+        value="{{ current_user.employee_id }}"
+      />
+      <input
+        type="hidden"
+        name="requested_by"
+        value="{{ current_user.username }}"
+      />
 
       <div>
         <label for="leave_type" class="block text-gray-700 font-medium mb-1">
           ប្រភេទនៃការឈប់សម្រាក (Type of Leave):
         </label>
-        <select id="leave_type" name="leave_type" class="select select-bordered w-full">
+        <select
+          id="leave_type"
+          name="leave_type"
+          class="select select-bordered w-full"
+        >
           <option value="annualLeave">
             ការឈប់សម្រាកប្រចាំឆ្នាំ (Annual Leave)
           </option>
@@ -45,38 +73,64 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Start Date -->
         <div class="relative">
-          <label for="start_date" class="block text-gray-700 font-medium mb-1">ពីថ្ងៃទី (From Date)</label>
+          <label for="start_date" class="block text-gray-700 font-medium mb-1"
+            >ពីថ្ងៃទី (From Date)</label
+          >
           <div class="relative">
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+            <span
+              class="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none"
+            >
               <i class="fas fa-calendar-alt"></i>
             </span>
-            <input type="text" id="start_date" name="start_date" required
-              class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white hover:shadow-md transition" />
+            <input
+              type="text"
+              id="start_date"
+              name="start_date"
+              required
+              class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white hover:shadow-md transition"
+            />
           </div>
         </div>
 
         <!-- End Date -->
         <div class="relative">
-          <label for="end_date" class="block text-gray-700 font-medium mb-1">រហូតដល់ថ្ងៃទី (To Date)</label>
+          <label for="end_date" class="block text-gray-700 font-medium mb-1"
+            >រហូតដល់ថ្ងៃទី (To Date)</label
+          >
           <div class="relative">
-            <span class="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none">
+            <span
+              class="absolute inset-y-0 left-3 flex items-center text-gray-400 pointer-events-none"
+            >
               <i class="fas fa-calendar-alt"></i>
             </span>
-            <input type="text" id="end_date" name="end_date" required
-              class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white hover:shadow-md transition" />
+            <input
+              type="text"
+              id="end_date"
+              name="end_date"
+              required
+              class="block w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white hover:shadow-md transition"
+            />
           </div>
         </div>
       </div>
 
       <div>
-        <label for="user_ids" class="block text-gray-700 font-medium mb-2">Assign to Users:</label>
+        <label for="user_ids" class="block text-gray-700 font-medium mb-2"
+          >Assign to Users:</label
+        >
         <div class="flex space-x-2 mb-2">
-          <button type="button" onclick="selectAll()"
-            class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm">
+          <button
+            type="button"
+            onclick="selectAll()"
+            class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-sm"
+          >
             <i class="fas fa-check-square mr-1"></i> Select All
           </button>
-          <button type="button" onclick="deselectAll()"
-            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">
+          <button
+            type="button"
+            onclick="deselectAll()"
+            class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm"
+          >
             <i class="fas fa-square mr-1"></i> Deselect All
           </button>
         </div>
@@ -86,11 +140,21 @@
           </legend>
           <div class="grid grid-cols-1 gap-2 mt-2">
             {% for user in users4 %}
-            <div class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded transition">
-              <input type="checkbox" name="user_ids" value="{{ user.id }}" id="user_{{ user.id }}"
-                class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500" />
-              <label for="user_{{ user.id }}" class="cursor-pointer text-gray-700 hover:text-blue-600">{{ user.username
-                }}</label>
+            <div
+              class="flex items-center space-x-3 hover:bg-gray-50 p-2 rounded transition"
+            >
+              <input
+                type="checkbox"
+                name="user_ids"
+                value="{{ user.id }}"
+                id="user_{{ user.id }}"
+                class="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+              />
+              <label
+                for="user_{{ user.id }}"
+                class="cursor-pointer text-gray-700 hover:text-blue-600"
+                >{{ user.username }}</label
+              >
             </div>
             {% endfor %}
           </div>
@@ -98,19 +162,28 @@
       </div>
 
       <div>
-        <label for="reason" class="block text-gray-700 font-medium mb-1">មូលហេតុនៃការសុំឈប់សម្រាក (Reason for
-          Leave):</label>
-        <textarea name="reason" required placeholder="Up to 250 words"
-          class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-white resize-none"></textarea>
+        <label for="reason" class="block text-gray-700 font-medium mb-1"
+          >មូលហេតុនៃការសុំឈប់សម្រាក (Reason for Leave):</label
+        >
+        <textarea
+          name="reason"
+          required
+          placeholder="Up to 250 words"
+          class="w-full p-4 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 bg-white resize-none"
+        ></textarea>
       </div>
 
       <div class="flex space-x-4">
-        <button type="submit"
-          class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center">
+        <button
+          type="submit"
+          class="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 flex items-center justify-center"
+        >
           <i class="fas fa-paper-plane mr-2"></i> Submit
         </button>
-        <a href="{{ url_for('leaves_by_dep_opd', branch_name=branch) }}"
-          class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center">
+        <a
+          href="{{ url_for('leaves_by_dep_opd', branch_name=branch) }}"
+          class="flex-1 bg-gray-500 text-white py-2 rounded-lg hover:bg-gray-600 flex items-center justify-center"
+        >
           <i class="fas fa-arrow-left mr-2"></i> Back
         </a>
       </div>

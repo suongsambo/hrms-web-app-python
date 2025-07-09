@@ -11,19 +11,17 @@
         <span class="text-green-600">&</span>
         <span class="text-indigo-700"> Days Summary</span>
     </h1>
-    <!-- Print Report Button -->
 
-    <section class=" flex flex-wrap justify-between items-center  mb-2">
+    <!-- Buttons -->
+    <section class="flex flex-wrap justify-between items-center mb-2">
         <div class="flex gap-1">
             <a href="{{ url_for('view_leaves') }}" class="btn btn-success">
                 <i class="fas fa-arrow-left mr-2"></i> Back
             </a>
-            <div class="flex justify-start mb-4">
-                <a href="{{ url_for('print_leave_hours', start_date=start_date, end_date=end_date, employee_name=employee_name, branch=branch, type_of_leave=type_of_leave) }}"
-                    target="_blank" class="btn btn-accent flex items-center gap-2">
-                    <i class="fas fa-print"></i> Print Report
-                </a>
-            </div>
+            <a href="{{ url_for('print_leave_hours', start_date=start_date, end_date=end_date, employee_name=employee_name, branch=branch, type_of_leave=type_of_leave) }}"
+                target="_blank" class="btn btn-accent flex items-center gap-2">
+                <i class="fas fa-print"></i> Print Report
+            </a>
         </div>
     </section>
 
@@ -69,7 +67,6 @@
                 Clear
             </a>
         </div>
-
     </form>
 
     <!-- Leave Table -->
@@ -127,4 +124,30 @@
     </div>
 
 </div>
+
+<!-- DataTables CSS & JS -->
+<!-- <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script> -->
+
+<script>
+    $(document).ready(function () {
+        $('#leaveTable').DataTable({
+            "pageLength": 10,
+            "lengthMenu": [5, 10, 25, 50, 100],
+            "ordering": true,
+            "order": [],
+            "language": {
+                "search": "Search table:",
+                "lengthMenu": "Show _MENU_ entries",
+                "info": "Showing _START_ to _END_ of _TOTAL_ entries",
+                "paginate": {
+                    "next": "Next",
+                    "previous": "Previous"
+                },
+                "emptyTable": "No data available in table"
+            }
+        });
+    });
+</script>
 {% endblock %}
