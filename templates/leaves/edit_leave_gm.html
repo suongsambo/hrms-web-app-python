@@ -18,11 +18,11 @@
           Edit Leave Hours (GM)
         </h2>
       </div>
-      <div class="mb-2 p-2 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md shadow">
+      <!-- <div class="mb-2 p-2 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 rounded-md shadow">
         <p class="text-sm font-medium">
           ⚠️ This form is read-only except for Status field.
         </p>
-      </div>
+      </div> -->
       <div class="grid grid-cols-2 gap-6">
         <div>
           <label for="approved_by" class="block text-gray-700 font-semibold">Approved By</label>
@@ -64,13 +64,17 @@
       </div>
 
       <!-- Status -->
+
       <div>
         <label for="status" class="block text-gray-700 font-semibold">Status</label>
         <select id="status" name="status"
           class="mt-2 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 transition">
           <option value="Approved" {% if leave['status']=='Approved' or leave['status'] is none %}selected{% endif %}>
-            Approved</option>
-          <option value="Verified" {% if leave['status']=='Verified' %}selected{% endif %}>Verified</option>
+            Approved
+          </option>
+          <option value="Rejected" {% if leave['status']=='Rejected' %}selected{% endif %}>
+            Rejected
+          </option>
         </select>
       </div>
 
@@ -80,7 +84,7 @@
           class="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center">
           <i class="fas fa-save mr-2"></i> Update Leave
         </button>
-        <a href="{{ url_for('leaves_by_branch_and_hrd') }}"
+        <a href="{{ url_for('leaves_by_gm') }}"
           class="w-full py-2 px-4 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition flex items-center justify-center">
           <i class="fas fa-arrow-left mr-2"></i> Back
         </a>

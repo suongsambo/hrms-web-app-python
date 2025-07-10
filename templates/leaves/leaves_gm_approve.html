@@ -36,7 +36,6 @@ content %}
             <th class="px-6 py-3 border-b">VerifiedBy</th>
             <th class="px-6 py-3 border-b">ApprovedBy</th>
 
-
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
               Status
             </th>
@@ -50,13 +49,13 @@ content %}
             <td class="px-6 py-3 border-b">{{ leave.branch_name }}</td>
             <td class="px-6 py-3 border-b">{{ leave.leave_type }}</td>
             <!-- Formatted Start Date -->
-            <td class="px-10 py-3 border-b leave-start-date" data-start="{{ leave.start_date }}"
-              style="min-width: 180px">
-            </td>
-            <!-- Formatted End Date -->
-            <td class="px-10 py-3 border-b leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px">
-            </td>
-            <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td>
+            <td class="px-6 py-3 border-b leave-start-date" data-start="{{ leave.start_date }}"
+              style="min-width: 180px"></td>
+            <td class="px-6 py-3 border-b leave-end-date" data-end="{{ leave.end_date }}" style="min-width: 180px"></td>
+            <td class="px-6 py-3 border-b leave-hours" data-start="{{ leave.start_date }}"
+              data-end="{{ leave.end_date }}"></td>
+            <!-- <td class="px-6 py-3 border-b">{{ leave.leave_hours }} hours</td> -->
+
             <td class="px-6 py-3 border-b">{{ leave.service_count }} day</td>
             <td class="px-6 py-3 border-b">{{ leave.type_of_leave }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
@@ -66,14 +65,9 @@ content %}
             <td class="px-6 py-3 border-b">{{ leave.verified_by }}</td>
             <td class="px-6 py-3 border-b">
               {% if leave.approved_by is none or leave.approved_by == ''%}
-              <div class="badge badge-warning">
-                Pending
-              </div>
-              {% else %}
-              {{ leave.approved_by }}
-              {% endif %}
+              <div class="badge badge-warning">Pending</div>
+              {% else %} {{ leave.approved_by }} {% endif %}
             </td>
-
 
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 border-b">
               {% if leave.status == 'Approved' %}
@@ -113,7 +107,6 @@ content %}
   </div>
 
   <!-- Initialize DataTable -->
-
 </div>
 <script>
   $(document).ready(function () {
@@ -121,6 +114,7 @@ content %}
       paging: true, // Enables pagination
       searching: true, // Enables the search box
       ordering: true, // Enables sorting
+      pageLength: 12,
       responsive: true, // Makes the table responsive for smaller screens
       order: [[3, "asc"]], // Default sorting by Start Date (3rd column)
       scrollX: true, // Enable horizontal scrolling
@@ -139,13 +133,10 @@ content %}
       },
     });
 
-
-
     function formatLeaveDatesAndHours() {
       $(".leave-start-date").each(function () {
         var startDate = $(this).data("start");
-        var formattedStartDate =
-          moment(startDate).format("MM-DD-YYYY hh:mm A");
+        var formattedStartDate = moment(startDate).format("MM-DD-YYYY hh:mm A");
         $(this).text(formattedStartDate);
       });
 
@@ -156,6 +147,9 @@ content %}
       });
 
       $(".leave-hours").each(function () {
+        var $row = $(this).closest("tr");
+        var branchName = $row.find("td:nth-child(3)").text().trim();
+
         var startDate = $(this).data("start");
         var endDate = $(this).data("end");
 
@@ -166,9 +160,9 @@ content %}
           var duration = moment.duration(endTime.diff(startTime));
           var totalHours = duration.asHours();
 
-          // Subtract lunch overlap
+          // Subtract lunch overlap (12:00 - 13:30)
           var lunchStart = moment(startDate).hour(12).minute(0).second(0);
-          var lunchEnd = moment(startDate).hour(13).minute(30).second(0);
+          var lunchEnd = moment(startDate).hour(13).minute(0).second(0);
 
           var overlapStart = moment.max(startTime, lunchStart);
           var overlapEnd = moment.min(endTime, lunchEnd);
@@ -181,7 +175,18 @@ content %}
           }
 
           totalHours = Math.max(totalHours, 0);
-          var displayHours = totalHours.toFixed(1) + " H";
+
+          var roundedHours = Number(totalHours.toFixed(1));
+          var displayHours = "";
+
+          // Adjust for HQ specific cases
+          if (branchName === "HQ" && roundedHours === 7.5) {
+            displayHours = "8 Hours";
+          } else if (branchName === "HQ" && roundedHours == 3.5) {
+            displayHours = "4 Hours";
+          } else {
+            displayHours = roundedHours.toFixed(1) + " Hours";
+          }
 
           $(this).text(displayHours);
         } else {

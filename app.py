@@ -2201,7 +2201,6 @@ def leaves_by_branch_and_spm():
         zone=zone
     )
 
-
 @app.route('/leaves/hrd', methods=['GET'])
 def leaves_by_branch_and_hrd():
     if not current_user.is_authenticated or current_user.role_default != 160:
@@ -2264,7 +2263,6 @@ def leaves_by_branch_and_hrd():
         zone=None
     )
 
-
 @app.route('/leaves/gm', methods=['GET'])
 def leaves_by_gm():
     if not current_user.is_authenticated or current_user.role_default != 180:
@@ -2304,16 +2302,26 @@ def leaves_by_gm():
                 l.status = 'Approved' AND
                 l.verified_by IS NOT NULL AND
                 (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
-
             )
             OR (
-                l.requested_by_roles = 20 
-                AND l.category IN ('L', 'M')  
-                AND l.verified_by IS NOT NULL 
+                l.requested_by_roles = 20
+                AND l.category IN ('L', 'M')
+                AND l.verified_by IS NOT NULL
                 AND l.requested_from IS NOT NULL
                 AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
             )
+            OR (
+                l.requested_by_roles IN (200, 300, 400, 500, 600, 700)
+                AND (
+                    (l.category IN ('S', 'L', 'M') AND (l.approved_by IS NULL OR TRIM(l.approved_by) = ''))
+                    OR (l.type_of_leave = 'H')
+                )
+            )
+
     '''
+    
+    #  AND l.verified_by = 'Not required'
+    #             AND l.requested_from = 'HQ'
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query).fetchall()
@@ -2326,7 +2334,6 @@ def leaves_by_gm():
         leaves=leaves or [],
         employees=employees
     )
-
 
 @app.route('/leave/edit/hours/department/<int:id>', methods=['GET', 'POST'])
 @login_required
@@ -2387,7 +2394,6 @@ def edit_leave_hours_department(id):
 
     return render_template('/leaves/edit_leave_hours_dep.html', leave=leave)
 
-
 def fetch_leaves(branch_name, requested_from):
     query = '''
         SELECT
@@ -2439,10 +2445,7 @@ def fetch_leaves(branch_name, requested_from):
 
     return leaves, None
 
-
 # --- ITD Route ---
-
-
 @app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_department_itd(branch_name):
@@ -6397,7 +6400,6 @@ def edit_leave_hours_spm(id):
         return redirect(url_for('leaves_by_branch_and_spm'))
 
     return render_template('/leaves/edit_leave_hours_spm.html', leave=leave)
-
 
 @app.route('/leave/edit/hours/gm/<int:id>', methods=['GET', 'POST'])
 def edit_leave_hours_gm(id):
