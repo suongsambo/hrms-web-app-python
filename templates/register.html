@@ -6,20 +6,25 @@
   <title>Register</title>
   <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
-  <!-- Include Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
-
 </head>
 
-<body class="bg-gradient-to-r from-blue-500 via-teal-500 to-green-500">
-  <div class="flex items-center justify-center min-h-screen">
+<body class="relative min-h-screen flex items-center justify-center">
+
+  <!-- ✅ Background image layer -->
+
+  <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
+    style="background-image: url('{{ url_for('static', filename='images/bg-login-city.jpg') }}');"></div>
+
+  <!-- ✅ Overlay for better contrast -->
+  <div class="absolute inset-0 bg-black/60"></div>
+
+  <!-- ✅ Form container -->
+  <div class="relative z-10 w-full max-w-5xl p-6">
     <form method="post" action="{{ url_for('register') }}"
-      class="bg-white shadow-xl rounded-2xl p-1 md:p-8 max-w-5xl mx-0 space-y-6">
-      <h2 class="text-4xl font-bold text-center text-gray-800 mb-6">
-        Create Account
-      </h2>
+      class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8 space-y-6">
+
+      <h2 class="text-4xl font-bold text-center text-white drop-shadow">Create Account</h2>
 
       {% with messages = get_flashed_messages() %}
       {% if messages %}
@@ -32,53 +37,53 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- Email -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="email">Email</label>
+          <label class="block text-gray-200 font-medium mb-1" for="email">Email</label>
           <div class="relative">
             <input type="email" id="email" name="email" required
-              class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
-            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              class="w-full px-4 py-3 pl-10 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            <i class="fas fa-envelope absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
           </div>
         </div>
 
         <!-- Mobile -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="mobile1">Mobile</label>
+          <label class="block text-gray-200 font-medium mb-1" for="mobile1">Mobile</label>
           <div class="relative">
             <input type="text" id="mobile1" name="mobile1" required
-              class="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
-            <i class="fas fa-phone-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              class="w-full px-4 py-3 pl-10 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            <i class="fas fa-phone-alt absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
           </div>
         </div>
 
-        <!-- First/Last Khmer -->
+        <!-- Khmer Names -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="first_name_kh">First Name (Khmer)</label>
+          <label class="block text-gray-200 font-medium mb-1" for="first_name_kh">First Name (Khmer)</label>
           <input type="text" id="first_name_kh" name="first_name_kh" required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none" />
         </div>
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="last_name_kh">Last Name (Khmer)</label>
+          <label class="block text-gray-200 font-medium mb-1" for="last_name_kh">Last Name (Khmer)</label>
           <input type="text" id="last_name_kh" name="last_name_kh" required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none" />
         </div>
 
-        <!-- First/Last English -->
+        <!-- English Names -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="first_name_en">First Name (English)</label>
+          <label class="block text-gray-200 font-medium mb-1" for="first_name_en">First Name (English)</label>
           <input type="text" id="first_name_en" name="first_name_en" required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none" />
         </div>
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="last_name_en">Last Name (English)</label>
+          <label class="block text-gray-200 font-medium mb-1" for="last_name_en">Last Name (English)</label>
           <input type="text" id="last_name_en" name="last_name_en" required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none" />
         </div>
 
         <!-- Branch -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="branch">Branch</label>
-          <select name="branch" id="branch" required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
+          <label class="block text-gray-200 font-medium mb-1" for="branch">Branch</label>
+          <select id="branch" name="branch" required
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none">
             <option value="">Select a Branch</option>
             {% for branch in branches %}
             <option value="{{ branch['Branch'] }}" {% if selected_branch==branch['ID'] %}selected{% endif %}>
@@ -88,12 +93,11 @@
           </select>
         </div>
 
-
         <!-- Language -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="language">Language</label>
+          <label class="block text-gray-200 font-medium mb-1" for="language">Language</label>
           <select id="language" name="language" required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none">
             <option value="en" selected>English</option>
             <option value="km">Khmer</option>
           </select>
@@ -101,91 +105,61 @@
 
         <!-- Username -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="username">Username</label>
+          <label class="block text-gray-200 font-medium mb-1" for="username">Username</label>
           <input type="text" id="username" name="username" required
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none" />
         </div>
 
         <!-- Role -->
         <div>
-          <label class="block text-gray-700 font-medium mb-1" for="role_default">Request Role</label>
+          <label class="block text-gray-300 font-medium mb-1" for="role_default">Request Role</label>
           <select id="role_default" name="role_default"
-            class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none">
+            class="w-full px-4 py-3 rounded-lg bg-white/80 text-gray-900 border border-gray-300 focus:ring-2 focus:ring-teal-500 focus:outline-none">
             <option value="" disabled selected hidden>Select Role</option>
             <option value="1">GUEST</option>
-            <option value="20">Employee</option>
-            <option value="25">TELLER</option>
-            <option value="30">CC</option>
+            <option value="20">Employee (Branch Staff & HQ)</option>
+            <!-- <option value="25">TELLER</option> -->
+            <!-- <option value="30">CC</option> -->
             <option value="35">CCC</option>
             <option value="140">BM</option>
             <option value="145">SPM</option>
-            <option value="160">HRD</option>
-            <option value="165">CS</option>
-            <option value="170">HD</option>
-            <option value="175">DGM</option>
-            <option value="180">GM</option>
-            <option value="190">CB</option>
+            <!-- <option value="160">HD</option> -->
+            <option value="200">CRD</option>
+            <option value="300">HRD</option>
+            <option value="400">OPD</option>
+            <option value="500">FND</option>
+            <option value="600">TRD</option>
+            <option value="700">ITD</option>
+
+            <!-- <option value="165">CS</option> -->
+            <!-- <option value="170">HD</option> -->
+            <!-- <option value="175">DGM</option> -->
+            <option value="180">CEO</option>
+            <!-- <option value="190">CB</option> -->
             <option value="1000">ADMIN</option>
           </select>
         </div>
 
-        <!-- Password (Hidden Default) -->
+        <!-- Hidden password -->
         <div class="hidden">
-          <label class="block text-gray-700 font-medium mb-1" for="password">Password</label>
-          <div class="relative">
-            <input type="password" id="password" name="password" value="1111"
-              class="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:outline-none" />
-          </div>
+          <input type="password" id="password" name="password" value="1111" />
         </div>
       </div>
 
-      <!-- Submit Button -->
       <div class="text-center pt-4">
         <button type="submit"
-          class="w-full py-3 bg-teal-600 text-white font-semibold text-lg rounded-lg hover:bg-teal-700 transition duration-200 shadow-lg">
+          class="w-full py-3 bg-teal-600 hover:bg-teal-700 text-white font-semibold text-lg rounded-lg transition duration-200 shadow-lg flex items-center justify-center">
           <i class="fas fa-user-plus mr-2"></i> Register
         </button>
       </div>
 
-      <p class="text-center text-sm text-gray-500 mt-4">
+      <p class="text-center text-gray-300 text-sm mt-4">
         Already have an account?
-        <a href="{{ url_for('index') }}" class="text-teal-600 hover:underline">Login here</a>.
+        <a href="{{ url_for('index') }}" class="text-teal-400 hover:underline">Login here</a>.
       </p>
     </form>
-
   </div>
 
-  <script>
-    // Toggle password visibility
-    function togglePasswordVisibility() {
-      const passwordField = document.getElementById("password");
-      const toggleIcon = document.getElementById("togglePassword");
-
-      if (passwordField.type === "password") {
-        // Show password
-        passwordField.type = "text";
-        toggleIcon.classList.remove("fa-eye-slash"); // Remove the eye-slash (hidden password)
-        toggleIcon.classList.add("fa-eye"); // Add the eye (visible password)
-      } else {
-        // Hide password
-        passwordField.type = "password";
-        toggleIcon.classList.remove("fa-eye"); // Remove the eye (visible password)
-        toggleIcon.classList.add("fa-eye-slash"); // Add the eye-slash (hidden password)
-      }
-    }
-
-    // Initialize the default state (hidden password and eye-slash icon)
-    window.onload = function () {
-      const passwordField = document.getElementById("password");
-      const toggleIcon = document.getElementById("togglePassword");
-
-      // Set the initial state for the password field and the icon
-      if (passwordField.type === "password") {
-        toggleIcon.classList.remove("fa-eye"); // Ensure eye icon is not shown
-        toggleIcon.classList.add("fa-eye-slash"); // Show eye-slash (hidden password)
-      }
-    };
-  </script>
 </body>
 
 </html>

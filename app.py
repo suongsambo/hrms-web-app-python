@@ -2289,7 +2289,9 @@ def leaves_by_gm():
         LEFT JOIN employees e ON l.employee_id = e.id
         WHERE
             (
-                (l.category = 'L' AND l.verified_by IS NULL AND l.approved_by IS NULL)
+              
+                (l.category = 'L' AND l.verified_by IS NULL AND l.approved_by IS NULL )
+
                 OR (l.category = 'M' AND l.requested_by_roles = 140)
                 OR (l.category = 'M' AND l.requested_by_roles = 140)
                 OR (l.category = 'L' AND l.requested_by_roles = 140)
@@ -2310,18 +2312,20 @@ def leaves_by_gm():
                 AND l.requested_from IS NOT NULL
                 AND (l.approved_by IS NULL OR TRIM(l.approved_by) = '')
             )
+            OR (l.type_of_leave = 'H' AND l.verified_by = 'Not required' AND l.approved_by IS NULL AND l.status = 'Pending')
             OR (
                 l.requested_by_roles IN (200, 300, 400, 500, 600, 700)
                 AND (
                     (l.category IN ('S', 'L', 'M') AND (l.approved_by IS NULL OR TRIM(l.approved_by) = ''))
-                    OR (l.type_of_leave = 'H')
+                    OR (l.type_of_leave = 'H' AND l.verified_by = 'Not required' AND l.approved_by IS NULL AND l.status = 'Pending')
+                    AND (l.status = 'Pending' AND l.verified_by IS NULL AND l.approved_by IS NULL)
                 )
             )
-
     '''
-    
+    #   (l.category = 'L' AND l.verified_by IS NULL AND l.approved_by IS NULL)
     #  AND l.verified_by = 'Not required'
     #             AND l.requested_from = 'HQ'
+    #  OR l.verified_by = 'Not required'
     try:
         with get_db_connection() as conn:
             leaves = conn.execute(query).fetchall()
