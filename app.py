@@ -967,95 +967,6 @@ def privacy_policy():
 def static_files(filename):
     return send_from_directory(app.static_folder, filename)
 
-# FIXME: leaves import
-
-
-# @app.route('/leaves/import', methods=['GET', 'POST'])
-# @login_required
-# def import_leaves():
-#     leave_columns = [
-#         'employee_id', 'leave_type', 'start_date', 'end_date', 'reason',
-#         'type_of_leave', 'requested_by', 'requested_by_roles',
-#         'verified_by', 'approved_by', 'branch', 'category'
-#     ]
-
-#     if request.method == 'POST':
-#         f = request.files.get('excel_file')
-#         if not f or f.filename == '':
-#             flash('Please choose an Excel file.', 'error')
-#             return redirect(request.url)
-
-#         if not allowed_excel(f.filename):
-#             flash('Supported formats: .xlsx or .xls', 'error')
-#             return redirect(request.url)
-
-#         try:
-#             df = pd.read_excel(f)
-#         except Exception as e:
-#             flash(f'Could not read file: {e}', 'error')
-#             return redirect(request.url)
-
-#         missing = [c for c in leave_columns if c not in df.columns]
-#         if missing:
-#             flash(f'Missing columns: {", ".join(missing)}', 'error')
-#             return redirect(request.url)
-
-#         inserted, skipped = 0, 0
-#         employees = []
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             employees = conn.execute(
-#                 'SELECT id, name FROM employees').fetchall()
-#             for _, row in df.iterrows():
-#                 if pd.isna(row['employee_id']) or pd.isna(row['leave_type']) or pd.isna(row['start_date']) or pd.isna(row['end_date']):
-#                     skipped += 1
-#                     continue
-
-#                 start_date = pd.to_datetime(row['start_date'])
-#                 end_date = pd.to_datetime(row['end_date'])
-
-#                 # Default fallback values
-#                 leave_hours = row.get('leave_hours', None)
-#                 if pd.isna(leave_hours):
-#                     service_count = (end_date - start_date).days + 1
-#                     leave_hours = service_count * 8
-#                 else:
-#                     leave_hours = float(leave_hours)
-#                     service_count = int(leave_hours / 8)
-
-#                 cursor.execute("""
-#                     INSERT INTO leaves (
-#                         employee_id, leave_type, start_date, end_date, reason,
-#                         type_of_leave, requested_by, requested_by_roles,
-#                         verified_by, approved_by, branch, category,
-#                         final_end_date, service_count, leave_hours
-#                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#                 """, (
-#                     row['employee_id'], row['leave_type'], row['start_date'],
-#                     row['end_date'], row['reason'], row['type_of_leave'],
-#                     row['requested_by'], row['requested_by_roles'],
-#                     row['verified_by'], row['approved_by'], row['branch'],
-#                     row['category'], row['end_date'], service_count, leave_hours
-#                 ))
-#                 # Get the inserted leave_id
-#                 leave_id = cursor.lastrowid
-
-#                 # Insert into user_leave (assuming one user_id per row)
-#                 user_id = row['employee_id']
-#                 cursor.execute('''
-#                     INSERT INTO user_leave (user_id, leave_id)
-#                     VALUES (?, ?)
-#                 ''', (user_id, leave_id))
-#                 inserted += 1
-
-#             conn.commit()
-
-#         flash(
-#             f'Imported {inserted} leave entries ({skipped} skipped).', 'success')
-#         return redirect(url_for('import_leaves'))
-
-#     return render_template('leaves/import_leaves.html', employees=employees)
-
 @app.route('/leaves/import', methods=['GET', 'POST'])
 @login_required
 def import_leaves():
@@ -8275,22 +8186,6 @@ def dashboard():
         else:
             flash("Branch information is missing.", "danger")
             return render_template('access_denied.html')
-
-    # if role == 200:
-    #     branch = getattr(current_user, 'branch', None)
-    #     if branch:
-    #         return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
-    #     else:
-    #         flash("Branch information is missing.", "danger")
-    #         return render_template('access_denied.html')
-
-    # if role == 700:
-    #     branch = getattr(current_user, 'branch', None)
-    #     if branch:
-    #         return redirect(url_for('render_dashboard_hq', branch_name=branch), code=302)
-    #     else:
-    #         flash("Branch information is missing.", "danger")
-    #         return render_template('access_denied.html')
 
     HQ_ROLES = {200, 700, 300, 400, 500, 600}  # Extend as needed
 
