@@ -90,6 +90,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 UPLOAD_FOLDER = 'signatures'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
 def allowed_file(filename: str) -> bool:
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -250,7 +251,7 @@ def show_current_routes():
 
 @app.route('/qr/<int:leave_id>')
 def generate_qr_for_leave(leave_id):
-  
+
     data = f"http://172.104.60.81/print-leaves?ids={leave_id}"
     img = qrcode.make(data)
     img_io = BytesIO()
@@ -356,13 +357,16 @@ def print_leaves():
 year = datetime.now().year
 holidays = get_holidays(year)
 
+
 def get_locale():
     lang = request.args.get('lang')
     if lang in LANGUAGES:
         return lang
     return request.accept_languages.best_match(LANGUAGES)
 
+
 babel.init_app(app, locale_selector=get_locale)
+
 
 @app.context_processor
 def inject_locale():
@@ -967,6 +971,7 @@ def privacy_policy():
 def static_files(filename):
     return send_from_directory(app.static_folder, filename)
 
+
 @app.route('/leaves/import', methods=['GET', 'POST'])
 @login_required
 def import_leaves():
@@ -1554,6 +1559,7 @@ def leaves_by_branch_and_pm_report(branch_name):
         users=users or []
     )
 
+
 @app.route('/leaves/dep/crd/report/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_dep_crd(branch_name):
@@ -1603,8 +1609,7 @@ def leaves_by_dep_crd(branch_name):
         leaves=leaves or [],
         branch_name=branch_name or '',
         users=users or []
-    ) 
-
+    )
 
 
 @app.route('/leaves/dep/itd/report/<string:branch_name>', methods=['GET'])
@@ -1653,8 +1658,7 @@ def leaves_by_dep_itd(branch_name):
         leaves=leaves or [],
         branch_name=branch_name or '',
         users=users or []
-    ) 
-
+    )
 
 
 @app.route('/leaves/dep/opd/report/<string:branch_name>', methods=['GET'])
@@ -1703,11 +1707,7 @@ def leaves_by_dep_opd(branch_name):
         leaves=leaves or [],
         branch_name=branch_name or '',
         users=users or []
-    ) 
-
-
-
-
+    )
 
 
 @app.route('/leaves/dep/fnd/report/<string:branch_name>', methods=['GET'])
@@ -1756,10 +1756,9 @@ def leaves_by_dep_fnd(branch_name):
         leaves=leaves or [],
         branch_name=branch_name or '',
         users=users or []
-    ) 
-    
-    
-    
+    )
+
+
 @app.route('/leaves/dep/trd/report/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_dep_trd(branch_name):
@@ -1806,10 +1805,9 @@ def leaves_by_dep_trd(branch_name):
         leaves=leaves or [],
         branch_name=branch_name or '',
         users=users or []
-    ) 
-    
-    
-    
+    )
+
+
 @app.route('/leaves/dep/hrd/report/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_dep_hrd(branch_name):
@@ -1856,9 +1854,7 @@ def leaves_by_dep_hrd(branch_name):
         leaves=leaves or [],
         branch_name=branch_name or '',
         users=users or []
-    ) 
-
-
+    )
 
 
 @app.route('/leaves/dep/<string:dep_code>/report/<string:branch_name>', methods=['GET'])
@@ -1972,6 +1968,7 @@ def leaves_by_branch_and_spm_report(branch_name):
         branch_name=branch_name or '',
         users=users or []
     )
+
 
 @app.route('/leaves/ccc/verify/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_ccc_category(branch_name):
@@ -2112,6 +2109,7 @@ def leaves_by_branch_and_spm():
         zone=zone
     )
 
+
 @app.route('/leaves/hrd', methods=['GET'])
 def leaves_by_branch_and_hrd():
     if not current_user.is_authenticated or current_user.role_default != 160:
@@ -2173,6 +2171,7 @@ def leaves_by_branch_and_hrd():
         branches_in_zone=branches,
         zone=None
     )
+
 
 @app.route('/leaves/gm', methods=['GET'])
 def leaves_by_gm():
@@ -2250,6 +2249,7 @@ def leaves_by_gm():
         employees=employees
     )
 
+
 @app.route('/leave/edit/hours/department/<int:id>', methods=['GET', 'POST'])
 @login_required
 def edit_leave_hours_department(id):
@@ -2309,6 +2309,7 @@ def edit_leave_hours_department(id):
 
     return render_template('/leaves/edit_leave_hours_dep.html', leave=leave)
 
+
 def fetch_leaves(branch_name, requested_from):
     query = '''
         SELECT
@@ -2361,6 +2362,8 @@ def fetch_leaves(branch_name, requested_from):
     return leaves, None
 
 # --- ITD Route ---
+
+
 @app.route('/leaves/department/itd/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_department_itd(branch_name):
@@ -2462,6 +2465,7 @@ def leaves_by_department_trd(branch_name):
         return error, 500
 
     return render_template('leaves/leaves_department_trd.html', leaves=leaves, branch_name=branch_name)
+
 
 @app.route('/leaves/branch/<string:branch_name>', methods=['GET'])
 @login_required
@@ -2782,7 +2786,6 @@ def add_leave_hours_pm(branch):
     return render_template('/leaves/add_leave_hours_pm.html', employees=employees, users=users, branch=branch)
 
 
-
 # @app.route('/leave_hours/dep/add/<string:branch>', methods=['GET', 'POST'])
 # @login_required
 # def add_leave_hours_dep(branch):
@@ -2885,7 +2888,6 @@ def add_leave_hours_pm(branch):
 #     return render_template('/leaves/add_leave_hours_dep.html', employees=employees, users=users, branch=branch)
 
 
-
 # Manger Department
 @app.route('/leave_hours/dep/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
@@ -2909,8 +2911,8 @@ def add_leave_hours_dep(branch):
         requested_by = request.form['requested_by']
         user_ids = request.form.getlist('user_ids')
         requested_by_roles = request.form['requested_by_roles']
-        verified_by = request.form.get('verified_by', 'Not required') or 'Not required'
-
+        verified_by = request.form.get(
+            'verified_by', 'Not required') or 'Not required'
 
         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
@@ -2942,7 +2944,8 @@ def add_leave_hours_dep(branch):
             lunch_overlap_start = max(start_date_obj, lunch_start)
             lunch_overlap_end = min(end_date_obj, lunch_end)
             if lunch_overlap_end > lunch_overlap_start:
-                lunch_overlap = (lunch_overlap_end - lunch_overlap_start).total_seconds() / 3600
+                lunch_overlap = (lunch_overlap_end -
+                                 lunch_overlap_start).total_seconds() / 3600
                 total_hours -= lunch_overlap
 
         total_hours = max(total_hours, 0)
@@ -2966,7 +2969,8 @@ def add_leave_hours_dep(branch):
             leave_id = cursor.lastrowid
 
             for user_id in user_ids:
-                cursor.execute('INSERT INTO user_leave (user_id, leave_id) VALUES (?, ?)', (user_id, leave_id))
+                cursor.execute(
+                    'INSERT INTO user_leave (user_id, leave_id) VALUES (?, ?)', (user_id, leave_id))
 
             conn.commit()
 
@@ -2995,7 +2999,8 @@ def add_leave_hours_crd(branch):
 
     with get_db_connection() as conn:
         # Get employee list (you might adjust this query)
-        employees = conn.execute('SELECT id, name FROM employees WHERE branch = ?', (user_branch,)).fetchall()
+        employees = conn.execute(
+            'SELECT id, name FROM employees WHERE branch = ?', (user_branch,)).fetchall()
 
         users = conn.execute(
             '''
@@ -3019,7 +3024,8 @@ def add_leave_hours_crd(branch):
         branch = form['branch']
         requested_by = form['requested_by']
         requested_by_roles = form['requested_by_roles']
-        requested_from = form.get('requested_from', 'Not specified')  # optional
+        requested_from = form.get(
+            'requested_from', 'Not specified')  # optional
 
         start_dt = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
         end_dt = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
@@ -3054,7 +3060,8 @@ def add_leave_hours_crd(branch):
                 overlap_start = max(start_dt, lunch_start)
                 overlap_end = min(end_dt, lunch_end)
                 if overlap_end > overlap_start:
-                    lunch_deduction = (overlap_end - overlap_start).total_seconds() / 3600
+                    lunch_deduction = (
+                        overlap_end - overlap_start).total_seconds() / 3600
                     total_hours -= lunch_deduction
 
             leave_hours = round(max(total_hours, 0), 2)
@@ -3083,7 +3090,6 @@ def add_leave_hours_crd(branch):
         users=users,
         branch=branch
     )
-
 
 
 @app.route('/leave_hours/spm/add/<string:branch>', methods=['GET', 'POST'])
@@ -3723,6 +3729,8 @@ def add_many_leave(branch):
     )
 
 # Leave days for CCC
+
+
 @app.route('/leave_days_ccc/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_leave_days_ccc(branch):
@@ -3890,6 +3898,7 @@ def add_leave_days_ccc(branch):
         users4=users4,
         branch=user_branch
     )
+
 
 @app.route('/leave_days/pm/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
@@ -4062,7 +4071,6 @@ def leave_days_pm(branch):
     )
 
 
-
 # @app.route('/leave/days/dep/crd/add/<string:branch>', methods=['GET', 'POST'])
 # @login_required
 # def leave_days_dep_crd(branch):
@@ -4141,7 +4149,6 @@ def leave_days_pm(branch):
 #     )
 
 
-
 # @app.route('/leave/days/dep/itd/add/<string:branch>', methods=['GET', 'POST'])
 # @login_required
 # def leave_days_dep_itd(branch):
@@ -4218,8 +4225,6 @@ def leave_days_pm(branch):
 #         users4=users4,
 #         branch=user_branch
 #     )
-
-
 
 
 # @app.route('/leave/days/dep/opd/add/<string:branch>', methods=['GET', 'POST'])
@@ -4335,19 +4340,23 @@ def handle_leave_post(branch):
     type_of_leave = request.form.get('type_of_leave', 'D')
     user_ids = request.form.getlist('user_ids')
     requested_by_roles = request.form.getlist('requested_by_roles')
-    verified_by = request.form.get('verified_by', 'Not required') or 'Not required'
+    verified_by = request.form.get(
+        'verified_by', 'Not required') or 'Not required'
 
     current_date = datetime.strptime(start_date, "%Y-%m-%d").date()
-    holiday_labels = [holiday["label"] for holiday in get_holidays(current_date.year)]
+    holiday_labels = [holiday["label"]
+                      for holiday in get_holidays(current_date.year)]
     public_holidays_str = ",".join(holiday_labels)
 
-    result = calculate_add_day_and_final_end_date(start_date, end_date, public_holidays_str)
+    result = calculate_add_day_and_final_end_date(
+        start_date, end_date, public_holidays_str)
     excluded_days = result['ExcludedDays']
     final_end_date = result['FinalEndDate']
     final_end_date_obj = datetime.strptime(str(final_end_date), "%Y-%m-%d")
     start_date_obj = datetime.strptime(start_date, "%Y-%m-%d")
 
-    service_count = calculate_service_count_1(start_date_obj, final_end_date_obj)
+    service_count = calculate_service_count_1(
+        start_date_obj, final_end_date_obj)
 
     if service_count <= 2:
         category = "S"
@@ -4367,7 +4376,8 @@ def handle_leave_post(branch):
         ''', (
             employee_id, leave_type, start_date_obj.date(), final_end_date_obj.date(),
             reason, service_count, type_of_leave, requested_by, category, branch,
-            excluded_days, final_end_date_obj.date(), ','.join(requested_by_roles), verified_by
+            excluded_days, final_end_date_obj.date(), ','.join(
+                requested_by_roles), verified_by
         ))
 
         leave_id = cursor.lastrowid
@@ -4379,7 +4389,6 @@ def handle_leave_post(branch):
             ''', (user_id, leave_id))
 
         conn.commit()
-
 
 
 # @app.route('/leave/days/dep/crd/add/<string:branch>', methods=['GET', 'POST'])
@@ -4461,8 +4470,6 @@ def handle_leave_post(branch):
 #         users4=users4,
 #         branch=user_branch
 #     )
-
-
 
 
 @app.route('/leave_days/spm/add/<string:branch>', methods=['GET', 'POST'])
@@ -4635,6 +4642,7 @@ def leave_days_spm(branch):
         branch=user_branch
     )
 
+
 @app.route('/leave/add', methods=['GET', 'POST'])
 def add_leave():
     employees = []
@@ -4774,8 +4782,6 @@ def add_leave():
 #                            employee_name=employee_name_filter)
 
 
-
-
 # @app.route('/leaves/hours', methods=['GET'])
 # @login_required
 # def get_leave_hours():
@@ -4894,7 +4900,6 @@ def add_leave():
 #                            employee_name=employee_name_filter,
 #                            branches=branches,
 #                            branch=branch_filter)
-
 
 
 # @app.route('/leaves/hours', methods=['GET'])
@@ -5130,7 +5135,6 @@ def add_leave():
 #                            branch=branch_filter)
 
 
-
 @app.route('/leaves/print', methods=['GET'])
 @login_required
 def print_leave_hours():
@@ -5142,7 +5146,8 @@ def print_leave_hours():
     type_of_leave_filter = request.args.get('type_of_leave')
 
     with get_db_connection() as conn:
-        branches = conn.execute("SELECT DISTINCT Branch FROM branches").fetchall()
+        branches = conn.execute(
+            "SELECT DISTINCT Branch FROM branches").fetchall()
 
         query = '''
             SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date,
@@ -5200,7 +5205,8 @@ def print_leave_hours():
             continue
 
         holidays = get_holidays(start_date_obj.year)
-        public_holidays_str = ",".join([holiday["label"] for holiday in holidays])
+        public_holidays_str = ",".join(
+            [holiday["label"] for holiday in holidays])
         result = remove_sun_sat_and_holiday(
             start_date_obj.strftime("%Y-%m-%d"),
             end_date_obj.strftime("%Y-%m-%d"),
@@ -5234,7 +5240,8 @@ def print_leave_hours():
 
         # Leave type summary
         if leave['leave_type'] not in leave_type_count:
-            leave_type_count[leave['leave_type']] = {'count': 0, 'total_days': 0}
+            leave_type_count[leave['leave_type']] = {
+                'count': 0, 'total_days': 0}
         leave_type_count[leave['leave_type']]['count'] += 1
         leave_type_count[leave['leave_type']]['total_days'] += leave_days
 
@@ -5277,7 +5284,8 @@ def get_leave_hours():
     type_of_leave_filter = request.args.get('type_of_leave')
 
     with get_db_connection() as conn:
-        branches = conn.execute("SELECT DISTINCT Branch FROM branches").fetchall()
+        branches = conn.execute(
+            "SELECT DISTINCT Branch FROM branches").fetchall()
 
         query = '''
             SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date,
@@ -5316,9 +5324,6 @@ def get_leave_hours():
     leave_records = []
     leave_type_count = {}
     branch_leave_count = {}
-    
-
-
 
     for leave in leaves:
         employee_name = leave['employee_name'] or "Unknown Employee"
@@ -5340,7 +5345,8 @@ def get_leave_hours():
             continue  # Skip if date parsing fails
 
         holidays = get_holidays(start_date_obj.year)
-        public_holidays_str = ",".join([holiday["label"] for holiday in holidays])
+        public_holidays_str = ",".join(
+            [holiday["label"] for holiday in holidays])
 
         result = remove_sun_sat_and_holiday(
             start_date_obj.strftime("%Y-%m-%d"),
@@ -5353,7 +5359,7 @@ def get_leave_hours():
         leave_days = len(valid_leave_days)
 
         leave_hours = leave['leave_hours'] or 0
-        
+
         # Adjust leave_hours if branch is HQ
         if branch == "HQ":
             if leave_hours == 7.5:
@@ -5372,7 +5378,8 @@ def get_leave_hours():
             total_leave_days += leave_days
 
         if leave['leave_type'] not in leave_type_count:
-            leave_type_count[leave['leave_type']] = {'count': 0, 'total_days': 0}
+            leave_type_count[leave['leave_type']] = {
+                'count': 0, 'total_days': 0}
         leave_type_count[leave['leave_type']]['count'] += 1
         leave_type_count[leave['leave_type']]['total_days'] += leave_days
 
@@ -5407,7 +5414,6 @@ def get_leave_hours():
                            branch=branch_filter)
 
 
-
 @app.route('/leaves/all', methods=['GET'])
 @login_required
 def get_all_leave_dates():
@@ -5420,7 +5426,8 @@ def get_all_leave_dates():
     branch_filter = request.args.get('branch')
 
     with get_db_connection() as conn:
-        branches = conn.execute("SELECT DISTINCT Branch FROM branches").fetchall()
+        branches = conn.execute(
+            "SELECT DISTINCT Branch FROM branches").fetchall()
 
         query = '''
             SELECT l.id, e.name AS employee_name, e.branch, l.leave_type, l.start_date, l.end_date
@@ -5465,7 +5472,8 @@ def get_all_leave_dates():
             continue
 
         holidays = get_holidays(start_date_obj.year)
-        public_holidays_str = ",".join([holiday["label"] for holiday in holidays])
+        public_holidays_str = ",".join(
+            [holiday["label"] for holiday in holidays])
 
         result = remove_sun_sat_and_holiday(
             start_date_obj.strftime("%Y-%m-%d"),
@@ -5480,7 +5488,8 @@ def get_all_leave_dates():
 
         # Update leave type count
         if leave['leave_type'] not in leave_type_count:
-            leave_type_count[leave['leave_type']] = {'count': 0, 'total_days': 0}
+            leave_type_count[leave['leave_type']] = {
+                'count': 0, 'total_days': 0}
         leave_type_count[leave['leave_type']]['count'] += 1
         leave_type_count[leave['leave_type']]['total_days'] += leave_days
 
@@ -5510,7 +5519,6 @@ def get_all_leave_dates():
                            employee_name=employee_name_filter,
                            branches=branches,
                            branch=branch_filter)
-
 
 
 @app.route('/leaves/user/<int:user_id>', methods=['GET'])
@@ -5604,6 +5612,8 @@ def leaves_user_id(user_id):
                            leave_type_count=leave_type_count,
                            start_date=start_date_filter,
                            end_date=end_date_filter)
+
+
 @app.route('/leave/edit_ccc_verify/<int:id>', methods=['GET', 'POST'])
 def edit_leave_ccc_verify(id):
     with get_db_connection() as conn:
@@ -6139,7 +6149,6 @@ def edit_leave_department_hrd(id):
     return render_template('/leaves/edit_leave_department.html', leave=leave)
 
 
-
 @app.route('/leave_department/edit/trd/<int:id>', methods=['GET', 'POST'])
 def edit_leave_department_trd(id):
     branch_name = current_user.branch
@@ -6185,7 +6194,6 @@ def edit_leave_department_trd(id):
         return redirect(url_for('leaves_by_department_trd', branch_name=branch_name))
 
     return render_template('/leaves/edit_leave_department.html', leave=leave)
-
 
 
 @app.route('/leave/edit/hours/ccc/<int:id>', methods=['GET', 'POST'])
@@ -6315,6 +6323,7 @@ def edit_leave_hours_spm(id):
         return redirect(url_for('leaves_by_branch_and_spm'))
 
     return render_template('/leaves/edit_leave_hours_spm.html', leave=leave)
+
 
 @app.route('/leave/edit/hours/gm/<int:id>', methods=['GET', 'POST'])
 def edit_leave_hours_gm(id):
@@ -7197,6 +7206,7 @@ def send_telegram_message(message):
         return False
     print("\007")  # Alert sound
     return True
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -8163,10 +8173,12 @@ def delete_user(id):
         conn.commit()
     return redirect(url_for('list_users'))
 
+
 @app.route('/access_denied')
 def access_denied():
     flash("Access denied!", "danger")
     return render_template('access_denied.html')
+
 
 @app.route('/dashboard')
 @login_required
@@ -8456,6 +8468,7 @@ def spm_dashboard():
     }
 
     return render_template('/dashboard/spm_dashboard.html', data=data)
+
 
 @app.route('/dashboard/hq/<string:branch_name>')
 @login_required
@@ -8870,6 +8883,7 @@ def search_employees():
         ).fetchall()
 
     return render_template('/employees/employees.html', employees=employees)
+
 
 @app.route('/employees/import', methods=['GET', 'POST'])
 @login_required
@@ -9351,8 +9365,6 @@ def add_employee_profile():
 
     # Render the form to add a new employee with necessary context
     return render_template('employees/add_employee_profile.html', branches=branches, users=users, positions=positions, departments=departments)
-
-
 
 
 @app.route('/employees/edit/<int:id>', methods=['GET', 'POST'])
