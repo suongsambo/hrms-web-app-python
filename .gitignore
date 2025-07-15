@@ -13,6 +13,14 @@ database
 *.db
 
 migrations/
+instance/
+.pytest_cache/
+.coverage
+htmlcov/
+
+dist/
+build/
+*.egg-info/
 
 .DS_Store
 *.log
@@ -20,6 +28,7 @@ migrations/
 *.pyc
 .idea
 .pytest_cache
+
 .vscode
 LearnDjango/__pycache__/
 /LearnDjango/settings.py
