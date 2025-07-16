@@ -766,9 +766,7 @@ def edit_location(id):
                 WHERE id = ?
             """, (street, city, province, country, postal_code, id))
             conn.commit()
-
         return redirect(url_for('list_locations'))
-
     return render_template('/locations/edit_location.html', location=location)
 
 
@@ -804,8 +802,9 @@ def chat():
     # Assuming the user is already logged in
     return render_template("chat.html", username=session.get("username", "Guest"))
 
-
 # Route to fetch chat history
+
+
 @app.route("/chat/history")
 def chat_history():
     """Fetch last 50 messages from the chat room"""
@@ -846,8 +845,6 @@ def handle_private_message(data):
         print("Error: Recipient or message is missing.")
         # Emit private message to recipient
 
-# Handle chat room join
-
 
 @socketio.on("join_room")
 def handle_join_room(data):
@@ -867,8 +864,6 @@ def handle_join_room(data):
         )
         conn.commit()
 
-# Handle chat room leave
-
 
 @socketio.on("leave_room")
 def handle_leave_room(data):
@@ -878,7 +873,6 @@ def handle_leave_room(data):
     emit("room_message", {
         "message": f"{username} has left the room {room}"
     }, room=room)
-
 # Handle chat message
 
 
@@ -1507,8 +1501,9 @@ def leaves_by_branch_and_ccc_dashboard(branch_name):
         users=users or []
     )
 
-
 # TODO: PM Report
+
+
 @app.route('/leaves/pm/report/<string:branch_name>', methods=['GET'])
 def leaves_by_branch_and_pm_report(branch_name):
     # if not current_user.is_authenticated or current_user.role_default != 140:
@@ -2379,8 +2374,9 @@ def leaves_by_department_itd(branch_name):
         return error, 500
     return render_template('leaves/leaves_department_itd.html', leaves=leaves, branch_name=branch_name)
 
-
 # --- CRD Route ---
+
+
 @app.route('/leaves/department/crd/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_department_crd(branch_name):
@@ -2397,8 +2393,9 @@ def leaves_by_department_crd(branch_name):
 
     return render_template('leaves/leaves_department_crd.html', leaves=leaves, branch_name=branch_name)
 
-
 # --- OPD Route ---
+
+
 @app.route('/leaves/department/opd/<string:branch_name>', methods=['GET'])
 @login_required
 def leaves_by_department_opd(branch_name):
@@ -2785,110 +2782,9 @@ def add_leave_hours_pm(branch):
 
     return render_template('/leaves/add_leave_hours_pm.html', employees=employees, users=users, branch=branch)
 
-
-# @app.route('/leave_hours/dep/add/<string:branch>', methods=['GET', 'POST'])
-# @login_required
-# def add_leave_hours_dep(branch):
-#     employees = []
-#     users = []
-#     user_branch = branch if not current_user.is_authenticated else current_user.branch
-#     current_department = current_user.branch or current_user.department
-
-#     with get_db_connection() as conn:
-#         employees = conn.execute('SELECT id, name FROM employees').fetchall()
-
-#         branch_row = conn.execute(
-#             "SELECT id FROM branches WHERE Branch = ?", (user_branch,)
-#         ).fetchone()
-
-#         # Get active users with RoleDefault 180
-#         users = conn.execute(
-#             'SELECT id, username, branch FROM users WHERE RoleDefault = 180 AND Active = 1'
-#         ).fetchall()
-
-#     if request.method == 'POST':
-#         employee_id = request.form['employee_id']
-#         leave_type = request.form['leave_type']
-#         start_date = request.form['start_date']
-#         end_date = request.form['end_date']
-#         reason = request.form['reason']
-#         branch = request.form['branch']
-#         requested_by = request.form['requested_by']
-#         user_ids = request.form.getlist('user_ids')
-#         requested_by_roles = request.form['requested_by_roles']
-
-#         start_date_obj = datetime.strptime(start_date, "%Y-%m-%d %H:%M")
-#         end_date_obj = datetime.strptime(end_date, "%Y-%m-%d %H:%M")
-
-#         if end_date_obj <= start_date_obj:
-#             flash("កាលបរិច្ឆេទ/ពេលវេលាបញ្ចប់ត្រូវតែបន្ទាប់...", "error")
-#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
-
-#         if start_date_obj.weekday() >= 5 or end_date_obj.weekday() >= 5:
-#             flash("មិនអាចដាក់ម៉ោងឈប់សម្រាកនៅថ្ងៃសៅរ៍ ឬ អាទិត្យបានទេ។", "error")
-#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
-
-#         if start_date_obj.hour < 7:
-#             flash("ម៉ោងឈប់សម្រាកត្រូវចាប់ពីម៉ោង 7:00 ព្រឹក...", "error")
-#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
-
-#         if start_date_obj.hour > 17 or (start_date_obj.hour == 17 and start_date_obj.minute > 0) or \
-#            end_date_obj.hour > 17 or (end_date_obj.hour == 17 and end_date_obj.minute > 0):
-#             flash("ម៉ោងឈប់សម្រាកត្រូវតែចប់មុនម៉ោង 5:00 ល្ងាច...", "error")
-#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
-
-#         total_seconds = (end_date_obj - start_date_obj).total_seconds()
-#         total_hours = total_seconds / 3600
-
-#         # Deduct lunch if overlapping
-#         lunch_start = start_date_obj.replace(hour=12, minute=0)
-#         lunch_end = start_date_obj.replace(hour=13, minute=30)
-
-#         if start_date_obj < lunch_end and end_date_obj > lunch_start:
-#             lunch_overlap_start = max(start_date_obj, lunch_start)
-#             lunch_overlap_end = min(end_date_obj, lunch_end)
-#             if lunch_overlap_end > lunch_overlap_start:
-#                 lunch_overlap = (lunch_overlap_end - lunch_overlap_start).total_seconds() / 3600
-#                 total_hours -= lunch_overlap
-
-#         total_hours = max(total_hours, 0)
-#         leave_hours = round(total_hours, 2)
-
-#         if leave_hours > 8:
-#             flash("ម៉ោងឈប់សម្រាកមិនគួរធំជាង 8 ម៉ោងទេ។", "error")
-#             return redirect(url_for('add_leave_hours_ccc', branch=branch))
-
-#         with get_db_connection() as conn:
-#             cursor = conn.cursor()
-#             cursor.execute('''
-#                 INSERT INTO leaves(employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, type_of_leave, branch, verified_by, requested_by_roles)
-#                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-#             ''', (employee_id, leave_type, start_date, end_date, reason, leave_hours, requested_by, 'H', branch, "Not required", requested_by_roles))
-
-#             leave_id = cursor.lastrowid
-
-#             for user_id in user_ids:
-#                 cursor.execute('INSERT INTO user_leave (user_id, leave_id) VALUES (?, ?)', (user_id, leave_id))
-
-#             conn.commit()
-
-#         if current_user.role_default == 700:
-#             return redirect(url_for('leaves_by_department_itd', branch_name=current_department))
-#         elif current_user.role_default == 200:
-#             return redirect(url_for('leaves_by_dep_crd', branch_name=current_department))
-#         elif current_user.role_default == 400:
-#             return redirect(url_for('leaves_by_department_opd', branch_name=current_department))
-#         elif current_user.role_default == 500:
-#             return redirect(url_for('leaves_by_department_fnd', branch_name=current_department))
-#         elif current_user.role_default == 300:
-#             return redirect(url_for('leaves_by_department_hrd', branch_name=current_department))
-#         elif current_user.role_default == 600:
-#             return redirect(url_for('leaves_by_department_trd', branch_name=current_department))
-
-#     return render_template('/leaves/add_leave_hours_dep.html', employees=employees, users=users, branch=branch)
-
-
 # Manger Department
+
+
 @app.route('/leave_hours/dep/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_leave_hours_dep(branch):
@@ -2989,8 +2885,9 @@ def add_leave_hours_dep(branch):
 
     return render_template('/leaves/add_leave_hours_dep.html', employees=employees, users=users, branch=branch)
 
-
 # Staff Department
+
+
 @app.route('/leave_hours/department/add/<string:branch>', methods=['GET', 'POST'])
 @login_required
 def add_leave_hours_crd(branch):
@@ -3727,8 +3624,6 @@ def add_many_leave(branch):
         users4=users4,
         branch=user_branch
     )
-
-# Leave days for CCC
 
 
 @app.route('/leave_days_ccc/add/<string:branch>', methods=['GET', 'POST'])
@@ -5709,8 +5604,9 @@ def delete_leave(id):
 
     return redirect(url_for('view_leaves'))
 
-
 # Route to check-in an employee
+
+
 @app.route('/checkin/<int:user_id>', methods=['GET', 'POST'])
 def checkin(user_id):
     with get_db_connection() as conn:
@@ -8002,7 +7898,6 @@ def render_dashboard(user_id):
 
 @app.route('/users/roles', methods=['GET'])
 def get_roles():
-
     return render_template('/users/roles.html')
 
 
