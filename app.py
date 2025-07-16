@@ -561,9 +561,9 @@ def delete_backup():
     backup_filename = request.form.get('backup')
 
     if backup_filename == 'hr_management.db':
-        # Flash an error message if the file is the database itself
+
         flash("You cannot delete the database itself!", "error")
-        # Ensure the backup file exists
+
     else:
         backup_folder = os.path.dirname(app.config['BACKUP_FILE'])
         backup_file_path = os.path.join(backup_folder, backup_filename)
