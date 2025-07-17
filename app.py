@@ -6645,16 +6645,6 @@ def login():
         ''', (user['ID'],))
         conn.commit()
 
-        # ✅ Set session variables (persistent session)
-        # session['user_id'] = user['ID']
-        # session['username'] = user['UserName']
-        # session['email'] = user['Email']
-        # session['employee_id'] = employee_id
-        # session['role'] = user['RoleDefault']
-        # session['zone_id'] = user['ZoneID']
-        # session['is_admin'] = user['IsAdmin']
-        # session.permanent = True  # ensure timeout is applied
-
     # Login user
     user_obj = User(
         id=user['ID'],
@@ -8639,5 +8629,5 @@ def view_employee(id):
 if __name__ == "__main__":
     init_db()
     socketio.run(app, debug=True)
-    start_scheduler()
+    # start_scheduler()
     app.run(ssl_context=('cert.pem', 'key.pem'))  # Use self-signed cert
