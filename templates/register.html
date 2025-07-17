@@ -11,15 +11,14 @@
 
 <body class="relative min-h-screen flex items-center justify-center">
 
-  <!-- ✅ Background image layer -->
 
   <div class="absolute inset-0 bg-cover bg-center bg-no-repeat"
     style="background-image: url('{{ url_for('static', filename='images/bg-login-city.jpg') }}');"></div>
 
-  <!-- ✅ Overlay for better contrast -->
+
   <div class="absolute inset-0 bg-black/60"></div>
 
-  <!-- ✅ Form container -->
+
   <div class="relative z-10 w-full max-w-5xl p-6">
     <form method="post" action="{{ url_for('register') }}"
       class="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl shadow-2xl p-8 space-y-6">
