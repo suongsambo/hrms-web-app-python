@@ -3279,7 +3279,6 @@ def calculate_add_day_and_final_end_date(start_date_str, end_date_str, public_ho
     public_holidays = [datetime.strptime(date.strip(), "%Y-%m-%d").date()
                        for date in public_holidays_str.split(",") if date.strip()]
 
-    # Calculate excluded days (weekends and public holidays)
     current_date = start_date
     excluded_days = 0
     while current_date <= end_date:
