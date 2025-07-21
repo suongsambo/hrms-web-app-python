@@ -1,5 +1,6 @@
-{% extends 'base.html' %} {% block title %}Branchs{% endblock %} {% block
-content %}
+{% extends 'base.html' %}
+{% block title %}Branchs{% endblock %}
+{% block content %}
 
 <div class="container mx-auto py-8 px-3">
   <div>
@@ -11,80 +12,83 @@ content %}
       </div>
 
       <!-- Buttons Section -->
-      <div class="flex justify-end gap-4">
-        <!-- Print Button -->
+      <!-- <div class="flex justify-end gap-4">
+
         <button type="button" onclick="printTable()"
           class="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out">
           <span class="material-symbols-outlined">print</span>
           <span class="text-sm">Print</span>
         </button>
 
-        <!-- Refresh Button -->
+
         <button type="button" onclick="window.location.reload()"
           class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out">
           <span class="material-symbols-outlined">autorenew</span>
           <span class="text-sm">Refresh</span>
         </button>
 
-        <!-- Add Branch Button -->
+ 
         <a href="{{ url_for('branches.add_branch') }}"
           class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full flex items-center space-x-2 transition duration-200 ease-in-out">
           <span class="material-symbols-outlined">add_box</span>
           <span class="text-sm font-medium">Add Branch</span>
         </a>
+      </div> -->
+
+
+      <div class="flex justify-end gap-4">
+        <!-- Print Button -->
+        <button type="button" onclick="printTable()" class="btn btn-success gap-2">
+          <span class="material-symbols-outlined">print</span>
+          <span class="text-sm">Print</span>
+        </button>
+
+        <!-- Refresh Button -->
+        <button type="button" onclick="window.location.reload()" class="btn btn-info gap-2">
+          <span class="material-symbols-outlined">autorenew</span>
+          <span class="text-sm">Refresh</span>
+        </button>
+
+        <!-- Add Branch Button -->
+        <a href="{{ url_for('branches.add_branch') }}" class="btn btn-primary gap-2">
+          <span class="material-symbols-outlined">add_box</span>
+          <span class="text-sm font-medium">Add Branch</span>
+        </a>
       </div>
+
     </div>
 
-    <!-- Branch Table -->
-    <table class="min-w-full text-sm text-left border-collapse nowrap" id="branch-table">
-      <thead class="bg-gray-800 text-white">
+    <!-- Branch Table with DaisyUI -->
+    <table class="table w-full table-zebra" id="branch-table">
+      <thead class="bg-black text-white">
         <tr>
-          <th class="py-2 px-4 text-center border border-gray-300">ID</th>
-          <th class="py-2 px-4 text-center border border-gray-300">Branch</th>
-          <th class="py-2 px-4 text-center border border-gray-300">
-            Branch Manager
-          </th>
-          <th class="py-2 px-4 text-center border border-gray-300">Status</th>
-          <th class="py-2 px-4 text-center border border-gray-300">
-            Contact Number
-          </th>
-          <th class="py-2 px-4 text-center border border-gray-300">Actions</th>
+          <th class="text-center">ID</th>
+          <th class="text-center">Branch</th>
+          <th class="text-center">Branch Manager</th>
+          <th class="text-center">Status</th>
+          <th class="text-center">Contact Number</th>
+          <th class="text-center">Actions</th>
         </tr>
       </thead>
       <tbody>
         {% for branch in branches %}
-        <tr class="border-b hover:bg-gray-50">
-          <td class="py-2 px-4 border border-gray-300">{{ branch['ID'] }}</td>
-          <td class="py-2 px-4 border border-gray-300">
-            {{ branch['Branch'] }}
-          </td>
-          <td class="py-2 px-4 border border-gray-300">
-            {{ branch['BranchManagerName'] }}
-          </td>
-          <td class="py-2 px-4 border border-gray-300">
-            {{ branch['Status'] }}
-          </td>
-          <td class="py-2 px-4 border border-gray-300">
-            {{ branch['ContactNumber'] }}
-          </td>
-          <td class="py-2 px-4 border border-gray-300 jstify-space-between">
+        <tr class="hover">
+          <td class="text-center">{{ branch['ID'] }}</td>
+          <td class="text-center">{{ branch['Branch'] }}</td>
+          <td class="text-center">{{ branch['BranchManagerName'] }}</td>
+          <td class="text-center">{{ branch['Status'] }}</td>
+          <td class="text-center">{{ branch['ContactNumber'] }}</td>
+          <td class="text-center">
             <div class="flex justify-center gap-x-2">
-              <a href="{{ url_for('branches.edit_branch', id=branch['ID']) }}"
-                class="text-blue-500 hover:text-blue-700 font-semibold transition-colors duration-300 flex items-center space-x-2">
+              <a href="{{ url_for('branches.edit_branch', id=branch['ID']) }}" class="btn btn-sm btn-primary">
                 <span class="material-symbols-outlined">edit</span>
-                <!-- <span class="text-sm">Edit</span> -->
               </a>
-              <a href="{{ url_for('branches.view_branch', id=branch['ID']) }}"
-                class="text-green-500 hover:text-green-700 font-semibold transition-colors duration-300 flex items-center space-x-2">
+              <a href="{{ url_for('branches.view_branch', id=branch['ID']) }}" class="btn btn-sm btn-success">
                 <span class="material-symbols-outlined">visibility</span>
-                <!-- <span class="text-sm">View</span> -->
               </a>
               <form action="{{ url_for('branches.delete_branch', id=branch['ID']) }}" method="POST" class="inline">
-                <button type="submit"
-                  class="text-red-500 hover:text-red-700 font-semibold transition-colors duration-300 flex items-center space-x-2"
-                  onclick="return confirm('Delete branch?')">
+                <button type="submit" class="btn btn-sm btn-error" onclick="return confirm('Delete branch?')">
                   <span class="material-symbols-outlined">delete</span>
-                  <!-- <span class="text-sm">Delete</span> -->
                 </button>
               </form>
             </div>
@@ -163,14 +167,7 @@ content %}
         ordering: true,
         info: true,
         autoWidth: false,
-        border: true,
-        autoWidth: false,
         pageLength: 14, // Number of rows per page
-        // order: [[3, "asc"]],
-        // fixedColumns: {
-        //   leftColumns: 2,      // Fix first 2 columns (like EmployeeName and Branch)
-        //   rightColumns: 1      // Fix last 2 columns (like Reason and Status)
-        // },
       });
     });
   </script>

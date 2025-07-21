@@ -414,9 +414,9 @@ def init_db():
         users = [
             ('SPM.KPCA', 'SPM.KPCA@example.com', 'SYS', 1),
             ('SPM.KKD',  'SPM.KKD@example.com',  'KKD', 2),
-            ('SPM.SAT',  'SPM.SAT@example.com',  'SAT', 3),
+            # ('SPM.SAT',  'SPM.SAT@example.com',  'SAT', 3),
             ('SPM.SAN',  'SPM.SAN@example.com',  'SAN', 4),
-            ('SPM.SNV',  'SPM.SNV@example.com',  'SNV', 5),
+            # ('SPM.SNV',  'SPM.SNV@example.com',  'SNV', 5),
             ('SPM.KPT',  'SPM.KPT@example.com',  'KPT', 6),
             ('SPM.BTB',  'SPM.BTB@example.com',  'KPT', 7),
         ]
@@ -652,17 +652,17 @@ def init_db():
                 VALUES (?, ?, ?)
             ''', ('CEO', 'Chief Executive Officer', department_id))
 
-        branch_exists = conn.execute(
-            "SELECT 1 FROM branches WHERE Branch = 'SYS'").fetchone()
-        if not branch_exists:
-            conn.execute('''
-                INSERT INTO branches (Branch, Status, CreateDate, StartDate, Description, BranchManagerName, ContactNumber,
-                                      Address, DistrictProvince, RegisterDate, LocalDescription, LocalAddress,
-                                      LocalBranchManagerName, BranchProjectId, CapitalInjectionId, GroupID, MemberID)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', ('SYS', 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
-                  '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
-                  'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
+        # branch_exists = conn.execute(
+        #     "SELECT 1 FROM branches WHERE Branch = 'SYS'").fetchone()
+        # if not branch_exists:
+        #     conn.execute('''
+        #         INSERT INTO branches (Branch, Status, CreateDate, StartDate, Description, BranchManagerName, ContactNumber,
+        #                               Address, DistrictProvince, RegisterDate, LocalDescription, LocalAddress,
+        #                               LocalBranchManagerName, BranchProjectId, CapitalInjectionId, GroupID, MemberID)
+        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        #     ''', ('SYS', 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
+        #           '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
+        #           'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
 
         branch_exists = conn.execute(
             "SELECT 1 FROM branches WHERE Branch = 'HQ'").fetchone()
@@ -677,15 +677,29 @@ def init_db():
                   'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
 
         # List of all branch values to insert
+        # branches = [
+        #     "HQ", "AKC", "BSD", "BVL", "CHK", "CHP", "KPT", "KTR", "PKB", "PRN",
+        #     "SNG", "TTG", "TTY", "BTB", "CBA", "DKR", "PNH", "KKD", "KTL", "PMR",
+        #     "PPN", "PSC", "SAN", "KPS", "SAT", "SST", "SVR", "KPCA", "SUB", "SAB",
+        #     "BTI", "KMP", "MCH", "CHC"
+        # ]
         branches = [
             "HQ", "AKC", "BSD", "BVL", "CHK", "CHP", "KPT", "KTR", "PKB", "PRN",
             "SNG", "TTG", "TTY", "BTB", "CBA", "DKR", "PNH", "KKD", "KTL", "PMR",
             "PPN", "PSC", "SAN", "KPS", "SAT", "SST", "SVR", "KPCA", "SUB", "SAB",
-            "BTI", "KMP", "KAD", "MCH", "CHC"
+            "BTI", "KMP", "MCH", "CHC"
         ]
 
+        # Branches to be removed
+        branches_to_remove = ["SAT", "SVR", "PMR",
+                              "SNG", "KAD", "CHP", "SNV", "SAB", "PRN", "SYS"]
+
+        # Removing specified branches
+        updated_branches = [
+            branch for branch in branches if branch not in branches_to_remove]
+
         # Loop through each branch in the list
-        for branch in branches:
+        for branch in updated_branches:
             branch_exists = conn.execute(
                 "SELECT 1 FROM branches WHERE Branch = ?", (branch,)).fetchone()
 
@@ -709,9 +723,9 @@ def init_db():
             zones = {
                 "ZONE_KPCA": ["KPCA", "PNH", "CHC", "CBA", "PPN", "DKR"],
                 "ZONE_KKD": ["KKD", "SST", "KTL"],
-                "ZONE_SAT": ["SAT", "SVR", "PMR", "SNG", "KAD", "CHP"],
+                # "ZONE_SAT": ["SAT", "SVR", "PMR", "SNG", "KAD", "CHP"],
                 "ZONE_SAN": ["SAN", "BTI", "TTG", "TTY", "BSD", "PKB"],
-                "ZONE_SNV": ["SNV", "SAB", "PRN"],
+                # "ZONE_SNV": ["SNV", "SAB", "PRN"],
                 "ZONE_KPT": ["KPT", "CHK", "KTR", "AKC"],
                 "ZONE_BTB": ["BTB", "BVL", "SSK"],
             }
