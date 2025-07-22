@@ -650,18 +650,6 @@ def init_db():
                 VALUES (?, ?, ?)
             ''', ('CEO', 'Chief Executive Officer', department_id))
 
-        # branch_exists = conn.execute(
-        #     "SELECT 1 FROM branches WHERE Branch = 'SYS'").fetchone()
-        # if not branch_exists:
-        #     conn.execute('''
-        #         INSERT INTO branches (Branch, Status, CreateDate, StartDate, Description, BranchManagerName, ContactNumber,
-        #                               Address, DistrictProvince, RegisterDate, LocalDescription, LocalAddress,
-        #                               LocalBranchManagerName, BranchProjectId, CapitalInjectionId, GroupID, MemberID)
-        #         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        #     ''', ('SYS', 'Active', '2025-02-28', '2025-02-28', 'System Default Branch', 'John Doe', '1234567890',
-        #           '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
-        #           'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
-
         branch_exists = conn.execute(
             "SELECT 1 FROM branches WHERE Branch = 'HQ'").fetchone()
         if not branch_exists:
@@ -674,13 +662,6 @@ def init_db():
                   '1234 Main Street', 'Some District, Some Province', '2025-02-28', 'Default Local Description',
                   'Local Address Example', 'Jane Smith', 'Project123', 'Capital123', 'Group123', 'Member123'))
 
-        # List of all branch values to insert
-        # branches = [
-        #     "HQ", "AKC", "BSD", "BVL", "CHK", "CHP", "KPT", "KTR", "PKB", "PRN",
-        #     "SNG", "TTG", "TTY", "BTB", "CBA", "DKR", "PNH", "KKD", "KTL", "PMR",
-        #     "PPN", "PSC", "SAN", "KPS", "SAT", "SST", "SVR", "KPCA", "SUB", "SAB",
-        #     "BTI", "KMP", "MCH", "CHC"
-        # ]
         branches = [
             "HQ", "AKC", "BSD", "BVL", "CHK", "CHP", "KPT", "KTR", "PKB", "PRN",
             "SNG", "TTG", "TTY", "BTB", "CBA", "DKR", "PNH", "KKD", "KTL", "PMR",
