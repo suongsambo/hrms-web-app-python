@@ -6254,8 +6254,6 @@ def search_attendance():
             "SELECT * FROM attendance WHERE employee_name LIKE ?", (f'%{query}%',)).fetchall()
     return render_template('attendance/attendance.html', records=records)
 
-# 📌 Add Attendance
-
 
 @app.route('/attendance/add', methods=['GET', 'POST'])
 @login_required

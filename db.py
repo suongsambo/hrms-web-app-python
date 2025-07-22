@@ -414,9 +414,7 @@ def init_db():
         users = [
             ('SPM.KPCA', 'SPM.KPCA@example.com', 'SYS', 1),
             ('SPM.KKD',  'SPM.KKD@example.com',  'KKD', 2),
-            # ('SPM.SAT',  'SPM.SAT@example.com',  'SAT', 3),
             ('SPM.SAN',  'SPM.SAN@example.com',  'SAN', 4),
-            # ('SPM.SNV',  'SPM.SNV@example.com',  'SNV', 5),
             ('SPM.KPT',  'SPM.KPT@example.com',  'KPT', 6),
             ('SPM.BTB',  'SPM.BTB@example.com',  'KPT', 7),
         ]
@@ -723,9 +721,7 @@ def init_db():
             zones = {
                 "ZONE_KPCA": ["KPCA", "PNH", "CHC", "CBA", "PPN", "DKR"],
                 "ZONE_KKD": ["KKD", "SST", "KTL"],
-                # "ZONE_SAT": ["SAT", "SVR", "PMR", "SNG", "KAD", "CHP"],
                 "ZONE_SAN": ["SAN", "BTI", "TTG", "TTY", "BSD", "PKB"],
-                # "ZONE_SNV": ["SNV", "SAB", "PRN"],
                 "ZONE_KPT": ["KPT", "CHK", "KTR", "AKC"],
                 "ZONE_BTB": ["BTB", "BVL", "SSK"],
             }
