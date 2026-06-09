@@ -18,13 +18,12 @@ uwsgi --http 0.0.0.0:5000 --wsgi-file app.py --callable app --processes 4 --thre
 
 python3 -m pip install flask-login
 python3 -m pip install flask_sqlalchemy
-
 python -m pip install flask-wtf
 
 File
 python3 install flask werkzeug
 
-pip install -r requirements.txt
+
 pip install -r requirements.txt
 pip freeze > requirements.txt
 
@@ -85,3 +84,7 @@ pip install pytest
 # Run tests
 
 pytest test_utils.py
+
+
+
+python -m pip install --upgrade pip setuptools wheel

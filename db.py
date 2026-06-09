@@ -1,4 +1,5 @@
 from datetime import date
+import os
 import random
 import sqlite3
 import hashlib
@@ -8,10 +9,41 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 
+# def get_db_connection():
+#     conn = sqlite3.connect(app.config['DATABASE'])
+#     conn.row_factory = sqlite3.Row
+#     return conn
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(BASE_DIR, "database", "hr_management.db")
+
 def get_db_connection():
-    conn = sqlite3.connect(app.config['DATABASE'])
+    os.makedirs(os.path.dirname(DATABASE), exist_ok=True)
+
+    conn = sqlite3.connect(DATABASE)
     conn.row_factory = sqlite3.Row
+
     return conn
+
+
+def get_db_connection():
+    db_dir = os.path.dirname(DATABASE)
+
+    try:
+        os.makedirs(db_dir, exist_ok=True)
+        print(f"Directory exists: {db_dir}")
+    except Exception as e:
+        print(f"Failed to create directory: {e}")
+        raise
+
+    try:
+        conn = sqlite3.connect(DATABASE)
+        conn.row_factory = sqlite3.Row
+        print(f"Connected to: {DATABASE}")
+        return conn
+    except Exception as e:
+        print(f"Failed to create database: {e}")
+        raise
 
 
 def init_db():
