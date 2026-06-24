@@ -6538,14 +6538,14 @@ def index():
     return render_template('login.html')
 
 
-def get_geolocation(ip):
-    # Replace with your geolocation API (e.g., ipstack, ipinfo.io, etc.)
-    api_url = f"http://ipinfo.io/{ip}/json"
-    response = requests.get(api_url)
-    data = response.json()
-    city = data.get('city', 'Unknown')
-    region = data.get('region', 'Unknown')
-    return city, region, data.get('country', 'Unknown')
+# def get_geolocation(ip):
+#     # Replace with your geolocation API (e.g., ipstack, ipinfo.io, etc.)
+#     api_url = f"http://ipinfo.io/{ip}/json"
+#     response = requests.get(api_url)
+#     data = response.json()
+#     city = data.get('city', 'Unknown')
+#     region = data.get('region', 'Unknown')
+#     return city, region, data.get('country', 'Unknown')
 
 
 @app.route('/online_users', methods=['GET'])
@@ -6592,9 +6592,9 @@ def login():
     username = request.form['username']
     password = hashlib.sha256(request.form['password'].encode()).hexdigest()
 
-    ip_address = request.remote_addr
-    user_agent = request.user_agent.string
-    city, region, country = get_geolocation(ip_address)
+    # ip_address = request.remote_addr
+    # user_agent = request.user_agent.string
+    # city, region, country = get_geolocation(ip_address)
 
     with get_db_connection() as conn:
         conn.row_factory = sqlite3.Row
@@ -6631,10 +6631,10 @@ def login():
         department = employee['department'] if employee else None
 
         # Log login
-        conn.execute('''
-            INSERT INTO login_logs(user_id, ip_address, city, region, country, user_agent)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (user['ID'], ip_address, city, region, country, user_agent))
+        # conn.execute('''
+        #     INSERT INTO login_logs(user_id, ip_address, city, region, country, user_agent)
+        #     VALUES (?, ?, ?, ?, ?, ?)
+        # ''', (user['ID'], ip_address, city, region, country, user_agent))
 
         # Add to online_users
         conn.execute('''
